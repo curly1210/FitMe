@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,6 +15,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(20)->create();
+        // Lưu ý rằng ngoài những seeder được thêm vào sẵn để tiện thao tác các bảng khác, CHƯA CẦN đưa các seeder mới vào file này để tránh xung đột code 
+        $this->call([
+            UserSeeder::class,
+            ShippingAddressSeeder::class,
+            CategorySeeder::class,
+            StatusOrderSeeder::class,
+            ProductSeeder::class,
+            ProductItemSeeder::class,
+        ]);
     }
 }
