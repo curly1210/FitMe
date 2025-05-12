@@ -26,7 +26,7 @@ class VariationFactory extends Factory
 
         return [
             'name' => $name,
-            'is_active' => true,
+            'is_active' => 1,
         ];
     }
 }
