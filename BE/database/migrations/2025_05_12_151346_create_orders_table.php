@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('total_amount');
             $table->tinyInteger('status_payment')->default(0); // 0: chưa thanh toán, 1: đã thanh toán
             $table->enum('payment_method', ['cod', 'banking', 'vnpay']);
-            $table->unsignedBigInteger('status_order_id');
+            $table->unsignedInteger('status_order_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('shipping_address_id');
             $table->timestamps();
