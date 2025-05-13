@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('parent_id')->nullable();
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes();
         });
     }
 
