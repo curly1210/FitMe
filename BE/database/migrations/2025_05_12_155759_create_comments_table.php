@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('content', 200);
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
-            $table->boolean('is_active')->default(1); // Mặc định là active
+            $table->tinyInteger('is_active')->default(1); // Mặc định là active
             $table->timestamps();
             
             // Khóa ngoại

@@ -25,6 +25,6 @@ class Cart extends Model
     // Quan hệ: Mỗi cart thuộc về 1 product item
     public function productItem()
     {
-        return $this->belongsTo(ProductItem::class);
+        return $this->hasMany(ProductItem::class);
     }
 }
