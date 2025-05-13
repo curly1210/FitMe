@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('rate'); // Đánh giá (1-5)
             $table->string('content', 200);
             $table->string('updated_content', 200)->nullable();
-            $table->boolean('is_update')->default(0); // Mặc định là chưa được cập nhật
+            $table->tinyInteger('is_update')->default(0); // Mặc định là chưa được cập nhật
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('order_id');
