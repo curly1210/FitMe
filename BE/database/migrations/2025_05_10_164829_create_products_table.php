@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id');
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes();
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }

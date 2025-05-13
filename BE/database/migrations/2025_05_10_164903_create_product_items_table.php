@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('sku', 20);
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
