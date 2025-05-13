@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('total_amount');
             $table->tinyInteger('status_payment')->default(0); // 0: chưa thanh toán, 1: đã thanh toán
             $table->enum('payment_method', ['cod', 'banking', 'vnpay']);
-            $table->unsignedInteger('status_order_id');
+            $table->unsignedBigInteger('status_order_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('shipping_address_id');
             $table->timestamps();
@@ -25,8 +25,7 @@ return new class extends Migration
             // Foreign keys (nếu muốn ràng buộc luôn)
             $table->foreign('status_order_id')->references('id')->on('status_orders');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('shipping_address_id')->references('id')->on('shipping_address');
-        });
+            $table->foreign('shipping_address_id')->references('id')->on('shipping_address');        });
     }
 
     /**
