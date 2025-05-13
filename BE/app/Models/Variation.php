@@ -17,4 +17,10 @@ class Variation extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    // Mối quan hệ One-to-Many với VariationOption
+    public function variationOptions()
+    {
+        return $this->hasMany(VariationOption::class, 'variation_id');
+    }
 }
