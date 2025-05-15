@@ -11,8 +11,8 @@ class OrdersDetailFactory extends Factory
     public function definition(): array
     {
         // Lấy dữ liệu có sẵn từ bảng orders và product_items
-         $orderId = Order::inRandomOrder()->value('id') ?? Order::factory();
-        $productItemId = ProductItem::inRandomOrder()->value('id') ?? ProductItem::factory();
+         $orderId = Order::inRandomOrder()->value('id');
+        $productItemId = ProductItem::inRandomOrder()->value('id');
         $quantity = rand(1, 5); // Số lượng ngẫu nhiên
 
         return [
