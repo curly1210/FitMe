@@ -11,7 +11,7 @@ class OrdersDetailSeeder extends Seeder
 {
     public function run()
     {
-        // Tạo 3 đơn hàng mẫu (nếu bạn chưa có sẵn đơn hàng, tạo ở đây)
+        // Tạo 3 đơn hàng mẫu 
         $orders = Order::factory()->count(3)->create();
 
         // Lấy danh sách sản phẩm hiện có
