@@ -11,42 +11,43 @@ class OrdersDetailSeeder extends Seeder
 {
     public function run()
     {
-        // Lấy tất cả các đơn hàng có sẵn
-        $orders = Order::all();
-        $productItems = ProductItem::all(); // Lấy tất cả sản phẩm có sẵn
+        // Tạo 3 đơn hàng mẫu (nếu bạn chưa có sẵn đơn hàng, tạo ở đây)
+        $orders = Order::factory()->count(3)->create();
+
+        // Lấy danh sách sản phẩm hiện có
+        $productItems = ProductItem::all();
+
 
         foreach ($orders as $order) {
-            $totalAmount = 0; // Khởi tạo tổng số tiền cho đơn hàng
+            $totalAmount = 0;
             $orderDetails = [];
 
-            // Lấy ngẫu nhiên các sản phẩm từ bảng ProductItem và gán vào đơn hàng
-            $productItemsToAdd = $productItems->random(rand(1, 3)); // Lấy từ 1 đến 3 sản phẩm ngẫu nhiên
+            
+            // Ngẫu nhiên từ 1 đến 3 sản phẩm
+            $productItemsToAdd = $productItems->random(rand(1, 3));
 
             foreach ($productItemsToAdd as $productItem) {
-                $quantity = rand(1, 5); // Số lượng ngẫu nhiên
+                $quantity = rand(1, 5);
+                $price = $productItem->sale_price_variation;
+                $totalAmount += $quantity * $price;
 
-                // Tính tiền của từng sản phẩm và cộng vào tổng tiền của đơn hàng
-                $totalAmount += $productItem->sale_price_variation * $quantity;
-
-                // Thêm bản ghi OrderDetail
                 $orderDetails[] = [
                     'order_id' => $order->id,
                     'product_item_id' => $productItem->id,
                     'quantity' => $quantity,
-                    'price' => $productItem->sale_price_variation,
+                    'price' => $price,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
 
-            // Tạo tất cả OrderDetail trước
+            // Lưu chi tiết đơn hàng
             OrdersDetail::insert($orderDetails);
 
-            // Cập nhật tổng số tiền của đơn hàng
+            // Cập nhật tổng số tiền đơn hàng
             $order->update([
                 'total_amount' => $totalAmount,
             ]);
         }
     }
 }
-
