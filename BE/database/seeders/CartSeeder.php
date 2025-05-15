@@ -24,11 +24,7 @@ class CartSeeder extends Seeder
 
         foreach ($users as $user) {
             foreach ($productItems->random(rand(1, 3)) as $productItem) {
-                Cart::create([
-                    'quantity_cart' => rand(1, 5),
-                    'user_id' => $user->id,
-                    'product_item_id' => $productItem->id,
-                ]);
+                Cart::factory()->create();
             }
         }
     }
