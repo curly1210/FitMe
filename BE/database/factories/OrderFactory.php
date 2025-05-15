@@ -21,7 +21,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         $userId = User::inRandomOrder()->value('id') ?? User::factory();
-        $statusOrderId = StatusOrder::inRandomOrder()->value('id') ?? StatusOrder::factory();
+        $statusOrderId = StatusOrder::inRandomOrder()->value('id');
         $shippingAddressId = ShippingAddress::where('user_id', $userId)->inRandomOrder()->value('id') ?? ShippingAddress::factory();
 
         return [
