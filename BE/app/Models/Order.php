@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
-       use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'orders_code',
@@ -38,8 +38,9 @@ class Order extends Model
     }
 
     // Quan hệ với OrdersDetail
-    // public function orderDetails()
-    // {
-    //     return $this->hasMany(OrderDetail::class);
-    // }
+    public function orderDetails()
+    {
+        return $this->hasMany(OrdersDetail::class);
+    }
+
 }
