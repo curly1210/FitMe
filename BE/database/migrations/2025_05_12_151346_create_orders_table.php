@@ -33,6 +33,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+         Schema::table('orders', function (Blueprint $table) {
+            $table->dropForeign(['status_order_id']);
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['shipping_address_id']);
+        });
         Schema::dropIfExists('orders');
     }
 };
