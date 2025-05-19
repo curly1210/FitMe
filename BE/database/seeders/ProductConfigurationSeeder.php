@@ -19,7 +19,7 @@ class ProductConfigurationSeeder extends Seeder
         $product_items = ProductItem::all();
 
         // Lấy tất cả biến thể
-        $variationOptions = VariationOption::all();
+        $variationOptions = $variationOptions = VariationOption::all();
 
         foreach ($product_items as $product_item) {
             // Số lượng biến thể ngẫu nhiên cho mỗi sản phẩm (từ 1 đến 4)
@@ -28,13 +28,15 @@ class ProductConfigurationSeeder extends Seeder
             // Lấy ngẫu nhiên một tập hợp các variation_option_id
             $selectedVariationOptionIds = $variationOptions->random($numberOfVariations)->pluck('id')->unique()->all();
 
-            // Tạo bản ghi cho mỗi biến thể được chọn
+            // Tạo bản ghi cho mỗi biến thể được chọn bằng factory
             foreach ($selectedVariationOptionIds as $variationOptionId) {
-                ProductConfiguration::create([
+                ProductConfiguration::factory()->create([
                     'product_item_id' => $product_item->id,
                     'variation_option_id' => $variationOptionId,
+                    'is_active' => 1,
                     'created_at' => now(),
                     'updated_at' => now(),
+                    'deleted_at' => null,
                 ]);
             }
         }

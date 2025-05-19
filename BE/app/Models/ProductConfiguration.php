@@ -12,4 +12,14 @@ class ProductConfiguration extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['product_item_id', 'variation_option_id', 'is_active'];
+
+    public function productItem()
+    {
+        return $this->belongsTo(ProductItem::class, 'product_item_id');
+    }
+
+    public function variationOption()
+    {
+        return $this->belongsTo(VariationOption::class, 'variation_option_id');
+    }
 }

@@ -21,4 +21,9 @@ class ProductItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function productConfigurations()
+    {
+        return $this->hasMany(ProductConfiguration::class);
+    }
 }

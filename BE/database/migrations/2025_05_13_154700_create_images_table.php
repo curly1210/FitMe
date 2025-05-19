@@ -12,10 +12,10 @@ return new class () extends Migration {
     {
         Schema::create('images', function (Blueprint $table) {
             $table->id();
-            $table->string('url', 255); 
+            $table->string('url', 255);
             $table->tinyInteger('is_active')->default(1);
-            $table->unsignedBigInteger('product_id'); 
-            $table->unsignedBigInteger('variation_option_id'); 
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('variation_option_id');
             $table->timestamps();
             $table->softDeletes();
 
@@ -30,6 +30,11 @@ return new class () extends Migration {
      */
     public function down(): void
     {
+        Schema::table('images', function (Blueprint $table) {
+            // Xóa các khóa ngoại
+            $table->dropForeign(['product_id']);
+            $table->dropForeign(['variation_option_id']);
+        });
         Schema::dropIfExists('images');
     }
 };

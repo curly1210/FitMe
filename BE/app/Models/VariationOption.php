@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class VariationOption extends Model
 {
     /** @use HasFactory<\Database\Factories\VariationOptionFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = ['variation_id', 'value', 'is_active'];
 
@@ -22,5 +23,10 @@ class VariationOption extends Model
     public function images()
     {
         return $this->hasMany(Image::class, 'variation_option_id');
+    }
+
+    public function productConfigurations()
+    {
+        return $this->hasMany(ProductConfiguration::class, 'variation_option_id');
     }
 }

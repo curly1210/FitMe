@@ -22,6 +22,9 @@ class ProductConfigurationFactory extends Factory
             'product_item_id' => ProductItem::inRandomOrder()->first()->id,
             'variation_option_id' => VariationOption::inRandomOrder()->first()->id,
             'is_active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'deleted_at' => null,
         ];
     }
 }
