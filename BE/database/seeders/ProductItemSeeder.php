@@ -15,7 +15,7 @@ class ProductItemSeeder extends Seeder
     public function run(): void
     { {
             $products = Product::query()->get('id');
-
+            // tạo mỗi product sẽ bao gồm 2 productItemItem
             foreach ($products as $product) {
                 ProductItem::factory()
                     ->count(2)
