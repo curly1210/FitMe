@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Variation;
+use App\Models\VariationOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,27 +18,52 @@ class VariationOptionFactory extends Factory
      */
     public function definition(): array
     {
-        // Lấy ngẫu nhiên một variation từ bảng variations
+        // Lấy một variation ngẫu nhiên (hoặc sẽ được ghi đè trong seeder)
         $variation = Variation::inRandomOrder()->first();
 
-        // Nếu không có variation, trả về giá trị mặc định
-        if (!$variation) {
-            return [
-                'variation_id' => 1,
-                'value' => $this->faker->word,
-                'is_active' => 1,
-            ];
-        }
-
-        // Xác định danh sách giá trị dựa trên tên của variation
-        $values = $variation->name === 'Size'
-            ? ['S', 'M', 'L', 'XL']
-            : ($variation->name === 'Color' ? ['Đỏ', 'Xanh', 'Đen', 'Trắng'] : [$this->faker->word]);
-
         return [
-            'variation_id' => $variation->id,
-            'value' => $this->faker->randomElement($values),
+            'variation_id' => $variation ? $variation->id : Variation::factory(),
+            'value' => $this->faker->word(),
             'is_active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
+    }
+
+    // Tạo tất cả giá trị cho một variation
+    public function withAllValues($variation)
+    {
+        return $this->afterCreating(function (VariationOption $option) use ($variation) {
+            // Xác định danh sách giá trị dựa trên tên của variation
+            $values = $variation->name === 'Size'
+                ? ['S', 'M', 'L', 'XL']
+                : ($variation->name === 'Color' ? ['Đỏ', 'Xanh', 'Đen', 'Trắng'] : []);
+
+            // Tạo các bản ghi còn lại với tất cả giá trị
+            foreach ($values as $value) {
+                if ($value !== $option->value) { // Tránh trùng với bản ghi đã tạo
+                    VariationOption::create([
+                        'variation_id' => $variation->id,
+                        'value' => $value,
+                        'is_active' => 1,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        })->state(function (array $attributes) use ($variation) {
+            // Tạo bản ghi đầu tiên với giá trị đầu tiên trong danh sách
+            $values = $variation->name === 'Size'
+                ? ['S', 'M', 'L', 'XL']
+                : ($variation->name === 'Color' ? ['Đỏ', 'Xanh', 'Đen', 'Trắng'] : []);
+
+            return [
+                'variation_id' => $variation->id,
+                'value' => $values[0], // Lấy giá trị đầu tiên (S hoặc Đỏ)
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        });
     }
 }

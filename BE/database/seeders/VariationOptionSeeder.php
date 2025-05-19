@@ -18,19 +18,10 @@ class VariationOptionSeeder extends Seeder
         $variations = Variation::all();
 
         foreach ($variations as $variation) {
-            // Xác định danh sách giá trị dựa trên tên của variation
-            $values = $variation->name === 'Size'
-                ? ['S', 'M', 'L', 'XL']
-                : ($variation->name === 'Color' ? ['Đỏ', 'Xanh', 'Đen', 'Trắng'] : []);
-
-            // Tạo VariationOption cho mỗi giá trị
-            foreach ($values as $value) {
-                VariationOption::create([
-                    'variation_id' => $variation->id,
-                    'value' => $value,
-                    'is_active' => 1,
-                ]);
-            }
+            // Sử dụng factory để tạo tất cả giá trị cho variation
+            VariationOption::factory()
+                ->withAllValues($variation)
+                ->create();
         }
     }
 }

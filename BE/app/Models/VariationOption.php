@@ -18,4 +18,9 @@ class VariationOption extends Model
     {
         return $this->belongsTo(Variation::class, 'variation_id');
     }
+
+    public function images()
+    {
+        return $this->hasMany(Image::class, 'variation_option_id');
+    }
 }
