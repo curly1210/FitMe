@@ -13,4 +13,8 @@ class StatusOrder extends Model
         'name',
         'color',
     ];
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

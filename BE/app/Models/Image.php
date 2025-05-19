@@ -13,11 +13,18 @@ class Image extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'url', 'product_id', 'variation_option_id', 'is_active'
+        'url',
+        'product_id',
+        'variation_option_id',
+        'is_active'
     ];
 
     public function variation()
     {
         return $this->belongsTo(VariationOption::class, 'variation_option_id');
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

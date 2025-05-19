@@ -11,7 +11,13 @@ class Review extends Model
     use HasFactory;
 
     protected $fillable = [
-        'rate', 'content', 'updated_content', 'is_update', 'user_id', 'product_id', 'order_id',
+        'rate',
+        'content',
+        'updated_content',
+        'is_update',
+        'user_id',
+        'product_id',
+        'order_id',
     ];
 
     // Quan hệ với bảng User
@@ -24,11 +30,5 @@ class Review extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    // Quan hệ với bảng Order
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
     }
 }
