@@ -19,7 +19,7 @@ class ProductConfigurationSeeder extends Seeder
         $product_items = ProductItem::all();
 
         // Lấy tất cả biến thể
-        $variationOptions = $variationOptions = VariationOption::all();
+        $variationOptions = VariationOption::all();
 
         foreach ($product_items as $product_item) {
             // Số lượng biến thể ngẫu nhiên cho mỗi sản phẩm (từ 1 đến 4)
