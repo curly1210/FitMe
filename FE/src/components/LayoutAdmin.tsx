@@ -43,7 +43,7 @@ const items: MenuItem[] = [
     <UnorderedListOutlined />
   ),
   getItem(<Link to="/admin">Quản lý sản phẩm</Link>, "4", <InboxOutlined />),
-  getItem(<Link to="/admin">Quản lý biến thể</Link>, "5", <ProductOutlined />),
+  getItem(<Link to="/admin/bienthe">Quản lý biến thể</Link>, "5", <ProductOutlined />),
   getItem(<Link to="/admin">Quản lý đơn hàng</Link>, "6", <ShoppingOutlined />),
   getItem(
     <Link to="/admin">Quản lý khuyến mãi</Link>,
