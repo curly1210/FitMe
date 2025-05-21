@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class OrdersDetail extends Model
 {
     //
-     use HasFactory;
+    use HasFactory;
 
     protected $table = 'orders_detail';
 
@@ -34,5 +34,9 @@ class OrdersDetail extends Model
     public function productItem()
     {
         return $this->belongsTo(ProductItem::class, 'product_item_id');
+    }
+    public function review()
+    {
+        return $this->belongsTo(OrdersDetail::class);
     }
 }

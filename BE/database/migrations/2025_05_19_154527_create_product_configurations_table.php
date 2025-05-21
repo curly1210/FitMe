@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class () extends Migration {
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -32,11 +32,12 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('product_configurations', function (Blueprint $table) {
-            // Xóa ràng buộc unique
-            $table->dropUnique('product_configurations_unique');
+
             // Xóa các khóa ngoại
             $table->dropForeign(['product_item_id']);
             $table->dropForeign(['variation_option_id']);
+            // Xóa ràng buộc unique
+            $table->dropUnique('product_configurations_unique');
         });
         Schema::dropIfExists('product_configurations');
     }
