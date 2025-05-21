@@ -38,7 +38,7 @@ const items: MenuItem[] = [
     <PictureOutlined />
   ),
   getItem(
-    <Link to="/admin">Quản lý danh mục</Link>,
+    <Link to="/admin/category">Quản lý danh mục</Link>,
     "3",
     <UnorderedListOutlined />
   ),
