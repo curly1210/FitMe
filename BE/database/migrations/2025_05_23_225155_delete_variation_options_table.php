@@ -11,10 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('images', function (Blueprint $table) {
-            // Xóa các khóa ngoại
-            $table->dropForeign(['variation_option_id']);
-        });
         Schema::dropIfExists('variation_options');
     }
 
@@ -31,13 +27,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('variation_id')->references('id')->on('variations')->onDelete('cascade');
-        });
-
-        Schema::table('images', function (Blueprint $table) {
-            $table->foreign('variation_option_id')
-                  ->references('id')
-                  ->on('variation_options')
-                  ->onDelete('cascade');
         });
     }
 };
