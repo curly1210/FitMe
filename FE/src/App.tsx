@@ -6,7 +6,7 @@ import { adminRoutes } from "./routes/adminRoutes";
 
 const RefineProvider = () => {
   return (
-    <Refine dataProvider={dataProvider("http")}>
+    <Refine dataProvider={dataProvider("http://localhost:3000")}>
       <Outlet />
     </Refine>
   );
