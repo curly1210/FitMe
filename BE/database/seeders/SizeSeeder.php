@@ -13,6 +13,6 @@ class SizeSeeder extends Seeder
      */
     public function run(): void
     {
-        Size::factory()->count(10)->create();
+        Size::factory()->count(5)->create();
     }
 }

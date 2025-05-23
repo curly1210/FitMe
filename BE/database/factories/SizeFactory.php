@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use InvalidArgumentException;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Size>
@@ -16,9 +17,14 @@ class SizeFactory extends Factory
      */
     public function definition(): array
     {
+        static $sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+        static $index = 0;
+
+        $name = $sizes[$index++];
+
         return [
-            'name' => $this->faker->randomElement(['S', 'M', 'L', 'XL', 'XXL']), // Tạo kích cỡ ngẫu nhiên
-            'is_active' => 1, // 90% khả năng là true
+            'name' => $name, // Tạo kích cỡ lần lượt
+            'is_active' => $this->faker->boolean(90), // 90% khả năng là true
             'created_at' => now(),
             'updated_at' => now(),
         ];
