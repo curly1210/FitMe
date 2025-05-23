@@ -22,7 +22,7 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        // $products = ['Áo khoác bomber nam', 'Áo thun form rộng nam', 'Áo khoác nữ tay lỡ', 'Áo thun nữ tay lỡ', 'Quần jean nữ', 'Quần short nam', 'Quần lót co dãn cho nam', 'Áo lót co dãn cho nữ', 'Tất thể thao nam', 'Tất trắng dành cho nữ', 'Áo bó thể thao dành cho nam', 'Quần bó thể thao cho nữ', 'Bộ đồ tập gym cho nam', 'Bộ đồ chống nắng cho nữ'];
+        // prefixes số đầu sốsố
         $phonePrefixes = ['032', '033', '034', '035', '036', '037', '038', '039'];
         return [
             'name' => fake()->name(),

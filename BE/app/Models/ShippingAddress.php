@@ -24,4 +24,8 @@ class ShippingAddress extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }
