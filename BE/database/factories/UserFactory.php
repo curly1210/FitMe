@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'birthday' => fake()->date(),
             'phone' => fake()->randomElement($phonePrefixes) . fake()->numerify('######'),
             'gender' => fake()->randomElement(['Nam', 'Nữ']),
+
             'created_at' => now(),
             'updated_at' => now(),
         ];
