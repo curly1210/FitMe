@@ -17,7 +17,7 @@ class OrdersDetailFactory extends Factory
             'order_id' => null,
             'product_item_id' => $productItem->id,
             'quantity' => $this->faker->numberBetween(1, 5),
-            'price' => $productItem->sale_price_variation,
+            'price' => $productItem->sale_price,
             'created_at' => now(),
             'updated_at' => now(),
         ];

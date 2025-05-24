@@ -11,11 +11,14 @@ class ProductItem extends Model
     /** @use HasFactory<\Database\Factories\ProductItemFactory> */
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        'price_variation',
-        'sale_price_variation',
-        'stock_variation',
+        'price',
+        'sale_price',
+        'stock',
         'sku',
         'is_active',
+        'product_id',
+        'color_id',
+        'size_id',
     ];
     public function product()
     {
@@ -25,12 +28,16 @@ class ProductItem extends Model
     {
         return $this->belongsTo(Cart::class);
     }
-    public function productConfigurations()
-    {
-        return $this->hasMany(ProductConfiguration::class);
-    }
+    // public function productConfigurations()
+    // {
+    //     return $this->hasMany(ProductConfiguration::class);
+    // }
     public function ordersDetail()
     {
         return $this->hasMany(OrdersDetail::class);
+    }
+    public function productImages()
+    {
+        return $this->hasMany(ProductImage::class);
     }
 }
