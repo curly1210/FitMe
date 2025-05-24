@@ -9,7 +9,7 @@ use App\Models\ProductItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-class CartSeeder extends Seeder
+class CartItemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
