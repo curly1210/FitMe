@@ -16,5 +16,6 @@ class User extends Model
         'birthday',
         'phone',
         'gender',
+        'role',
     ];
 }
