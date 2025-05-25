@@ -12,9 +12,9 @@ use App\Http\Controllers\Api\VariationController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Route::middleware('jwt.auth')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
-// });
+});
 
 
 
