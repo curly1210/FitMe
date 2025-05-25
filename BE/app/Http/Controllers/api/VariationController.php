@@ -24,6 +24,20 @@ class VariationController extends Controller
         ], 'Lấy danh sách màu sắc và kích thước thành công');
     }
 
+    //Lấy ra danh sách các biến thể đã xóa
+
+    public function trashed()
+    {
+        $trashedColors = ColorResource::collection(Color::onlyTrashed()->get());
+        $trashedSizes = SizeResource::collection(Size::onlyTrashed()->get());
+
+        return $this->success([
+            'colors' => $trashedColors,
+            'sizes' => $trashedSizes
+        ], 'Danh sách màu sắc và kích thước đã xóa mềm');
+    }
+
+
     //hàm tạo mới màu sắc
 
     public function storeColor(Request $request)
@@ -63,9 +77,32 @@ class VariationController extends Controller
 
         $color->update($validator->validated());
         return $this->success($color, 'Cập nhật màu thành công');
-
     }
 
+    public function deleteColor($id)
+    {
+        $color = Color::find($id);
+
+        if (!$color) {
+            return $this->error('Màu sắc không tồn tại', [], 404);
+        }
+
+        $color->delete();
+
+        return $this->success(null, 'Xóa màu sắc thành công');
+    }
+
+    public function restoreColor($id)
+    {
+        $color = Color::onlyTrashed()->find($id);
+        if (!$color) {
+            return $this->error('Màu không tồn tại hoặc chưa xóa', [], 404);
+        }
+
+        $color->restore();
+
+        return $this->success(new ColorResource($color), 'Khôi phục màu sắc thành công');
+    }
 
 
 
@@ -118,5 +155,28 @@ class VariationController extends Controller
     }
 
 
+    public function deleteSize($id)
+    {
+        $size = Size::find($id);
 
+        if (!$size) {
+            return $this->error('Kích thước không tồn tại', [], 404);
+        }
+
+        $size->delete();
+
+        return $this->success(null, 'Xóa kích thước thành công');
+    }
+
+    public function restoreSize($id)
+    {
+        $size = Size::onlyTrashed()->find($id);
+        if (!$size) {
+            return $this->error('Màu không tồn tại hoặc chưa xóa', [], 404);
+        }
+
+        $size->restore();
+
+        return $this->success(new SizeResource($size), 'Khôi phục màu sắc thành công');
+    }
 }
