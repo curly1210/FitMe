@@ -2,9 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\OrdersDetail;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,8 +27,8 @@ class ReviewFactory extends Factory
             'updated_content' => $this->faker->sentence(),
             'is_update' => $this->faker->boolean(),
             'user_id' => User::inRandomOrder()->value('id'),
-            'product_id' => Product::inRandomOrder()->value('id'),
-            'order_id' => Order::inRandomOrder()->value('id'),
+            'product_item_id' => ProductItem::inRandomOrder()->value('id'),
+            'order_detail_id' => OrdersDetail::inRandomOrder()->value('id'),
             'created_at' => now(),
             'updated_at' => now(),
         ];

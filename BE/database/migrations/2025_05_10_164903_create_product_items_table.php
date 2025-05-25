@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('product_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
-            $table->unsignedInteger('price_variation');
-            $table->unsignedInteger('sale_price_variation')->nullable();
-            $table->unsignedInteger('stock_variation')->default(0);
-            $table->string('sku', 20);
+            $table->unsignedInteger('price');
+            $table->unsignedInteger('sale_price')->nullable();
+            $table->unsignedInteger('stock')->default(0);
+            $table->string('sku', 40);
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
             $table->softDeletes();

@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Cart;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\CartItem;
 use App\Models\ProductItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-class CartSeeder extends Seeder
+class CartItemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -24,7 +24,7 @@ class CartSeeder extends Seeder
 
         foreach ($users as $user) {
             foreach ($productItems->random(rand(1, 3)) as $productItem) {
-                Cart::factory()->create();
+                CartItem::factory()->create();
             }
         }
     }

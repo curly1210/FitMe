@@ -26,7 +26,7 @@ export const adminRoutes = [
             path: "category",
             element: <Category/>,
           },
-                 {
+           {
             path: "bienthe",
             element: <Bienthe />,
           },

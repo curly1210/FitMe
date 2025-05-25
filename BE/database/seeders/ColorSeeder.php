@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Variation;
+use App\Models\Color;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class VariationSeeder extends Seeder
+class ColorSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Variation::factory()->count(2)->create();
+        Color::factory()->count(10)->create(); // Tạo 10 bản ghi mẫu
     }
 }

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('variations', function (Blueprint $table) {
+        Schema::create('sizes', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 200);
+            $table->string('name', 200); // Tên kích cỡ, varchar(200)
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
             $table->softDeletes();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('variations');
+        Schema::dropIfExists('sizes');
     }
 };

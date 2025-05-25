@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('colors', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 150); // varchar(50)
-            $table->longText('content'); // longtext
-            $table->string('thumbnail', 255); // varchar(255)
-            $table->tinyInteger('is_active')->default(1); // tinyint(1)
-            $table->string('img', 255); // varchar(255)
+            $table->string('name', 200); // Tên màu, varchar(200)
+            $table->string('code', 10); // Mã màu, varchar(10)
+            $table->tinyInteger('is_active')->default(1); // Trạng thái, mặc định là 1
             $table->timestamps();
+            $table->softDeletes(); // deleted_at
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('colors');
     }
 };
