@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Traits;
 
 trait ApiResponse
@@ -19,6 +20,7 @@ trait ApiResponse
             'success' => false,
             'message' => $message,
             'errors'  => $errors,
+
         ], $code);
     }
 }

@@ -19,6 +19,7 @@ return new class () extends Migration {
             $table->date('birthday')->nullable();
             $table->string('phone', 10);
             $table->enum('gender', ['Nam', 'Nữ'])->nullable();
+
             $table->enum('role', ['Thành viên', 'Quản trị viên'])->default('Thành viên');
 
             $table->tinyInteger('is_ban')->default(0);

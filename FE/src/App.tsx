@@ -1,20 +1,13 @@
-import { Refine } from "@refinedev/core";
-import dataProvider from "@refinedev/simple-rest";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router";
 import { clientRoutes } from "./routes/clientRoutes";
 import { adminRoutes } from "./routes/adminRoutes";
+// import axios from "axios";
 
-const RefineProvider = () => {
-  return (
-    <Refine dataProvider={dataProvider("http://localhost:3000")}>
-      <Outlet />
-    </Refine>
-  );
-};
+
 
 const router = createBrowserRouter([
   {
-    element: <RefineProvider />,
+    element: <Outlet />,
     children: [...clientRoutes, ...adminRoutes],
   },
 ]);
