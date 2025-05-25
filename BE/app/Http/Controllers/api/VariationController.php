@@ -53,7 +53,15 @@ class VariationController extends Controller
     }
 
 
+    public function showColor($id)
+    {
+        $color = Color::find($id);
+        if (!$color) {
+            return $this->error('Màu sắc không tồn tại', [], 404);
+        }
 
+        return $this->success(new ColorResource($color), 'Lấy thông tin màu sắc thành công');
+    }
 
     //hàm cập nhật màu sắc
     public function updateColor(Request $request, $id)
@@ -76,15 +84,7 @@ class VariationController extends Controller
         return $this->success($color, 'Cập nhật màu thành công');
     }
 
-    public function showColor($id)
-    {
-        $color = Color::find($id);
-        if (!$color) {
-            return $this->error('Màu sắc không tồn tại', [], 404);
-        }
 
-        return $this->success(new ColorResource($color), 'Lấy thông tin màu sắc thành công');
-    }
 
     // Xóa mềm màu sắc
     public function deleteColor($id)
@@ -112,7 +112,7 @@ class VariationController extends Controller
 
         return $this->success(new ColorResource($color), 'Khôi phục màu sắc thành công');
     }
-    
+
     // Xóa vĩnh viễn màu sắc
     public function ForceDeleteColor($id)
     {
@@ -122,8 +122,8 @@ class VariationController extends Controller
         }
 
         // Xét màu sắc có sản phẩm hay không nếu có thì báo lỗi
-        if($color->productItems()->exists()){
-            return $this->error('Không thể xóa màu sắc vì đang có màu sắc',[],400);
+        if ($color->productItems()->exists()) {
+            return $this->error('Không thể xóa màu sắc vì đang có màu sắc', [], 400);
         }
 
         //Sau khi màu sắc không có sản phẩm tiến hành xóa vĩnh viễn
@@ -143,10 +143,10 @@ class VariationController extends Controller
 
     //hàm tạo mới kích thước
 
-     public function listSize()
+    public function listSize()
     {
         return $this->success([
-           
+
             'sizes' => SizeResource::collection(Size::whereNull('deleted_at')->get()),
         ], 'Lấy danh sáchkích thước thành công');
     }
@@ -235,8 +235,8 @@ class VariationController extends Controller
         }
 
         // Xét kích thước có sản phẩm hay không nếu có thì báo lỗi
-        if($size->productItems()->exists()){
-            return $this->error('Không thể xóa kích thước vì đang có biến thể',[],400);
+        if ($size->productItems()->exists()) {
+            return $this->error('Không thể xóa kích thước vì đang có biến thể', [], 400);
         }
 
         //Sau khi kích thước không có sản phẩm tiến hành xóa vĩnh viễn
