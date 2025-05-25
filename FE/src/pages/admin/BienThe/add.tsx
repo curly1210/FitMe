@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 interface AddDrawerProps {
   open: boolean;
   onClose: () => void;
-  type: "color" | "size" | null;
+  type: "colo" | "sizee" | null;
 }
 
 export default function Add({ open, onClose, type }: AddDrawerProps) {
@@ -18,23 +18,23 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
   const { mutate: create } = useCreate();
 
   const onFinish = (values: any) => {
-    const resource = type === "color" ? "colors" : "sizes";
+    const resource = type === "colo" ? "variations/color" : "variations/size";
 
     create(
       {
         resource,
-        values: type === "color" ? { ...values, code: color } : values,
+        values: type === "colo" ? { ...values, code: color } : values,
       },
       {
         onSuccess: () => {
-          message.success(`Thêm ${type === "color" ? "màu" : "kích thước"} thành công`);
+          message.success(`Thêm ${type === "colo" ? "màu" : "kích thước"} thành công`);
           
             onClose();
            
           
         },
         onError: () => {
-          message.error(`Thêm ${type === "color" ? "màu" : "kích thước"} thất bại`);
+          message.error(`Thêm ${type === "colo" ? "màu" : "kích thước"} thất bại`);
         },
       }
     );
@@ -42,7 +42,7 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
 
   return (
     <Drawer
-      title={type === "color" ? "Thêm màu sắc" : "Thêm kích thước"}
+      title={type === "colo" ? "Thêm màu sắc" : "Thêm kích thước"}
       placement="right"
       onClose={onClose}
       open={open}
@@ -59,7 +59,7 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
       }
     >
       <Form form={form} onFinish={onFinish} layout="vertical" onSubmitCapture={(e) => e.preventDefault()}>
-        {type === "color" && (
+        {type === "colo" && (
           <>
             <Form.Item label="Tên màu" name="name" rules={[{ required: true }]}>
               <Input />
@@ -70,7 +70,7 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
           </>
         )}
 
-        {type === "size" && (
+        {type === "sizee" && (
           <Form.Item label="Kích thước" name="name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>

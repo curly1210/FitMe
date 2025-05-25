@@ -6,30 +6,30 @@ import Add from "./add";
 import Edit from "./edit";
 
 const Bienthe = () => {
-  const { data: colorData } = useList({ resource: "colors" });
-  const { data: sizeData } = useList({ resource: "sizes" });
+  const { data: colorData } = useList({ resource: "variations/color" });
+  const { data: sizeData } = useList({ resource: "variations/size" });
   const colors = colorData?.data ?? [];
   const sizes = sizeData?.data ?? [];
 
   const { mutate: deleteOne } = useDelete();
 
   const [drawerOpen, setAddDrawerOpen] = useState(false);
-  const [drawerType, setDrawerType] = useState<"color" | "size" | null>(null);
+  const [drawerType, setDrawerType] = useState<"colo" | "sizee" | null>(null);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editId, setEditId] = useState<string | number | null>(null);
 
-  const openAdd = (type: "color" | "size") => {
+  const openAdd = (type: "colo" | "sizee") => {
     setDrawerType(type);
     setAddDrawerOpen(true);
   };
 
-  const openEditDrawer = (type: "color" | "size", id: number | string) => {
+  const openEditDrawer = (type: "colo" | "sizee", id: number | string) => {
     setDrawerType(type);
     setEditId(id);
     setEditDrawerOpen(true);
   };
 
-  const handleDelete = (resource: "colors" | "sizes", id: number | string) => {
+  const handleDelete = (resource: "variations/color" | "variations/size", id: number | string) => {
     deleteOne(
       { resource, id },
       {
@@ -40,12 +40,12 @@ const Bienthe = () => {
   };
 
 
-  const menu = (resource: "colors" | "sizes", id: number | string) => (
+  const menu = (resource: "variations/color" | "variations/size", id: number | string) => (
     <Menu>
       <Menu.Item
         key="edit"
         icon={<EditOutlined />}
-        onClick={() => openEditDrawer(resource === "colors" ? "color" : "size", id)}
+        onClick={() => openEditDrawer(resource === "variations/color" ? "colo" : "sizee", id)}
       >
         Sửa
       </Menu.Item>
@@ -86,7 +86,7 @@ const Bienthe = () => {
                   />
                   <span className="font-medium">{item.name}</span>
                 </div>
-                <Dropdown overlay={menu("colors", item.id!)} trigger={["click"]}>
+                <Dropdown overlay={menu("variations/color", item.id!)} trigger={["click"]}>
                   <MoreOutlined className="text-gray-500 cursor-pointer" />
                 </Dropdown>
               </div>
@@ -95,7 +95,7 @@ const Bienthe = () => {
        
             <Button
               icon={<PlusOutlined />}
-              onClick={() => openAdd("color")}
+              onClick={() => openAdd("colo")}
               className="justify-start rounded-xl mt-2"
               style={{ color: "#22689B", textAlign: "left" }}
             >
@@ -118,7 +118,7 @@ const Bienthe = () => {
                 className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
               >
                 <span className="font-medium">{item.name}</span>
-                <Dropdown overlay={menu("sizes", item.id!)} trigger={["click"]}>
+                <Dropdown overlay={menu("variations/size", item.id!)} trigger={["click"]}>
                   <MoreOutlined className="text-gray-500 cursor-pointer" />
                 </Dropdown>
               </div>
@@ -127,7 +127,7 @@ const Bienthe = () => {
          
             <Button
               icon={<PlusOutlined />}
-              onClick={() => openAdd("size")}
+              onClick={() => openAdd("sizee")}
               className="justify-start rounded-xl mt-2"
               style={{ color: "#22689B", textAlign: "left" }}
             >
