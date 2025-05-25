@@ -83,6 +83,7 @@ Route::prefix('variations')->group(function () {
     // màu sắc
     Route::get('/color', [VariationController::class, 'listColor']);
     Route::post('/color', [VariationController::class, 'storeColor']);
+    Route::get('/color/{id}', [VariationController::class, 'showColor']);
     Route::post('/color/{id}', [VariationController::class, 'updateColor']);
     Route::delete('/color/{id}', [VariationController::class, 'deleteColor']);
     Route::post('/color/{id}/restore', [VariationController::class, 'restoreColor']);
@@ -94,6 +95,7 @@ Route::prefix('variations')->group(function () {
     // kích th`ước
     Route::get('/size', [VariationController::class, 'listSize']);
     Route::post('/size', [VariationController::class, 'storeSize']);
+    Route::get('/size/{id}', [VariationController::class, 'showSize']);
     Route::post('/size/{id}', [VariationController::class, 'updateSize']);
     Route::delete('/size/{id}', [VariationController::class, 'deleteSize']);
     Route::post('/size/{id}/restore', [VariationController::class, 'restoreSize']);
