@@ -76,19 +76,19 @@ Route::prefix('variations')->group(function () {
 
 
     // màu sắc
-    Route::post('/color', [VariationController::class, 'storeColor']);
-    Route::post('/color/{id}', [VariationController::class, 'updateColor']);
-    Route::delete('/color/{id}', [VariationController::class, 'deleteColor']);
-    Route::post('/color/{id}/restore', [VariationController::class, 'restoreColor']);
-    Route::delete('/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
+    Route::post('/colors', [VariationController::class, 'storeColor']);
+    Route::post('/colors/{id}', [VariationController::class, 'updateColor']);
+    Route::delete('/colors/{id}', [VariationController::class, 'deleteColor']);
+    Route::post('/colors/{id}/restore', [VariationController::class, 'restoreColor']);
+    Route::delete('/colors/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
 
 
     // kích th`ước
-    Route::post('/size', [VariationController::class, 'storeSize']);
-    Route::post('/size/{id}', [VariationController::class, 'updateSize']);
-    Route::delete('/size/{id}', [VariationController::class, 'deleteSize']);
-    Route::post('/size/{id}/restore', [VariationController::class, 'restoreSize']);
-    Route::delete('/size/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
+    Route::post('/sizes', [VariationController::class, 'storeSize']);
+    Route::post('/sizes/{id}', [VariationController::class, 'updateSize']);
+    Route::delete('/sizes/{id}', [VariationController::class, 'deleteSize']);
+    Route::post('/sizes/{id}/restore', [VariationController::class, 'restoreSize']);
+    Route::delete('/sizes/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
 
 
 });
