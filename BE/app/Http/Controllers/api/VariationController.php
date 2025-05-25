@@ -76,6 +76,16 @@ class VariationController extends Controller
         return $this->success($color, 'Cập nhật màu thành công');
     }
 
+    public function showColor($id)
+    {
+        $color = Color::find($id);
+        if (!$color) {
+            return $this->error('Màu sắc không tồn tại', [], 404);
+        }
+
+        return $this->success(new ColorResource($color), 'Lấy thông tin màu sắc thành công');
+    }
+
     // Xóa mềm màu sắc
     public function deleteColor($id)
     {
@@ -178,6 +188,15 @@ class VariationController extends Controller
         ]);
 
         return $this->success($size, 'Cập nhật kích thước thành công');
+    }
+    public function showSize($id)
+    {
+        $size = Size::find($id);
+        if (!$size) {
+            return $this->error('Kích thước không tồn tại', [], 404);
+        }
+
+        return $this->success(new SizeResource($size), 'Lấy thông tin kích thước thành công');
     }
 
     // Xóa mềm kích thước
