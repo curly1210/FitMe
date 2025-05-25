@@ -1,6 +1,99 @@
 {
   "posts": [
-    { "id": 1, "title": "a title", "views": 100 },
-    { "id": 2, "title": "another title", "views": 200 }
+    {
+      "id": 1,
+      "title": "a title",
+      "views": 100
+    },
+    {
+      "id": 2,
+      "title": "another title",
+      "views": 200
+    }
+  ],
+  "users": [
+    {
+      "email": "cuongpxph48448@gmail.com",
+      "password": "$2a$10$712Txv3dHppVPXN/GhDf9.wbo2hgNCNKpe.IFl1Qq5cTKNlgw1QEq",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 1
+    },
+    {
+      "email": "1210.curly@gmail.com",
+      "password": "$2a$10$JXTkVj71kh8GlZszV4EAueTkpILec1dj9JZFQp1kf3H0.RAhUwtwe",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 2
+    },
+    {
+      "email": "cuongpxph48441@gmail.com",
+      "password": "$2a$10$m43QH5CsDOMZRLHuUlHpRO52EJ1FDx8gdXsUIV7LjbYBw.DbD3YYm",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 3
+    },
+    {
+      "email": "cuongpxp48448@gmail.com",
+      "password": "$2a$10$dwHFx0lHOTXuclXmsQbKUODy1R1fpe8p1KtHYxoR452hY0MXWJWTS",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 4
+    },
+    {
+      "email": "cuopxph48448@gmail.com",
+      "password": "$2a$10$khKJwIX39ngr3MdjKup/E.o8ICzJ9hg7.X82q2UrvCPIEqevHbwDu",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 5
+    },
+    {
+      "email": "cuong48448@gmail.com",
+      "password": "$2a$10$Dk4EB9vrFTGdysVSqIzSnOODMznYdFPggFC.rAz8eirUpcRiTK.aW",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 6
+    },
+    {
+      "email": "cuongpxp48@gmail.com",
+      "password": "$2a$10$yw8.VcnXNxuPx6a5n4uwmeRA6BKrtiVjTtN25vi08N6KLD5IqJm.q",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 7
+    },
+    {
+      "email": "cuongp@gmail.com",
+      "password": "$2a$10$YvQL1tzWk3BNJv9ggFTwrOvrfMUKI83RZPp5VQOQWVRsOW4u.CKVS",
+      "phone": "0898645513",
+      "name": "cuong Pham",
+      "id": 8
+    }
+  ],
+  "category": [
+    {
+      "id": 1,
+      "name": "Nam",
+      "parent_id": null
+    },
+    {
+      "id": 2,
+      "name": "Nữ",
+      "parent_id": null
+    },
+    {
+      "id": 3,
+      "name": "Quần dài",
+      "parent_id": 1
+    },
+    {
+      "id": 4,
+      "name": "Quần ngắn",
+      "parent_id": 1
+    },
+    {
+      "id": 5,
+      "name": "áo dài",
+      "parent_id": 2
+    }
   ]
 }
