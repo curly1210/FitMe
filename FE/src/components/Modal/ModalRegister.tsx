@@ -18,13 +18,6 @@ const ModalRegister = () => {
 
   const { notify } = usePopup();
 
-  // const openNotificationWithIcon = (type: NotificationType, content = "") => {
-  //   api[type]({
-  //     message: "Đăng ký",
-  //     description: content,
-  //   });
-  // };
-
   const { mutate } = useCreate({
     resource: "register",
     mutationOptions: {
