@@ -1,6 +1,168 @@
 {
   "posts": [
-    { "id": 1, "title": "a title", "views": 100 },
-    { "id": 2, "title": "another title", "views": 200 }
+    {
+      "id": "1",
+      "title": "a title",
+      "views": 100
+    },
+    {
+      "id": "2",
+      "title": "another title",
+      "views": 200
+    }
+  ],
+  "colors": [
+    {
+      "name": "vàng 22",
+      "code": "#d3da17",
+      "id": "1dde"
+    },
+    {
+      "id": "6f9e",
+      "name": "Hyundai Elantra",
+      "code": "#1890ff"
+    },
+    {
+      "id": "955f",
+      "name": "Huyndai i10new",
+      "code": "#3f3e33"
+    },
+    {
+      "id": "aa6e",
+      "name": "Huyndai 2024 new",
+      "code": "#1890ff"
+    },
+    {
+      "id": "c18c",
+      "name": "dfsfdsf",
+      "code": "#1890ff"
+    },
+    {
+      "id": "7a16",
+      "name": "Huyndai 2024 new",
+      "code": "#1890ff"
+    },
+    {
+      "id": "54cd",
+      "name": "4",
+      "code": "#1f4d7c"
+    },
+    {
+      "id": "d191",
+      "name": "1",
+      "code": "#36393c"
+    },
+    {
+      "id": "2a17",
+      "name": "Hyundai Elantra",
+      "code": "#1a1c1d"
+    },
+    {
+      "id": "202d",
+      "name": "sdfsdfs",
+      "code": "#040506"
+    },
+    {
+      "id": "a4c0",
+      "name": "à",
+      "code": "#547fa7"
+    },
+    {
+      "id": "8bcb",
+      "name": "3",
+      "code": "#283e53"
+    },
+    {
+      "id": "8b5a",
+      "name": "6",
+      "code": "#122f49"
+    },
+    {
+      "id": "86de",
+      "name": "e",
+      "code": "#295072"
+    },
+    {
+      "id": "7284",
+      "name": "7",
+      "code": "#143451"
+    },
+    {
+      "id": "fde9",
+      "name": "8",
+      "code": "#1890ff"
+    },
+    {
+      "id": "464d",
+      "name": "9",
+      "code": "#9ec8ee"
+    },
+    {
+      "id": "2ca4",
+      "name": "0",
+      "code": "#102c48"
+    },
+    {
+      "id": "3d8a",
+      "name": "dfsfd",
+      "code": "#1890ff"
+    },
+    {
+      "id": "9ba3",
+      "name": "5",
+      "code": "#1890ff"
+    },
+    {
+      "id": "60cf",
+      "name": "7",
+      "code": "#1890ff"
+    },
+    {
+      "id": "d994",
+      "name": "sdfsdf",
+      "code": "#1890ff"
+    }
+  ],
+  "sizes": [
+    {
+      "id": "19c9",
+      "name": "dfsfs"
+    },
+    {
+      "id": "5aae",
+      "name": "Hyundai Tucson"
+    },
+    {
+      "id": "071c",
+      "name": "vsdv"
+    },
+    {
+      "id": "d6da",
+      "name": "afafas"
+    },
+    {
+      "id": "55f5",
+      "name": "vll"
+    },
+    {
+      "id": "5f11",
+      "name": "dfsf"
+    },
+    {
+      "id": "3230",
+      "name": "Huyndai i10new"
+    },
+    {
+      "id": "6860",
+      "name": "sgsdgsdg"
+    },
+    {
+      "id": "1b67",
+      "name": "sdgsaqwr"
+    },
+    {
+      "id": "5c93",
+      "name": "fffd"
+    }
   ]
 }
