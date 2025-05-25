@@ -27,14 +27,14 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
   const { mutate: update } = useUpdate();
 
   useEffect(() => {
-    if (data?.data) {
-      form.setFieldsValue({ name: data.data.name });
-      if (type === "colo" && data.data.code) {
-        setColor(data.data.code);
+    if (data?.data?.data) {
+      form.setFieldsValue({ name: data.data.data.name });
+      if (type === "colo" && data.data.data.code) {
+        setColor(data.data.data.code);
       }
     }
   }, [data, form, type]);
-
+console.log(data)
   const onFinish = (values: any) => {
     update(
       {
