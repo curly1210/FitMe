@@ -5,12 +5,13 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Route Authen
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/users', [UserController::class, 'index']);
-// Route Authen
-
+// Route::middleware('jwt.auth')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+// });
 
 
 

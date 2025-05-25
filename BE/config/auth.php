@@ -43,6 +43,7 @@ return [
         'api' => [
             'driver' => 'jwt', // Thêm guard api với driver jwt
             'provider' => 'users',
+            // 'hash' => false,
         ],
     ],
 
