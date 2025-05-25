@@ -16,4 +16,8 @@ class Color extends Model
         'is_active',
     ];
 
+    public function productItems()
+    {
+        return $this->hasMany(ProductItem::class);
+    }
 }
