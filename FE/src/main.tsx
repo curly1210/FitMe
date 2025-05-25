@@ -10,9 +10,8 @@ import PopupProvider from "./context/PopupMessageProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <RouterProvider router={router}>
-   <Refine dataProvider={dataProvider("http://127.0.0.1:8000/api")}>
-  
-     
+  // <Refine dataProvider={dataProvider("http://localhost:3000")}>
+  <Refine dataProvider={dataProvider("http://127.0.0.1:8000/api")}>
     <PopupProvider>
       <ModalProvider>
         <App />
