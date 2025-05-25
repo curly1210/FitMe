@@ -34,7 +34,8 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
       }
     }
   }, [data, form, type]);
-console.log(data)
+  // console.log(data)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFinish = (values: any) => {
     update(
       {
@@ -44,11 +45,15 @@ console.log(data)
       },
       {
         onSuccess: () => {
-          message.success(`Sửa ${type === "colo" ? "màu" : "kích thước"} thành công`);
+          message.success(
+            `Sửa ${type === "colo" ? "màu" : "kích thước"} thành công`
+          );
           onClose();
         },
         onError: () => {
-          message.error(`Sửa ${type === "colo" ? "màu" : "kích thước"} thất bại`);
+          message.error(
+            `Sửa ${type === "colo" ? "màu" : "kích thước"} thất bại`
+          );
         },
       }
     );
@@ -65,7 +70,11 @@ console.log(data)
         <div style={{ textAlign: "right" }}>
           <Space>
             <Button onClick={onClose}>Huỷ</Button>
-            <Button type="primary" onClick={() => form.submit()} loading={isLoading}>
+            <Button
+              type="primary"
+              onClick={() => form.submit()}
+              loading={isLoading}
+            >
               Sửa biến thể
             </Button>
           </Space>
@@ -85,7 +94,11 @@ console.log(data)
         )}
 
         {type === "sizee" && (
-          <Form.Item label="Kích thước" name="name" rules={[{ required: true }]}>
+          <Form.Item
+            label="Kích thước"
+            name="name"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
         )}
