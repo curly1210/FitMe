@@ -1,147 +1,154 @@
-import { MoreOutlined, PlusOutlined } from "@ant-design/icons";
-import { Card, Dropdown, Button, Menu, Drawer, Space } from "antd";
+import { useList, useDelete } from "@refinedev/core";
+import { message, Popconfirm, Dropdown, Menu, Card, Button } from "antd";
+import { DeleteOutlined, EditOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import Add from "./add";
+import Edit from "./edit";
 
 const Bienthe = () => {
-  const colors = [
-    { name: 'Màu đen', color: 'bg-black' },
-    { name: 'Màu xanh', color: 'bg-blue-700' },
-    { name: 'Màu đỏ', color: 'bg-red-600' },
-    { name: 'Màu trắng', color: 'bg-white border border-gray-300' },
-    { name: 'Màu xám', color: 'bg-gray-400' },
-    { name: 'Màu vàng', color: 'bg-yellow-400' },
-  ];
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+  const { data: colorData } = useList({ resource: "colors" });
+  const { data: sizeData } = useList({ resource: "sizes" });
+  const colors = colorData?.data ?? [];
+  const sizes = sizeData?.data ?? [];
 
-  const actionMenu = (
-    <Menu
-      items={[
-        { key: '1', label: 'Sửa' },
-        { key: '2', label: 'Xoá' },
-      ]}
-    />
+  const { mutate: deleteOne } = useDelete();
+
+  const [drawerOpen, setAddDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState<"color" | "size" | null>(null);
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editId, setEditId] = useState<string | number | null>(null);
+
+  const openAdd = (type: "color" | "size") => {
+    setDrawerType(type);
+    setAddDrawerOpen(true);
+  };
+
+  const openEditDrawer = (type: "color" | "size", id: number | string) => {
+    setDrawerType(type);
+    setEditId(id);
+    setEditDrawerOpen(true);
+  };
+
+  const handleDelete = (resource: "colors" | "sizes", id: number | string) => {
+    deleteOne(
+      { resource, id },
+      {
+        onSuccess: () => message.success("Xoá thành công"),
+        onError: () => message.error("Xoá thất bại"),
+      }
+    );
+  };
+
+
+  const menu = (resource: "colors" | "sizes", id: number | string) => (
+    <Menu>
+      <Menu.Item
+        key="edit"
+        icon={<EditOutlined />}
+        onClick={() => openEditDrawer(resource === "colors" ? "color" : "size", id)}
+      >
+        Sửa
+      </Menu.Item>
+      <Popconfirm
+        title="Bạn có chắc chắn muốn xóa?"
+        okText="Xóa"
+        cancelText="Hủy"
+        onConfirm={() => handleDelete(resource, id)}
+      >
+        <Menu.Item key="delete" icon={<DeleteOutlined />}>
+          Xoá
+        </Menu.Item>
+      </Popconfirm>
+    </Menu>
   );
-  //đây là hàm sử lý khi click nút thêm sẽ mở ra sile bên tay trái
-  const [open, setOpen] = useState(false);
-  const showDrawer = () => setOpen(true);
-  const onClose = () => setOpen(false);
 
-  return <div>
-    <h1 className="text-2xl font-bold">Quản lý biến thể</h1><div className="flex gap-4 p-4 items-start">
-
-      
-
-      {/* From nút thêm */}
-      <Drawer
-           title="Thêm màu sắc"
-           placement="right"
-          onClose={onClose}
-          open={open}
-          className="custom-class"
-          rootClassName="root-class-name"
-          styles={{ body: { paddingBottom: 80 } }}
-          //nút thao tác
-        footer={
-          <div className="text-right">
-            <Space >
-              <Button onClick={onClose}>Cancel</Button>
-              <Button  block icon={<PlusOutlined />} className="text-white" style={{ backgroundColor: '#22689B', color: '#fff' }} >Thêm mới sản phẩm</Button>
-            </Space>
-          </div>
-        }
-      >
-        {/* Nội dung trong Ô thêm*/}
-        <p>Form thêm màu sắc hoặc nội dung khác...</p>
-        <p>Ví dụ: ô nhập, chọn màu, v.v.</p>
-      </Drawer>   
-
-
-      {/* Card Màu sắc */}
-      <Card
-        title={<span className="font-semibold text-base">Màu sắc</span>}
-        className="w-64 rounded-2xl border border-gray-200 !bg-gray-200"
-        bodyStyle={{ padding: 12 }}
-        extra={
-          <Dropdown overlay={actionMenu} trigger={['click']}>
-            <MoreOutlined className="text-gray-500" />
-          </Dropdown>
-        }
-      >
-        <div className="flex flex-col gap-2">
-          {colors.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full ${item.color}`} />
-                <span className="font-medium">{item.name}</span>
-              </div>
-              <Dropdown overlay={actionMenu} trigger={['click']}>
-                <MoreOutlined className="text-gray-500 cursor-pointer" />
-              </Dropdown>
-            </div>
-          ))}
-
-          <Button
-            icon={<PlusOutlined />}
-            onClick={showDrawer}
-           className="justify-start rounded-xl mt-2 " style={{ color: '#22689B',textAlign: 'left' }}
-           
-          >
-            Thêm
-          </Button>
-        </div>
-      </Card>
-
-      {/* Card Kích thước */}
-      <Card
-        title={<span className="font-semibold text-base">Kích thước</span>}
-        className="w-64 rounded-2xl border border-gray-200 !bg-gray-200"
-        bodyStyle={{ padding: 12 }}
-        extra={
-          <Dropdown overlay={actionMenu} trigger={['click']}>
-            <MoreOutlined className="text-gray-500" />
-          </Dropdown>
-        }
-      >
-        <div className="flex flex-col gap-2">
-          {sizes.map((size, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
-            >
-              <span className="font-medium">{size}</span>
-              <Dropdown overlay={actionMenu} trigger={['click']}>
-                <MoreOutlined className="text-gray-500 cursor-pointer" />
-              </Dropdown>
-            </div>
-          ))}
-
-          <Button
-            icon={<PlusOutlined />}
-            onClick={showDrawer}
-           className="justify-start rounded-xl mt-2 " style={{ color: '#22689B',textAlign: 'left' }}
-          >
-            Thêm
-          </Button>
-        </div>
-      </Card>
-
-      {/* Thêm biến thể */}
-      <div className="pt-2">
-        <Button
-          type="default"
-          icon={<PlusOutlined />}
-           className="justify-start rounded-xl mt-2 " style={{ color: '#22689B',textAlign: 'left' }}
-          onClick={showDrawer}
+  return (
+    <div>
+      <h1 className="text-2xl font-bold">Quản lý biến thể</h1>
+      <div className="flex gap-4 p-4 items-start">
+        {/* Card Màu sắc */}
+        <Card
+          title={<span className="font-semibold text-base">Màu sắc</span>}
+          className="w-64 rounded-2xl border border-gray-200 !bg-gray-200"
+          bodyStyle={{ padding: 12 }}
         >
-          Thêm biến thể
-        </Button>
+          <div className="flex flex-col gap-2">
+            <div style={{ maxHeight: 460, paddingRight: 4, overflow: "auto" }}>
+                   {colors.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-6 h-6 rounded-full border border-gray-300"
+                    style={{ backgroundColor: item.code }}
+                  />
+                  <span className="font-medium">{item.name}</span>
+                </div>
+                <Dropdown overlay={menu("colors", item.id!)} trigger={["click"]}>
+                  <MoreOutlined className="text-gray-500 cursor-pointer" />
+                </Dropdown>
+              </div>
+            ))}
+            </div>
+       
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => openAdd("color")}
+              className="justify-start rounded-xl mt-2"
+              style={{ color: "#22689B", textAlign: "left" }}
+            >
+              Thêm màu sắc
+            </Button>
+          </div>
+        </Card>
+
+        {/* Card Kích thước */}
+        <Card
+          title={<span className="font-semibold text-base">Kích thước</span>}
+          className="w-64 rounded-2xl border border-gray-200 !bg-gray-200"
+          bodyStyle={{ padding: 12 }}
+        >
+          <div className="flex flex-col gap-2">
+            <div style={{ maxHeight: 460, overflowY: "auto" }}>
+                 {sizes.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
+              >
+                <span className="font-medium">{item.name}</span>
+                <Dropdown overlay={menu("sizes", item.id!)} trigger={["click"]}>
+                  <MoreOutlined className="text-gray-500 cursor-pointer" />
+                </Dropdown>
+              </div>
+            ))}
+            </div>
+         
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => openAdd("size")}
+              className="justify-start rounded-xl mt-2"
+              style={{ color: "#22689B", textAlign: "left" }}
+            >
+              Thêm kích thước
+            </Button>
+          </div>
+        </Card>
       </div>
+
+      <Add open={drawerOpen} onClose={() => setAddDrawerOpen(false)} type={drawerType} />
+      <Edit
+        open={editDrawerOpen}
+        onClose={() => {
+          setEditDrawerOpen(false);
+          setEditId(null);
+        }}
+        type={drawerType}
+        id={editId}
+      />
     </div>
-    </div>
-  ;
+  );
 };
 
 export default Bienthe;
