@@ -21,14 +21,13 @@ const ModalRegister = () => {
   const { mutate } = useCreate({
     resource: "register",
     mutationOptions: {
-      onSuccess: (data) => {
-        console.log(data);
-        notify("success", "Đăng ký", "Đăng ký thành công");
+      onSuccess: (response) => {
+        notify("success", "Đăng ký", response?.data?.message);
         openPopup(<ModalLogin />);
       },
       onError: (error) => {
         console.log(error);
-        notify("error", "Đăng ký", "Đăng ký thất bại");
+        notify("error", "Đăng ký", error.message);
       },
     },
   });
