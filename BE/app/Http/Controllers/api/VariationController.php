@@ -16,25 +16,22 @@ class VariationController extends Controller
     use ApiResponse;
 
     //show danh sách màu sắc và kích thước
-    public function index()
+    public function listColor()
     {
         return $this->success([
             'colors' => ColorResource::collection(Color::whereNull('deleted_at')->get()),
-            'sizes' => SizeResource::collection(Size::whereNull('deleted_at')->get()),
-        ], 'Lấy danh sách màu sắc và kích thước thành công');
+        ], 'Lấy danh sách màu sắc thành công');
     }
 
     //Lấy ra danh sách các biến thể đã xóa
 
-    public function trashed()
+    public function trashedColor()
     {
         $trashedColors = ColorResource::collection(Color::onlyTrashed()->get());
-        $trashedSizes = SizeResource::collection(Size::onlyTrashed()->get());
 
         return $this->success([
             'colors' => $trashedColors,
-            'sizes' => $trashedSizes
-        ], 'Danh sách màu sắc và kích thước đã xóa mềm');
+        ], 'Danh sách màu sắc đã xóa mềm');
     }
 
 
@@ -136,6 +133,14 @@ class VariationController extends Controller
 
     //hàm tạo mới kích thước
 
+     public function listSize()
+    {
+        return $this->success([
+           
+            'sizes' => SizeResource::collection(Size::whereNull('deleted_at')->get()),
+        ], 'Lấy danh sáchkích thước thành công');
+    }
+
     public function storeSize(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -219,5 +224,14 @@ class VariationController extends Controller
         $size->forceDelete();
 
         return $this->success(null, 'Đã xóa vĩnh viễn kích thước');
+    }
+
+    public function trashedSize()
+    {
+        $trashedSizes = SizeResource::collection(Size::onlyTrashed()->get());
+
+        return $this->success([
+            'sizes' => $trashedSizes
+        ], 'Danh sách kích thước đã xóa mềm');
     }
 }
