@@ -6,7 +6,7 @@ import { useOne, useUpdate } from "@refinedev/core";
 interface EditProps {
   open: boolean;
   onClose: () => void;
-  type: "color" | "size" | null;
+  type: "colo" | "sizee" | null;
   id?: string | number | null;
 }
 
@@ -14,7 +14,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
   const [form] = Form.useForm();
   const [color, setColor] = useState("#1890ff");
 
-  const resource = type === "color" ? "colors" : "sizes";
+  const resource = type === "colo" ? "variations/color" : "variations/size";
 
   const { data, isLoading } = useOne({
     resource,
@@ -29,7 +29,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
   useEffect(() => {
     if (data?.data) {
       form.setFieldsValue({ name: data.data.name });
-      if (type === "color" && data.data.code) {
+      if (type === "colo" && data.data.code) {
         setColor(data.data.code);
       }
     }
@@ -40,15 +40,15 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
       {
         resource,
         id: id!,
-        values: type === "color" ? { ...values, code: color } : values,
+        values: type === "colo" ? { ...values, code: color } : values,
       },
       {
         onSuccess: () => {
-          message.success(`Sửa ${type === "color" ? "màu" : "kích thước"} thành công`);
+          message.success(`Sửa ${type === "colo" ? "màu" : "kích thước"} thành công`);
           onClose();
         },
         onError: () => {
-          message.error(`Sửa ${type === "color" ? "màu" : "kích thước"} thất bại`);
+          message.error(`Sửa ${type === "colo" ? "màu" : "kích thước"} thất bại`);
         },
       }
     );
@@ -56,7 +56,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
 
   return (
     <Drawer
-      title={type === "color" ? "Sửa màu sắc" : "Sửa kích thước"}
+      title={type === "colo" ? "Sửa màu sắc" : "Sửa kích thước"}
       placement="right"
       onClose={onClose}
       open={open}
@@ -73,7 +73,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
       }
     >
       <Form form={form} onFinish={onFinish} layout="vertical">
-        {type === "color" && (
+        {type === "colo" && (
           <>
             <Form.Item label="Tên màu" name="name" rules={[{ required: true }]}>
               <Input />
@@ -84,7 +84,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
           </>
         )}
 
-        {type === "size" && (
+        {type === "sizee" && (
           <Form.Item label="Kích thước" name="name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
