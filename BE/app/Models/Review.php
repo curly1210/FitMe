@@ -16,8 +16,8 @@ class Review extends Model
         'updated_content',
         'is_update',
         'user_id',
-        'product_id',
-        'order_id',
+        'product_item_id',
+        'order_detail_id',
     ];
 
     // Quan hệ với bảng User

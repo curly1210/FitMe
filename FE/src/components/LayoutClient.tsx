@@ -1,9 +1,10 @@
 import { Outlet } from "react-router";
+import HeaderClient from "./HeaderClient";
 
 const LayoutClient = () => {
   return (
     <div>
-      <header>Header của client</header>
+      <HeaderClient />
       <main>
         <Outlet />
       </main>
