@@ -8,8 +8,9 @@ import Edit from "./edit";
 const Bienthe = () => {
   const { data: colorData } = useList({ resource: "variations/color" });
   const { data: sizeData } = useList({ resource: "variations/size" });
-  const colors = colorData?.data ?? [];
-  const sizes = sizeData?.data ?? [];
+  const colors = colorData?.data?.data?.colors ??  [];
+  const sizes = sizeData?.data?.data?.sizes ?? [];
+
 
   const { mutate: deleteOne } = useDelete();
 
