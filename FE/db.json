@@ -11,7 +11,6 @@
       "views": 200
     }
   ],
-
   "colors": [
     {
       "name": "vàng 22",
@@ -59,18 +58,8 @@
       "code": "#1a1c1d"
     },
     {
-      "id": "202d",
-      "name": "sdfsdfs",
-      "code": "#040506"
-    },
-    {
-      "id": "a4c0",
-      "name": "à",
-      "code": "#547fa7"
-    },
-    {
       "id": "8bcb",
-      "name": "3",
+      "name": "3 4",
       "code": "#283e53"
     },
     {
@@ -122,9 +111,13 @@
       "id": "d994",
       "name": "sdfsdf",
       "code": "#1890ff"
+    },
+    {
+      "name": "3",
+      "code": "#244b6e",
+      "id": "5McegUW"
     }
   ],
-
   "sizes": [
     {
       "id": "19c9",
@@ -167,7 +160,6 @@
       "name": "fffd"
     }
   ],
-
   "categories": [
     {
       "id": "1",
@@ -253,6 +245,5 @@
       ]
     }
   ],
-  
   "users": []
 }
