@@ -2,7 +2,7 @@
 import {
   createContext,
   ReactNode,
-  useContext,
+  // useContext,
   useEffect,
   useState,
 } from "react";
@@ -12,16 +12,16 @@ interface ModalContextType {
   closePopup: () => void;
 }
 
-const ModalContext = createContext<ModalContextType>({
+export const ModalContext = createContext<ModalContextType>({
   openPopup: () => {},
   closePopup: () => {},
 });
 
-export const useModalContext = () => {
-  return useContext(ModalContext);
-};
+// export const useModalContext = () => {
+//   return useContext(ModalContext);
+// };
 
-const ModalProvider = ({ children }: { children: ReactNode }) => {
+export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const [isShowing, setIsShowing] = useState(false);
   const [content, setContent] = useState<ReactNode>(null);
 
@@ -65,4 +65,3 @@ const ModalProvider = ({ children }: { children: ReactNode }) => {
     </ModalContext.Provider>
   );
 };
-export default ModalProvider;

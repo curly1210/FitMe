@@ -3,3 +3,7 @@
 * {
   font-family: "Roboto Condensed", sans-serif;
 }
+
+.ant-spin-fullscreen {
+  background-color: white; /* Tailwind amber-400 */
+}

@@ -1,12 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Form, Input } from "antd";
 import login from "../../../public/login.png";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { useModalContext } from "../../context/ModalProvider";
+// import { useModalContext } from "../../context/ModalProvider";
 import ModalRegister from "./ModalRegister";
+import { useModal } from "../../hooks/useModal";
+import { usePopup } from "../../context/PopupMessageProvider";
+import { useCreate } from "@refinedev/core";
+import { useAuthen } from "../../hooks/useAuthen";
+import { useNavigate } from "react-router";
 
 const ModalLogin = () => {
-  const { openPopup, closePopup } = useModalContext();
+  const { openPopup, closePopup } = useModal();
+  const { notify } = usePopup();
+  const { setAccessToken, setUser } = useAuthen();
+  // const navigate = useNavigate();
+  const navi = useNavigate();
+
+  const { mutate, isLoading } = useCreate({
+    resource: "login",
+    mutationOptions: {
+      onSuccess: (response) => {
+        setUser(response?.data?.data?.access_token);
+        setAccessToken(response?.data?.data?.access_token);
+        notify("success", "Đăng nhập", "Thành công");
+        navi("/");
+        closePopup();
+        // openPopup(<ModalLogin />);
+      },
+      onError: (error) => {
+        console.log(error);
+        notify("error", "Đăng nhập", error.message);
+      },
+    },
+  });
+
+  const onFinish = (values: any) => {
+    // const { confirmPassword, ...userData } = values;
+    mutate({ values: values });
+    // console.log(userData);
+    // console.log(confirmPassword);
+  };
+
   return (
+    // <Spin spinning={isLoading}>
     <div className="w-4xl relative grid grid-cols-2 bg-white py-10 px-10 gap-x-[40px] items-center">
       <button
         onClick={closePopup}
@@ -25,7 +62,7 @@ const ModalLogin = () => {
           </p>
         </div>
         <div className="relative">
-          <Form layout="vertical">
+          <Form onFinish={onFinish} layout="vertical">
             <Form.Item
               label={
                 <span>
@@ -63,6 +100,7 @@ const ModalLogin = () => {
               Quên mật khẩu
             </p>
             <Button
+              loading={isLoading}
               className="w-full !bg-[#22689B] !text-base !py-5 !rounded-3xl"
               type="primary"
               htmlType="submit"
@@ -97,6 +135,7 @@ const ModalLogin = () => {
         </div>
       </div>
     </div>
+    // </Spin>
   );
 };
 export default ModalLogin;

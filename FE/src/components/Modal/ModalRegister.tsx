@@ -8,13 +8,14 @@ import {
   PhoneOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useModalContext } from "../../context/ModalProvider";
+// import { useModalContext } from "../../context/ModalProvider";
 import { useCreate } from "@refinedev/core";
 import ModalLogin from "./ModalLogin";
 import { usePopup } from "../../context/PopupMessageProvider";
+import { useModal } from "../../hooks/useModal";
 
 const ModalRegister = () => {
-  const { closePopup, openPopup } = useModalContext();
+  const { closePopup, openPopup } = useModal();
 
   const { notify } = usePopup();
 
