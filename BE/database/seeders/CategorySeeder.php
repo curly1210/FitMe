@@ -13,7 +13,7 @@ class CategorySeeder extends Seeder
      * Run the database seeds.
      */
     public static array $categoryTree = [
-        'Nam' => [
+        'Đồ nam' => [
             'Áo khoác nam',
             'Áo nam',
             'Quần nam',
@@ -22,7 +22,7 @@ class CategorySeeder extends Seeder
             'Đồ mặc trong & đồ lót nam',
             'Phụ kiện nam',
         ],
-        'Nữ' => [
+        'Đồ nữ' => [
             'Áo khoác nữ',
             'Áo nữ',
             'Quần nữ',
@@ -31,7 +31,7 @@ class CategorySeeder extends Seeder
             'Đồ mặc trong & Đồ lót nữ',
             'Phụ kiện nữ',
         ],
-        'Trẻ em' => [
+        'Đồ trẻ em' => [
             'Áo thun trẻ em',
             'Áo polo trẻ em',
             'Quần trẻ em',
