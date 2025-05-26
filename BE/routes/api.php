@@ -85,6 +85,8 @@ Route::prefix('variations')->group(function () {
 
 
     // màu sắc
+    // Route::middleware('auth:api')->get('/color', [VariationController::class, 'listColor']);
+
     Route::get('/color', [VariationController::class, 'listColor']);
     Route::post('/color', [VariationController::class, 'storeColor']);
     Route::get('/color/{id}', [VariationController::class, 'showColor']);

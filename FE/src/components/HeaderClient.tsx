@@ -26,7 +26,7 @@ const HeaderClient = () => {
   });
 
   // console.log(accessToken);
-  console.log(user);
+  // console.log(user);
 
   return (
     <div>

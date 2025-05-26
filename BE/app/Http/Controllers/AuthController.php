@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTFactory;
 
 class AuthController extends Controller
 {
@@ -22,8 +23,13 @@ class AuthController extends Controller
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT
-        // $refreshTtl = (int) config('jwt.refresh_ttl', 20160); // Thời gian sống của refresh token (mặc định là 20160 phút = 14 ngày)
-        $refreshToken = JWTAuth::claims(['type' => 'refresh'])->fromUser($user); // Sử dụng TTL từ config/jwt.php
+        // $refreshToken = JWTAuth::claims(['type' => 'refresh'])->fromUser($user); // Sử dụng TTL từ config/jwt.php
+
+        $payload = JWTFactory::customClaims(['type' => 'refresh'])
+            ->setTTL(config('jwt.refresh_ttl'))
+            ->make();
+
+        $refreshToken = JWTAuth::encode($payload)->get();
 
         return $this->success([
             'access_token' => $accessToken,
@@ -67,22 +73,6 @@ class AuthController extends Controller
             return $this->error('Có lỗi xảy ra khi xác thực dữ liệu', $e->errors(), 422);
         }
 
-        // $request->validate([
-        //     'email' => 'required|email|unique:users,email',
-        //     'phone' => 'required|unique:users,phone',
-        //     'name' => 'required|string|max:255',
-        //     'password' => 'required|string|min:6',
-        //     'avatar' => 'nullable|string',
-        // ], [
-        //     'email.unique' => 'Email đã được sử dụng.',
-        //     'phone.unique' => 'Số điện thoại đã được sử dụng.',
-        //     'email.required' => 'Email là bắt buộc.',
-        //     'email.email' => 'Email không hợp lệ.',
-        //     'phone.required' => 'Số điện thoại là bắt buộc.',
-        //     'name.required' => 'Tên là bắt buộc.',
-        //     'password.required' => 'Mật khẩu là bắt buộc.',
-        //     'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
-        // ]);
 
         $user = User::create([
             'name' => $request->name,

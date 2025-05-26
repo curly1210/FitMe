@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const { mutate: create } = useCreate();
 
-  const refreshToken = () => {
-    try {
+  const refreshToken = async () => {
+    return new Promise((resolve, reject) => {
       create(
         {
           resource: "refresh",
@@ -48,22 +48,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
         {
           onSuccess: (response) => {
-            // console.log(response?.data?.data?.user);
             setUser(response?.data?.data?.user);
             // console.log(response?.data?.data?.access_token);
             setAccessToken(response?.data?.data?.access_token);
             setIsAppReady(true);
+            resolve(response?.data?.data?.access_token); // ✅ để `await refreshToken()` lấy được token
+            // const token = response?.data?.data?.access_token;
+            // setAccessToken(token);
+            return response?.data?.data?.access_token;
           },
           onError: (error) => {
-            console.log(error);
             setIsAppReady(true);
+            reject(error);
           },
         }
       );
-    } catch (error) {
-      console.error("Refresh failed", error);
-      setAccessToken(null);
-    }
+    });
+    // try {
+    //   create(
+    //     {
+    //       resource: "refresh",
+    //       meta: {
+    //         requestOptions: {
+    //           withCredentials: true,
+    //         },
+    //       },
+    //       values: {},
+    //     },
+    //     {
+    //       onSuccess: (response) => {
+    //         // console.log(response?.data?.data?.user);
+    //         setUser(response?.data?.data?.user);
+    //         // console.log(response?.data?.data?.access_token);
+    //         setAccessToken(response?.data?.data?.access_token);
+    //         setIsAppReady(true);
+    //         return response?.data?.data?.access_token;
+    //       },
+    //       onError: (error) => {
+    //         console.log(error);
+    //         setIsAppReady(true);
+    //       },
+    //     }
+    //   );
+    // } catch (error) {
+    //   console.error("Refresh failed", error);
+    //   setAccessToken(null);
+    // }
   };
 
   useEffect(() => {

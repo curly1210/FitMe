@@ -1,7 +1,10 @@
 import { Navigate, Outlet } from "react-router";
+import { useAuthen } from "../hooks/useAuthen";
 
-const Authenticate = () => {
-  const isAuthenticated = true;
-  return isAuthenticated ? <Outlet /> : <Navigate to={"/"} replace />;
+const Authenticate = ({ role }: { role: string }) => {
+  return <Outlet />;
+
+  const { user } = useAuthen();
+  return user?.role === role ? <Outlet /> : <Navigate to={"/"} replace />;
 };
 export default Authenticate;

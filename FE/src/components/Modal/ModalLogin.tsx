@@ -21,7 +21,8 @@ const ModalLogin = () => {
     resource: "login",
     mutationOptions: {
       onSuccess: (response) => {
-        setUser(response?.data?.data?.access_token);
+        // console.log(response?.data?.data?.user?.name);
+        setUser(response?.data?.data?.user);
         setAccessToken(response?.data?.data?.access_token);
         notify("success", "Đăng nhập", "Thành công");
         navi("/");

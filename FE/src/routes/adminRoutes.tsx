@@ -8,7 +8,7 @@ import Dashboard from "../pages/admin/Dashboard";
 
 export const adminRoutes = [
   {
-    element: <Authenticate />,
+    element: <Authenticate role="Quản trị viên" />,
     children: [
       {
         path: "/admin",
@@ -24,9 +24,9 @@ export const adminRoutes = [
           },
           {
             path: "category",
-            element: <Category/>,
+            element: <Category />,
           },
-           {
+          {
             path: "bienthe",
             element: <Bienthe />,
           },
