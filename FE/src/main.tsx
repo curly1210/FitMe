@@ -1,22 +1,32 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 // import "./index.css";
-import ModalProvider from "./context/ModalProvider.tsx";
-import { Refine } from "@refinedev/core";
-import dataProvider from "@refinedev/simple-rest";
-import PopupProvider from "./context/PopupMessageProvider.tsx";
+// import ModalProvider from "./context/ModalProvider.tsx";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import { clientRoutes } from "./routes/clientRoutes.tsx";
+import { adminRoutes } from "./routes/adminRoutes.tsx";
 
 // const router = createBrowserRouter([...clientRoutes, ...adminRoutes]);
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [...clientRoutes, ...adminRoutes],
+  },
+]);
 
 createRoot(document.getElementById("root")!).render(
   // <RouterProvider router={router}>
   // <Refine dataProvider={dataProvider("http://localhost:3000")}>
-  <Refine dataProvider={dataProvider("http://127.0.0.1:8000/api")}>
-    <PopupProvider>
-      <ModalProvider>
-        <App />
-      </ModalProvider>
-    </PopupProvider>
-  </Refine>
+  <RouterProvider router={router} />
+  // <RouterProvider router={router}>
+  //   <Refine dataProvider={dataProvider("http://127.0.0.1:8000/api")}>
+  //     <PopupProvider>
+  //       <ModalProvider>
+  //         <App />
+  //       </ModalProvider>
+  //     </PopupProvider>
+  //   </Refine>
+  // </RouterProvider>
   // </RouterProvider>
 );
