@@ -28,7 +28,7 @@ class AuthController extends Controller
         return $this->success([
             'access_token' => $accessToken,
             'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60, // Tính bằng giây 
+            'expires_in' => JWTAuth::factory()->getTTL() * 60, // Tính bằng giây
             'user' => new UserResource($user),
         ], 'Đăng nhập thành công', 200)->cookie(
             'refresh_token',
@@ -100,6 +100,7 @@ class AuthController extends Controller
                 'access_token' => $newAccessToken,
                 'token_type' => 'bearer',
                 'expires_in' => JWTAuth::factory()->getTTL() * 60, // Tính bằng giây
+                'user' => new UserResource($user),
             ], 'Làm mới token thành công', 200);
         } catch (\Exception $e) {
             return $this->error('Refresh token không hợp lệ', [], 401);
