@@ -25,7 +25,7 @@ const Bienthe = () => {
   // const colors = colorData?.data ?? [];
   const sizes = sizeData?.data ?? [];
 
-  console.log(colorData);
+  // console.log(colorData);
 
   const { mutate: deleteOne } = useDelete();
 

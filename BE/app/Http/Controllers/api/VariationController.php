@@ -18,9 +18,10 @@ class VariationController extends Controller
     //show danh sách màu sắc và kích thước
     public function listColor()
     {
-        return $this->success([
-            'colors' => ColorResource::collection(Color::whereNull('deleted_at')->get()),
-        ], 'Lấy danh sách màu sắc thành công');
+        return ColorResource::collection(Color::whereNull('deleted_at')->get());
+        // return $this->success([
+        //     'colors' => ColorResource::collection(Color::whereNull('deleted_at')->get()),
+        // ], 'Lấy danh sách màu sắc thành công');
     }
 
     //Lấy ra danh sách các biến thể đã xóa
@@ -145,10 +146,11 @@ class VariationController extends Controller
 
     public function listSize()
     {
-        return $this->success([
+        return SizeResource::collection(Size::whereNull('deleted_at')->get());
+        // return $this->success([
 
-            'sizes' => SizeResource::collection(Size::whereNull('deleted_at')->get()),
-        ], 'Lấy danh sáchkích thước thành công');
+        //     'sizes' => SizeResource::collection(Size::whereNull('deleted_at')->get()),
+        // ], 'Lấy danh sáchkích thước thành công');
     }
 
     public function storeSize(Request $request)

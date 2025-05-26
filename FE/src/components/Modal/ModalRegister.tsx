@@ -28,7 +28,8 @@ const ModalRegister = () => {
       },
       onError: (error) => {
         console.log(error);
-        notify("error", "Đăng ký", error.message);
+        notify("error", "Đăng ký", "Email hoặc SĐT đã được sử dụng");
+        // console.log(error);
       },
     },
   });
