@@ -18,7 +18,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return $this->error('Thông tin đăng nhập không chính xác', [], 401, );
+            return $this->error('Thông tin đăng nhập không chính xác', [], 401,);
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT
@@ -37,10 +37,10 @@ class AuthController extends Controller
             (int) config('jwt.refresh_ttl'), // Thời gian sống của cookie (phút)
             '/',
             null,
-            true, // Secure
+            false, // Secure
             true, // HttpOnly
             false, // Raw
-            'Strict' // SameSite
+            'Lax' // SameSite
         );
     }
 
@@ -66,6 +66,23 @@ class AuthController extends Controller
         } catch (ValidationException $e) {
             return $this->error('Có lỗi xảy ra khi xác thực dữ liệu', $e->errors(), 422);
         }
+
+        // $request->validate([
+        //     'email' => 'required|email|unique:users,email',
+        //     'phone' => 'required|unique:users,phone',
+        //     'name' => 'required|string|max:255',
+        //     'password' => 'required|string|min:6',
+        //     'avatar' => 'nullable|string',
+        // ], [
+        //     'email.unique' => 'Email đã được sử dụng.',
+        //     'phone.unique' => 'Số điện thoại đã được sử dụng.',
+        //     'email.required' => 'Email là bắt buộc.',
+        //     'email.email' => 'Email không hợp lệ.',
+        //     'phone.required' => 'Số điện thoại là bắt buộc.',
+        //     'name.required' => 'Tên là bắt buộc.',
+        //     'password.required' => 'Mật khẩu là bắt buộc.',
+        //     'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+        // ]);
 
         $user = User::create([
             'name' => $request->name,
@@ -121,10 +138,10 @@ class AuthController extends Controller
             -1, // Xóa cookie
             '/',
             null,
-            true, // Secure
+            false, // Secure
             true, // HttpOnly
             false, // Raw
-            'Strict' // SameSite
+            'Lax' // SameSite
         );
     }
 }
