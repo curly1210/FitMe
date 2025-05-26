@@ -4,35 +4,44 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"json-server --watch db.json -m ./node_modules/json-server-auth\" \"npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch\"",
+    "server": "json-server --watch db.json -m ./node_modules/json-server-auth",
+    "taild": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db": "json-server --watch db.json --port 3000"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
     "@refinedev/core": "^4.57.9",
     "@refinedev/react-router-v6": "^4.6.2",
     "@refinedev/simple-rest": "^5.0.10",
+    "@tailwindcss/cli": "^4.1.7",
     "@tailwindcss/vite": "^4.1.7",
     "antd": "^5.25.2",
     "axios": "^1.9.0",
+    "json-server": "^0.17.4",
+    "json-server-auth": "^2.1.0",
     "react": "^18.3.1",
+    "react-color": "^2.19.3",
     "react-dom": "^18.3.1",
-    "react-router": "^7.6.0"
+    "react-router": "^7.6.0",
+    "tailwindcss": "^4.1.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@types/react": "^18.3.21",
+    "@types/react-color": "^3.0.13",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
     "eslint": "^9.22.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.7",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1"

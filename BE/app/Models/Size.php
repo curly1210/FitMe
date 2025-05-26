@@ -14,4 +14,9 @@ class Size extends Model
         'name',
         'is_active',
     ];
+
+    public function productItems()
+    {
+        return $this->hasMany(ProductItem::class);
+    }
 }
