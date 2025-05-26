@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Category extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
     protected $fillable = [
         'name',
         'parent_id',
+        'image',
     ];
     public function products()
     {

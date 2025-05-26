@@ -5,13 +5,13 @@ namespace App\Traits;
 
 trait ApiResponse
 {
-    protected function success($data = null, $message = 'Thành công')
+    protected function success($data = null, $message = 'Thành công', $code = 200)
     {
         return response()->json([
             'success' => true,
             'message' => $message,
             'data'    => $data
-        ]);
+        ], $code);
     }
 
     protected function error($message = 'Lỗi hệ thống', $errors = [], $code = 400)
