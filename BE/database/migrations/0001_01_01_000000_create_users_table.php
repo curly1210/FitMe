@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class () extends Migration {
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -20,7 +20,7 @@ return new class () extends Migration {
             $table->string('phone', 10);
             $table->enum('gender', ['Nam', 'Nữ'])->nullable();
 
-            $table->enum('role', ['Thành viên', 'Quản trị viên'])->default('Thành viên');
+            $table->enum('role', ['Customer', 'Admin'])->default('Customer');
 
             $table->tinyInteger('is_ban')->default(0);
             $table->timestamps();

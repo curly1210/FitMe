@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'name' => 'admin',
             'email' => fake()->unique()->email(),
             'password' => Hash::make('admin'),
-            'role' => "Quản trị viên",
+            'role' => "Admin",
         ]);
         User::factory(20)->create();
     }

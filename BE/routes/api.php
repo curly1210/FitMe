@@ -105,10 +105,6 @@ Route::prefix('variations')->group(function () {
     Route::post('/size/{id}/restore', [VariationController::class, 'restoreSize']);
     Route::delete('/size/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
     Route::get('/size/trashed', [VariationController::class, 'trashedSize']);
-
-
-
-
 });
 
 
@@ -157,6 +153,6 @@ Route::prefix('admin')->name('admin')->group(function () {
     Route::get('/categories', [CategoryController::class, "index"])->name('categories.index');
     Route::post('/categories/insert', [CategoryController::class, 'store'])->name('categories.store');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
-    Route::post('/categories/update/{id}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::post('/categories/delete/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::put('/categories/update/{id}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/delete/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
