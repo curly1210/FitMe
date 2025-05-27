@@ -15,8 +15,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/users', [UserController::class, 'index']);
+Route::middleware('jwt.auth')->group(function () {
+    Route::middleware('role.admin')->group(function (){
+        Route::get('/users', [UserController::class, 'index']);
+    });
 });
 
 

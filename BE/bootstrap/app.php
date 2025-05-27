@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RoleAdmin;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'jwt.auth' => Authenticate::class, // Đăng ký middleware jwt.auth
+            'role.admin' => RoleAdmin::class, // Đăng ký middleware role.admin
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
