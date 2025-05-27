@@ -25,6 +25,7 @@ const ModalLogin = () => {
         setUser(response?.data?.data?.user);
         setAccessToken(response?.data?.data?.access_token);
         notify("success", "Đăng nhập", "Thành công");
+        localStorage.setItem("persist", JSON.stringify(true));
         navi("/");
         closePopup();
         // openPopup(<ModalLogin />);

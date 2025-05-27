@@ -21,14 +21,14 @@ function App() {
     <>
       <Refine dataProvider={dataProvider}>
         {/* <Refine dataProvider={dataProvider("http://127.0.0.1:8000/api")}> */}
-        <AuthProvider>
-          <AttachAxios />
-          <PopupProvider>
+        <PopupProvider>
+          <AuthProvider>
+            <AttachAxios />
             <ModalProvider>
               <Outlet />
             </ModalProvider>
-          </PopupProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </PopupProvider>
       </Refine>
     </>
   );

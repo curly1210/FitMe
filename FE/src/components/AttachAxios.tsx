@@ -18,13 +18,23 @@ const AttachAxios = () => {
 
     const reponseIntercept = axiosInstance.interceptors.response.use(
       (response) => response,
+
       async (error) => {
         const prevRequest = error?.config;
+        // console.log("cuong dep trai");
         if (error?.response?.status === 401 && !prevRequest?.sent) {
           prevRequest.sent = true;
-          const newAccessToken = await refreshToken();
-          prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-          return axiosInstance(prevRequest);
+
+          try {
+            const newAccessToken = await refreshToken();
+            if (newAccessToken) {
+              prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+              return axiosInstance(prevRequest);
+            }
+          } catch (error) {
+            console.error("Refresh token expired hoặc:", error);
+            return Promise.reject(error); // Không retry tiếp
+          }
         }
         return Promise.reject(error);
       }
