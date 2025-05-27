@@ -88,7 +88,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
               <Input />
             </Form.Item>
             <Form.Item label="Mã màu">
-              <ChromePicker color={color} onChange={(c) => setColor(c.hex)} />
+              <ChromePicker color={color} onChange={(c:any) => setColor(c.hex)} />
             </Form.Item>
           </>
         )}

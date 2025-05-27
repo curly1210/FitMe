@@ -1,5 +1,18 @@
 import React, { useState } from "react";
 import {
+  Button,
+  Card,
+  Drawer,
+  Dropdown,
+  Image,
+  Input,
+  Menu,
+  Modal,
+  Space,
+  Upload,
+  notification,
+} from "antd";
+import {
   MoreOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -10,328 +23,374 @@ import {
   useCreate,
   useDelete,
 } from "@refinedev/core";
-import {
-  Card,
-  Dropdown,
-  Button,
-  Menu,
-  Drawer,
-  Space,
-  Image,
-  Modal,
-  Input,
-  Upload,
-  message,
-} from "antd";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+type Mode = "add-category" | "edit-category" | "add-item" | "edit-item" | null;
+
 const Category: React.FC = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
-  const [mode, setMode] = useState<"add-category" | "edit-category" | "add-item" | "edit-item" | null>(null);
+  const [mode, setMode] = useState<Mode>(null);
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [parentCategory, setParentCategory] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [categoryName, setCategoryName] = useState("");
   const [itemName, setItemName] = useState("");
-  const [itemImage, setItemImage] = useState<string>("");
+  const [categoryImage, setCategoryImage] = useState<File | null>(null);
+  const [itemImage, setItemImage] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string>("");
 
-  const { data, isLoading, isError } = useList({ resource: "categories" });
+  const { data, refetch } = useList({ resource: "admin/categories" });
   const { mutate: updateCategory } = useUpdate();
   const { mutate: createCategory } = useCreate();
   const { mutate: deleteCategory } = useDelete();
 
   const getNow = () => dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
 
-  const showDrawer = (category?: any, item?: any, addItemToCategory?: any) => {
-    setOpenDrawer(true);
-
-    if (category && !item) {
+  const showDrawer = (category?: any, item?: any, parent?: any) => {
+    if (category) {
       setMode("edit-category");
       setEditingCategory(category);
       setCategoryName(category.name);
-      setEditingItem(null);
-      setParentCategory(null);
-    } else if (!category && item) {
+      setPreviewImage(category.image || "");
+      setCategoryImage(null); // reset
+    } else if (item) {
       setMode("edit-item");
       setEditingItem(item);
       setItemName(item.name);
-      setItemImage(item.image || "");
-      setParentCategory(null);
-      const parent = data?.data.find((cat: any) =>
-        cat.items.some((i: any) => i.id === item.id)
-      );
+      setPreviewImage(item.image || "");
       setParentCategory(parent);
-    } else if (addItemToCategory) {
+      setItemImage(null); // reset
+    } else if (parent) {
       setMode("add-item");
-      setParentCategory(addItemToCategory);
+      setParentCategory(parent);
       setItemName("");
-      setItemImage("");
-      setEditingCategory(null);
-      setEditingItem(null);
+      setPreviewImage("");
+      setItemImage(null);
     } else {
       setMode("add-category");
       setCategoryName("");
-      setEditingCategory(null);
-      setEditingItem(null);
-      setParentCategory(null);
-      setItemName("");
-      setItemImage("");
+      setPreviewImage("");
+      setCategoryImage(null);
     }
+    setOpenDrawer(true);
   };
 
   const onClose = () => {
     setOpenDrawer(false);
     setMode(null);
     setEditingCategory(null);
-    setEditingItem(null);
     setParentCategory(null);
+    setEditingItem(null);
     setCategoryName("");
     setItemName("");
-    setItemImage("");
+    setCategoryImage(null);
+    setItemImage(null);
+    setPreviewImage("");
   };
 
-  // ✅ Giả lập upload ảnh: chỉ console.log thông tin và tạo URL tạm
-  const handleImageUpload = async (options: any) => {
-    const { file, onSuccess } = options;
+  const handleBeforeUpload = (file: File) => {
+    const imageUrl = URL.createObjectURL(file);
+    setPreviewImage(imageUrl);
+    if (mode === "add-category" || mode === "edit-category") {
+      setCategoryImage(file);
+      notification.success({ message: "Ảnh danh mục đã được chọn." });
+    } else {
+      setItemImage(file);
+      notification.success({ message: "Ảnh mục con đã được chọn." });
+    }
+    return false;
+  };
 
-    const tempUrl = URL.createObjectURL(file);
-
-    console.log("📁 Thông tin ảnh được chọn:");
-    console.log("• Tên file:", file.name);
-    console.log("• Loại:", file.type);
-    console.log("• Kích thước:", (file.size / 1024).toFixed(2) + " KB");
-    console.log("• Sửa lần cuối:", new Date(file.lastModified).toLocaleString());
-    console.log("• Link tạm thời:", tempUrl);
-
-    setItemImage(tempUrl);
-    onSuccess("ok");
-    message.success("Ảnh đã chọn (hiển thị tạm)");
+  const handleDeletePreviewImage = () => {
+    setPreviewImage("");
+    if (mode === "add-category" || mode === "edit-category") {
+      setCategoryImage(null);
+    } else {
+      setItemImage(null);
+    }
+    notification.info({ message: "Ảnh preview đã bị xoá." });
   };
 
   const handleAddCategory = () => {
+    if (!categoryName.trim()) {
+      notification.warning({ message: "Vui lòng nhập tên danh mục!" });
+      return;
+    }
     const now = getNow();
-    const existingIds = data?.data.map((c: any) => Number(c.id)).filter((id) => !isNaN(id)) || [];
-    const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
+    const formData = new FormData();
+    formData.append("name", categoryName);
+    formData.append("created_at", now);
+    formData.append("updated_at", now);
+    if (categoryImage) formData.append("image", categoryImage);
+    formData.append("items", JSON.stringify([]));
 
-    const newCategory = {
-      id: (maxId + 1).toString(),
-      name: categoryName,
-      parent_id: null,
-      is_active: 1,
-      created_at: now,
-      updated_at: now,
-      deleted_at: null,
-      items: [],
-    };
-
-    createCategory({ resource: "categories", values: newCategory });
-    onClose();
+    createCategory(
+      {
+        resource: "admin/categories/insert",
+        values: formData,
+        meta: { headers: { "Content-Type": "multipart/form-data" } },
+      },
+      {
+        onSuccess: () => {
+          notification.success({ message: "Thêm danh mục thành công!" });
+          refetch();
+          onClose();
+        },
+        onError: () => {
+          notification.error({ message: "Thêm danh mục thất bại!" });
+        },
+      }
+    );
   };
 
   const handleAddItem = () => {
-    if (!parentCategory) return;
+    if (!itemName.trim()) {
+      notification.warning({ message: "Vui lòng nhập tên mục con!" });
+      return;
+    }
+    if (!itemImage) {
+      notification.warning({ message: "Vui lòng chọn ảnh mục con!" });
+      return;
+    }
     const now = getNow();
+    const newItemId = Date.now();
+    const newItem = { id: newItemId, name: itemName, image: "" };
+    const updatedItems = [...(parentCategory.items || []), newItem];
+    const formData = new FormData();
+    formData.append("name", parentCategory.name);
+    formData.append("updated_at", now);
+    formData.append("items", JSON.stringify(updatedItems));
+    formData.append("image", itemImage);
+    formData.append("new_item_id", newItemId.toString());
+    formData.append("parent_id", parentCategory.id);
 
-    const items = parentCategory.items || [];
-    const existingItemIds = items.map((item: any) => Number(item.id)).filter((id) => !isNaN(id));
-    const maxItemId = existingItemIds.length > 0 ? Math.max(...existingItemIds) : 0;
-
-    const newItem = {
-      id: maxItemId + 1,
-      name: itemName,
-      image: itemImage,
-    };
-
-    const updatedCategory = {
-      ...parentCategory,
-      items: [...items, newItem],
-      updated_at: now,
-    };
-
-    updateCategory({
-      resource: "categories",
-      id: parentCategory.id,
-      values: updatedCategory,
-    });
-    onClose();
+    createCategory(
+      {
+        resource: "admin/categories/insert",
+        values: formData,
+        meta: { headers: { "Content-Type": "multipart/form-data" } },
+      },
+      {
+        onSuccess: () => {
+          notification.success({ message: "Thêm mục con thành công!" });
+          refetch();
+          onClose();
+        },
+        onError: () => {
+          notification.error({ message: "Thêm mục con thất bại!" });
+        },
+      }
+    );
   };
 
   const handleSave = () => {
     const now = getNow();
+    if (mode === "add-category") return handleAddCategory();
+    if (mode === "add-item") return handleAddItem();
 
-    if (mode === "edit-category" && editingCategory) {
-      updateCategory({
-        resource: "categories",
-        id: editingCategory.id,
-        values: {
-          ...editingCategory,
-          name: categoryName,
-          updated_at: now,
+    if (mode === "edit-category") {
+      if (!categoryName.trim()) {
+        notification.warning({ message: "Vui lòng nhập tên danh mục!" });
+        return;
+      }
+      const formData = new FormData();
+      formData.append("name", categoryName);
+      formData.append("updated_at", now);
+      if (categoryImage) formData.append("image", categoryImage);
+      formData.append("items", JSON.stringify(editingCategory.items || []));
+      formData.append("_method", "PUT");
+
+      createCategory(
+        {
+          resource: `admin/categories/update/${editingCategory.id}`,
+          values: formData,
+          meta: { headers: { "Content-Type": "multipart/form-data" } },
         },
-      });
-      onClose();
-    } else if (mode === "edit-item" && editingItem && parentCategory) {
-      const updatedItems = parentCategory.items.map((item: any) =>
-        item.id === editingItem.id
-          ? { ...item, name: itemName, image: itemImage }
-          : item
+        {
+          onSuccess: () => {
+            notification.success({ message: "Cập nhật danh mục thành công!" });
+            refetch();
+            onClose();
+          },
+          onError: () => {
+            notification.error({ message: "Cập nhật danh mục thất bại!" });
+          },
+        }
       );
-      const updatedCategory = {
-        ...parentCategory,
-        items: updatedItems,
-        updated_at: now,
-      };
-      updateCategory({
-        resource: "categories",
-        id: parentCategory.id,
-        values: updatedCategory,
-      });
-      onClose();
-    } else if (mode === "add-category") {
-      handleAddCategory();
-    } else if (mode === "add-item") {
-      handleAddItem();
+    }
+
+    if (mode === "edit-item") {
+      if (!itemName.trim()) {
+        notification.warning({ message: "Vui lòng nhập tên mục con!" });
+        return;
+      }
+      const formData = new FormData();
+      formData.append("name", itemName);
+      formData.append("updated_at", now);
+      formData.append("parent_id", parentCategory.id);
+      formData.append("_method", "PUT");
+      if (itemImage) formData.append("image", itemImage);
+
+      createCategory(
+        {
+          resource: `admin/categories/update/${editingItem.id}`,
+          values: formData,
+          meta: { headers: { "Content-Type": "multipart/form-data" } },
+        },
+        {
+          onSuccess: () => {
+            notification.success({ message: "Cập nhật mục con thành công!" });
+            refetch();
+            onClose();
+          },
+          onError: () => {
+            notification.error({ message: "Cập nhật mục con thất bại!" });
+          },
+        }
+      );
     }
   };
 
-  const handleDelete = (categoryId: string) => {
+  const handleDelete = (id: number, items?: any[]) => {
+    if (items && items.length > 0) {
+      return notification.warning({ message: "Danh mục có mục con, không thể xoá!" });
+    }
+
     Modal.confirm({
-      title: "Bạn có chắc muốn xóa toàn bộ danh mục này cùng các danh mục con?",
+      title: "Bạn có chắc muốn xóa danh mục này?",
       onOk: () => {
-        deleteCategory({ resource: "categories", id: categoryId });
+        deleteCategory(
+          {
+            resource: "admin/categories/delete",
+            id,
+            meta: { method: "delete" },
+          },
+          {
+            onSuccess: () => {
+              notification.success({ message: "Xoá thành công!" });
+              refetch();
+            },
+            onError: () => {
+              notification.error({ message: "Xoá thất bại!" });
+            },
+          }
+        );
       },
     });
   };
 
-  if (isLoading) return <div>...Loading</div>;
-  if (isError) return <div>Error loading data</div>;
+  const categoryList = data?.data?.categories;
 
   return (
     <div className="p-4 bg-white min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Quản lý danh mục sản phẩm</h1>
-
       <div className="flex gap-4 items-start overflow-x-auto">
-        {data?.data.map((category: any) => (
-          <Card
-            key={category.id}
-            title={<span className="font-semibold text-base">{category.name}</span>}
-            className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
-            extra={
-              <Dropdown
-                overlay={
-                  <Menu>
-                    <Menu.Item onClick={() => showDrawer(category)}>Sửa</Menu.Item>
-                    <Menu.Item onClick={() => handleDelete(category.id)}>Xoá</Menu.Item>
-                  </Menu>
-                }
-              >
-                <MoreOutlined className="text-gray-500 cursor-pointer" />
-              </Dropdown>
-            }
-          >
-            <div className="p-3 flex flex-col gap-3">
-              {Array.isArray(category.items) && category.items.length > 0 ? (
-                category.items.map((item: any) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      {item.image && (
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          width={30}
-                          height={30}
-                          style={{ objectFit: "cover", borderRadius: 6 }}
-                          preview={false}
-                        />
-                      )}
-                      <span className="font-medium">{item.name}</span>
-                    </div>
-                    <Dropdown
-                      overlay={
-                        <Menu>
-                          <Menu.Item
-                            onClick={() => {
-                              setParentCategory(category);
-                              showDrawer(undefined, item);
-                            }}
-                          >
-                            Sửa
-                          </Menu.Item>
-                          <Menu.Item
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Bạn có chắc muốn xóa danh mục con này?",
-                                onOk: () => {
-                                  const updatedItems = category.items.filter(
-                                    (i: any) => i.id !== item.id
-                                  );
-                                  const now = getNow();
-                                  const updatedCategory = {
-                                    ...category,
-                                    items: updatedItems,
-                                    updated_at: now,
-                                  };
-                                  updateCategory({
-                                    resource: "categories",
-                                    id: category.id,
-                                    values: updatedCategory,
-                                  });
-                                },
-                              });
-                            }}
-                          >
-                            Xóa
-                          </Menu.Item>
-                        </Menu>
-                      }
+        {Array.isArray(categoryList) && categoryList.length > 0 ? (
+          categoryList.map((category: any) => (
+            <Card
+              key={category.id}
+              title={<span className="font-semibold text-base">{category.name}</span>}
+              className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
+              extra={
+                <Dropdown
+                  overlay={
+                    <Menu>
+                      <Menu.Item onClick={() => showDrawer(category)}>Sửa</Menu.Item>
+                      <Menu.Item onClick={() => handleDelete(category.id, category.items)}>Xóa</Menu.Item>
+                    </Menu>
+                  }
+                >
+                  <MoreOutlined className="text-gray-500 cursor-pointer" />
+                </Dropdown>
+              }
+            >
+              <div className="p-3 flex flex-col gap-3">
+                {Array.isArray(category.items) && category.items.length > 0 ? (
+                  category.items.map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm"
                     >
-                      <MoreOutlined className="text-gray-500 cursor-pointer" />
-                    </Dropdown>
-                  </div>
-                ))
-              ) : (
-                <div className="text-gray-500">Không có danh mục con</div>
-              )}
-
-              <Button
-                icon={<PlusOutlined />}
-                onClick={() => showDrawer(undefined, undefined, category)}
-                className="rounded-lg border border-blue-500"
-                style={{
-                  backgroundColor: "#f5f6f8",
-                  color: "#22689B",
-                  fontWeight: 500,
-                  width: "100%",
-                }}
-              >
-                + Thêm danh mục con
-              </Button>
-            </div>
-          </Card>
-        ))}
-
-        <Card
-          className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
-          bodyStyle={{ padding: 12 }}
-        >
+                      <div className="flex items-center gap-2">
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            width={30}
+                            height={30}
+                            style={{ objectFit: "cover", borderRadius: 6 }}
+                            preview={false}
+                          />
+                        )}
+                        <span className="font-medium">{item.name}</span>
+                      </div>
+                      <Dropdown
+                        overlay={
+                          <Menu>
+                            <Menu.Item onClick={() => showDrawer(undefined, item, category)}>
+                              Sửa
+                            </Menu.Item>
+                            <Menu.Item
+                              onClick={() => {
+                                Modal.confirm({
+                                  title: "Bạn có chắc muốn xóa mục con này?",
+                                  onOk: () => {
+                                    deleteCategory(
+                                      {
+                                        resource: "admin/categories/delete",
+                                        id: item.id,
+                                      },
+                                      {
+                                        onSuccess: () => {
+                                          notification.success({ message: "Xoá mục con thành công!" });
+                                          refetch();
+                                        },
+                                        onError: () => {
+                                          notification.error({ message: "Xoá mục con thất bại!" });
+                                        },
+                                      }
+                                    );
+                                  },
+                                });
+                              }}
+                            >
+                              Xóa
+                            </Menu.Item>
+                          </Menu>
+                        }
+                      >
+                        <MoreOutlined className="text-gray-500 cursor-pointer" />
+                      </Dropdown>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500">Không có danh mục con</div>
+                )}
+                <Button
+                  icon={<PlusOutlined />}
+                  onClick={() => showDrawer(undefined, undefined, category)}
+                  className="rounded-lg border border-blue-500"
+                  style={{ backgroundColor: "#f5f6f8", color: "#22689B", fontWeight: 500 }}
+                >
+                  + Thêm danh mục con
+                </Button>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <div className="text-gray-500">Không có danh mục</div>
+        )}
+        <Card className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0" bodyStyle={{ padding: 12 }}>
           <Button
             icon={<PlusOutlined />}
             onClick={() => showDrawer()}
             className="rounded-lg border border-blue-500"
-            style={{
-              backgroundColor: "#f5f6f8",
-              color: "#22689B",
-              fontWeight: 500,
-              width: "100%",
-            }}
+            style={{ backgroundColor: "#f5f6f8", color: "#22689B", fontWeight: 500, width: "100%" }}
           >
             + Thêm danh mục
           </Button>
@@ -361,22 +420,25 @@ const Category: React.FC = () => {
                 style={{ backgroundColor: "#22689B" }}
                 onClick={handleSave}
               >
-                {mode === "add-category" || mode === "add-item"
-                  ? "Thêm mới"
-                  : "Lưu thay đổi"}
+                {mode === "add-category" || mode === "add-item" ? "Thêm mới" : "Lưu thay đổi"}
               </Button>
             </Space>
           </div>
         }
       >
         {(mode === "add-category" || mode === "edit-category") && (
-          <Input
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-            placeholder="Nhập tên danh mục"
-          />
+          <>
+            <Input
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="Nhập tên danh mục"
+              style={{ marginBottom: 12 }}
+            />
+            <Upload beforeUpload={handleBeforeUpload} listType="picture" maxCount={1} showUploadList={false}>
+              <Button icon={<UploadOutlined />}>Chọn ảnh danh mục</Button>
+            </Upload>
+          </>
         )}
-
         {(mode === "add-item" || mode === "edit-item") && (
           <>
             <Input
@@ -385,35 +447,16 @@ const Category: React.FC = () => {
               placeholder="Nhập tên mục con"
               style={{ marginBottom: 12 }}
             />
-
-            <Upload
-              customRequest={handleImageUpload}
-              listType="picture"
-              maxCount={1}
-              showUploadList={false}
-            >
+            <Upload beforeUpload={handleBeforeUpload} listType="picture" maxCount={1} showUploadList={false}>
               <Button icon={<UploadOutlined />}>Chọn ảnh mục con</Button>
             </Upload>
-
-            {itemImage && (
-              <div style={{ marginTop: 12 }}>
-                <Image
-                  src={itemImage}
-                  alt="Ảnh mục con"
-                  style={{ maxHeight: 150, borderRadius: 6 }}
-                  preview
-                />
-                <Button
-                  danger
-                  size="small"
-                  style={{ marginTop: 8 }}
-                  onClick={() => setItemImage("")}
-                >
-                  Xoá ảnh
-                </Button>
-              </div>
-            )}
           </>
+        )}
+        {previewImage && (
+          <div style={{ marginTop: 12 }}>
+            <Image src={previewImage} alt="Ảnh preview" style={{ maxHeight: 150, borderRadius: 6 }} preview />
+            <Button danger size="small" style={{ marginTop: 8 }} onClick={handleDeletePreviewImage}>Xoá ảnh</Button>
+          </div>
         )}
       </Drawer>
     </div>
