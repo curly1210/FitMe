@@ -121,6 +121,10 @@ const Category: React.FC = () => {
       notification.warning({ message: "Vui lòng nhập tên danh mục!" });
       return;
     }
+    if (!categoryImage) {
+      notification.warning({ message: "Vui lòng nhập ảnh danh mục!" });
+      return;
+    }
     const now = getNow();
     const formData = new FormData();
     formData.append("name", categoryName);
@@ -203,7 +207,7 @@ const Category: React.FC = () => {
       formData.append("updated_at", now);
       if (categoryImage) formData.append("image", categoryImage);
       formData.append("items", JSON.stringify(editingCategory.items || []));
-      formData.append("_method", "PUT");
+      formData.append("_method", "PATCH");
 
       createCategory(
         {
@@ -233,7 +237,7 @@ const Category: React.FC = () => {
       formData.append("name", itemName);
       formData.append("updated_at", now);
       formData.append("parent_id", parentCategory.id);
-      formData.append("_method", "PUT");
+      formData.append("_method", "PATCH");
       if (itemImage) formData.append("image", itemImage);
 
       createCategory(
@@ -295,7 +299,7 @@ const Category: React.FC = () => {
             <Card
               key={category.id}
               title={<span className="font-semibold text-base">{category.name}</span>}
-              className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
+              className="w-64 rounded-2xl border border-gray-100 !bg-gray-100"
               extra={
                 <Dropdown
                   overlay={
@@ -313,9 +317,10 @@ const Category: React.FC = () => {
                 {Array.isArray(category.items) && category.items.length > 0 ? (
                   category.items.map((item: any) => (
                     <div
-                      key={item.id}
-                      className="flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm"
-                    >
+  key={item.id}
+  className="flex items-center justify-between px-5 py-3 rounded-xl border border-gray-200 bg-white shadow-sm w-full"
+  style={{ minWidth: 200 }}
+>
                       <div className="flex items-center gap-2">
                         {item.image && (
                           <Image
@@ -377,7 +382,7 @@ const Category: React.FC = () => {
                   className="rounded-lg border border-blue-500"
                   style={{ backgroundColor: "#f5f6f8", color: "#22689B", fontWeight: 500 }}
                 >
-                  + Thêm danh mục con
+                  Thêm danh mục con
                 </Button>
               </div>
             </Card>
@@ -392,7 +397,7 @@ const Category: React.FC = () => {
             className="rounded-lg border border-blue-500"
             style={{ backgroundColor: "#f5f6f8", color: "#22689B", fontWeight: 500, width: "100%" }}
           >
-            + Thêm danh mục
+            Thêm danh mục
           </Button>
         </Card>
       </div>
@@ -417,7 +422,7 @@ const Category: React.FC = () => {
               <Button
                 icon={<PlusOutlined />}
                 className="text-white"
-                style={{ backgroundColor: "#22689B" }}
+                style={{ backgroundColor: "#22689B", color:"white" }}
                 onClick={handleSave}
               >
                 {mode === "add-category" || mode === "add-item" ? "Thêm mới" : "Lưu thay đổi"}
@@ -453,10 +458,35 @@ const Category: React.FC = () => {
           </>
         )}
         {previewImage && (
-          <div style={{ marginTop: 12 }}>
-            <Image src={previewImage} alt="Ảnh preview" style={{ maxHeight: 150, borderRadius: 6 }} preview />
-            <Button danger size="small" style={{ marginTop: 8 }} onClick={handleDeletePreviewImage}>Xoá ảnh</Button>
-          </div>
+         <div style={{ position: "relative", display: "inline-block", marginTop: 12 }}>
+  <Image
+    src={previewImage}
+    alt="Ảnh preview"
+    style={{ maxHeight: 150, borderRadius: 6 }}
+    preview
+  />
+  <Button
+    shape="circle"
+    size="small"
+    danger
+    onClick={handleDeletePreviewImage}
+    style={{
+      position: "absolute",
+      top: 6,
+      right: 6,
+      zIndex: 10,
+      padding: 0,
+      width: 24,
+      height: 24,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    ×
+  </Button>
+</div>
+
         )}
       </Drawer>
     </div>
