@@ -2,11 +2,15 @@
 
 namespace App\Http\Resources\Admin;
 
+use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
+use App\Traits\CloudinaryTrait;
+use Cloudinary\Api\Upload\UploadApi;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class CategoryResource extends ResourceCollection
 {
+    use CloudinaryTrait;
     protected $childCategories;
 
     public function __construct($resource, $childCategories)
@@ -17,6 +21,7 @@ class CategoryResource extends ResourceCollection
 
     public function toArray(Request $request): array
     {
+
         return [
             'categories' => $this->collection->map(function ($parent) {
                 $children = $this->childCategories->where('parent_id', $parent->id)->values();
@@ -30,10 +35,11 @@ class CategoryResource extends ResourceCollection
                     'updated_at' => $parent->updated_at == null ? $parent->updated_at : $parent->updated_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s'),
                     'deleted_at' => $parent->deleted_at == null ? $parent->deleted_at : $parent->deleted_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s'),
                     'items' => $children->map(function ($item) {
+
                         return [
                             'id' => $item->id,
                             'name' => $item->name,
-                            'image' => $item->image,
+                            'image' => $this->buildImageUrl($item->image),
                         ];
                     }),
                 ];

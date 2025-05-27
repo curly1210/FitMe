@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-
 use App\Models\Category;
 use Cloudinary\Cloudinary;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Traits\CloudinaryTrait;
 use App\Http\Controllers\Controller;
+use Cloudinary\Api\Upload\UploadApi;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Admin\CategoryResource;
 
 class CategoryController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, CloudinaryTrait;
     /**
      * Display a listing of the resource.
      */
@@ -58,22 +59,25 @@ class CategoryController extends Controller
         if ($validator->fails() || !$request->hasFile('image')) {
             return $this->error('Dữ liệu không hợp lệ', $validator->errors(), 422);
         } else {
-            $cloudinary = new Cloudinary();
-            $uploadedFileUrl = $cloudinary->uploadApi()->upload(
-                $request->image->getRealPath(),
-                ['folder' => 'my-uploads']
+
+            $uploadedFileUrl = $this->uploadImageToCloudinary(
+                $request->file('image'),
+                ['quality' => 65, 'folder' => 'uploads-category']
             );
+
             $category = Category::create([
                 'name' => $request->name,
-                'parent_id' => $request->parent_id,
-                'image' => $uploadedFileUrl['secure_url'],
+                'parent_id' => ($request->parent_id === null || $request->parent_id === 'null')
+                    ? null
+                    : (int)$request->parent_id,
+                'image' => $uploadedFileUrl['public_id'],
             ]);
             $data = response()->json([
                 'id' => $category->id,
 
                 'name' => $category->name,
                 'parent_id' => $category->parent_id,
-                'image' => $category->image,
+                'image' => $this->buildImageUrl($category->image),
             ]);
 
             return $this->success($data, "Thêm danh mục thành công", 201);
@@ -110,7 +114,13 @@ class CategoryController extends Controller
         if ($category == null) {
             return $this->error('Danh mục không tồn tại', [], 404);
         } else {
-            return response()->json($category, 200);
+            $cloudinary = new Cloudinary();
+            return response()->json([
+                "id" => $category->id,
+                "name" => $category->name,
+                "parent_id" => $category->parent_id,
+                "image" => $cloudinary->adminApi()->asset($category->image)['secure_url'],
+            ], 200);
         }
     }
 
@@ -123,11 +133,11 @@ class CategoryController extends Controller
             return $this->error('Danh mục không tồn tại', [], 404);
         } else {
             $validator = Validator::make(
-                $request->only(['name', 'parent_id', 'image']),
+                $request->only(['name', 'image']),
                 [
                     'name' => 'required|string|max:255',
 
-                    'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                    'image' => 'image|mimes:jpeg,png,jpg|max:2048',
                 ],
                 [
 
@@ -138,7 +148,7 @@ class CategoryController extends Controller
                     'image.image' => 'File upload phải là một tệp hình ảnh',
                     'image.mimes' => 'File upload chỉ nhận định dạng jpeg, png hoặc jpg',
                     'image.max' => 'Ảnh không được vượt quá 2MB',
-                    'image.required' => "Bạn chưa chọn ảnh"
+
                 ]
             );
             if ($validator->fails()) {
@@ -146,25 +156,29 @@ class CategoryController extends Controller
             } else {
 
                 if ($request->hasFile('image')) {
-                    $cloudinary = new Cloudinary();
-                    if ($category->image) {
+
+                    if ($category->image != null) {
                         // Xóa ảnh cũ nếu có
-                        $cloudinary->uploadApi()->destroy($category->image);
+                        $this->deleteImageFromCloudinary($category->image);
                     }
-                    $uploadedFileUrl = $cloudinary->uploadApi()->upload(
-                        $request->image->getRealPath(),
-                        ['folder' => 'my-uploads']
+                    $uploadedFileUrl = $this->uploadImageToCloudinary(
+                        $request->file('image'),
+                        ['quality' => 65, 'folder' => 'uploads-category']
                     );
                 } else {
-                    $uploadedFileUrl = ['secure_url' => $category->image]; // Giữ nguyên ảnh cũ nếu không có ảnh mới
+                    $uploadedFileUrl = ['public_id' => $category->image]; // Giữ nguyên ảnh cũ nếu không có ảnh mới
                 }
 
                 $category->update([
                     'name' => $request->name,
-                    'parent_id' => $request->parent_id,
-                    'image' => $uploadedFileUrl['secure_url'],
+                    'image' => $uploadedFileUrl['public_id'],
                 ]);
-                return $this->success($category, "Cập nhật danh mục thành công", 200);
+                $data = [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'image' => $this->buildImageUrl($category->image),
+                ];
+                return $this->success($data, "Cập nhật danh mục thành công", 200);
             }
         }
     }
@@ -174,39 +188,27 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = Category::find($id);
-        // return response()->json($category);
-        if ($category == null) {
+
+        $category = Category::withCount('products')->find($id);
+
+        if (!$category) {
             return $this->error('Danh mục không tồn tại', [], 404);
-        } else {
-            if ($category->products()->count() > 0) {
-                return $this->error('Không thể xóa vì danh mục đang chứa sản phẩm', [], 400);
-            } else {
-                // Kiểm tra xem danh mục có phải là danh mục cha không
-                if ($category->parent_id == null) {
-                    $subcategories = Category::where('parent_id', $id)->get();
-                    # Nếu danh mục cha không có danh mục con thì cho xóa
-                    if (!$subcategories->isEmpty()) {
-                        return $this->error(['Không thể xóa danh mục cha vì đang chứa danh mục con '], "Xóa danh mục thất bại", 403); #403 Forbidden Hành động vị phạm luật
-                    } else {
-                        // Xóa ảnh nếu có
-                        if ($category->image) {
-                            $cloudinary = new Cloudinary();
-                            $cloudinary->uploadApi()->destroy($category->image);
-                        }
-                        $category->delete();
-                        return $this->success([], "Xóa danh mục thành công", 200);
-                    }
-                } else {
-                    // Xóa ảnh nếu có
-                    if ($category->image) {
-                        $cloudinary = new Cloudinary();
-                        $cloudinary->uploadApi()->destroy($category->image);
-                    }
-                    $category->delete();
-                    return $this->success([], "Xóa danh mục thành công", 200);
-                }
-            }
         }
+
+        // Nếu có sản phẩm thì không cho xóa
+        if ($category->products_count > 0) {
+            return $this->error('Không thể xóa vì danh mục đang chứa sản phẩm', [], 403);
+        }
+        $hasSubCategory = Category::where('parent_id', $id)->exists();
+        // Nếu là danh mục cha và có danh mục con thì không cho xóa
+        if (is_null($category->parent_id) && $hasSubCategory == true) {
+            return $this->error(['Không thể xóa danh mục cha vì đang chứa danh mục con'], "Xóa danh mục thất bại", 403);
+        }
+
+        // Xóa ảnh nếu có
+        $this->deleteImageFromCloudinary($category->image);
+
+        $category->delete();
+        return $this->success([], "Xóa danh mục thành công", 200);
     }
 }
