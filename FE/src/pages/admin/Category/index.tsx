@@ -149,16 +149,18 @@ const Category: React.FC = () => {
       notification.warning({ message: "Vui lòng nhập tên mục con!" });
       return;
     }
+     console.log("Tên mục con: ", itemName);
     if (!itemImage) {
       notification.warning({ message: "Vui lòng chọn ảnh mục con!" });
       return;
     }
+    
     const now = getNow();
     const newItemId = Date.now();
     const newItem = { id: newItemId, name: itemName, image: "" };
     const updatedItems = [...(parentCategory.items || []), newItem];
     const formData = new FormData();
-    formData.append("name", parentCategory.name);
+    formData.append("name", itemName);
     formData.append("updated_at", now);
     formData.append("items", JSON.stringify(updatedItems));
     formData.append("image", itemImage);
