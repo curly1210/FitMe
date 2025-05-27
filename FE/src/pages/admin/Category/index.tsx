@@ -9,6 +9,7 @@ import {
   Menu,
   Modal,
   Space,
+  Spin,
   Upload,
   notification,
 } from "antd";
@@ -37,7 +38,7 @@ const Category: React.FC = () => {
 
   const { data, refetch } = useList({ resource: "admin/categories" });
   const { mutate: updateCategory } = useUpdate();
-  const { mutate: createCategory } = useCreate();
+  const { mutate: createCategory, isLoading } = useCreate();
   const { mutate: deleteCategory } = useDelete();
 
   const getNow = () =>
@@ -149,12 +150,12 @@ const Category: React.FC = () => {
       notification.warning({ message: "Vui lòng nhập tên mục con!" });
       return;
     }
-     console.log("Tên mục con: ", itemName);
+    console.log("Tên mục con: ", itemName);
     if (!itemImage) {
       notification.warning({ message: "Vui lòng chọn ảnh mục con!" });
       return;
     }
-    
+
     const now = getNow();
     const newItemId = Date.now();
     const newItem = { id: newItemId, name: itemName, image: "" };
@@ -435,8 +436,8 @@ const Category: React.FC = () => {
           </Button>
         </Card>
       </div>
-
       <Drawer
+        className="relative"
         title={
           mode === "edit-category"
             ? `Sửa ${editingCategory?.name}`
@@ -467,6 +468,16 @@ const Category: React.FC = () => {
           </div>
         }
       >
+        {isLoading ? (
+          <Spin
+            className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+            style={{ textAlign: "center" }}
+            size="large"
+          />
+        ) : (
+          ""
+        )}
+
         {(mode === "add-category" || mode === "edit-category") && (
           <>
             <Input
