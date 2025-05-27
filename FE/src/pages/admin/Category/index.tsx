@@ -12,17 +12,8 @@ import {
   Upload,
   notification,
 } from "antd";
-import {
-  MoreOutlined,
-  PlusOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
-import {
-  useList,
-  useUpdate,
-  useCreate,
-  useDelete,
-} from "@refinedev/core";
+import { MoreOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { useList, useUpdate, useCreate, useDelete } from "@refinedev/core";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -49,7 +40,8 @@ const Category: React.FC = () => {
   const { mutate: createCategory } = useCreate();
   const { mutate: deleteCategory } = useDelete();
 
-  const getNow = () => dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
+  const getNow = () =>
+    dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
 
   const showDrawer = (category?: any, item?: any, parent?: any) => {
     if (category) {
@@ -101,20 +93,20 @@ const Category: React.FC = () => {
       notification.success({ message: "Ảnh danh mục đã được chọn." });
     } else {
       setItemImage(file);
-      notification.success({ message: "Ảnh mục con đã được chọn." });
+      notification.success({ message: "Ảnh danh mục đã được chọn." });
     }
     return false;
   };
 
-  const handleDeletePreviewImage = () => {
-    setPreviewImage("");
-    if (mode === "add-category" || mode === "edit-category") {
-      setCategoryImage(null);
-    } else {
-      setItemImage(null);
-    }
-    notification.info({ message: "Ảnh preview đã bị xoá." });
-  };
+  // const handleDeletePreviewImage = () => {
+  //   setPreviewImage("");
+  //   if (mode === "add-category" || mode === "edit-category") {
+  //     setCategoryImage(null);
+  //   } else {
+  //     setItemImage(null);
+  //   }
+  //   notification.info({ message: "Ảnh preview đã bị xoá." });
+  // };
 
   const handleAddCategory = () => {
     if (!categoryName.trim()) {
@@ -230,7 +222,7 @@ const Category: React.FC = () => {
 
     if (mode === "edit-item") {
       if (!itemName.trim()) {
-        notification.warning({ message: "Vui lòng nhập tên mục con!" });
+        notification.warning({ message: "Vui lòng nhập tên danh mục con!" });
         return;
       }
       const formData = new FormData();
@@ -248,12 +240,14 @@ const Category: React.FC = () => {
         },
         {
           onSuccess: () => {
-            notification.success({ message: "Cập nhật mục con thành công!" });
+            notification.success({
+              message: "Cập nhật danh mục con thành công!",
+            });
             refetch();
             onClose();
           },
           onError: () => {
-            notification.error({ message: "Cập nhật mục con thất bại!" });
+            notification.error({ message: "Cập nhật danh mục con thất bại!" });
           },
         }
       );
@@ -262,7 +256,9 @@ const Category: React.FC = () => {
 
   const handleDelete = (id: number, items?: any[]) => {
     if (items && items.length > 0) {
-      return notification.warning({ message: "Danh mục có mục con, không thể xoá!" });
+      return notification.warning({
+        message: "Danh mục có danh mục con, không thể xoá!",
+      });
     }
 
     Modal.confirm({
@@ -291,21 +287,32 @@ const Category: React.FC = () => {
   const categoryList = data?.data?.categories;
 
   return (
-    <div className="p-4 bg-white min-h-screen">
+    <div className="p-2 bg-white min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Quản lý danh mục sản phẩm</h1>
       <div className="flex gap-4 items-start overflow-x-auto">
         {Array.isArray(categoryList) && categoryList.length > 0 ? (
           categoryList.map((category: any) => (
             <Card
               key={category.id}
-              title={<span className="font-semibold text-base">{category.name}</span>}
-              className="w-64 rounded-2xl border border-gray-100 !bg-gray-100"
+              title={
+                <span className="font-semibold text-base">{category.name}</span>
+              }
+              bodyStyle={{ padding: 12 }}
+              className="w-90  rounded-2xl border border-gray-100 !bg-gray-100 shadow-sm flex-shrink-0"
               extra={
                 <Dropdown
                   overlay={
                     <Menu>
-                      <Menu.Item onClick={() => showDrawer(category)}>Sửa</Menu.Item>
-                      <Menu.Item onClick={() => handleDelete(category.id, category.items)}>Xóa</Menu.Item>
+                      <Menu.Item onClick={() => showDrawer(category)}>
+                        Sửa
+                      </Menu.Item>
+                      <Menu.Item
+                        onClick={() =>
+                          handleDelete(category.id, category.items)
+                        }
+                      >
+                        Xóa
+                      </Menu.Item>
                     </Menu>
                   }
                 >
@@ -313,15 +320,15 @@ const Category: React.FC = () => {
                 </Dropdown>
               }
             >
-              <div className="p-3 flex flex-col gap-3">
+              <div className=" flex flex-col gap-3">
                 {Array.isArray(category.items) && category.items.length > 0 ? (
                   category.items.map((item: any) => (
                     <div
-  key={item.id}
-  className="flex items-center justify-between px-5 py-3 rounded-xl border border-gray-200 bg-white shadow-sm w-full"
-  style={{ minWidth: 200 }}
->
-                      <div className="flex items-center gap-2">
+                      key={item.id}
+                      className="flex items-center justify-between px-5 py-3 rounded-xl border border-gray-200 bg-white shadow-sm w-full"
+                      style={{ minWidth: 200 }}
+                    >
+                      <div className="flex items-center gap-3">
                         {item.image && (
                           <Image
                             src={item.image}
@@ -337,13 +344,18 @@ const Category: React.FC = () => {
                       <Dropdown
                         overlay={
                           <Menu>
-                            <Menu.Item onClick={() => showDrawer(undefined, item, category)}>
+                            <Menu.Item
+                              onClick={() =>
+                                showDrawer(undefined, item, category)
+                              }
+                            >
                               Sửa
                             </Menu.Item>
                             <Menu.Item
                               onClick={() => {
                                 Modal.confirm({
-                                  title: "Bạn có chắc muốn xóa mục con này?",
+                                  title:
+                                    "Bạn có chắc muốn xóa danh mục con này?",
                                   onOk: () => {
                                     deleteCategory(
                                       {
@@ -352,11 +364,17 @@ const Category: React.FC = () => {
                                       },
                                       {
                                         onSuccess: () => {
-                                          notification.success({ message: "Xoá mục con thành công!" });
+                                          notification.success({
+                                            message:
+                                              "Xoá danh mục con thành công!",
+                                          });
                                           refetch();
                                         },
                                         onError: () => {
-                                          notification.error({ message: "Xoá mục con thất bại!" });
+                                          notification.error({
+                                            message:
+                                              "Xoá danh mục con thất bại!",
+                                          });
                                         },
                                       }
                                     );
@@ -374,15 +392,21 @@ const Category: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-gray-500">Không có danh mục con</div>
+                  <div className="ml-3 text-gray-500">
+                    Không có danh mục con
+                  </div>
                 )}
                 <Button
                   icon={<PlusOutlined />}
                   onClick={() => showDrawer(undefined, undefined, category)}
                   className="rounded-lg border border-blue-500"
-                  style={{ backgroundColor: "#f5f6f8", color: "#22689B", fontWeight: 500 }}
+                  style={{
+                    backgroundColor: "#f5f6f8",
+                    color: "#22689B",
+                    fontWeight: 500,
+                  }}
                 >
-                  Thêm danh mục con
+                  <p className="text-left"> Thêm danh mục con</p>
                 </Button>
               </div>
             </Card>
@@ -390,12 +414,20 @@ const Category: React.FC = () => {
         ) : (
           <div className="text-gray-500">Không có danh mục</div>
         )}
-        <Card className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0" bodyStyle={{ padding: 12 }}>
+        <Card
+          className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
+          bodyStyle={{ padding: 10 }}
+        >
           <Button
             icon={<PlusOutlined />}
             onClick={() => showDrawer()}
             className="rounded-lg border border-blue-500"
-            style={{ backgroundColor: "#f5f6f8", color: "#22689B", fontWeight: 500, width: "100%" }}
+            style={{
+              backgroundColor: "#f5f6f8",
+              color: "#22689B",
+              fontWeight: 500,
+              width: "100%",
+            }}
           >
             Thêm danh mục
           </Button>
@@ -422,10 +454,12 @@ const Category: React.FC = () => {
               <Button
                 icon={<PlusOutlined />}
                 className="text-white"
-                style={{ backgroundColor: "#22689B", color:"white" }}
+                style={{ backgroundColor: "#22689B", color: "white" }}
                 onClick={handleSave}
               >
-                {mode === "add-category" || mode === "add-item" ? "Thêm mới" : "Lưu thay đổi"}
+                {mode === "add-category" || mode === "add-item"
+                  ? "Thêm mới"
+                  : "Lưu thay đổi"}
               </Button>
             </Space>
           </div>
@@ -439,7 +473,12 @@ const Category: React.FC = () => {
               placeholder="Nhập tên danh mục"
               style={{ marginBottom: 12 }}
             />
-            <Upload beforeUpload={handleBeforeUpload} listType="picture" maxCount={1} showUploadList={false}>
+            <Upload
+              beforeUpload={handleBeforeUpload}
+              listType="picture"
+              maxCount={1}
+              showUploadList={false}
+            >
               <Button icon={<UploadOutlined />}>Chọn ảnh danh mục</Button>
             </Upload>
           </>
@@ -449,44 +488,28 @@ const Category: React.FC = () => {
             <Input
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              placeholder="Nhập tên mục con"
+              placeholder="Nhập tên danh mục con"
               style={{ marginBottom: 12 }}
             />
-            <Upload beforeUpload={handleBeforeUpload} listType="picture" maxCount={1} showUploadList={false}>
-              <Button icon={<UploadOutlined />}>Chọn ảnh mục con</Button>
+            <Upload
+              beforeUpload={handleBeforeUpload}
+              listType="picture"
+              maxCount={1}
+              showUploadList={false}
+            >
+              <Button icon={<UploadOutlined />}>Chọn ảnh danh mục con</Button>
             </Upload>
           </>
         )}
         {previewImage && (
-         <div style={{ position: "relative", display: "inline-block", marginTop: 12 }}>
-  <Image
-    src={previewImage}
-    alt="Ảnh preview"
-    style={{ maxHeight: 150, borderRadius: 6 }}
-    preview
-  />
-  <Button
-    shape="circle"
-    size="small"
-    danger
-    onClick={handleDeletePreviewImage}
-    style={{
-      position: "absolute",
-      top: 6,
-      right: 6,
-      zIndex: 10,
-      padding: 0,
-      width: 24,
-      height: 24,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
-  >
-    ×
-  </Button>
-</div>
-
+          <div className="mt-4 mb-2 ">
+            <Image
+              src={previewImage}
+              alt="Ảnh preview"
+              style={{ maxHeight: 150, borderRadius: 6 }}
+              preview
+            />
+          </div>
         )}
       </Drawer>
     </div>
