@@ -1,13 +1,13 @@
 <?php
 
 
-use App\Http\Controllers\api\UserController;
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\VariationController;
+use App\Http\Controllers\Api\Admin\VariationController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -45,7 +45,12 @@ Route::prefix('admin')->group(function () {
     Route::get('/variations/size/trashed', [VariationController::class, 'trashedSize']);
 });
 
+Route::prefix('admin')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::patch('/users/lock/{id}', [UserController::class, 'lock']);
 
+});
 
 
 

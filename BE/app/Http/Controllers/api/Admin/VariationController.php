@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Models\Size;
 use App\Models\Color;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\SizeResource;
-use App\Http\Resources\ColorResource;
+use App\Http\Resources\Admin\SizeResource;
+use App\Http\Resources\Admin\ColorResource;
 use Illuminate\Support\Facades\Validator;
 
 class VariationController extends Controller
