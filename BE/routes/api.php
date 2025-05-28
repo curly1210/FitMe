@@ -2,12 +2,11 @@
 
 
 use App\Http\Controllers\api\UserController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\VariationController;
-
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -16,7 +15,7 @@ Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::middleware('jwt.auth')->group(function () {
-    Route::middleware('role.admin')->group(function (){
+    Route::middleware('role.admin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
     });
 });
