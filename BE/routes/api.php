@@ -48,7 +48,7 @@ Route::prefix('admin')->group(function () {
 Route::prefix('admin')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::post('/users/lock/{id}', [UserController::class, 'lock']);
+    Route::patch('/users/lock/{id}', [UserController::class, 'lock']);
 
 });
 

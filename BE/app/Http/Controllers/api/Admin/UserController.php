@@ -33,30 +33,30 @@ class UserController extends Controller
     // Xem chi tiết người dùng + đơn hàng
     public function show($id)
     {
-      $user = User::with('orders')->findOrFail($id);
+        $user = User::with('orders')->findOrFail($id);
 
-    return new UserResource($user);
+        return new UserResource($user);
     }
 
 
     // Cập nhật thông tin người dùng
-   public function lock(Request $request, $id)
-{
-    $request->validate([
-        'is_ban' => 'required|in:0,1',
-    ]);
+    public function lock(Request $request, $id)
+    {
+        $request->validate([
+            'is_ban' => 'required|in:0,1',
+        ]);
 
-    $user = User::findOrFail($id);
+        $user = User::findOrFail($id);
 
-    if ((int)$user->is_ban ) {
-        $message = $request->is_ban == 1 ? 'Tài khoản đã bị khóa trước đó' : 'Tài khoản đang hoạt động, không cần mở khóa';
-        return $this->error($message, [], 409);
+        if ((int) $user->is_ban) {
+            $message = $request->is_ban == 1 ? 'Tài khoản đã bị khóa trước đó' : 'Tài khoản đang hoạt động, không cần mở khóa';
+            return $this->error($message, [], 409);
+        }
+
+        $user->is_ban = $request->is_ban;
+        $user->save();
+
+        $message = $request->is_ban == 1 ? 'Tài khoản đã bị khóa' : 'Tài khoản đã được mở khóa';
+        return $this->success(null, $message);
     }
-
-    $user->is_ban = $request->is_ban;
-    $user->save();
-
-    $message = $request->is_ban == 1 ? 'Tài khoản đã bị khóa' : 'Tài khoản đã được mở khóa';
-    return $this->success(null, $message);
-}
 }
