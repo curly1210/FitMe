@@ -219,6 +219,7 @@ return [
 
     'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
 
+    'blacklist_storage' => env('JWT_BLACKLIST_STORAGE', 'default'),
     /*
     | -------------------------------------------------------------------------
     | Blacklist Grace Period
