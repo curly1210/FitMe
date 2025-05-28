@@ -20,6 +20,7 @@ class ShippingAddress extends Model
         'ward',
         'detail_address',
         'is_default',
+        'user_id',
     ];
     public function user()
     {
