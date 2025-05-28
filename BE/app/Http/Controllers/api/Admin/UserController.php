@@ -33,12 +33,9 @@ class UserController extends Controller
     // Xem chi tiết người dùng + đơn hàng
     public function show($id)
     {
-        $user = User::with('orders')->findOrFail($id);
+      $user = User::with('orders')->findOrFail($id);
 
-        return $this->success(
-            new UserResource($user),
-            'Lấy chi tiết người dùng thành công'
-        );
+    return new UserResource($user);
     }
 
 
