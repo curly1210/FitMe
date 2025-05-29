@@ -8,13 +8,13 @@ import {
 } from "react";
 
 interface ModalContextType {
-  openPopup: (content: React.ReactNode) => void;
-  closePopup: () => void;
+  openModal: (content: React.ReactNode) => void;
+  closeModal: () => void;
 }
 
 export const ModalContext = createContext<ModalContextType>({
-  openPopup: () => {},
-  closePopup: () => {},
+  openModal: () => {},
+  closeModal: () => {},
 });
 
 // export const useModalContext = () => {
@@ -33,21 +33,21 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isShowing]);
 
-  const openPopup = (content: ReactNode) => {
+  const openModal = (content: ReactNode) => {
     setIsShowing(true);
     setContent(content);
   };
 
-  const closePopup = () => {
+  const closeModal = () => {
     setIsShowing(false);
     setContent(null);
   };
 
   return (
-    <ModalContext.Provider value={{ openPopup, closePopup }}>
+    <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
       {isShowing && (
-        <div className="fixed inset-0 ">
+        <div className="fixed inset-0 z-100 ">
           {/* <div className="absolute inset-0 bg-slate-600/60"></div> */}
           <div
             onClick={() => setIsShowing(false)}
