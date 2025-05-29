@@ -1,12 +1,13 @@
 <?php
 
 
-use App\Http\Controllers\Api\Admin\UserController;
-use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\Admin\CategoryController;
-use App\Http\Controllers\api\Client\AddressController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\api\Admin\BannerController;
+use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Admin\VariationController;
 
 // Route Authen
@@ -49,7 +50,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::patch('/users/lock/{id}', [UserController::class, 'lock']);
-
 });
 
 
@@ -87,8 +87,14 @@ Route::prefix('admin')->name('admin')->group(function () {
     Route::patch('/categories/update/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/delete/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
+//Route quản lý banner
 
-
+Route::prefix('admin')->name('admin')->group(function () {
+    Route::get('/banners', [BannerController::class, "index"])->name('banners.index');
+    Route::get('/banners/{id}', [BannerController::class, 'show'])->name('banners.show');
+    Route::patch('/banners/edit/{id}', [BannerController::class, 'edit'])->name('banners.edit');
+    Route::post('/banners/{id}', [BannerController::class, 'update'])->name('banners.update');
+});
 
 
 
