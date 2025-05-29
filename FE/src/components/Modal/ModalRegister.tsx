@@ -15,7 +15,7 @@ import { usePopup } from "../../context/PopupMessageProvider";
 import { useModal } from "../../hooks/useModal";
 
 const ModalRegister = () => {
-  const { closePopup, openPopup } = useModal();
+  const { closeModal, openModal } = useModal();
 
   const { notify } = usePopup();
 
@@ -24,7 +24,7 @@ const ModalRegister = () => {
     mutationOptions: {
       onSuccess: (response) => {
         notify("success", "Đăng ký", response?.data?.message);
-        openPopup(<ModalLogin />);
+        openModal(<ModalLogin />);
       },
       onError: (error) => {
         console.log(error);
@@ -53,7 +53,7 @@ const ModalRegister = () => {
   return (
     <div className="w-4xl relative grid grid-cols-2 bg-white py-10 px-10 gap-x-[40px] items-center">
       <button
-        onClick={closePopup}
+        onClick={closeModal}
         className="absolute cursor-pointer top-5 right-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-black transition"
       >
         ×

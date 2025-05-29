@@ -16,7 +16,7 @@ Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::middleware('jwt.auth')->group(function () {
-    Route::middleware('role.admin')->group(function (){
+    Route::middleware('role.admin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
     });
 });
@@ -87,9 +87,9 @@ Route::prefix('variations')->group(function () {
 
 
     // màu sắc
-    Route::middleware('auth:api')->get('/color', [VariationController::class, 'listColor']);
+    // Route::middleware('auth:api')->get('/color', [VariationController::class, 'listColor']);
 
-    // Route::get('/color', [VariationController::class, 'listColor']);
+    Route::get('/color', [VariationController::class, 'listColor']);
     Route::post('/color', [VariationController::class, 'storeColor']);
     Route::get('/color/{id}', [VariationController::class, 'showColor']);
     Route::patch('/color/{id}', [VariationController::class, 'updateColor']);

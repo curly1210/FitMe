@@ -5,12 +5,13 @@ import HomePage from "../pages/client/HomePage";
 export const clientRoutes = [
   {
     path: "/",
+    element: <HomePage />,
+    index: true,
+  },
+  {
+    path: "/",
     element: <LayoutClient />,
     children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
       {
         path: "contact",
         element: <Contact />,

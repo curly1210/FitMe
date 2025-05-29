@@ -19,11 +19,11 @@ class CategoryResource extends ResourceCollection
         $this->childCategories = $childCategories;
     }
 
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
 
-        return [
-            'categories' => $this->collection->map(function ($parent) {
+        return
+            $this->collection->map(function ($parent) {
                 $children = $this->childCategories->where('parent_id', $parent->id)->values();
 
                 return [
@@ -43,7 +43,6 @@ class CategoryResource extends ResourceCollection
                         ];
                     }),
                 ];
-            }),
-        ];
+            });
     }
 }
