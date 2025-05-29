@@ -69,7 +69,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function getAuthPassword()
-{
-    return $this->password; // Đảm bảo tên cột password khớp với database
-}
+    {
+        return $this->password; // Đảm bảo tên cột password khớp với database
+    }
+    
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

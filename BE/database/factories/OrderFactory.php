@@ -15,27 +15,23 @@ class OrderFactory extends Factory
 {
     public function definition(): array
     {
-        // Chọn 1 user ngẫu nhiên
-        $user = User::inRandomOrder()->first();
+         $shippingAddress = ShippingAddress::inRandomOrder()->first();
 
-        // Kiểm tra xem user đã có địa chỉ giao hàng chưa
-        $shippingAddress = ShippingAddress::where('user_id', $user->id)->inRandomOrder()->first();
-
-        // Nếu chưa có, tạo mới
+        // Nếu không có địa chỉ thì không thể tạo order hợp lệ => bạn có thể xử lý tùy tình huống
         if (!$shippingAddress) {
-            $shippingAddress = ShippingAddress::factory()->create([
-                'user_id' => $user->id,
-            ]);
+            throw new \Exception('Không có địa chỉ giao hàng nào để tạo đơn hàng.');
         }
 
         return [
             'orders_code' => 'OD-' . strtoupper(Str::random(8)),
             'total_amount' => 0,
-            'status_payment' => fake()->boolean(),
-            'payment_method' => fake()->randomElement(['cod', 'banking', 'vnpay']),
+            'status_payment' => $this->faker->boolean(),
+            'payment_method' => $this->faker->randomElement(['cod', 'banking', 'vnpay']),
             'status_order_id' => StatusOrder::inRandomOrder()->value('id'),
-            'user_id' => $user->id,
-            'shipping_address_id' => $shippingAddress->id,
+            'user_id' => $shippingAddress->user_id,
+            'receiving_address' => "{$shippingAddress->detail_address}, {$shippingAddress->ward}, {$shippingAddress->district}, {$shippingAddress->city}, {$shippingAddress->country}",
+            'recipient_name' => $shippingAddress->name_receive,
+            'recipient_phone' => $shippingAddress->phone,
             'created_at' => now(),
             'updated_at' => now(),
         ];

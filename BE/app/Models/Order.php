@@ -16,7 +16,9 @@ class Order extends Model
         'payment_method',
         'status_order_id',
         'user_id',
-        'shipping_address_id',
+        'receiving_address',
+        'recipient_name',
+        'recipient_phone',
     ];
 
     // Quan hệ với User
@@ -26,10 +28,10 @@ class Order extends Model
     }
 
     // Quan hệ với ShippingAddress
-    public function shippingAddress()
-    {
-        return $this->belongsTo(ShippingAddress::class);
-    }
+    // public function shippingAddress()
+    // {
+    //     return $this->belongsTo(ShippingAddress::class);
+    // }
 
     // Quan hệ với StatusOrder
     public function statusOrder()

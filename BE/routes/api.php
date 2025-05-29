@@ -1,13 +1,13 @@
 <?php
 
 
-use App\Http\Controllers\api\UserController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\api\Client\AddressController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\VariationController;
-
+use App\Http\Controllers\Api\Admin\VariationController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -21,109 +21,36 @@ Route::middleware('jwt.auth')->group(function () {
     });
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //router quản lý biến thể
-
-
-
-Route::prefix('variations')->group(function () {
-    // list màu sắc và kích thước
-    // Route::get('/', [VariationController::class, 'index']);
-
-
+Route::prefix('admin')->group(function () {
     // màu sắc
     // Route::middleware('auth:api')->get('/color', [VariationController::class, 'listColor']);
-
-    Route::get('/color', [VariationController::class, 'listColor']);
-    Route::post('/color', [VariationController::class, 'storeColor']);
-    Route::get('/color/{id}', [VariationController::class, 'showColor']);
-    Route::patch('/color/{id}', [VariationController::class, 'updateColor']);
-    Route::delete('/color/{id}', [VariationController::class, 'deleteColor']);
-    Route::post('/color/{id}/restore', [VariationController::class, 'restoreColor']);
-    Route::delete('/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
-    Route::get('/color/trashed', [VariationController::class, 'trashedColor']);
-
-
+    Route::get('/variations/color', [VariationController::class, 'listColor']);
+    Route::post('/variations/color', [VariationController::class, 'storeColor']);
+    Route::get('/variations/color/{id}', [VariationController::class, 'showColor']);
+    Route::patch('/variations/color/{id}', [VariationController::class, 'updateColor']);
+    Route::delete('/variations/color/{id}', [VariationController::class, 'deleteColor']);
+    Route::post('/variations/color/{id}/restore', [VariationController::class, 'restoreColor']);
+    Route::delete('/variations/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
+    Route::get('/variations/color/trashed', [VariationController::class, 'trashedColor']);
 
     // kích th`ước
-    Route::get('/size', [VariationController::class, 'listSize']);
-    Route::post('/size', [VariationController::class, 'storeSize']);
-    Route::get('/size/{id}', [VariationController::class, 'showSize']);
-    Route::patch('/size/{id}', [VariationController::class, 'updateSize']);
-    Route::delete('/size/{id}', [VariationController::class, 'deleteSize']);
-    Route::post('/size/{id}/restore', [VariationController::class, 'restoreSize']);
-    Route::delete('/size/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
-    Route::get('/size/trashed', [VariationController::class, 'trashedSize']);
+    Route::get('/variations/size', [VariationController::class, 'listSize']);
+    Route::post('/variations/size', [VariationController::class, 'storeSize']);
+    Route::get('/variations/size/{id}', [VariationController::class, 'showSize']);
+    Route::patch('/variations/size/{id}', [VariationController::class, 'updateSize']);
+    Route::delete('/variations/size/{id}', [VariationController::class, 'deleteSize']);
+    Route::post('/variations/size/{id}/restore', [VariationController::class, 'restoreSize']);
+    Route::delete('/variations/size/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
+    Route::get('/variations/size/trashed', [VariationController::class, 'trashedSize']);
 });
 
+Route::prefix('admin')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::patch('/users/lock/{id}', [UserController::class, 'lock']);
 
-
-
-
-
-
-
-
-
-
-
-
-
+});
 
 
 
@@ -160,3 +87,150 @@ Route::prefix('admin')->name('admin')->group(function () {
     Route::patch('/categories/update/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/delete/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // màu sắc
+    // Route::middleware('auth:api')->get('/color', [VariationController::class, 'listColor']);
+
+    Route::get('/color', [VariationController::class, 'listColor']);
+    Route::post('/color', [VariationController::class, 'storeColor']);
+    Route::get('/color/{id}', [VariationController::class, 'showColor']);
+    Route::patch('/color/{id}', [VariationController::class, 'updateColor']);
+    Route::delete('/color/{id}', [VariationController::class, 'deleteColor']);
+    Route::post('/color/{id}/restore', [VariationController::class, 'restoreColor']);
+    Route::delete('/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
+    Route::get('/color/trashed', [VariationController::class, 'trashedColor']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// CLient
+Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
+Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+Route::get('/addresses/{id}', [AddressController::class, 'show'])->name('addresses.show');
+Route::post('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
+Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');

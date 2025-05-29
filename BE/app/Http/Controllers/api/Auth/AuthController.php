@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Resources\UserResource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Auth\UserResource;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return $this->error('Thông tin đăng nhập không chính xác', [], 401,);
+            return $this->error('Thông tin đăng nhập không chính xác', [], 401, );
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT
@@ -116,13 +117,17 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
-        } catch (\Exception $e) {
-            // Không làm gì nếu token không hợp lệ
+        // Lấy token từ request
+        $token = JWTAuth::getToken();
+        if (!$token) {
+            return $this->error('Không tìm thấy token để đăng xuất. Vui lòng kiểm tra lại.', [], 400);
         }
 
-        return $this->success([], 'Đăng xuất thành công', 200)->cookie(
+        // Vô hiệu hóa token
+        JWTAuth::invalidate($token);
+
+        // Trả về phản hồi thành công và xóa cookie refresh_token
+        return $this->success([], 'Đăng xuất thành công.', 200)->cookie(
             'refresh_token',
             '',
             -1, // Xóa cookie
@@ -133,5 +138,6 @@ class AuthController extends Controller
             false, // Raw
             'Lax' // SameSite
         );
+
     }
 }
