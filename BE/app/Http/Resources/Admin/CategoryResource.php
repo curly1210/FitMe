@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Admin;
 
 use Cloudinary\Cloudinary;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Traits\CloudinaryTrait;
 use Cloudinary\Api\Upload\UploadApi;

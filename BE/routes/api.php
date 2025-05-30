@@ -91,8 +91,12 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 Route::prefix('admin')->name('admin')->group(function () {
     Route::get('/banners', [BannerController::class, "index"])->name('banners.index');
+    Route::get('/banners/categories', [BannerController::class, 'getCategories'])->name('banners.getCategories');
+    Route::get('/banners/posts', [BannerController::class, 'getPosts'])->name('banners.getPosts');
+    Route::get('/banners/products', [BannerController::class, 'getProducts'])->name('banners.getProducts');
     Route::get('/banners/{id}', [BannerController::class, 'show'])->name('banners.show');
-    Route::patch('/banners/edit/{id}', [BannerController::class, 'edit'])->name('banners.edit');
+
+    Route::post('/banners/edit/{id}', [BannerController::class, 'edit'])->name('banners.edit');
     Route::post('/banners/{id}', [BannerController::class, 'update'])->name('banners.update');
 });
 
