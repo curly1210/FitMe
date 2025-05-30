@@ -1,44 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { useCreate } from "@refinedev/core";
-// import { useAuthen } from "../../hooks/useAuthen";
-// import { useModal } from "../../hooks/useModal";
-// import ModalLogin from "../Modal/ModalLogin";
-// import { usePopup } from "../../context/PopupMessageProvider";
-
 import {
   EllipsisOutlined,
   SearchOutlined,
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../hooks/useAuthen";
-import { usePopup } from "../../context/PopupMessageProvider";
 import ModalLogin from "../Modal/ModalLogin";
 import { useModal } from "../../hooks/useModal";
+import { Link } from "react-router";
+import { useSearchPanel } from "../../hooks/useSearchPanel";
 
-const HeaderClient = ({ categories, openCategory, setOpenCategory }: any) => {
+const HeaderClient = () => {
   /* Start dont-delete */
 
   const { openModal } = useModal();
-  const { accessToken, user, setAccessToken, setUser } = useAuthen();
-  const { notify } = usePopup();
-
-  const { mutate } = useCreate({
-    resource: "logout",
-    mutationOptions: {
-      onSuccess: (response) => {
-        notify("success", "Đăng xuất", response?.data?.message);
-        setAccessToken(null);
-        setUser(null);
-        // openPopup(<ModalLogin />);
-      },
-      onError: (error) => {
-        console.log(error);
-        notify("error", "Đăng xuất", error.message);
-      },
-    },
-  });
+  const { accessToken, user, logout } = useAuthen();
+  const {
+    categories,
+    selectedCategory,
+    setSelectedCategory,
+    setIsOpenSearchPanel,
+  } = useSearchPanel();
 
   return (
     <header className=" shrink-0 sticky top-0 bg-white  border-gray-200  px-4">
@@ -50,16 +33,21 @@ const HeaderClient = ({ categories, openCategory, setOpenCategory }: any) => {
               <li
                 key={category.id}
                 className={`cursor-pointer   ${
-                  openCategory?.id === category.id
+                  selectedCategory?.id === category.id
                     ? "border-b-2 border-black font-semibold"
                     : ""
                 }`}
-                onClick={() => setOpenCategory(category)}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setIsOpenSearchPanel(true);
+                }}
               >
                 {category.name}
               </li>
             ))}
-            <li>Về FitMe</li>
+            <Link to="/address">
+              <li>Địa chỉ</li>
+            </Link>
             <li>Khuyến mãi</li>
           </div>
         </div>
@@ -88,7 +76,7 @@ const HeaderClient = ({ categories, openCategory, setOpenCategory }: any) => {
                 <button
                   className="cursor-pointer"
                   onClick={() => {
-                    mutate({ values: {} });
+                    logout();
                   }}
                 >
                   Đăng xuất

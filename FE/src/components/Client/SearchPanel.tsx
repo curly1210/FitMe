@@ -1,44 +1,22 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { useList } from "@refinedev/core";
 import { Link } from "react-router";
 import { Spin } from "antd";
 import HeaderClient from "./HeaderClient";
+import { useSearchPanel } from "../../hooks/useSearchPanel";
 
-interface SearchPanelProps {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+// interface SearchPanelProps {
+//   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+// }
 
-const SearchPanel = ({ setIsOpen }: SearchPanelProps) => {
-  const [openCategory, setOpenCategory] = useState<any>();
-
-  const { data: responseCategories, isLoading } = useList({
-    resource: "admin/categories",
-  });
-
-  const categories = responseCategories?.data || [];
-
-  useEffect(() => {
-    if (categories?.length > 0) {
-      setOpenCategory(categories[0]);
-    }
-  }, [responseCategories]);
-
-  <Spin
-    className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
-    style={{ textAlign: "center" }}
-    size="large"
-  />;
-  //     </div>
-  //   );
-  // }
+const SearchPanel = () => {
+  const { isLoadingSearchPanel, selectedCategory, setIsOpenSearchPanel } =
+    useSearchPanel();
 
   return (
-    <div>
-      <div className="absolute top-0 left-0 w-full h-full z-20 bg-white flex flex-col">
-        {isLoading ? (
+    <div className="fixed inset-0 z-20">
+      <div className="absolute top-0 left-0 w-full h-full  bg-white flex flex-col">
+        {isLoadingSearchPanel ? (
           <Spin
             className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
             style={{ textAlign: "center" }}
@@ -47,16 +25,17 @@ const SearchPanel = ({ setIsOpen }: SearchPanelProps) => {
         ) : (
           <>
             {/* Header cố định trên cùng */}
-            <HeaderClient
-              categories={categories}
-              openCategory={openCategory}
-              setOpenCategory={setOpenCategory}
-            />
+            <HeaderClient />
 
             {/* Nội dung cuộn được ở giữa */}
             <div className="w-7xl flex-1 mx-auto  px-3 overflow-y-auto p-4 space-y-3 no-scrollbar">
+              {Array.from({ length: 50 }).map((_, i) => (
+                <div key={i} className="p-4 bg-gray-100 rounded">
+                  Gợi ý #{i + 1}
+                </div>
+              ))}
               <div className="grid grid-cols-4 gap-y-8">
-                {openCategory?.items.map((sub: any) => (
+                {selectedCategory?.items.map((sub: any) => (
                   <Link
                     to={""}
                     key={sub.id}
@@ -86,7 +65,7 @@ const SearchPanel = ({ setIsOpen }: SearchPanelProps) => {
                 className="w-full border border-gray-400 rounded px-4 py-2 mt-3"
               />
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => setIsOpenSearchPanel(false)}
                 className="bg-black text-white rounded-full w-10 h-10 flex items-center justify-center mb-3"
               >
                 <CloseOutlined />

@@ -1,14 +1,14 @@
-import Authenticate from "../components/Authenticate";
 import LayoutAdmin from "../components/LayoutAdmin";
 import Banner from "../pages/admin/Banner";
 import Category from "../pages/admin/Category";
 
 import Bienthe from "../pages/admin/BienThe/indext";
 import Dashboard from "../pages/admin/Dashboard";
+import ProtectAdmin from "../components/ProtectAdmin";
 
 export const adminRoutes = [
   {
-    element: <Authenticate role="Quản trị viên" />,
+    element: <ProtectAdmin role="Quản trị viên" />,
     children: [
       {
         path: "/admin",

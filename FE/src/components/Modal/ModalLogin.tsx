@@ -2,18 +2,16 @@
 import { Button, Form, Input } from "antd";
 import login from "../../../public/login.png";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-// import { useModalContext } from "../../context/ModalProvider";
 import ModalRegister from "./ModalRegister";
 import { useModal } from "../../hooks/useModal";
-import { usePopup } from "../../context/PopupMessageProvider";
 import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../hooks/useAuthen";
 import { useNavigate } from "react-router";
+import { usePopupMessage } from "../../hooks/usePopupMessage";
 
 const ModalLogin = () => {
-  console.log("cipng");
   const { openModal, closeModal } = useModal();
-  const { notify } = usePopup();
+  const { notify } = usePopupMessage();
   const { setAccessToken, setUser } = useAuthen();
   // const navigate = useNavigate();
   const navi = useNavigate();
