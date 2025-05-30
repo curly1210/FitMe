@@ -13,22 +13,22 @@ class UserController extends Controller
     use ApiResponse;
     //Hàm sử lý hiển thị danh sách người dùng
     public function index(Request $request)
-    {
-        $query = User::query()
-            ->where('role', '!=', 'admin'); // Ẩn tài khoản admin
+{
+    $query = User::query()
+        ->where('role', '!=', 'admin');
 
-        if ($request->has('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
-        }
-
-        if ($request->has('is_ban')) {
-            $query->where('is_ban', $request->is_ban);
-        }
-
-        $users = $query->paginate(10);
-
-        return UserResource::collection($users);
+    if ($request->has('name')) {
+        $query->where('name', 'like', '%' . $request->name . '%');
     }
+
+    if ($request->has('is_ban')) {
+        $query->where('is_ban', $request->is_ban);
+    }
+
+    $users = $query->get(); 
+
+    return UserResource::collection($users);
+}
 
     // Xem chi tiết người dùng + đơn hàng
     public function show($id)
@@ -39,24 +39,18 @@ class UserController extends Controller
     }
 
 
-    // Cập nhật thông tin người dùng
-    public function lock(Request $request, $id)
+    // Hàm sử lý khóa hoặc mở khóa người dùng
+   public function lock($id)
     {
-        $request->validate([
-            'is_ban' => 'required|in:0,1',
-        ]);
+        try {
+            $user = User::findOrFail($id);
+            $user->is_ban = $user->is_ban == 1 ? 0 : 1;
+            $user->save();
 
-        $user = User::findOrFail($id);
-
-        if ((int) $user->is_ban) {
-            $message = $request->is_ban == 1 ? 'Tài khoản đã bị khóa trước đó' : 'Tài khoản đang hoạt động, không cần mở khóa';
-            return $this->error($message, [], 409);
+            return $this->success(null, $user->is_ban ? 'Đã khóa người dùng' : 'Đã mở khóa người dùng');
+        } catch (\Exception $e) {
+            return $this->error('Không thể cập nhật trạng thái người dùng', [$e->getMessage()], 500);
         }
-
-        $user->is_ban = $request->is_ban;
-        $user->save();
-
-        $message = $request->is_ban == 1 ? 'Tài khoản đã bị khóa' : 'Tài khoản đã được mở khóa';
-        return $this->success(null, $message);
     }
+
 }
