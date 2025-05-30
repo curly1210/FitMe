@@ -9,6 +9,10 @@ use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Admin\VariationController;
+use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
+use App\Http\Controllers\Api\Client\PostController as ClientPostController;
+use App\Http\Controllers\Api\Client\ProductController;
+use App\Http\Controllers\Api\Client\WishlistController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -244,3 +248,19 @@ Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.
 Route::get('/addresses/{id}', [AddressController::class, 'show'])->name('addresses.show');
 Route::post('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
 Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+
+//client
+//Banner
+
+Route::prefix('client')->group(function () {
+    Route::get('banners', [ClientBannerController::class, 'index']);
+    Route::get('posts', [ClientPostController::class, 'index']);
+    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/{id}', [ProductController::class, 'show']);
+});
+
+Route::middleware('auth:api')->group(function(){
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
+    Route::delete('/wishlist/{product_id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+});
