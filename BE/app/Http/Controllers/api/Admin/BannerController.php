@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\api\Admin;
 
+use App\Models\Post;
 use App\Models\Banner;
 use App\Models\Product;
 use App\Models\Category;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Traits\CloudinaryTrait;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\BannerResource;
-use App\Models\Post;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Admin\BannerResource;
+use App\Http\Resources\Admin\CategoryResource;
 
 class BannerController extends Controller
 {
@@ -44,24 +46,57 @@ class BannerController extends Controller
                 'title' => $banner->title,
                 'direct_link' => $banner->direct_link,
                 'url_image' => $this->buildImageUrl($banner->url_image),
+                "updated_at" => $banner->updated_at
             ], 200);
         } else {
             return $this->error('Không tìm thấy banner', 404);
         }
     }
-
-    public function edit($id)
+    public function getCategories()
     {
-        $banner = Banner::find($id);
-        if ($banner) {
-            $childCategories = Category::query()->whereNotNull('parent_id')->where('is_active', '=', 1)->get(['id', 'name', 'parent_id']);
-            $parentCategories = Category::query()->whereNull('parent_id')->Where('is_active', '=', 1)->get(['id', 'name', 'parent_id']);
 
-            $products = Product::query()->where('is_active', "=", 1)->orderBy('created_at', 'desc')->get(['id', 'name', 'slug', 'category_id', 'is_active'])->take(30);
-            $posts = Post::query()->where('is_active', "=", 1)->orderBy('created_at', 'desc')->get(['id', 'title', 'is_active'])->take(10);
-            return new BannerResource($banner, $parentCategories, $childCategories, $products, $posts);
+        $parentCategories = Category::query()->whereNull('parent_id')->get();
+        $childCategories = Category::query()->whereNotNull('parent_id')->get();
+        if ($parentCategories->isEmpty()) {
+            return $this->success([], "Không có danh mục");
         } else {
-            return $this->error('Không tìm thấy banner', 404);
+            return new CategoryResource($parentCategories, $childCategories);
+        }
+    }
+    public function getPosts()
+    {
+        $posts = Post::query()->where('is_active', "=", 1)->orderBy('created_at', 'desc')->get(['id', 'title', 'is_active'])->take(10);
+        if ($posts->isEmpty()) {
+            return $this->success([], "Không có bài viết");
+        } else {
+            return response()->json(
+                $posts->map(function ($post) {
+                    return [
+                        'id' => $post->id,
+                        'title' => $post->title,
+                        'slug' => Str::slug($post->title),
+                    ];
+                }),
+                200
+            );
+        }
+    }
+    public function getProducts()
+    {
+        $products = Product::query()->where('is_active', "=", 1)->orderBy('created_at', 'desc')->get(['id', 'name', 'slug', 'category_id', 'is_active'])->take(30);
+        if ($products->isEmpty()) {
+            return $this->success([], "Không có sản phẩm");
+        } else {
+            return response()->json(
+                $products->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                    ];
+                }),
+                200
+            );
         }
     }
     public function update(Request $request, $id)
@@ -73,14 +108,17 @@ class BannerController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:50',
-            'direct_type' => 'required', # danh-muc, san-pham, bai-viet
-            'direct_value' => 'required', # sản phẩm ao-thun-ong-rong,Bài viết "bai-viet-ra-mat-san-pham", danh mục 'ao-khoac-nam'
+            // 'direct_type' => 'required', # danh-muc, san-pham, bai-viet
+            // 'direct_value' => 'required', # sản phẩm ao-thun-ong-rong,Bài viết "bai-viet-ra-mat-san-pham", danh mục 'ao-khoac-nam'
+            // 'sub_direct_value' => 'nullable', #  Trường hợp có danh mục con
+            'direct_link' => 'required', # Trường hợp có liên kết cụ thể
             'url_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'title.required' => 'Tiêu đề là bắt buộc',
             'title.max' => 'Tiêu đề không được vượt quá 50 ký tự',
-            'direct_type.required' => 'Bạn chưa chọn loại liên kết',
-            'direct_value.required' => 'Ban chưa chọn liên kết cụ thể',
+            // 'direct_type.required' => 'Bạn chưa chọn loại liên kết',
+            // 'direct_value.required' => 'Ban phải chọn liên kết cụ thể',
+            "direct_link.required" => 'Bạn chưa chọn liên kết',
             'url_image.image' => 'File upload phải là một tệp hình ảnh',
             'url_image.mimes' => 'File upload chỉ nhận định dạng jpeg, png hoặc jpg',
             'url_image.max' => 'Ảnh không được vượt quá 2MB',
@@ -96,22 +134,35 @@ class BannerController extends Controller
             } else {
                 $bannerImage = ['public_id' => $banner->image];
             }
-            # Ghép đường dẫn
-            $direct_link = env('APP_URL') . ":8000" . "/" . $request->direct_type . '/' . $request->direct_value;
+            // # Ghép đường dẫn
+            // $baseUrl = env('APP_URL') . ":8000"; # Đường dẫn gốc
+            // if ($request->sub_direct_value == "#" || $request->sub_direct_value == null) {
+            //     $direct_link =  $baseUrl . "/" . $request->direct_type . '/' . $request->direct_value;
+            // } else if ($request->sub_direct_value != null || $request->sub_direct_value != "#") {
+            //     $direct_link =  $baseUrl . "/" . $request->direct_type . '/' . $request->sub_direct_value;
+            // } else {
+            //     $direct_link =  $baseUrl . "/" . $request->direct_type . '/' . $request->direct_value . '/' . $request->sub_direct_value;
+            // }
+
 
 
             # Cập nhật banner
-            $check = $banner->update([
+            $updated = $banner->update([
                 'title' => $request->title,
-                'direct_link' => $direct_link,
+                'direct_link' => $request->direct_link,
                 'url_image' => $bannerImage['public_id'],
-
             ]);
-            if (!$check) {
+            if (!$updated) {
                 return $this->error('Cập nhật banner thất bại', 500);
             } else {
-
-                return $this->success($check, "Cập nhật banner thành công", 200);
+                $banner = $banner->refresh([
+                    'id',
+                    'title',
+                    'direct_link',
+                    'url_image',
+                    'updated_at'
+                ]);
+                return $this->success($banner, "Cập nhật banner thành công", 200);
             }
         }
     }
