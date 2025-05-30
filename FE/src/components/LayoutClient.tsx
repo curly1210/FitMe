@@ -9,7 +9,7 @@ const LayoutClient = () => {
   return (
     <div>
       <HeaderClient />
-      <main className="overflow-y-auto">
+      <main className="w-7xl mx-auto px-4">
         <Outlet />
       </main>
       <footer>

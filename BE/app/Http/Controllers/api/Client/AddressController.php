@@ -23,9 +23,8 @@ class AddressController extends Controller
 
             return $this->success(AddressResource::collection($addresses), 'Lấy danh sách địa chỉ thành công', 200);
         } catch (\Throwable $th) {
-            return $this->error('Lỗi khi lấy danh sách địa chỉ', [$th->getMessage()], 500);
+            return $this->error('Lỗi khi lấy danh sách địa chỉ', [$th->getMessage()], 403);
         }
-
     }
 
     public function store(Request $request)
@@ -34,32 +33,33 @@ class AddressController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             $validatedData = $request->validate([
-                    'name_receive' => 'required|string|max:50',
-                    'phone' => 'required|string|min:10|max:10|unique:shipping_address,phone',
-                    'country' => 'required|string|max:50',
-                    'city' => 'required|string|max:50',
-                    'district' => 'required|string|max:50',
-                    'ward' => 'required|string|max:50',
-                    'detail_address' => 'required|string|max:50',
-                    'is_default' => 'boolean|nullable',
-                ], [
-                    'name_receive.required' => 'Tên người nhận là bắt buộc.',
-                    'name_receive.max' => 'Tên người nhận không được dài quá 50 ký tự.',
-                    'phone.required' => 'Số điện thoại là bắt buộc.',
-                    'phone.unique' => 'Số điện thoại đã được sử dụng.',
-                    'phone.min' => 'Số điện thoại phải có ít nhất 10 ký tự.',
-                    'phone.max' => 'Số điện thoại không được dài quá 10 ký tự.',
-                    'country.required' => 'Quốc gia là bắt buộc.',
-                    'country.max' => 'Quốc gia không được dài quá 50 ký tự.',
-                    'city.required' => 'Thành phố là bắt buộc.',
-                    'city.max' => 'Thành phố không được dài quá 50 ký tự.',
-                    'district.required' => 'Quận/Huyện là bắt buộc.',
-                    'district.max' => 'Quận/Huyện không được dài quá 50 ký tự.',
-                    'ward.required' => 'Phường/Xã là bắt buộc.',
-                    'ward.max' => 'Phường/Xã không được dài quá 50 ký tự.',
-                    'detail_address.required' => 'Địa chỉ chi tiết là bắt buộc.',
-                    'detail_address.max' => 'Địa chỉ chi tiết không được dài quá 50 ký tự.',
-                ]);
+                'name_receive' => 'required|string|max:50',
+                // 'phone' => 'required|string|min:10|max:10|unique:shipping_address,phone',
+                'phone' => 'required|string|min:10|max:10',
+                'country' => 'required|string|max:50',
+                'city' => 'required|string|max:50',
+                'district' => 'required|string|max:50',
+                'ward' => 'required|string|max:50',
+                'detail_address' => 'required|string|max:50',
+                'is_default' => 'boolean|nullable',
+            ], [
+                'name_receive.required' => 'Tên người nhận là bắt buộc.',
+                'name_receive.max' => 'Tên người nhận không được dài quá 50 ký tự.',
+                'phone.required' => 'Số điện thoại là bắt buộc.',
+                // 'phone.unique' => 'Số điện thoại đã được sử dụng.',
+                'phone.min' => 'Số điện thoại phải có ít nhất 10 ký tự.',
+                'phone.max' => 'Số điện thoại không được dài quá 10 ký tự.',
+                'country.required' => 'Quốc gia là bắt buộc.',
+                'country.max' => 'Quốc gia không được dài quá 50 ký tự.',
+                'city.required' => 'Thành phố là bắt buộc.',
+                'city.max' => 'Thành phố không được dài quá 50 ký tự.',
+                'district.required' => 'Quận/Huyện là bắt buộc.',
+                'district.max' => 'Quận/Huyện không được dài quá 50 ký tự.',
+                'ward.required' => 'Phường/Xã là bắt buộc.',
+                'ward.max' => 'Phường/Xã không được dài quá 50 ký tự.',
+                'detail_address.required' => 'Địa chỉ chi tiết là bắt buộc.',
+                'detail_address.max' => 'Địa chỉ chi tiết không được dài quá 50 ký tự.',
+            ]);
 
             $data = $validatedData;
             $data['user_id'] = $user->id;
@@ -74,7 +74,7 @@ class AddressController extends Controller
         } catch (ValidationException $e) {
             return $this->error('Thông tin nhập vào không hợp lệ. Vui lòng kiểm tra lại.', $e->errors(), 422);
         } catch (\Throwable $th) {
-            return $this->error('Có lỗi xảy ra khi thêm địa chỉ. Vui lòng thử lại sau.', ['error' => $th->getMessage()], 500);
+            return $this->error('Có lỗi xảy ra khi thêm địa chỉ. Vui lòng thử lại sau.', ['error' => $th->getMessage()], 403);
         }
     }
 
@@ -102,32 +102,33 @@ class AddressController extends Controller
             $address = ShippingAddress::where('user_id', $user->id)->findOrFail($id);
 
             $validatedData = $request->validate([
-                    'name_receive' => 'required|string|max:50',
-                    'phone' => 'required|string|min:10|max:10|unique:shipping_address,phone',
-                    'country' => 'required|string|max:50',
-                    'city' => 'required|string|max:50',
-                    'district' => 'required|string|max:50',
-                    'ward' => 'required|string|max:50',
-                    'detail_address' => 'required|string|max:50',
-                    'is_default' => 'boolean|nullable',
-                ], [
-                    'name_receive.required' => 'Tên người nhận là bắt buộc.',
-                    'name_receive.max' => 'Tên người nhận không được dài quá 50 ký tự.',
-                    'phone.required' => 'Số điện thoại là bắt buộc.',
-                    'phone.unique' => 'Số điện thoại đã được sử dụng.',
-                    'phone.min' => 'Số điện thoại phải có ít nhất 10 ký tự.',
-                    'phone.max' => 'Số điện thoại không được dài quá 10 ký tự.',
-                    'country.required' => 'Quốc gia là bắt buộc.',
-                    'country.max' => 'Quốc gia không được dài quá 50 ký tự.',
-                    'city.required' => 'Thành phố là bắt buộc.',
-                    'city.max' => 'Thành phố không được dài quá 50 ký tự.',
-                    'district.required' => 'Quận/Huyện là bắt buộc.',
-                    'district.max' => 'Quận/Huyện không được dài quá 50 ký tự.',
-                    'ward.required' => 'Phường/Xã là bắt buộc.',
-                    'ward.max' => 'Phường/Xã không được dài quá 50 ký tự.',
-                    'detail_address.required' => 'Địa chỉ chi tiết là bắt buộc.',
-                    'detail_address.max' => 'Địa chỉ chi tiết không được dài quá 50 ký tự.',
-                ]);
+                'name_receive' => 'required|string|max:50',
+                // 'phone' => 'required|string|min:10|max:10|unique:shipping_address,phone',
+                'phone' => 'required|string|min:10|max:10',
+                'country' => 'required|string|max:50',
+                'city' => 'required|string|max:50',
+                'district' => 'required|string|max:50',
+                'ward' => 'required|string|max:50',
+                'detail_address' => 'required|string|max:50',
+                'is_default' => 'boolean|nullable',
+            ], [
+                'name_receive.required' => 'Tên người nhận là bắt buộc.',
+                'name_receive.max' => 'Tên người nhận không được dài quá 50 ký tự.',
+                'phone.required' => 'Số điện thoại là bắt buộc.',
+                // 'phone.unique' => 'Số điện thoại đã được sử dụng.',
+                'phone.min' => 'Số điện thoại phải có ít nhất 10 ký tự.',
+                'phone.max' => 'Số điện thoại không được dài quá 10 ký tự.',
+                'country.required' => 'Quốc gia là bắt buộc.',
+                'country.max' => 'Quốc gia không được dài quá 50 ký tự.',
+                'city.required' => 'Thành phố là bắt buộc.',
+                'city.max' => 'Thành phố không được dài quá 50 ký tự.',
+                'district.required' => 'Quận/Huyện là bắt buộc.',
+                'district.max' => 'Quận/Huyện không được dài quá 50 ký tự.',
+                'ward.required' => 'Phường/Xã là bắt buộc.',
+                'ward.max' => 'Phường/Xã không được dài quá 50 ký tự.',
+                'detail_address.required' => 'Địa chỉ chi tiết là bắt buộc.',
+                'detail_address.max' => 'Địa chỉ chi tiết không được dài quá 50 ký tự.',
+            ]);
 
             $data = $validatedData;
 
@@ -151,7 +152,7 @@ class AddressController extends Controller
         } catch (ValidationException $e) {
             return $this->error('Thông tin nhập vào không hợp lệ. Vui lòng kiểm tra lại.', $e->errors(), 422);
         } catch (\Throwable $th) {
-            return $this->error('Có lỗi xảy ra khi cập nhật địa chỉ. Vui lòng thử lại sau.', ['error' => $th->getMessage()], 500);
+            return $this->error('Có lỗi xảy ra khi cập nhật địa chỉ. Vui lòng thử lại sau.', ['error' => $th->getMessage()], 403);
         }
     }
     public function destroy($id)
