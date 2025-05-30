@@ -5,6 +5,7 @@ import Category from "../pages/admin/Category";
 import Bienthe from "../pages/admin/BienThe/indext";
 import Dashboard from "../pages/admin/Dashboard";
 import ProtectAdmin from "../components/ProtectAdmin";
+import User from "../pages/admin/User/indext";
 
 export const adminRoutes = [
   {
@@ -29,6 +30,10 @@ export const adminRoutes = [
           {
             path: "bienthe",
             element: <Bienthe />,
+          },
+                 {
+            path: "users",
+            element: <User />,
           },
         ],
       },
