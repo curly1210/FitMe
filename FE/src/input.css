@@ -19,7 +19,8 @@
 }
 
 body {
-  overflow: hidden !important;
+  /* overflow: hidden !important; */
+  overflow-x: hidden !important;
 }
 
 /* Bọc container để dot nằm đè lên slide */

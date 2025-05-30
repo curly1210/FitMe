@@ -1,11 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-refresh/only-export-components */
 import { notification, Spin } from "antd";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { useCreate } from "@refinedev/core";
+import { API_URL } from "../utils/constant";
+import { usePopupMessage } from "../hooks/usePopupMessage";
 
 interface User {
   id: number;
@@ -21,6 +24,7 @@ type AuthContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
   setPersist: (val: boolean) => void;
+  logout: () => void;
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -30,6 +34,7 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {},
   setPersist: () => {},
+  logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -39,17 +44,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [persist, setPersist] = useState<boolean>(
     localStorage.getItem("persist") === "true" || false
   );
-
+  const { notify } = usePopupMessage();
   const navigate = useNavigate();
+
+  const { mutate: signout } = useCreate({
+    resource: "logout",
+    mutationOptions: {
+      onSuccess: (response) => {
+        notify("success", "Đăng xuất", response?.data?.message);
+        setAccessToken(null);
+        setUser(null);
+        setPersist(false);
+        console.log("hello");
+        localStorage.removeItem("persist");
+        // openPopup(<ModalLogin />);
+      },
+      onError: (error) => {
+        console.log(error);
+        notify("error", "Đăng xuất", error.message);
+      },
+    },
+  });
 
   const refreshToken = async () => {
     try {
       const { data } = await axios.post(
-        `http://localhost:8000/api/refresh`,
+        `${API_URL}/refresh`,
         {},
         { withCredentials: true }
       );
-      // console.log(data);
 
       setUser(data?.data?.user);
       setAccessToken(data?.data?.access_token);
@@ -66,38 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAppReady(true);
       return null;
     }
+  };
 
-    // return new Promise((resolve, reject) => {
-    //   create(
-    //     {
-    //       resource: "refresh",
-    //       meta: {
-    //         requestOptions: {
-    //           withCredentials: true,
-    //         },
-    //       },
-    //       values: {},
-    //     },
-    //     {
-    //       onSuccess: (response) => {
-    //         setUser(response?.data?.data?.user);
-    //         // console.log(response?.data?.data?.access_token);
-    //         setAccessToken(response?.data?.data?.access_token);
-    //         setIsAppReady(true);
-    //         resolve(response?.data?.data?.access_token); // ✅ để `await refreshToken()` lấy được token
-    //         // const token = response?.data?.data?.access_token;
-    //         // setAccessToken(token);
-    //         return response?.data?.data?.access_token;
-    //       },
-    //       onError: (error) => {
-    //         console.log("loi o day");
-    //         setIsAppReady(true);
-    //         reject(null);
-    //         return null;
-    //       },
-    //     }
-    //   );
-    // });
+  const logout = () => {
+    signout({ values: {} });
   };
 
   useEffect(() => {
@@ -119,6 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         setUser,
         setPersist,
+        logout,
       }}
     >
       {!isAppReady ? (
@@ -133,7 +129,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       ) : (
         children
       )}
-      {/* {<Spin spinning={isLoading}>{children}</Spin>} */}
     </AuthContext.Provider>
   );
 };

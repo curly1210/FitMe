@@ -11,13 +11,13 @@ import {
 // import { useModalContext } from "../../context/ModalProvider";
 import { useCreate } from "@refinedev/core";
 import ModalLogin from "./ModalLogin";
-import { usePopup } from "../../context/PopupMessageProvider";
 import { useModal } from "../../hooks/useModal";
+import { usePopupMessage } from "../../hooks/usePopupMessage";
 
 const ModalRegister = () => {
   const { closeModal, openModal } = useModal();
 
-  const { notify } = usePopup();
+  const { notify } = usePopupMessage();
 
   const { mutate } = useCreate({
     resource: "register",

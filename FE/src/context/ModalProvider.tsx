@@ -1,11 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  createContext,
-  ReactNode,
-  // useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
 interface ModalContextType {
   openModal: (content: React.ReactNode) => void;
@@ -16,10 +10,6 @@ export const ModalContext = createContext<ModalContextType>({
   openModal: () => {},
   closeModal: () => {},
 });
-
-// export const useModalContext = () => {
-//   return useContext(ModalContext);
-// };
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const [isShowing, setIsShowing] = useState(false);
@@ -48,7 +38,6 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
       {children}
       {isShowing && (
         <div className="fixed inset-0 z-100 ">
-          {/* <div className="absolute inset-0 bg-slate-600/60"></div> */}
           <div
             onClick={() => setIsShowing(false)}
             className="absolute inset-0 flex items-center justify-center bg-slate-600/60 "

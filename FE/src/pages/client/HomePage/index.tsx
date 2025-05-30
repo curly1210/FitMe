@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import { Carousel } from "antd";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import Slider from "react-slick";
 
 import "slick-carousel/slick/slick.css";
@@ -11,11 +12,11 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import SearchPanel from "../../../components/Client/SearchPanel";
-import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../../hooks/useAuthen";
-import { usePopup } from "../../../context/PopupMessageProvider";
 import ModalLogin from "../../../components/Modal/ModalLogin";
 import { useModal } from "../../../hooks/useModal";
+import { useSearchPanel } from "../../../hooks/useSearchPanel";
+import { Link } from "react-router";
 // import HeaderClient from "../../../components/Client/HeaderClient";
 
 const contentStyle: React.CSSProperties = {
@@ -37,27 +38,17 @@ const carousels = [
 
 const HomePage = () => {
   const sliderRef = useRef<Slider>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
+  const {
+    isOpenSearchPanel,
+    setIsOpenSearchPanel,
+    categories,
+    selectedCategory,
+    setSelectedCategory,
+  } = useSearchPanel();
 
   const { openModal } = useModal();
-  const { accessToken, user, setAccessToken, setUser } = useAuthen();
-  const { notify } = usePopup();
-
-  const { mutate } = useCreate({
-    resource: "logout",
-    mutationOptions: {
-      onSuccess: (response) => {
-        notify("success", "Đăng xuất", response?.data?.message);
-        setAccessToken(null);
-        setUser(null);
-        // openPopup(<ModalLogin />);
-      },
-      onError: (error) => {
-        console.log(error);
-        notify("error", "Đăng xuất", error.message);
-      },
-    },
-  });
+  const { accessToken, user, logout } = useAuthen();
 
   const handleWheel = (e: React.WheelEvent) => {
     if (!sliderRef.current) return;
@@ -99,9 +90,25 @@ const HomePage = () => {
               <div className="flex gap-7">
                 <SearchOutlined className="text-xl" />
                 <div className="list-none flex gap-3.5">
-                  <li className="none">Nam</li>
-                  <li>Nữ</li>
-                  <li>Về FitMe</li>
+                  {categories.map((category: any) => (
+                    <li
+                      key={category.id}
+                      className={`cursor-pointer   ${
+                        selectedCategory?.id === category.id
+                          ? "border-b-2 border-white font-semibold"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setIsOpenSearchPanel(true);
+                      }}
+                    >
+                      {category.name}
+                    </li>
+                  ))}
+                  <Link to="/address">
+                    <li>Địa chỉ</li>
+                  </Link>
                   <li>Khuyến mãi</li>
                 </div>
               </div>
@@ -124,7 +131,7 @@ const HomePage = () => {
                     <button
                       className="cursor-pointer"
                       onClick={() => {
-                        mutate({ values: {} });
+                        logout();
                       }}
                     >
                       Đăng xuất
@@ -147,11 +154,11 @@ const HomePage = () => {
           ))}
         </Slider>
 
-        {isOpen && <SearchPanel setIsOpen={setIsOpen} />}
+        {isOpenSearchPanel && <SearchPanel />}
 
-        {!isOpen && (
+        {!isOpenSearchPanel && (
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={() => setIsOpenSearchPanel(true)}
             className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-white border border-gray-400 shadow-lg rounded-full w-12 h-12 flex items-center justify-center"
           >
             <SearchOutlined className="text-xl" />
