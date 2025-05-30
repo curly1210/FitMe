@@ -245,5 +245,39 @@
       ]
     }
   ],
-  "users": []
+  "users": [
+    {
+      "email": "1210.curly@gmail.com",
+      "password": "$2a$10$ZfhE3iYQ0J1KRf.hz4gdJu1L9CBoVv5BUtmd/xRwv0nFRQyYPesrK",
+      "phone": "0898645512",
+      "name": "Cuong Pham",
+      "id": 1
+    }
+  ],
+  "addresses": [
+    {
+      "id": 1,
+      "idUser": 1,
+      "name": "cuong",
+      "phone": "0898645512",
+      "email": "1210.curly@gmail.com",
+      "city": "thanh hoa",
+      "district": "huyện Đông Sơn",
+      "ward": "thị trấn Rừng Thông",
+      "detail_address": "234 Pvd",
+      "is_default": true
+    },
+    {
+      "id": 2,
+      "idUser": 1,
+      "name": "cuong pham",
+      "phone": "0545877745",
+      "email": "cuongpxph48@gmail.com",
+      "city": "ha noi",
+      "district": "quận Hoàn Kiếm",
+      "ward": "phường Cổ Nhuế",
+      "detail_address": "hello",
+      "is_default": false
+    }
+  ]
 }

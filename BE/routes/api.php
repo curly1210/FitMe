@@ -231,5 +231,5 @@ Route::get('/color/trashed', [VariationController::class, 'trashedColor']);
 Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
 Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
 Route::get('/addresses/{id}', [AddressController::class, 'show'])->name('addresses.show');
-Route::post('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
+Route::patch('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
 Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
