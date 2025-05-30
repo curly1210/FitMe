@@ -1,4 +1,4 @@
-import { Drawer, Space, Button, Input, Form, message } from "antd";
+import { Drawer, Space, Button, Input, Form, message, Spin } from "antd";
 import { useState } from "react";
 import { ChromePicker } from "react-color";
 import { useCreate } from "@refinedev/core";
@@ -15,7 +15,7 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
   const [form] = Form.useForm();
   const [color, setColor] = useState("#1890ff");
 
-  const { mutate: create } = useCreate();
+  const { mutate: create,isLoading } = useCreate();
 
   const onFinish = (values: any) => {
     const resource = type === "colo" ? "variations/color" : "variations/size";
@@ -58,10 +58,19 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
         </div>
       }
     >
+             {isLoading ? (
+          <Spin
+            className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+            style={{ textAlign: "center" }}
+            size="large"
+          />
+        ) : (
+          ""
+        )}
       <Form form={form} onFinish={onFinish} layout="vertical" onSubmitCapture={(e) => e.preventDefault()}>
         {type === "colo" && (
           <>
-            <Form.Item label="Tên màu" name="name" rules={[{ required: true }]}>
+            <Form.Item label="Tên màu" name="name" rules={[{ required: true,message:"Tên không được để trống" }]}>
               <Input />
             </Form.Item>
             <Form.Item label="Mã màu">
@@ -71,7 +80,7 @@ export default function Add({ open, onClose, type }: AddDrawerProps) {
         )}
 
         {type === "sizee" && (
-          <Form.Item label="Kích thước" name="name" rules={[{ required: true }]}>
+          <Form.Item label="Kích thước" name="name" rules={[{ required: true ,message:"Kích thước không được để trống"}]}>
             <Input />
           </Form.Item>
         )}

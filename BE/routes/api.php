@@ -127,6 +127,17 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 
+    // màu sắc
+    // Route::middleware('auth:api')->get('/color', [VariationController::class, 'listColor']);
+
+    Route::get('/color', [VariationController::class, 'listColor']);
+    Route::post('/color', [VariationController::class, 'storeColor']);
+    Route::get('/color/{id}', [VariationController::class, 'showColor']);
+    Route::patch('/color/{id}', [VariationController::class, 'updateColor']);
+    Route::delete('/color/{id}', [VariationController::class, 'deleteColor']);
+    Route::post('/color/{id}/restore', [VariationController::class, 'restoreColor']);
+    Route::delete('/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
+    Route::get('/color/trashed', [VariationController::class, 'trashedColor']);
 
 
 

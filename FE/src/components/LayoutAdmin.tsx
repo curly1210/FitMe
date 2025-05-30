@@ -50,12 +50,8 @@ const items: MenuItem[] = [
     "7",
     <PercentageOutlined />
   ),
-  getItem(<Link to="/admin">Quản lý khách hàng</Link>, "8", <UserOutlined />),
-  // getItem("User", "sub1", <UserOutlined />, [
-  //   getItem("Tom", "3"),
-  //   getItem("Bill", "4"),
-  //   getItem("Alex", "5"),
-  // ]),
+  getItem(<Link to="/admin/users">Quản lý khách hàng</Link>, "8", <UserOutlined />),
+
   // getItem("Team", "sub2", <TeamOutlined />, [
   //   getItem("Team 1", "6"),
   //   getItem("Team 2", "8"),

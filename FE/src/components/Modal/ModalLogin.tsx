@@ -11,7 +11,8 @@ import { useAuthen } from "../../hooks/useAuthen";
 import { useNavigate } from "react-router";
 
 const ModalLogin = () => {
-  const { openPopup, closePopup } = useModal();
+  console.log("cipng");
+  const { openModal, closeModal } = useModal();
   const { notify } = usePopup();
   const { setAccessToken, setUser } = useAuthen();
   // const navigate = useNavigate();
@@ -27,7 +28,7 @@ const ModalLogin = () => {
         notify("success", "Đăng nhập", "Thành công");
         localStorage.setItem("persist", JSON.stringify(true));
         navi("/");
-        closePopup();
+        closeModal();
         // openPopup(<ModalLogin />);
       },
       onError: (error) => {
@@ -46,9 +47,9 @@ const ModalLogin = () => {
 
   return (
     // <Spin spinning={isLoading}>
-    <div className="w-4xl relative grid grid-cols-2 bg-white py-10 px-10 gap-x-[40px] items-center">
+    <div className="w-4xl z-30 relative grid grid-cols-2 bg-white py-10 px-10 gap-x-[40px] items-center">
       <button
-        onClick={closePopup}
+        onClick={closeModal}
         className="absolute cursor-pointer top-5 right-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-black transition"
       >
         ×
@@ -128,7 +129,7 @@ const ModalLogin = () => {
           <p className="text-sm text-gray-700 text-center">
             Bạn chưa có tài khoản?{" "}
             <span
-              onClick={() => openPopup(<ModalRegister />)}
+              onClick={() => openModal(<ModalRegister />)}
               className="text-black underline cursor-pointer hover:text-blue-800"
             >
               Đăng ký
