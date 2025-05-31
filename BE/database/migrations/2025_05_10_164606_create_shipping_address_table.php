@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name_receive', 50);
             $table->string('phone', 10);
-            $table->string('country', 50);
+            $table->string('country', 50)->default('Vietnam');
             $table->string('city', 50);
             $table->string('district', 50);
             $table->string('ward', 50);
