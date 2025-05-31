@@ -3,6 +3,7 @@ import HeaderClient from "./Client/HeaderClient";
 import { useSearchPanel } from "../hooks/useSearchPanel";
 import { SearchOutlined } from "@ant-design/icons";
 import SearchPanel from "./Client/SearchPanel";
+import FooterClient from "./Client/FooterClient";
 
 const LayoutClient = () => {
   const { isOpenSearchPanel, setIsOpenSearchPanel } = useSearchPanel();
@@ -13,6 +14,7 @@ const LayoutClient = () => {
         <Outlet />
       </main>
       <footer>
+        <FooterClient />
         {isOpenSearchPanel && <SearchPanel />}
         {!isOpenSearchPanel && (
           <button

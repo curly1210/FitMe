@@ -8,8 +8,9 @@ import {
 import { useAuthen } from "../../hooks/useAuthen";
 import ModalLogin from "../Modal/ModalLogin";
 import { useModal } from "../../hooks/useModal";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useSearchPanel } from "../../hooks/useSearchPanel";
+import { Dropdown, MenuProps } from "antd";
 
 const HeaderClient = () => {
   /* Start dont-delete */
@@ -22,6 +23,89 @@ const HeaderClient = () => {
     setSelectedCategory,
     setIsOpenSearchPanel,
   } = useSearchPanel();
+  const navigate = useNavigate();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) {
+      return {
+        message: "Good morning",
+        icon: "☀️",
+      };
+    } else if (hour >= 12 && hour < 18) {
+      return {
+        message: "Good afternoon",
+        icon: "🌤️",
+      };
+    } else {
+      return {
+        message: "Good evening",
+        icon: "🌙",
+      };
+    }
+  };
+
+  const { message, icon } = getGreeting();
+
+  const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
+    if (key === "2") {
+      navigate("/address");
+    }
+
+    if (key === "4") {
+      logout();
+    }
+  };
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <p className="text-base font-bold py-1">
+          {message} {icon} {user?.name} !
+        </p>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/3596/3596091.png"
+            alt=""
+          />
+          <div className="flex flex-col">
+            <p className="font-bold">Thông tin đơn hàng</p>
+            <span className="text-xs">
+              Tài khoản, Đơn hàng, Địa chỉ giao nhận
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/846/846364.png"
+            alt=""
+          />
+          <div className="flex flex-col">
+            <p className="font-bold">Lịch sử đơn hàng</p>
+            <span className="text-xs">Tra cứu đơn hàng đã đặt</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "4",
+      label: <div className="text-base font-bold py-1">Đăng xuất</div>,
+    },
+  ];
 
   return (
     <header className=" shrink-0 sticky top-0 bg-white  border-gray-200  px-4 mb-5">
@@ -71,17 +155,17 @@ const HeaderClient = () => {
                 </p>
               </>
             ) : (
-              <>
-                <p>Hello, {user?.name}</p>
-                <button
-                  className="cursor-pointer"
-                  onClick={() => {
-                    logout();
-                  }}
-                >
-                  Đăng xuất
-                </button>
-              </>
+              <Dropdown
+                // overlay={customMenu}
+                menu={{ items, onClick: handleMenuClick }}
+                placement="bottom"
+                trigger={["click"]}
+              >
+                <div className="flex items-center gap-1 cursor-pointer">
+                  <UserOutlined className="text-2xl" />
+                  <p className="text-sm font-bold">{user?.name}</p>
+                </div>
+              </Dropdown>
             )}
           </div>
           <ShoppingCartOutlined className="text-3xl" />
