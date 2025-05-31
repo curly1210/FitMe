@@ -136,11 +136,13 @@ const HeaderClient = () => {
           </div>
         </div>
         <div>
-          <img
-            width={36}
-            src="https://media.routine.vn/1920x0/prod/media/a31071fa-22a1-440b-a6d2-776d07fe0419.webp"
-            alt=""
-          />
+          <Link to={"/"}>
+            <img
+              width={36}
+              src="https://media.routine.vn/1920x0/prod/media/a31071fa-22a1-440b-a6d2-776d07fe0419.webp"
+              alt=""
+            />
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
