@@ -20,7 +20,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return $this->error('Thông tin đăng nhập không chính xác', [], 401,);
+            return $this->error('Thông tin đăng nhập không chính xác', [], 401, );
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT
@@ -117,26 +117,34 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Lấy token từ request
-        $token = JWTAuth::getToken();
-        if (!$token) {
-            return $this->error('Không tìm thấy token để đăng xuất. Vui lòng kiểm tra lại.', [], 400);
+        try {
+            // Lấy token từ request
+            $token = JWTAuth::getToken();
+            if (!$token) {
+                return $this->error('Không tìm thấy token để đăng xuất. Vui lòng kiểm tra lại.', [], 400)
+                    ->cookie('refresh_token', '', -1, '/', null, false, true, false, 'Lax');
+            }
+
+            // Vô hiệu hóa token
+            try {
+                JWTAuth::invalidate($token);
+            } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+                // Token đã hết hạn, vẫn coi như đăng xuất thành công vì token không còn hợp lệ
+                return $this->success([], 'Đăng xuất thành công.', 200)
+                    ->cookie('refresh_token', '', -1, '/', null, false, true, false, 'Lax');
+            } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+                // Token không hợp lệ
+                return $this->error('Token không hợp lệ. Vui lòng kiểm tra lại.', ['message' => $e->getMessage()], 401)
+                    ->cookie('refresh_token', '', -1, '/', null, false, true, false, 'Lax');
+            }
+
+            // Trả về phản hồi thành công và xóa cookie refresh_token
+            return $this->success([], 'Đăng xuất thành công.', 200)
+                ->cookie('refresh_token', '', -1, '/', null, false, true, false, 'Lax');
+        } catch (\Throwable $th) {
+            // Bắt các lỗi khác (nếu có)
+            return $this->error('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.', ['message' => $th->getMessage()], 500)
+                ->cookie('refresh_token', '', -1, '/', null, false, true, false, 'Lax');
         }
-
-        // Vô hiệu hóa token
-        JWTAuth::invalidate($token);
-
-        // Trả về phản hồi thành công và xóa cookie refresh_token
-        return $this->success([], 'Đăng xuất thành công.', 200)->cookie(
-            'refresh_token',
-            '',
-            -1, // Xóa cookie
-            '/',
-            null,
-            false, // Secure
-            true, // HttpOnly
-            false, // Raw
-            'Lax' // SameSite
-        );
     }
 }
