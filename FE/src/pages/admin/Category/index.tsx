@@ -286,7 +286,7 @@ const Category: React.FC = () => {
     });
   };
 
-  const categoryList = data?.data?.categories;
+  const categoryList = data?.data;
 
   return (
     <div className="p-2 bg-white min-h-screen">

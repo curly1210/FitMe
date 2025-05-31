@@ -24,7 +24,7 @@ class CategoryController extends Controller
         $parentCategories = Category::query()->whereNull('parent_id')->get();
         $childCategories = Category::query()->whereNotNull('parent_id')->get();
         if ($parentCategories->isEmpty()) {
-            return $this->success([], "Không có danh mục");
+            return response()->json([])->status(200);
         } else {
             return new CategoryResource($parentCategories, $childCategories);
         }

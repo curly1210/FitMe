@@ -22,7 +22,11 @@ const AttachAxios = () => {
       async (error) => {
         const prevRequest = error?.config;
         // console.log("cuong dep trai");
-        if (error?.response?.status === 401 && !prevRequest?.sent) {
+        if (
+          (error?.response?.status === 401 ||
+            error?.response?.status === 403) &&
+          !prevRequest?.sent
+        ) {
           prevRequest.sent = true;
 
           try {

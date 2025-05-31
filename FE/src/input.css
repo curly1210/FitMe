@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 * {
   font-family: "Roboto Condensed", sans-serif;
 }
@@ -7,3 +17,78 @@
 .ant-spin-fullscreen {
   background-color: white; /* Tailwind amber-400 */
 }
+
+body {
+  /* overflow: hidden !important; */
+  overflow-x: hidden !important;
+}
+
+/* Bọc container để dot nằm đè lên slide */
+.custom-carousel-wrapper {
+  position: relative;
+}
+
+/* Dot chuyển sang bên phải và dọc */
+.custom-carousel-wrapper .slick-dots {
+  position: absolute !important;
+  bottom: 10%;
+  right: 1%;
+  /* transform: translateY(-50%); */
+  display: flex !important;
+  flex-direction: column;
+  align-items: end;
+  /* justify-content: center; */
+  gap: 8px;
+  z-index: 10;
+}
+
+/* Tùy chỉnh dot nếu muốn */
+.custom-carousel-wrapper .slick-dots li button:before {
+  /* font-size: 10px; */
+  color: white;
+  opacity: 0.75;
+}
+
+.custom-carousel-wrapper .slick-dots li.slick-active button:before {
+  color: black;
+  font-size: 10px;
+  opacity: 1;
+}
+
+/*  */
+.ant-select-selector {
+  border-radius: 0px !important;
+  height: 48px !important;
+  /* padding: 12px !important; */
+  /* @apply px-4 py-2; */
+}
+
+.ant-checkbox-inner {
+  width: 25px !important;
+  height: 25px !important;
+  border-radius: 0px !important;
+  /* background-color: black !important;
+  border-color: black !important; */
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: black !important;
+  border-color: black !important;
+}
+
+.ant-checkbox-inner {
+  border-color: black !important;
+}
+
+.ant-checkbox-inner:hover {
+  border-color: black !important;
+}
+
+.ant-checkbox-inner::after {
+  width: 9px !important;
+  height: 14px !important;
+}
+
+/* .custom-antd-dropdown .ant-select-item {
+  @apply px-4 py-2 text-sm hover:bg-gray-100;
+} */

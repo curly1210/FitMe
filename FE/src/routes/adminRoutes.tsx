@@ -1,15 +1,18 @@
-import Authenticate from "../components/Authenticate";
 import LayoutAdmin from "../components/LayoutAdmin";
 import Banner from "../pages/admin/Banner";
 import Category from "../pages/admin/Category";
 
 import Bienthe from "../pages/admin/BienThe/indext";
 import Dashboard from "../pages/admin/Dashboard";
+
 import BannerList from "../pages/admin/Banner";
+import ProtectAdmin from "../components/ProtectAdmin";
+import User from "../pages/admin/User/indext";
+
 
 export const adminRoutes = [
   {
-    element: <Authenticate role="Quản trị viên" />,
+    element: <ProtectAdmin role="Quản trị viên" />,
     children: [
       {
         path: "/admin",
@@ -30,6 +33,10 @@ export const adminRoutes = [
           {
             path: "bienthe",
             element: <Bienthe />,
+          },
+                 {
+            path: "users",
+            element: <User />,
           },
         ],
       },

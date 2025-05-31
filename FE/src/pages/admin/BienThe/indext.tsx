@@ -19,8 +19,8 @@ import Edit from "./edit";
 // };
 
 const Bienthe = () => {
-  const { data: colorData } = useList({ resource: "variations/color" });
-  const { data: sizeData } = useList({ resource: "variations/size" });
+  const { data: colorData } = useList({ resource: "admin/variations/color" });
+  const { data: sizeData } = useList({ resource: "admin/variations/size" });
   const colors = colorData?.data ?? [];
   // const colors = colorData?.data ?? [];
   const sizes = sizeData?.data ?? [];

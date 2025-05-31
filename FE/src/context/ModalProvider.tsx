@@ -1,25 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  createContext,
-  ReactNode,
-  // useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
 interface ModalContextType {
-  openPopup: (content: React.ReactNode) => void;
-  closePopup: () => void;
+  openModal: (content: React.ReactNode) => void;
+  closeModal: () => void;
 }
 
 export const ModalContext = createContext<ModalContextType>({
-  openPopup: () => {},
-  closePopup: () => {},
+  openModal: () => {},
+  closeModal: () => {},
 });
-
-// export const useModalContext = () => {
-//   return useContext(ModalContext);
-// };
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const [isShowing, setIsShowing] = useState(false);
@@ -33,22 +23,21 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isShowing]);
 
-  const openPopup = (content: ReactNode) => {
+  const openModal = (content: ReactNode) => {
     setIsShowing(true);
     setContent(content);
   };
 
-  const closePopup = () => {
+  const closeModal = () => {
     setIsShowing(false);
     setContent(null);
   };
 
   return (
-    <ModalContext.Provider value={{ openPopup, closePopup }}>
+    <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
       {isShowing && (
-        <div className="fixed inset-0 ">
-          {/* <div className="absolute inset-0 bg-slate-600/60"></div> */}
+        <div className="fixed inset-0 z-100 ">
           <div
             onClick={() => setIsShowing(false)}
             className="absolute inset-0 flex items-center justify-center bg-slate-600/60 "

@@ -1,4 +1,4 @@
-import { Drawer, Space, Button, Input, Form, message } from "antd";
+import { Drawer, Space, Button, Input, Form, message, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
 import { useOne, useUpdate } from "@refinedev/core";
@@ -81,6 +81,15 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
         </div>
       }
     >
+             {isLoading ? (
+          <Spin
+            className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+            style={{ textAlign: "center" }}
+            size="large"
+          />
+        ) : (
+          ""
+        )}
       <Form form={form} onFinish={onFinish} layout="vertical">
         {type === "colo" && (
           <>
