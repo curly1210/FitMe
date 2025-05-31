@@ -1,1 +1,0 @@
-export const FRONTEND_BASE_URL = "http://localhost:5173";

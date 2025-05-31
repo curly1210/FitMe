@@ -42,7 +42,7 @@ class CategoryController extends Controller
             [
                 'name' => 'required|string|max:255',
 
-                'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             ],
             [
 
@@ -137,7 +137,7 @@ class CategoryController extends Controller
                 [
                     'name' => 'required|string|max:255',
 
-                    'image' => 'image|mimes:jpeg,png,jpg|max:2048',
+                    'image' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
                 ],
                 [
 

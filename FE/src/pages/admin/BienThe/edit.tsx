@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Drawer, Space, Button, Input, Form, message, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
@@ -14,7 +15,8 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
   const [form] = Form.useForm();
   const [color, setColor] = useState("#1890ff");
 
-  const resource = type === "colo" ? "variations/color" : "variations/size";
+  const resource =
+    type === "colo" ? "admin/variations/color" : "admin/variations/size";
 
   const { data, isLoading } = useOne({
     resource,
@@ -35,7 +37,6 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
     }
   }, [data, form, type]);
   // console.log(data)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFinish = (values: any) => {
     update(
       {
@@ -81,15 +82,15 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
         </div>
       }
     >
-             {isLoading ? (
-          <Spin
-            className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
-            style={{ textAlign: "center" }}
-            size="large"
-          />
-        ) : (
-          ""
-        )}
+      {isLoading ? (
+        <Spin
+          className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+          style={{ textAlign: "center" }}
+          size="large"
+        />
+      ) : (
+        ""
+      )}
       <Form form={form} onFinish={onFinish} layout="vertical">
         {type === "colo" && (
           <>
@@ -97,7 +98,10 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
               <Input />
             </Form.Item>
             <Form.Item label="Mã màu">
-              <ChromePicker color={color} onChange={(c:any) => setColor(c.hex)} />
+              <ChromePicker
+                color={color}
+                onChange={(c: any) => setColor(c.hex)}
+              />
             </Form.Item>
           </>
         )}

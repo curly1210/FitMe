@@ -46,7 +46,7 @@ const Bienthe = () => {
   };
 
   const handleDelete = (
-    resource: "variations/color" | "variations/size",
+    resource: "admin/variations/color" | "admin/variations/size",
     id: number | string
   ) => {
     deleteOne(
@@ -59,7 +59,7 @@ const Bienthe = () => {
   };
 
   const menu = (
-    resource: "variations/color" | "variations/size",
+    resource: "admin/variations/color" | "admin/variations/size",
     id: number | string
   ) => (
     <Menu>
@@ -67,7 +67,10 @@ const Bienthe = () => {
         key="edit"
         icon={<EditOutlined />}
         onClick={() =>
-          openEditDrawer(resource === "variations/color" ? "colo" : "sizee", id)
+          openEditDrawer(
+            resource === "admin/variations/color" ? "colo" : "sizee",
+            id
+          )
         }
       >
         Sửa
@@ -110,7 +113,7 @@ const Bienthe = () => {
                     <span className="font-medium">{item.name}</span>
                   </div>
                   <Dropdown
-                    overlay={menu("variations/color", item.id!)}
+                    overlay={menu("admin/variations/color", item.id!)}
                     trigger={["click"]}
                   >
                     <MoreOutlined className="text-gray-500 cursor-pointer" />
@@ -145,7 +148,7 @@ const Bienthe = () => {
                 >
                   <span className="font-medium">{item.name}</span>
                   <Dropdown
-                    overlay={menu("variations/size", item.id!)}
+                    overlay={menu("admin/variations/size", item.id!)}
                     trigger={["click"]}
                   >
                     <MoreOutlined className="text-gray-500 cursor-pointer" />
