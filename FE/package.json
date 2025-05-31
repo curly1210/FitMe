@@ -19,7 +19,7 @@
     "@refinedev/simple-rest": "^5.0.10",
     "@tailwindcss/cli": "^4.1.7",
     "@tailwindcss/vite": "^4.1.7",
-    "antd": "^5.25.2",
+    "antd": "^5.25.3",
     "axios": "^1.9.0",
     "json-server": "^0.17.4",
     "json-server-auth": "^2.1.0",

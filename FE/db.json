@@ -1,16 +1,4 @@
 {
-  "posts": [
-    {
-      "id": "1",
-      "title": "a title",
-      "views": 100
-    },
-    {
-      "id": "2",
-      "title": "another title",
-      "views": 200
-    }
-  ],
   "colors": [
     {
       "name": "vàng 22",
@@ -245,5 +233,54 @@
       ]
     }
   ],
-  "users": []
+  "users": [],
+  "banners": [
+    {
+      "id": 1,
+      "title": "Khuyến mãi 23",
+      "direct_link": "/danh-muc/do-nu/ao-phong",
+      "url_image": "/images/banner2.jpg",
+      "image": {
+        "uid": "rc-upload-1748660191986-4"
+      },
+      "updated_at": "2025-05-31 14:16:36"
+    },
+    {
+      "id": 2,
+      "title": "Khuyến mãi ",
+      "direct_link": "http://localhost:8000/api/category/do-namm/ao-phong",
+      "url_image": "/images/banner2.jpg",
+      "updated_at": "",
+      "image": {
+        "uid": "rc-upload-1748589693732-4"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Khuyến mãi",
+      "direct_link": "#",
+      "updated_at": "",
+      "url_image": "/images/banner2.jpg"
+    },
+    {
+      "id": 4,
+      "title": "Khuyến mãi ",
+      "direct_link": "#",
+      "url_image": "/images/banner2.jpg"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Áo sơ mi trắng",
+      "slug": "ao-so-mi-trang"
+    }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "name": "tin",
+      "slug": "tin-tuc"
+    }
+  ]
 }

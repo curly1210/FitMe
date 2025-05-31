@@ -5,6 +5,7 @@ import Category from "../pages/admin/Category";
 
 import Bienthe from "../pages/admin/BienThe/indext";
 import Dashboard from "../pages/admin/Dashboard";
+import BannerList from "../pages/admin/Banner";
 
 export const adminRoutes = [
   {
@@ -20,7 +21,7 @@ export const adminRoutes = [
           },
           {
             path: "banner",
-            element: <Banner />,
+            element: <BannerList />,
           },
           {
             path: "category",
