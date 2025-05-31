@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Client\WishlistController;
+use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -257,6 +258,7 @@ Route::prefix('client')->group(function () {
     Route::get('posts', [ClientPostController::class, 'index']);
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
+    Route::get('/categories', [ClientCategoryController::class, 'index']);
 });
 
 Route::middleware('auth:api')->group(function(){
