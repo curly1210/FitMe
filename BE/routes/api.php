@@ -100,9 +100,7 @@ Route::prefix('admin')->name('admin')->group(function () {
     Route::get('/banners/posts', [BannerController::class, 'getPosts'])->name('banners.getPosts');
     Route::get('/banners/products', [BannerController::class, 'getProducts'])->name('banners.getProducts');
     Route::get('/banners/{id}', [BannerController::class, 'show'])->name('banners.show');
-
-    Route::post('/banners/edit/{id}', [BannerController::class, 'edit'])->name('banners.edit');
-    Route::post('/banners/{id}', [BannerController::class, 'update'])->name('banners.update');
+    Route::patch('/banners/{id}', [BannerController::class, 'update'])->name('banners.update');
 });
 
 
@@ -261,7 +259,7 @@ Route::prefix('client')->group(function () {
     Route::get('/categories', [ClientCategoryController::class, 'index']);
 });
 
-Route::middleware('auth:api')->group(function(){
+Route::middleware('auth:api')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{product_id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
