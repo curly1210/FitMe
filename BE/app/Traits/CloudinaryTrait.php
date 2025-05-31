@@ -48,9 +48,9 @@ trait CloudinaryTrait
             $image->scaleDown(width: 300, height: 200);
         }
 
-        // Encode ảnh sang jpeg với chất lượng mong muốn
-        $tmpPath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
-        $image->toJpeg($quality)->save($tmpPath);
+        // Encode ảnh sang webp với chất lượng mong muốn
+        $tmpPath = sys_get_temp_dir() . '/' . uniqid() . '.webp';
+        $image->toWebp($quality)->save($tmpPath);
 
         // Upload lên Cloudinary
         $cloudinary = new Cloudinary();
