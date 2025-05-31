@@ -72,7 +72,7 @@ class AddressController extends Controller
             $existingAddressesCount = ShippingAddress::where('user_id', $user->id)->count();
 
             // Nếu danh sách rỗng và không cung cấp is_default, tự động đặt is_default = 1
-            if ($existingAddressesCount === 0 && !isset($validatedData['is_default'])) {
+            if ($existingAddressesCount === 0) {
                 $data['is_default'] = 1;
             }
 

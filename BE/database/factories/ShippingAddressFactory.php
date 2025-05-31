@@ -31,6 +31,7 @@ class ShippingAddressFactory extends Factory
         return [
             'name_receive' => fake()->name(),
             'phone' => fake()->randomElement($phonePrefixes) . fake()->numerify('######'),
+            'email' => fake()->email(),
             'country' => 'Việt Nam',
             'city' => $city,
             'district' => $district,
