@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Form, Input } from "antd";
-import login from "../../../public/login.png";
+import login from "../../assets/images/login.png";
 import {
   LockOutlined,
   MailOutlined,

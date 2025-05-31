@@ -89,6 +89,25 @@ body {
   height: 14px !important;
 }
 
+.ant-dropdown .ant-dropdown-menu {
+  border-radius: 0px;
+}
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item {
+  border-radius: 0px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item:last-child {
+  border-bottom: none;
+}
+
+.ant-empty-image {
+  height: 41px !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
 /* .custom-antd-dropdown .ant-select-item {
   @apply px-4 py-2 text-sm hover:bg-gray-100;
 } */
