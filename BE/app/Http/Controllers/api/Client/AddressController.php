@@ -188,7 +188,7 @@ class AddressController extends Controller
             $address->delete();
             return $this->success(null, 'Địa chỉ nhận hàng đã được xóa thành công.', 200);
         } catch (\Exception $e) {
-            return $this->error('Có lỗi xảy ra khi xóa địa chỉ. Vui lòng thử lại sau.', ['error' => $e->getMessage()], 500);
+            return $this->error('Có lỗi xảy ra khi xóa địa chỉ. Vui lòng thử lại sau.', ['error' => $e->getMessage()], 403);
         }
     }
 }
