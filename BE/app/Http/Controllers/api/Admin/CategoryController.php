@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Models\Category;
 use Cloudinary\Cloudinary;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Traits\CloudinaryTrait;
 use App\Http\Controllers\Controller;
@@ -24,7 +25,7 @@ class CategoryController extends Controller
         $parentCategories = Category::query()->whereNull('parent_id')->get();
         $childCategories = Category::query()->whereNotNull('parent_id')->get();
         if ($parentCategories->isEmpty()) {
-            return response()->json([])->status(200);
+            return response()->json([], 200);
         } else {
             return new CategoryResource($parentCategories, $childCategories);
         }
@@ -38,9 +39,9 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make(
-            $request->only(['name', 'parent_id', 'image']),
+            $request->only(['name', 'parent_id', 'image', 'slug']),
             [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:categories,name',
 
                 'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             ],
@@ -49,9 +50,9 @@ class CategoryController extends Controller
                 'name.required' => 'Tên danh mục là bắt buộc',
                 'name.string' => 'Tên danh mục phải là chuỗi',
                 'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
-
+                'name.unique' => 'Tên danh mục đã tồn tại',
                 'image.image' => 'File upload phải là một tệp hình ảnh',
-                'image.mimes' => 'File upload chỉ nhận định dạng jpeg, png hoặc jpg',
+                'image.mimes' => 'File upload chỉ nhận định dạng jpeg, png, webp hoặc jpg',
                 'image.max' => 'Ảnh không được vượt quá 2MB',
                 'image.required' => "Bạn chưa chọn ảnh"
             ]
@@ -70,12 +71,14 @@ class CategoryController extends Controller
                 'parent_id' => ($request->parent_id === null || $request->parent_id === 'null')
                     ? null
                     : (int)$request->parent_id,
+                'slug' => Str::slug($request->name, '-'),
                 'image' => $uploadedFileUrl['public_id'],
             ]);
             $data = response()->json([
                 'id' => $category->id,
 
                 'name' => $category->name,
+                'slug' => $category->slug,
                 'parent_id' => $category->parent_id,
                 'image' => $this->buildImageUrl($category->image),
             ]);
@@ -133,9 +136,9 @@ class CategoryController extends Controller
             return $this->error('Danh mục không tồn tại', [], 404);
         } else {
             $validator = Validator::make(
-                $request->only(['name', 'image']),
+                $request->only(['name', 'image', 'slug']),
                 [
-                    'name' => 'required|string|max:255',
+                    'name' => 'required|string|max:255|unique:categories,name',
 
                     'image' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
                 ],
@@ -144,9 +147,9 @@ class CategoryController extends Controller
                     'name.required' => 'Tên danh mục là bắt buộc',
                     'name.string' => 'Tên danh mục phải là chuỗi',
                     'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
-
+                    'name.unique' => 'Tên danh mục đã tồn tại',
                     'image.image' => 'File upload phải là một tệp hình ảnh',
-                    'image.mimes' => 'File upload chỉ nhận định dạng jpeg, png hoặc jpg',
+                    'image.mimes' => 'File upload chỉ nhận định dạng jpeg, png, webp hoặc jpg',
                     'image.max' => 'Ảnh không được vượt quá 2MB',
 
                 ]
@@ -172,10 +175,12 @@ class CategoryController extends Controller
                 $category->update([
                     'name' => $request->name,
                     'image' => $uploadedFileUrl['public_id'],
+                    'slug' => Str::slug($request->name, '-'),
                 ]);
                 $data = [
                     'id' => $category->id,
                     'name' => $category->name,
+                    'slug' =>  $category->slug,
                     'image' => $this->buildImageUrl($category->image),
                 ];
                 return $this->success($data, "Cập nhật danh mục thành công", 200);

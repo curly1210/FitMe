@@ -21,7 +21,7 @@ class CategoryFactory extends Factory
         return [
 
             'parent_id' => null,
-            'is_active' => 1,
+
             'image' => fake()->imageUrl(640, 480, 'categories'),
             'created_at' => now(),
             'updated_at' => now(),

@@ -32,6 +32,7 @@ class CategoryResource extends ResourceCollection
                     'name' => $parent->name,
                     'parent_id' => $parent->parent_id,
                     'is_active' => $parent->is_active,
+                    'slug' => $parent->slug,
                     'created_at' => $parent->created_at == null ? $parent->created_at : $parent->created_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s'),
                     'updated_at' => $parent->updated_at == null ? $parent->updated_at : $parent->updated_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s'),
                     'deleted_at' => $parent->deleted_at == null ? $parent->deleted_at : $parent->deleted_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s'),
@@ -40,6 +41,7 @@ class CategoryResource extends ResourceCollection
                         return [
                             'id' => $item->id,
                             'name' => $item->name,
+                            'slug' => $item->slug,
                             'image' => $this->buildImageUrl($item->image),
                         ];
                     }),

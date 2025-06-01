@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +17,10 @@ class PostFactory extends Factory
      */
     public function definition(): array
     {
+        $title = $this->faker->unique()->sentence(1);
         return [
-            'title' => $this->faker->sentence(4), // Câu ngẫu nhiên, tối đa 50 ký tự
+            'title' => $title, // Câu ngẫu nhiên, tối đa 50 ký tự
+            'slug' => Str::slug($title), // Tạo slug từ tiêu đề
             'content' => $this->faker->paragraphs(3, true), // 3 đoạn văn
             'thumbnail' => $this->faker->imageUrl(640, 480, 'news'), // URL hình ảnh ngẫu nhiên
             'is_active' => $this->faker->boolean(90), // 90% là active

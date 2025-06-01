@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -19,8 +20,8 @@ class CategorySeeder extends Seeder
             'Quần nam',
             'Bộ quần áo nam',
             'Đồ thể thao nam',
-            'Đồ mặc trong & đồ lót nam',
-            'Phụ kiện nam',
+
+
         ],
         'Đồ nữ' => [
             'Áo khoác nữ',
@@ -28,16 +29,10 @@ class CategorySeeder extends Seeder
             'Quần nữ',
             'Bộ quần áo nữ',
             'Đồ thể thao nữ',
-            'Đồ mặc trong & Đồ lót nữ',
-            'Phụ kiện nữ',
+
+
         ],
-        'Đồ trẻ em' => [
-            'Áo thun trẻ em',
-            'Áo polo trẻ em',
-            'Quần trẻ em',
-            'Đồ mặc trong trẻ em',
-            'Phụ kiện trẻ em',
-        ],
+
         'Bộ sưu tập' => [
             'Bộ sưu tập xuân',
             'Bộ sưu tập hạ',
@@ -51,10 +46,10 @@ class CategorySeeder extends Seeder
     public function run()
     {
         foreach (self::$categoryTree as $parent => $children) {
-            $parentModel = Category::factory()->create(['name' => $parent]);
+            $parentModel = Category::factory()->create(['name' => $parent, 'slug' =>  Str::slug($parent)]);
 
             foreach ($children as $child) {
-                $childModel = Category::factory()->child($parentModel->id)->create(['name' => $child]);
+                $childModel = Category::factory()->child($parentModel->id)->create(['name' => $child, 'slug' => Str::slug($child)]);
 
                 self::$categoryIds[$child] = $childModel->id;
             }
