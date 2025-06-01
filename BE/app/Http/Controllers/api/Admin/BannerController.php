@@ -24,61 +24,60 @@ class BannerController extends Controller
         if ($banners->isEmpty()) {
             return $this->success([], "không có banner", 200);
         } else {
+            $data = [];
+            foreach ($banners as $banner) {
+                if ($banner) {
+                    $directLink = $banner->direct_link;
+                    $directElements = array_values(array_filter(explode('/', $directLink)));
+                    $directType = $directElements[0];
+                    $directValue = $directElements[1];
+                    # Trường hợp có danh mục con
+                    if ($directType == "danh-muc") {
+                        $subDirectValue = $directElements[1]; # trường hợp có danh mục con
 
-            return response()->json(
-                $banners->map(function ($banner) {
-                    return [
+                        // dd($subDirectValue);
+                        $parentId = Category::query()->where('slug', $subDirectValue)->value('parent_id');
+
+
+                        if ($parentId == null) {
+                            $parentId = Category::query()->where('slug', 'LIKE', $directValue)->value('parent_id');
+                            $subDirectValue = null;
+                        } else {
+                            $slugParent = Category::query()->where('id', $parentId)->value('slug');
+                            $directValue = $slugParent;
+                        }
+                    } else {
+                        $subDirectValue = null; # trường hợp không có danh mục con
+                    }
+                    $data[] = [
                         'id' => $banner->id,
                         'title' => $banner->title,
-                        'direct_link' => $banner->direct_link,
+                        'direct_link' => $directLink,
+                        'direct_type' => $directType,
+                        'direct_value' => $directValue,
+                        'sub_direct_value' =>  $subDirectValue,
                         'url_image' => $this->buildImageUrl($banner->url_image),
+                        "updated_at" => $banner->updated_at
                     ];
-                }),
-                200
-            );
-        }
-    }
-    public function show($id)
-    {
-        $banner = Banner::find($id);
-
-        if ($banner) {
-            $directLink = $banner->direct_link;
-            $directElements = array_values(array_filter(explode('/', $directLink)));
-            $directType = $directElements[0];
-            $directValue = $directElements[1];
-            # Trường hợp có danh mục con
-            if ($directType == "danh-muc") {
-                $subDirectValue = $directElements[1]; # trường hợp có danh mục con
-
-                // dd($subDirectValue);
-                $parentId = Category::query()->where('slug', $subDirectValue)->value('parent_id');
-
-
-                if ($parentId == null) {
-                    $parentId = Category::query()->where('slug', 'LIKE', $directValue)->value('parent_id');
-                    $subDirectValue = null;
                 } else {
-                    $slugParent = Category::query()->where('id', $parentId)->value('slug');
-                    $directValue = $slugParent;
+                    return $this->error('Không tìm thấy banner', 404);
                 }
-            } else {
-                $subDirectValue = null; # trường hợp không có danh mục con
             }
-            return response()->json([
-                'id' => $banner->id,
-                'title' => $banner->title,
-                'direct_link' => $directLink,
-                'direct_type' => $directType,
-                'direct_value' => $directValue,
-                'sub_direct_value' =>  $subDirectValue,
-                'url_image' => $this->buildImageUrl($banner->url_image),
-                "updated_at" => $banner->updated_at
-            ], 200);
-        } else {
-            return $this->error('Không tìm thấy banner', 404);
+            return response()->json($data);
+            // return response()->json(
+            //     $banners->map(function ($banner) {
+            //         return [
+            //             'id' => $banner->id,
+            //             'title' => $banner->title,
+            //             'direct_link' => $banner->direct_link,
+            //             'url_image' => $this->buildImageUrl($banner->url_image),
+            //         ];
+            //     }),
+            //     200
+            // );
         }
     }
+
     public function getCategories()
     {
 
