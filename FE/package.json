@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"json-server --watch db.json -m ./node_modules/json-server-auth\" \"npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch\"",
+    "dev": "concurrently \"vite\" --port 5173 \"json-server --watch db.json -m ./node_modules/json-server-auth\" \"npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch\"",
     "server": "json-server --watch db.json -m ./node_modules/json-server-auth",
     "taild": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch",
     "build": "tsc -b && vite build",

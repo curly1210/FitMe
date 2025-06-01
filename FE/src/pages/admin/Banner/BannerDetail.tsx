@@ -24,7 +24,7 @@ type Props = {
 
 const BannerDetailDrawer: React.FC<Props> = ({ bannerId, visible, onClose }) => {
   const { data, isLoading, isError } = useOne<Banner>({
-    resource: "banners",
+    resource: "admin/banners",
     id: bannerId ?? 0,
     queryOptions: { enabled: bannerId !== null },
   });
