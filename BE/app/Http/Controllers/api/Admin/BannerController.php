@@ -147,7 +147,7 @@ class BannerController extends Controller
                 //
                 $bannerImage = $this->uploadImageToCloudinary($request->file('url_image'), ['quantity' => 100, 'folder' => 'uploads-banner']);
             } else {
-                $bannerImage = ['public_id' => $banner->image];
+                $bannerImage = ['public_id' => $banner->url_image];
             }
             // # Ghép đường dẫn
             // $baseUrl = env('APP_FE_URL') ; # Đường dẫn gốc
@@ -155,8 +155,6 @@ class BannerController extends Controller
                 $direct_link = "/" . $request->direct_type . '/' . $request->direct_value;
             } else if ($request->sub_direct_value != null || $request->sub_direct_value != "#") {
                 $direct_link = "/" . $request->direct_type . '/' . $request->sub_direct_value;
-            } else {
-                $direct_link = "/" . $request->direct_type . '/' . $request->direct_value . '/' . $request->sub_direct_value;
             }
 
 
