@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use Cloudinary\Api\Upload\UploadApi;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Admin\CategoryResource;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -138,7 +139,7 @@ class CategoryController extends Controller
             $validator = Validator::make(
                 $request->only(['name', 'image', 'slug']),
                 [
-                    'name' => 'required|string|max:255|unique:categories,name',
+                    'name' => 'required|string|max:255|unique:categories,name,' . $id,
 
                     'image' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
                 ],
