@@ -20,7 +20,7 @@ class BannerController extends Controller
     use ApiResponse, CloudinaryTrait;
     public function index()
     {
-        $banners = Banner::query()->get(['id', 'title', 'url_image']);
+        $banners = Banner::query()->get(['id', 'title', 'url_image', 'direct_link']);
         if ($banners->isEmpty()) {
             return $this->success([], "không có banner", 200);
         } else {
@@ -30,6 +30,7 @@ class BannerController extends Controller
                     return [
                         'id' => $banner->id,
                         'title' => $banner->title,
+                        'direct_link' => $banner->direct_link,
                         'url_image' => $this->buildImageUrl($banner->url_image),
                     ];
                 }),
@@ -40,11 +41,37 @@ class BannerController extends Controller
     public function show($id)
     {
         $banner = Banner::find($id);
+
         if ($banner) {
+            $directLink = $banner->direct_link;
+            $directElements = array_values(array_filter(explode('/', $directLink)));
+            $directType = $directElements[0];
+            $directValue = $directElements[1];
+            # Trường hợp có danh mục con
+            if ($directType == "danh-muc") {
+                $subDirectValue = $directElements[1]; # trường hợp có danh mục con
+
+                // dd($subDirectValue);
+                $parentId = Category::query()->where('slug', $subDirectValue)->value('parent_id');
+
+
+                if ($parentId == null) {
+                    $parentId = Category::query()->where('slug', 'LIKE', $directValue)->value('parent_id');
+                    $subDirectValue = null;
+                } else {
+                    $slugParent = Category::query()->where('id', $parentId)->value('slug');
+                    $directValue = $slugParent;
+                }
+            } else {
+                $subDirectValue = null; # trường hợp không có danh mục con
+            }
             return response()->json([
                 'id' => $banner->id,
                 'title' => $banner->title,
-                'direct_link' => $banner->direct_link,
+                'direct_link' => $directLink,
+                'direct_type' => $directType,
+                'direct_value' => $directValue,
+                'sub_direct_value' =>  $subDirectValue,
                 'url_image' => $this->buildImageUrl($banner->url_image),
                 "updated_at" => $banner->updated_at
             ], 200);
@@ -108,17 +135,17 @@ class BannerController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:50',
-            // 'direct_type' => 'required', # danh-muc, san-pham, bai-viet
-            // 'direct_value' => 'required', # sản phẩm ao-thun-ong-rong,Bài viết "bai-viet-ra-mat-san-pham", danh mục 'ao-khoac-nam'
-            // 'sub_direct_value' => 'nullable', #  Trường hợp có danh mục con
-            'direct_link' => 'required', # Trường hợp có liên kết cụ thể
+            'direct_type' => 'required', # danh-muc, san-pham, bai-viet
+            'direct_value' => 'required', # sản phẩm ao-thun-ong-rong,Bài viết "bai-viet-ra-mat-san-pham", danh mục 'ao-khoac-nam'
+            'sub_direct_value' => 'nullable', #  Trường hợp có danh mục con
+            // 'direct_link' => 'required', # Trường hợp có liên kết cụ thể
             'url_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'title.required' => 'Tiêu đề là bắt buộc',
             'title.max' => 'Tiêu đề không được vượt quá 50 ký tự',
-            // 'direct_type.required' => 'Bạn chưa chọn loại liên kết',
-            // 'direct_value.required' => 'Ban phải chọn liên kết cụ thể',
-            "direct_link.required" => 'Bạn chưa chọn liên kết',
+            'direct_type.required' => 'Bạn chưa chọn loại liên kết',
+            'direct_value.required' => 'Ban phải chọn liên kết cụ thể',
+            // "direct_link.required" => 'Bạn chưa chọn liên kết',
             'url_image.image' => 'File upload phải là một tệp hình ảnh',
             'url_image.mimes' => 'File upload chỉ nhận định dạng jpeg, png hoặc jpg',
             'url_image.max' => 'Ảnh không được vượt quá 2MB',
@@ -135,21 +162,21 @@ class BannerController extends Controller
                 $bannerImage = ['public_id' => $banner->image];
             }
             // # Ghép đường dẫn
-            // $baseUrl = env('APP_URL') . ":8000"; # Đường dẫn gốc
-            // if ($request->sub_direct_value == "#" || $request->sub_direct_value == null) {
-            //     $direct_link =  $baseUrl . "/" . $request->direct_type . '/' . $request->direct_value;
-            // } else if ($request->sub_direct_value != null || $request->sub_direct_value != "#") {
-            //     $direct_link =  $baseUrl . "/" . $request->direct_type . '/' . $request->sub_direct_value;
-            // } else {
-            //     $direct_link =  $baseUrl . "/" . $request->direct_type . '/' . $request->direct_value . '/' . $request->sub_direct_value;
-            // }
+            // $baseUrl = env('APP_FE_URL') ; # Đường dẫn gốc
+            if ($request->sub_direct_value == "#" || $request->sub_direct_value == null) {
+                $direct_link = "/" . $request->direct_type . '/' . $request->direct_value;
+            } else if ($request->sub_direct_value != null || $request->sub_direct_value != "#") {
+                $direct_link = "/" . $request->direct_type . '/' . $request->sub_direct_value;
+            } else {
+                $direct_link = "/" . $request->direct_type . '/' . $request->direct_value . '/' . $request->sub_direct_value;
+            }
 
 
 
             # Cập nhật banner
             $updated = $banner->update([
                 'title' => $request->title,
-                'direct_link' => $request->direct_link,
+                'direct_link' => $direct_link,
                 'url_image' => $bannerImage['public_id'],
             ]);
             if (!$updated) {

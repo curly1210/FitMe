@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Post;
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,33 +19,53 @@ class BannerFactory extends Factory
      */
     public function definition(): array
     {
-
+        $slugCategory = Category::inRandomOrder()->whereNotNull('parent_id')->value('slug');
+        $slugProduct = Product::inRandomOrder()->value('slug');
+        $slugPost = Post::inRandomOrder()->value('slug');
+        $slugParentCategory = Category::query()->whereNull('parent_id')->inRandomOrder()->value('slug');
         $data = [
             [
-                'title' => 'Khuyến mãi hè rực rỡ',
-                'direct_link' => 'https://example.com/summer-sale',
-                'url_image' => 'uploads/banners/banner1.jpg',
 
-            ],
-            [
-                'title' => 'Siêu sale cuối tuần',
-                'direct_link' => 'https://example.com/weekend-deal',
+                'direct_link' => '/danh-muc/' . $slugCategory,
+                // 'direct_type' => 'danh-muc',
                 'url_image' => 'uploads/banners/banner2.jpg',
 
             ],
             [
-                'title' => 'Mở bán bộ sưu tập mới',
-                'direct_link' => 'https://example.com/new-collection',
+
+                'direct_link' => '/san-pham/' . $slugProduct,
+                // 'direct_type' => 'san-pham',
                 'url_image' => 'uploads/banners/banner3.jpg',
 
             ],
+            [
+
+                'direct_link' => '/tin-tuc/' . $slugPost,
+                // 'direct_type' => 'tin-tuc',
+                'url_image' => 'uploads/banners/banner4.jpg',
+
+
+
+            ],
+            [
+                'direct_link' => '/danh-muc/' . $slugParentCategory,
+                // 'direct_type' => 'danh-muc',
+                'url_image' => 'uploads/banners/banner5.jpg',
+            ],
         ];
 
-        $banner = $this->faker->randomElement($data);
-
+        $banner = $this->faker->unique()->randomElement($data);
+        $titles = [
+            'Khuyến mãi lớn',
+            'Sản phẩm mới',
+            'Tin tức mới nhất',
+            'Khám phá danh mục',
+            'Ưu đãi đặc biệt',
+        ];
         return [
-            'title' => $banner['title'],
+            'title' => fake()->unique()->randomElement($titles),
             'direct_link' => $banner['direct_link'],
+            // 'direct_type' => $banner['direct_type'],
             'url_image' => $banner['url_image'],
 
             'created_at' => now(),
