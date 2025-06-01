@@ -215,7 +215,15 @@ class BannerController extends Controller
                     'url_image',
                     'updated_at'
                 ]);
-                return $this->success($banner, "Cập nhật banner thành công", 200);
+
+                $data = [
+                    'id' => $banner->id,
+                    'title' => $banner->title,
+                    'direct_link' => $banner->direct_link,
+                    'url_image' => $this->buildImageUrl($banner->url_image),
+                    'updated_at' => $banner->updated_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s'),
+                ];
+                return $this->success($data, "Cập nhật banner thành công", 200);
             }
         }
     }
