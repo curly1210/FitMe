@@ -63,18 +63,7 @@ class BannerController extends Controller
                     return $this->error('Không tìm thấy banner', 404);
                 }
             }
-            return response()->json($data);
-            // return response()->json(
-            //     $banners->map(function ($banner) {
-            //         return [
-            //             'id' => $banner->id,
-            //             'title' => $banner->title,
-            //             'direct_link' => $banner->direct_link,
-            //             'url_image' => $this->buildImageUrl($banner->url_image),
-            //         ];
-            //     }),
-            //     200
-            // );
+            return response()->json($data, 200);
         }
     }
 
