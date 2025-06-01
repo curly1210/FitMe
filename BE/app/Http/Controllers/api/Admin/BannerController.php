@@ -114,6 +114,46 @@ class BannerController extends Controller
             );
         }
     }
+    public function show($id)
+    {
+        $banner = Banner::find($id, ['id', 'title', 'direct_link', 'url_image', 'updated_at']);
+        if ($banner) {
+            $directLink = $banner->direct_link;
+            $directElements = array_values(array_filter(explode('/', $directLink)));
+            $directType = $directElements[0];
+            $directValue = $directElements[1];
+            # Trường hợp có danh mục con
+            if ($directType == "danh-muc") {
+                $subDirectValue = $directElements[1]; # trường hợp có danh mục con
+
+                // dd($subDirectValue);
+                $parentId = Category::query()->where('slug', $subDirectValue)->value('parent_id');
+
+
+                if ($parentId == null) {
+                    $parentId = Category::query()->where('slug', 'LIKE', $directValue)->value('parent_id');
+                    $subDirectValue = null;
+                } else {
+                    $slugParent = Category::query()->where('id', $parentId)->value('slug');
+                    $directValue = $slugParent;
+                }
+            } else {
+                $subDirectValue = null; # trường hợp không có danh mục con
+            }
+            return response()->json([
+                'id' => $banner->id,
+                'title' => $banner->title,
+                'direct_link' => $directLink,
+                'direct_type' => $directType,
+                'direct_value' => $directValue,
+                'sub_direct_value' =>  $subDirectValue,
+                'url_image' => $this->buildImageUrl($banner->url_image),
+                "updated_at" => $banner->updated_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s')
+            ], 200);
+        } else {
+            return $this->error('Không tìm thấy banner', 404);
+        }
+    }
     public function update(Request $request, $id)
     {
         $banner = Banner::find($id);
