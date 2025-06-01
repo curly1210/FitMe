@@ -99,7 +99,8 @@ Route::prefix('admin')->name('admin')->group(function () {
     Route::get('/banners/categories', [BannerController::class, 'getCategories'])->name('banners.getCategories');
     Route::get('/banners/posts', [BannerController::class, 'getPosts'])->name('banners.getPosts');
     Route::get('/banners/products', [BannerController::class, 'getProducts'])->name('banners.getProducts');
-    Route::patch('/banners/{id}', [BannerController::class, 'update'])->name('banners.update');
+    Route::get('/banners/{id}', [BannerController::class, 'show'])->name('banners.show');
+    Route::post('/banners/{id}', [BannerController::class, 'update'])->name('banners.update');
 });
 
 

@@ -114,6 +114,46 @@ class BannerController extends Controller
             );
         }
     }
+    public function show($id)
+    {
+        $banner = Banner::find($id, ['id', 'title', 'direct_link', 'url_image', 'updated_at']);
+        if ($banner) {
+            $directLink = $banner->direct_link;
+            $directElements = array_values(array_filter(explode('/', $directLink)));
+            $directType = $directElements[0];
+            $directValue = $directElements[1];
+            # Trường hợp có danh mục con
+            if ($directType == "danh-muc") {
+                $subDirectValue = $directElements[1]; # trường hợp có danh mục con
+
+                // dd($subDirectValue);
+                $parentId = Category::query()->where('slug', $subDirectValue)->value('parent_id');
+
+
+                if ($parentId == null) {
+                    $parentId = Category::query()->where('slug', 'LIKE', $directValue)->value('parent_id');
+                    $subDirectValue = null;
+                } else {
+                    $slugParent = Category::query()->where('id', $parentId)->value('slug');
+                    $directValue = $slugParent;
+                }
+            } else {
+                $subDirectValue = null; # trường hợp không có danh mục con
+            }
+            return response()->json([
+                'id' => $banner->id,
+                'title' => $banner->title,
+                'direct_link' => $directLink,
+                'direct_type' => $directType,
+                'direct_value' => $directValue,
+                'sub_direct_value' =>  $subDirectValue,
+                'url_image' => $this->buildImageUrl($banner->url_image),
+                "updated_at" => $banner->updated_at->timezone('Asia/Ho_Chi_Minh')->format('d-m-Y H:i:s')
+            ], 200);
+        } else {
+            return $this->error('Không tìm thấy banner', 404);
+        }
+    }
     public function update(Request $request, $id)
     {
         $banner = Banner::find($id);
@@ -147,7 +187,7 @@ class BannerController extends Controller
                 //
                 $bannerImage = $this->uploadImageToCloudinary($request->file('url_image'), ['quantity' => 100, 'folder' => 'uploads-banner']);
             } else {
-                $bannerImage = ['public_id' => $banner->image];
+                $bannerImage = ['public_id' => $banner->url_image];
             }
             // # Ghép đường dẫn
             // $baseUrl = env('APP_FE_URL') ; # Đường dẫn gốc
@@ -155,8 +195,6 @@ class BannerController extends Controller
                 $direct_link = "/" . $request->direct_type . '/' . $request->direct_value;
             } else if ($request->sub_direct_value != null || $request->sub_direct_value != "#") {
                 $direct_link = "/" . $request->direct_type . '/' . $request->sub_direct_value;
-            } else {
-                $direct_link = "/" . $request->direct_type . '/' . $request->direct_value . '/' . $request->sub_direct_value;
             }
 
 
