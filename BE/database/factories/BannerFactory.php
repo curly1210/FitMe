@@ -23,38 +23,8 @@ class BannerFactory extends Factory
         $slugProduct = Product::inRandomOrder()->value('slug');
         $slugPost = Post::inRandomOrder()->value('slug');
         $slugParentCategory = Category::query()->whereNull('parent_id')->inRandomOrder()->value('slug');
-        $data = [
-            [
-
-                'direct_link' => '/danh-muc/' . $slugCategory,
-                // 'direct_type' => 'danh-muc',
-                'url_image' => 'uploads/banners/banner2.jpg',
-
-            ],
-            [
-
-                'direct_link' => '/san-pham/' . $slugProduct,
-                // 'direct_type' => 'san-pham',
-                'url_image' => 'uploads/banners/banner3.jpg',
-
-            ],
-            [
-
-                'direct_link' => '/tin-tuc/' . $slugPost,
-                // 'direct_type' => 'tin-tuc',
-                'url_image' => 'uploads/banners/banner4.jpg',
 
 
-
-            ],
-            [
-                'direct_link' => '/danh-muc/' . $slugParentCategory,
-                // 'direct_type' => 'danh-muc',
-                'url_image' => 'uploads/banners/banner5.jpg',
-            ],
-        ];
-
-        $banner = $this->faker->unique()->randomElement($data);
         $titles = [
             'Khuyến mãi lớn',
             'Sản phẩm mới',
@@ -62,11 +32,17 @@ class BannerFactory extends Factory
             'Khám phá danh mục',
             'Ưu đãi đặc biệt',
         ];
+        $directLinks = [
+            '/danh-muc/' . $slugCategory,
+            '/san-pham/' . $slugProduct,
+            '/tin-tuc/' . $slugPost,
+            '/danh-muc/' . $slugParentCategory,
+        ];
         return [
             'title' => fake()->unique()->randomElement($titles),
-            'direct_link' => $banner['direct_link'],
+            'direct_link' => fake()->unique()->randomElement($directLinks),
             // 'direct_type' => $banner['direct_type'],
-            'url_image' => $banner['url_image'],
+            'url_image' => fake()->imageUrl(),
 
             'created_at' => now(),
             'updated_at' => now(),
