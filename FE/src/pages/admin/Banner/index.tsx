@@ -71,26 +71,28 @@ export default function BannerList() {
   const [directLink, setDirectLink] = useState<string>("#");
   const [categories, setCategories] = useState<Category[]>([]);
 
-  const { data: bannersData, isLoading, isError } = useList<Banner>({ resource: "banners" });
+  const { data: bannersData, isLoading, isError } = useList<Banner>({ resource: "admin/banners" });
   const banners = bannersData?.data ?? [];
 
-  const { data: productsData } = useList<Product>({ resource: "products" });
+  const { data: productsData } = useList<Product>({ resource: "admin/banners/products" });
   const products = productsData?.data ?? [];
 
-  const { data: newsData } = useList<News>({ resource: "posts" });
+  const { data: newsData } = useList<News>({ resource: "admin/banners/posts" });
   const news = newsData?.data ?? [];
 
-  const { data: categoriesData } = useList<Category>({ resource: "categories" });
+  const { data: categoriesData } = useList<Category>({ resource: "admin/categories" });
 
   useEffect(() => {
     if (categoriesData) setCategories(categoriesData.data);
   }, [categoriesData]);
 
   const { mutate: updateBanner, isLoading: updating } = useUpdate({
-    resource: `banners/${selectedBanner?.id}`,
+    resource: `admin/banners/${selectedBanner?.id}`,
   });
 
   const handleEdit = (banner: Banner) => {
+    console.log(banner);
+    
     setSelectedBanner(banner);
     setDrawerOpen(true);
     setFileList([]);
@@ -102,17 +104,17 @@ export default function BannerList() {
     let categoryId: string | undefined;
     let subCategoryId: string | undefined;
 
-    let rawLink = banner.direct_link;
+    let rawLink = (banner.direct_link || "") as string;
 
-    if (rawLink.startsWith("/san-pham/")) {
+    if (rawLink?.startsWith("/san-pham/")) {
       linkType = "/products";
       productSlug = rawLink.replace("/san-pham/", "");
       setSelectedProduct(productSlug);
-    } else if (rawLink.startsWith("/tin-tuc/")) {
+    } else if (rawLink?.startsWith("/tin-tuc/")) {
       linkType = "/news";
       newsSlug = rawLink.replace("/tin-tuc/", "");
       setSelectedNews(newsSlug);
-    } else if (rawLink.startsWith("/danh-muc/")) {
+    } else if (rawLink?.startsWith("/danh-muc/")) {
       linkType = "/category";
       const parts = rawLink.replace("/danh-muc/", "").split("/");
       const catSlug = parts[0];
@@ -136,6 +138,7 @@ export default function BannerList() {
       category: categoryId,
       sub_category: subCategoryId,
     });
+    console.log(form);
   };
 
   const handleViewDetail = (id: number) => {
@@ -217,6 +220,7 @@ export default function BannerList() {
 
     const formData = new FormData();
     formData.append("title", values.title);
+    // formData.append("_method", 'PUT');
     formData.append("direct_link", directLink === "#" ? "#" : directLink);
  const vnTime = dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
   formData.append("updated_at", vnTime); // 
@@ -227,7 +231,7 @@ export default function BannerList() {
 
     updateBanner(
       {
-        resource: "banners",
+        resource: "admin/banners",
         id: selectedBanner.id,
         values: formData,
         meta: {
@@ -315,7 +319,7 @@ export default function BannerList() {
             <Input />
           </Form.Item>
 
-          <Form.Item label="Kiểu liên kết" name="direct_link" rules={[{ required: true }]}>
+          <Form.Item label="Kiểu liên kết" name="direct_link"  {...form.getFieldValue('title')} rules={[{ required: true }]}>
             <Select onChange={handleLinkTypeChange} placeholder="Chọn kiểu liên kết">
               <Option value="#">Không liên kết</Option>
               <Option value="/products">Sản phẩm</Option>
