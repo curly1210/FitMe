@@ -11,6 +11,7 @@ class ProductItem extends Model
     /** @use HasFactory<\Database\Factories\ProductItemFactory> */
     use HasFactory, SoftDeletes;
     protected $fillable = [
+        'import_price',
         'price',
         'sale_price',
         'stock',

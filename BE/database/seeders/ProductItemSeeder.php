@@ -15,20 +15,12 @@ class ProductItemSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    { {
-            $products = Product::query()->get('id');
-            // tạo mỗi product sẽ bao gồm 2 productItem
-            foreach ($products as $product) {
-                ProductItem::factory()
-                    ->count(2)
-                    ->forProduct($product->id)
-                    ->has(ProductImage::factory()->count('5')->state(function (array $atributes, ProductItem $productItem) {
-                        return [
-                            'product_item_id' => $productItem->id,
-                        ];
-                    }))
-                    ->create();
-            }
+    {
+        $products = Product::all();
+
+        foreach ($products as $product) {
+            // Tạo 3 biến thể mỗi sản phẩm (bạn có thể chỉnh số này)
+            ProductItem::factory()->count(3)->forProduct($product->id)->create();
         }
     }
 }
