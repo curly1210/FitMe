@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,9 +12,9 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             //
-            $table->string('receiving_address');
-            $table->string('recipient_name');
-            $table->string('recipient_phone');
+            $table->string('receiving_address')->after('payment_method');
+            $table->string('recipient_name')->after('receiving_address');
+            $table->string('recipient_phone')->after('recipient_name');
         });
     }
 

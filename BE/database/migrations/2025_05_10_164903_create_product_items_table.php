@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('price');
             $table->unsignedInteger('sale_price')->nullable();
             $table->unsignedInteger('stock')->default(0);
-            $table->string('sku', 40);
+            $table->string('sku', 30)->unique();
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
             $table->softDeletes();

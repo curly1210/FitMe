@@ -175,7 +175,9 @@ class BannerController extends Controller
             'direct_value.required' => 'Ban phải chọn liên kết cụ thể',
             // "direct_link.required" => 'Bạn chưa chọn liên kết',
             'url_image.image' => 'File upload phải là một tệp hình ảnh',
-            'url_image.mimes' => 'File upload chỉ nhận định dạng jpeg, png, webp hoặc jpg',
+
+            'url_image.mimes' => 'File upload chỉ nhận định dạng jpeg,png,webp hoặc jpg',
+
             'url_image.max' => 'Ảnh không được vượt quá 2MB',
         ]);
         if ($validator->fails()) {

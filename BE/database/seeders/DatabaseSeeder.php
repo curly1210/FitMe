@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\ProductImage;
 use App\Models\User;
 use App\Models\Wishlist;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -16,7 +17,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Lưu ý rằng ngoài những seeder được thêm vào sẵn để tiện thao tác các bảng khác, CHƯA CẦN đưa các seeder mới vào file này để tránh xung đột code 
+        // Lưu ý rằng ngoài những seeder được thêm vào sẵn để tiện thao tác các bảng khác, CHƯA CẦN đưa các seeder mới vào file này để tránh xung đột code
         $this->call([
             UserSeeder::class,
             ShippingAddressSeeder::class,
@@ -33,7 +34,7 @@ class DatabaseSeeder extends Seeder
             ReviewSeeder::class,
             // VariationSeeder::class,
             // VariationOptionSeeder::class,
-            // ImageSeeder::class,
+            ProductImageSeeder::class,
             // ProductConfigurationSeeder::class,
             PostSeeder::class,
             WishlistSeeder::class,
