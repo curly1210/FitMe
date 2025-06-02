@@ -167,7 +167,7 @@ class BannerController extends Controller
             'direct_value' => 'required', # sản phẩm ao-thun-ong-rong,Bài viết "bai-viet-ra-mat-san-pham", danh mục 'ao-khoac-nam'
             'sub_direct_value' => 'nullable', #  Trường hợp có danh mục con
             // 'direct_link' => 'required', # Trường hợp có liên kết cụ thể
-            'url_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'url_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'title.required' => 'Tiêu đề là bắt buộc',
             'title.max' => 'Tiêu đề không được vượt quá 50 ký tự',
@@ -175,7 +175,7 @@ class BannerController extends Controller
             'direct_value.required' => 'Ban phải chọn liên kết cụ thể',
             // "direct_link.required" => 'Bạn chưa chọn liên kết',
             'url_image.image' => 'File upload phải là một tệp hình ảnh',
-            'url_image.mimes' => 'File upload chỉ nhận định dạng jpeg, png hoặc jpg',
+            'url_image.mimes' => 'File upload chỉ nhận định dạng jpeg, png, webp hoặc jpg',
             'url_image.max' => 'Ảnh không được vượt quá 2MB',
         ]);
         if ($validator->fails()) {

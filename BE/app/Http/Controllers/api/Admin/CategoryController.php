@@ -138,7 +138,7 @@ class CategoryController extends Controller
             $validator = Validator::make(
                 $request->only(['name', 'image', 'slug']),
                 [
-                    'name' => 'required|string|max:255|unique:categories,name',
+                    'name' => 'required|string|max:255|unique:categories,name,' . $id,
 
                     'image' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
                 ],

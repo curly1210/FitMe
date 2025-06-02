@@ -9,15 +9,17 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    
+
     public function index(Request $request)
     {
-        $query = Product::query()->where('is_active', 1)->with(['category','productItems' => function ($query) {
-                    $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
-                        $query->where('is_active', 1);
-                    }]);
-                }
-            ]);
+        $query = Product::query()->where('is_active', 1)->with([
+            'category',
+            'productItems' => function ($query) {
+                $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
+                    $query->where('is_active', 1);
+                }]);
+            }
+        ]);
 
         // Lọc theo danh mục
         if ($request->has('category_id')) {
@@ -31,8 +33,8 @@ class ProductController extends Controller
 
         // Phan trang
         $products = $query->paginate(10);
-
-        return ProductResource::collection($products);
+        return response()->json($products);
+        // return ProductResource::collection($products);
     }
 
     /**
@@ -43,12 +45,14 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::query()->where('is_active', 1)->with(['category','productItems' => function ($query) {
-                    $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
-                        $query->where('is_active', 1);
-                    }]);
-                }
-            ])->findOrFail($id);
+        $product = Product::query()->where('is_active', 1)->with([
+            'category',
+            'productItems' => function ($query) {
+                $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
+                    $query->where('is_active', 1);
+                }]);
+            }
+        ])->findOrFail($id);
 
         return new ProductResource($product);
     }

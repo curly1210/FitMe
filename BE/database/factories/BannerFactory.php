@@ -42,7 +42,7 @@ class BannerFactory extends Factory
             'title' => fake()->unique()->randomElement($titles),
             'direct_link' => fake()->unique()->randomElement($directLinks),
             // 'direct_type' => $banner['direct_type'],
-            'url_image' => fake()->imageUrl(),
+            'url_image' => fake()->imageUrl(), # https://via.placeholder.com/640x480.png?text=Banner+Image
 
             'created_at' => now(),
             'updated_at' => now(),
