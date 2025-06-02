@@ -2,9 +2,11 @@
 
 namespace Database\Factories;
 
-
+use App\Models\Category;
 use App\Models\Size;
 use App\Models\Color;
+use App\Models\Product;
+use App\Models\ProductItem;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,31 +22,73 @@ class ProductItemFactory extends Factory
      */
     public function definition(): array
     {
-        // $sizes = ['S', 'M', 'L', 'XL'];
-        // $colors = ['Đỏ', 'Xanh', 'Đen', 'Trắng'];
+        $product = Product::inRandomOrder()->first();
+        $category = Category::find($product->category_id);
+        $categoryName = $category->name;
 
         $size = Size::inRandomOrder()->first();
         $color = Color::inRandomOrder()->first();
+        $year = now()->year;
 
-        $price = fake()->numberBetween(200000, 300000);
-        $salePrice = fake()->numberBetween(100000, 199999);
+        $sku = $this->generateSKU($categoryName, $product->id, $year, $color->id, $size->id);
 
         return [
-            'price' => $price,
-            'sale_price' => $salePrice,
-            'stock' => $this->faker->numberBetween(5, 50),
-            'sku' => 'SKU-' . strtoupper(Str::random(5)) . '-' . $size->name . '-' . Str::slug($color->name),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'product_id' => $product->id,
+            'import_price' => fake()->numberBetween(80000, 150000),
+            'price' => fake()->numberBetween(200000, 300000),
+            'sale_price' => fake()->numberBetween(100000, 199999),
+            'stock' => fake()->numberBetween(5, 50),
+            'sku' => $sku,
             'color_id' => $color->id,
             'size_id' => $size->id,
-
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
+
     public function forProduct($productId)
     {
-        return $this->state(fn() => [
-            'product_id' => $productId
-        ]);
+        return $this->state(function () use ($productId) {
+            $product = Product::find($productId);
+            $category = Category::find($product->category_id);
+            $categoryName = $category->name;
+
+            $size = Size::inRandomOrder()->first();
+            $color = Color::inRandomOrder()->first();
+            $year = now()->year;
+
+            $sku = $this->generateSKU($categoryName, $productId, $year, $color->id, $size->id);
+
+            return [
+                'product_id' => $productId,
+                'import_price' => fake()->numberBetween(80000, 150000),
+                'price' => fake()->numberBetween(200000, 300000),
+                'sale_price' => fake()->numberBetween(100000, 199999),
+                'stock' => fake()->numberBetween(5, 50),
+                'sku' => $sku,
+                'color_id' => $color->id,
+                'size_id' => $size->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        });
     }
+
+    private function generateSKU($categoryName, $productId, $year, $colorId, $sizeId)
+    {
+        $yearPart = substr($year, -2);
+        $categoryName = Str::ascii($categoryName);
+        $words = explode(' ', $categoryName);
+        $categoryPart = '';
+        foreach ($words as $word) {
+            if (!empty($word)) {
+                $categoryPart .= strtoupper($word[0]);
+            }
+        }
+
+        $genderPart = Str::contains(strtolower($categoryName), 'nam') ? 'M' : 'W';
+
+        return "{$yearPart}{$categoryPart}{$productId}{$genderPart}_C{$colorId}S{$sizeId}";
+    }
+
 }
