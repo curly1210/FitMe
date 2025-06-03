@@ -7,14 +7,14 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CategoryController;
-use App\Http\Controllers\api\Client\AddressController;
+use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Admin\VariationController;
+use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -105,8 +105,10 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 
-// Admin PRoduct
-
+//Route quản lý sản phẩm
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+});
 
 
 
@@ -253,10 +255,3 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{product_id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 });
-
-
-// api/Admin/ProductController
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
-});
-
