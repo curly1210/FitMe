@@ -55,4 +55,8 @@ class ProductItem extends Model
     {
         return $this->hasMany(ProductImage::class, 'product_item_id');
     }
+      public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

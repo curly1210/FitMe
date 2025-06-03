@@ -310,27 +310,18 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        $product = Product::with([
-            'category',
-            'productItems.color',
-            'productItems.size',
-            'productItems.images',  // load ảnh cho productItems
-        ])->where('slug', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
+          $product = Product::with([
+        'category',
+        'productItems.color',
+        'productItems.size',
+        'productItems.images',
+        'reviews.user',
+        'reviews.reviewImages',
+        'comments.user',
+    ])->where('slug', $slug)->firstOrFail();
 
-        $relatedProducts = Product::where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->where('is_active', true)
-            ->get();
-
-        $product->setRelation('relatedProducts', $relatedProducts);
-
-        return response()->json(
-            new ProductDetailResource($product),
-        );
+        return new ProductDetailResource($product);
     }
-
 
 
 

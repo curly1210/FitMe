@@ -38,4 +38,16 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class);
     }
+    public function reviews()
+    {
+        return $this->hasManyThrough(
+            Review::class,
+            ProductItem::class,
+            'product_id',      
+            'product_item_id', 
+            'id',              
+            'id'               
+        );
+    }
+
 }
