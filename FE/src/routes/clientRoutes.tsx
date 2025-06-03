@@ -3,6 +3,7 @@ import ProtectClient from "../components/ProtectClient";
 import Address from "../pages/client/Address";
 import Contact from "../pages/client/Contact";
 import HomePage from "../pages/client/HomePage";
+import ListProducts from "../pages/client/Products";
 
 export const clientRoutes = [
   {
@@ -19,12 +20,17 @@ export const clientRoutes = [
         element: <Contact />,
       },
       {
+            path: "product",
+            element: <ListProducts />,
+          },
+      {
         element: <ProtectClient role="client" />,
         children: [
           {
             path: "address",
             element: <Address />,
           },
+          
         ],
       },
     ],
