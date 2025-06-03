@@ -58,6 +58,7 @@ Route::prefix('admin')->group(function () {
 });
 
 
+Route::get('/products/{slug}', [ProductController::class, 'show']);
 
 
 
