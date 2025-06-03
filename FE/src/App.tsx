@@ -18,7 +18,7 @@ import { API_URL } from "./utils/constant";
 
 
 const dataProvider = simpleRestDataProvider(
-  "http://be.test/api",
+  API_URL,
   axiosInstance
 );
 
