@@ -87,8 +87,8 @@ class ProductItemFactory extends Factory
         }
 
         $genderPart = Str::contains(strtolower($categoryName), 'nam') ? 'M' : 'W';
-
-        return "{$yearPart}{$categoryPart}{$productId}{$genderPart}_C{$colorId}S{$sizeId}";
+        $unique = rand(100, 999);
+        return "{$yearPart}{$categoryPart}{$productId}{$genderPart}{$unique}_C{$colorId}S{$sizeId}";
     }
 
 }
