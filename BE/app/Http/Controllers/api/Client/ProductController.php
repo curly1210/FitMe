@@ -2,24 +2,33 @@
 
 namespace App\Http\Controllers\api\Client;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Client\ProductResource;
-use App\Models\Category;
+
 use App\Models\Product;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Client\ProductResource;
+use App\Http\Resources\Client\ProductDetailResource;
+use App\Models\Category;
 class ProductController extends Controller
 {
+
     use ApiResponse;
+
     public function index(Request $request)
     {
         $query = Product::query()->where('is_active', 1)->with([
             'category',
             'productItems' => function ($query) {
-                $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
-                    $query->where('is_active', 1);
-                }]);
+
+                $query->where('is_active', 1)->with([
+                    'color',
+                    'size',
+                    'productImages' => function ($query) {
+                        $query->where('is_active', 1);
+                    }
+                ]);
+
             }
         ]);
 
@@ -45,19 +54,283 @@ class ProductController extends Controller
      * @param int $id
      * @return ProductResource
      */
-    public function show($id)
-    {
-        $product = Product::query()->where('is_active', 1)->with([
-            'category',
-            'productItems' => function ($query) {
-                $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
-                    $query->where('is_active', 1);
-                }]);
-            }
-        ])->findOrFail($id);
+    // public function show($id)
+    // {
+    //     $product = Product::query()->where('is_active', 1)->with(['category','productItems' => function ($query) {
+    //                 $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
+    //                     $query->where('is_active', 1);
+    //                 }]);
+    //             }
+    //         ])->findOrFail($id);
 
-        return new ProductResource($product);
+    //     return new ProductResource($product);
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function show($slug)
+    {
+
+          $product = Product::with([
+        'category',
+        'productItems.color',
+        'productItems.size',
+        'productItems.images',
+        'reviews.user',
+        'reviews.reviewImages',
+        'comments.user',
+    ])->where('slug', $slug)->firstOrFail();
+
+
+        return new ProductDetailResource($product);
     }
+
     public function getProductByCategory(String $slug)
     {
         $category = Category::query()->where('slug', 'LIKE', $slug)->first(['name', 'id', 'slug', 'parent_id']);
@@ -79,3 +352,4 @@ class ProductController extends Controller
         }
     }
 }
+

@@ -7,8 +7,9 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CategoryController;
-use App\Http\Controllers\api\Client\AddressController;
+use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Admin\VariationController;
+use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Client\ProductController;
@@ -57,6 +58,7 @@ Route::prefix('admin')->group(function () {
 });
 
 
+Route::get('/products/{slug}', [ProductController::class, 'show']);
 
 
 
@@ -103,8 +105,20 @@ Route::prefix('admin')->name('admin')->group(function () {
 });
 
 
+
 //client
 Route::get("/category/{slug}", [ProductController::class, "getProductByCategory"]);
+
+//Route quản lý sản phẩm
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
+    Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
+});
+
+
+
+
 
 
 
