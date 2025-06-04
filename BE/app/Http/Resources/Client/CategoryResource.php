@@ -33,12 +33,14 @@ class CategoryResource extends ResourceCollection
                 'id' => $parent->id,
                 'name' => $parent->name,
                 'parent_id' => $parent->parent_id,
-                'is_active' => $parent->is_active,
+                // 'is_active' => $parent->is_active,
+                'slug' => $parent->slug,
                 'image' => $this->buildImageUrl($parent->image),
                 'children' => $children->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'name' => $item->name,
+                        'slug' => $item->slug,
                         'image' => $this->buildImageUrl($item->image),
                     ];
                 })->toArray(),

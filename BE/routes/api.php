@@ -103,7 +103,8 @@ Route::prefix('admin')->name('admin')->group(function () {
 });
 
 
-
+//client
+Route::get("/category/{slug}", [ProductController::class, "getProductByCategory"]);
 
 
 
