@@ -15,13 +15,11 @@ return new class () extends Migration {
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
             $table->string('url');
-            $table->tinyInteger('is_active')->default(1);
-            $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('color_id');
-            $table->timestamps();
-            $table->softDeletes();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('color_id')->constrained()->onDelete('cascade');
+            $table->tinyInteger('is_active')->default(1);
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
