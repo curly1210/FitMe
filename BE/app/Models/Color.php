@@ -20,4 +20,10 @@ class Color extends Model
     {
         return $this->hasMany(ProductItem::class);
     }
+
+    // Một màu có thể có nhiều ảnh sản phẩm (theo từng sản phẩm)
+    public function productImages()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 }

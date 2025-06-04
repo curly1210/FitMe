@@ -13,10 +13,23 @@ class ProductImage extends Model
     protected $fillable = [
         'url',
         'is_active',
-        'product_item_id',
+        'product_id',
+        'color_id',
     ];
-    public function product_item()
+    // public function product_item()
+    // {
+    //     return $this->belongsTo(ProductItem::class, 'product_item_id', 'id');
+    // }
+
+    // Ảnh thuộc về sản phẩm
+    public function product()
     {
-        return $this->belongsTo(ProductItem::class, 'product_item_id', 'id');
+        return $this->belongsTo(Product::class);
+    }
+
+    // Ảnh thuộc về màu sắc cụ thể
+    public function color()
+    {
+        return $this->belongsTo(Color::class);
     }
 }

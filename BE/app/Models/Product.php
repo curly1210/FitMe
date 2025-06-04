@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         'name',
         'total_inventory',
@@ -31,10 +32,10 @@ class Product extends Model
     {
         return $this->hasMany(Comment::class);
     }
-    // public function images()
-    // {
-    //     return $this->hasMany(Image::class);
-    // }
+    public function productImages()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class);

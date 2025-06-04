@@ -108,6 +108,8 @@ Route::prefix('admin')->name('admin')->group(function () {
 //Route quản lý sản phẩm
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
+    Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
 });
 
 
