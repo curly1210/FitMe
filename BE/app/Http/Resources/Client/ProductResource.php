@@ -21,6 +21,7 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'category' => [
                 'id' => $this->category->id,
+                'slug' => $this->category->slug,
                 'name' => $this->category->name,
                 'image' => $this->buildImageUrl($this->category->image),
             ],
@@ -31,22 +32,28 @@ class ProductResource extends JsonResource
                     'sale_price' => $item->sale_price,
                     'stock' => $item->stock,
                     'sku' => $item->sku,
-                    'is_active' => $item->is_active,
-                    'color' => $item->color ? [
+                    'color' => [
                         'id' => $item->color->id,
                         'name' => $item->color->name,
-                    ] : null,
-                    'size' => $item->size ? [
+                        'code' => $item->color->code,
+                        'images' => $this->productImages->map(function ($img) {
+                            return [
+                                'id' => $img->id,
+                                'url' => $this->buildImageUrl($img->url),
+                            ];
+                        }),
+                    ],
+                    'size' =>  [
                         'id' => $item->size->id,
                         'name' => $item->size->name,
-                    ] : null,
-                    'images' => $item->productImages->map(function ($image) {
-                        return [
-                            'id' => $image->id,
-                            'url' => $this->buildImageUrl($image->url),
+                    ],
+                    // 'images' => $item->productImages->map(function ($image) {
+                    //     return [
+                    //         'id' => $image->id,
+                    //         'url' => $this->buildImageUrl($image->url),
 
-                        ];
-                    })
+                    //     ];
+                    // })
                 ];
             })
 
