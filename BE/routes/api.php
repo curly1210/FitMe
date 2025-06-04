@@ -107,7 +107,7 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 //client
-Route::get("/category/{slug}", [ProductController::class, "getProductByCategory"]);
+Route::get("/category/{slug}", [ProductController::class, "getProductsByCategory"]);
 
 //Route quản lý sản phẩm
 Route::prefix('admin')->name('admin.')->group(function () {

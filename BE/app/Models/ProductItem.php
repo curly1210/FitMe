@@ -50,12 +50,12 @@ class ProductItem extends Model
     {
         return $this->belongsTo(Size::class);
     }
-    // Quan hệ ảnh
-    public function images()
-    {
-        return $this->hasMany(ProductImage::class, 'product_item_id');
-    }
-      public function reviews()
+    // // Quan hệ ảnh
+    // public function images()
+    // {
+    //     return $this->hasMany(ProductImage::class, 'product_item_id');
+    // }
+    public function reviews()
     {
         return $this->hasMany(Review::class);
     }
