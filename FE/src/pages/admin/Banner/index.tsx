@@ -287,7 +287,11 @@ export default function BannerList() {
             <Button onClick={handleClose} style={{ marginRight: 8 }}>
               Hủy
             </Button>
-            <Button type="primary" loading={updating} onClick={() => form.submit()}>
+            <Button
+              type="primary"
+              loading={updating}
+              onClick={() => form.submit()}
+            >
               Lưu
             </Button>
           </div>
@@ -297,7 +301,11 @@ export default function BannerList() {
           <Form.Item label="Tiêu đề" name="title" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Kiểu liên kết" name="direct_link" rules={[{ required: true }]}>
+          <Form.Item
+            label="Kiểu liên kết"
+            name="direct_link"
+            rules={[{ required: true }]}
+          >
             <Select onChange={handleLinkTypeChange}>
               <Option value="#">Không liên kết</Option>
               <Option value="/products">Sản phẩm</Option>
@@ -307,7 +315,11 @@ export default function BannerList() {
           </Form.Item>
 
           {selectedLinkType === "/products" && (
-            <Form.Item label="Sản phẩm" name="product" rules={[{ required: true }]}>
+            <Form.Item
+              label="Sản phẩm"
+              name="product"
+              rules={[{ required: true }]}
+            >
               <Select onChange={handleProductChange}>
                 {products.map((p) => (
                   <Option key={p.id} value={p.slug}>
@@ -332,7 +344,11 @@ export default function BannerList() {
 
           {selectedLinkType === "/category" && (
             <>
-              <Form.Item label="Danh mục cha" name="category" rules={[{ required: true }]}>
+              <Form.Item
+                label="Danh mục cha"
+                name="category"
+                rules={[{ required: true }]}
+              >
                 <Select onChange={handleCategoryChange}>
                   {parentCategories.map((cat) => (
                     <Option key={cat.id} value={cat.id}>
@@ -356,24 +372,24 @@ export default function BannerList() {
           )}
 
           <label className="block font-medium mb-1">Ảnh banner</label>
-<Upload
-  beforeUpload={handleBeforeUpload}
-  listType="picture"
-  maxCount={1}
-  showUploadList={false}
->
-  <Button icon={<UploadOutlined />}>Chọn ảnh banner</Button>
-</Upload>
-{previewImage && (
-  <div className="mt-4 mb-2">
-    <Image
-      src={previewImage}
-      alt="Ảnh preview"
-      style={{ maxHeight: 150, borderRadius: 6 }}
-      preview
-    />
-  </div>
-)}
+          <Upload
+            beforeUpload={handleBeforeUpload}
+            listType="picture"
+            maxCount={1}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Chọn ảnh banner</Button>
+          </Upload>
+          {previewImage && (
+            <div className="mt-4 mb-2">
+              <Image
+                src={previewImage}
+                alt="Ảnh preview"
+                style={{ maxHeight: 150, borderRadius: 6 }}
+                preview
+              />
+            </div>
+          )}
         </Form>
       </Drawer>
 

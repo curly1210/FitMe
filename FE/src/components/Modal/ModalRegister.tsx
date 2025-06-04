@@ -19,7 +19,7 @@ const ModalRegister = () => {
 
   const { notify } = usePopupMessage();
 
-  const { mutate } = useCreate({
+  const { mutate, isLoading } = useCreate({
     resource: "register",
     mutationOptions: {
       onSuccess: (response) => {
@@ -185,6 +185,7 @@ const ModalRegister = () => {
               Quên mật khẩu
             </p>
             <Button
+              loading={isLoading}
               className="w-full !bg-[#22689B] !text-base !py-5 !rounded-3xl"
               type="primary"
               htmlType="submit"
