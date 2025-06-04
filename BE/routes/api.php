@@ -29,8 +29,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 //router quản lý biến thể
 Route::prefix('admin')->group(function () {
     // màu sắc
-    Route::middleware('auth:api')->get('/variations/color', [VariationController::class, 'listColor']);
-    // Route::get('/variations/color', [VariationController::class, 'listColor']);
+    // Route::middleware('auth:api')->get('/variations/color', [VariationController::class, 'listColor']);
+    Route::get('/variations/color', [VariationController::class, 'listColor']);
     Route::post('/variations/color', [VariationController::class, 'storeColor']);
     Route::get('/variations/color/{id}', [VariationController::class, 'showColor']);
     Route::patch('/variations/color/{id}', [VariationController::class, 'updateColor']);
