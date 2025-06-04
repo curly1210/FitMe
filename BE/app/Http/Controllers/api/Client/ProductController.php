@@ -2,20 +2,25 @@
 
 namespace App\Http\Controllers\api\Client;
 
+
 use App\Models\Product;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Client\ProductResource;
 use App\Http\Resources\Client\ProductDetailResource;
-
+use App\Models\Category;
 class ProductController extends Controller
 {
+
+    use ApiResponse;
 
     public function index(Request $request)
     {
         $query = Product::query()->where('is_active', 1)->with([
             'category',
             'productItems' => function ($query) {
+
                 $query->where('is_active', 1)->with([
                     'color',
                     'size',
@@ -23,6 +28,7 @@ class ProductController extends Controller
                         $query->where('is_active', 1);
                     }
                 ]);
+
             }
         ]);
 
@@ -310,6 +316,7 @@ class ProductController extends Controller
 
     public function show($slug)
     {
+
           $product = Product::with([
         'category',
         'productItems.color',
@@ -320,11 +327,29 @@ class ProductController extends Controller
         'comments.user',
     ])->where('slug', $slug)->firstOrFail();
 
+
         return new ProductDetailResource($product);
     }
 
+    public function getProductByCategory(String $slug)
+    {
+        $category = Category::query()->where('slug', 'LIKE', $slug)->first(['name', 'id', 'slug', 'parent_id']);
 
+        if ($category != null) {
+            # Trường hợp danh mục con
+            if ($category->parent_id != null) {
+                $products = Product::query()->where('category_id', $category->id)->paginate(8);
+            } else {
 
+                $subCategoryIds = Category::query()->where('parent_id', $category->id)->pluck('id')->toArray();
 
+                $products = Product::query()->whereIn('category_id', $subCategoryIds)->paginate(8);
+            };
 
+            return  ProductResource::collection($products)->additional(['total_products' => $products->total()]);
+        } else {
+            return $this->error("Danh mục không tồn tại", "Không tìm thấy danh mục", 404);
+        }
+    }
 }
+
