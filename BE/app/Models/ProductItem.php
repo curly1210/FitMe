@@ -37,10 +37,10 @@ class ProductItem extends Model
     {
         return $this->hasMany(OrdersDetail::class);
     }
-    public function productImages()
-    {
-        return $this->hasMany(ProductImage::class);
-    }
+    // public function productImages()
+    // {
+    //     return $this->hasMany(ProductImage::class);
+    // }
     public function color()
     {
         return $this->belongsTo(Color::class);
