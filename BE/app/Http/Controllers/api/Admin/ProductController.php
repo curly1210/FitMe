@@ -297,18 +297,15 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return $this->success([
-                'product' => [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'category_id' => $product->category_id,
-                    'short_description' => $product->short_description,
-                    'description' => $product->description,
-                    'slug' => $product->slug,
-                    'total_inventory' => $product->total_inventory,
-                    'is_active' => $product->is_active,
-                ],
-            ], 'Cập nhật sản phẩm thành công.');
+            // Load lại đầy đủ các quan hệ sau khi cập nhật
+            $product->load([
+                'category',
+                'items.color',
+                'items.size',
+                'images.color',
+            ]);
+
+            return $this->success([], 'Cập nhật sản phẩm thành công.', 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->error('Dữ liệu không hợp lệ.', $e->errors(), 422);
