@@ -43,6 +43,17 @@ class ProductDetailResource extends JsonResource
                 'url' => $this->buildImageUrl($image->url),
             ];
         }
+        $sizes = $productItems
+            ->pluck('size')
+            ->unique('id')
+            ->sortBy('id')
+            ->values()
+            ->map(function ($size) {
+                return [
+                    'id' => $size->id,
+                    'name' => $size->name,
+                ];
+            });
 
 
         return [
@@ -74,6 +85,7 @@ class ProductDetailResource extends JsonResource
 
                 ];
             }),
+            'sizes' => $sizes,
             'color_images' => array_values($colorImages),
             'comments' => $this->comments->map(function ($comment) {
                 return [
@@ -117,6 +129,7 @@ class ProductDetailResource extends JsonResource
             ];
         });
     }
+
 
 
 
