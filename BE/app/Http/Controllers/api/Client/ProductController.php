@@ -74,19 +74,24 @@ class ProductController extends Controller
         $colors = json_decode($request->input('colors'), true);
         $sizes = json_decode($request->input('sizes'), true);
         $prices = json_decode($request->input('price'), true);
+        $sort = $request->query('sort');
+        $sort = strtolower($sort);
+        if ($sort !== 'asc' && $sort !== 'desc') {
+            $sort = 'asc';
+        }
         $category = Category::query()->where('slug', 'LIKE', $slug)->first(['name', 'id', 'slug', 'parent_id']);
 
         if ($category != null) {
             # Trường hợp lọc sản phẩm theo danh mục con
             if ($category->parent_id != null) {
                 $query = Product::query()->where('is_active', 1)->where('category_id', $category->id);
-                $products = $this->filterProducts($query, $colors, $sizes, $prices);
+                $products = $this->filterProducts($query, $colors, $sizes, $prices, $sort);
             } else {
                 # Trường hợp lọc sản phẩm theo danh mục cha
                 $subCategoryIds = Category::query()->where('parent_id', $category->id)->pluck('id')->toArray();
 
                 $query = Product::query()->where('is_active', 1)->whereIn('category_id', $subCategoryIds);
-                $products = $this->filterProducts($query, $colors, $sizes, $prices);
+                $products = $this->filterProducts($query, $colors, $sizes, $prices, $sort);
             };
             # Trường hợp không có sản phẩm
             if ($products->count() == 0) {
@@ -103,9 +108,14 @@ class ProductController extends Controller
     {
         # Lấy tham số sau khi được endcode bên FE và giải mã decode các tham số
         $keyword = $request->input('keyword');
+        $sort = $request->query('sort');
         $colors = json_decode($request->input('color'), true);
         $sizes = json_decode($request->input('size'), true);
         $prices = json_decode($request->input('price'), true);
+        $sort = strtolower($sort);
+        if ($sort !== 'asc' && $sort !== 'desc') {
+            $sort = 'asc';
+        }
         # Trường hợp có từ khóa tìm kiếm (lọc theo sku hoặc tên sản phẩm)
         if ($keyword != null) {
             $query = Product::query()->where('is_active', 1)->where(function ($query) use ($keyword) {
@@ -114,7 +124,7 @@ class ProductController extends Controller
                         $q->where('sku', 'LIKE', '%' . $keyword . '%');
                     });
             });
-            $products = $this->filterProducts($query, $colors, $sizes, $prices);
+            $products = $this->filterProducts($query, $colors, $sizes, $prices, $sort);
             # Trường hợp không có sản phẩm
             if ($products->count() == 0) {
 
@@ -123,7 +133,7 @@ class ProductController extends Controller
             return ProductResource::collection($products)->additional(['total_products' => $products->total()]);
         } else {
             $query = Product::query()->where('is_active', 1);
-            $products = $this->filterProducts($query, $colors, $sizes, $prices);
+            $products = $this->filterProducts($query, $colors, $sizes, $prices, $sort);
             # Trường hợp không có sản phẩm
             if ($products->count() == 0) {
 
@@ -132,7 +142,7 @@ class ProductController extends Controller
             return ProductResource::collection($products)->additional(['total_products' => $products->total()]);
         }
     }
-    public function filterProducts($query, $colors = null, $sizes = null, $prices = null)
+    public function filterProducts($query, $colors = null, $sizes = null, $prices = null, $sort = null)
     {
         # Trường hợp lọc theo giá
         if (is_array($prices) && count($prices) === 2) {
@@ -142,27 +152,48 @@ class ProductController extends Controller
                 $q->whereBetween('sale_price', [$min, $max]);
             });
         }
+        // Lấy giá nhỏ nhất từ productItems 
+        $query->withMin(['productItems' => function ($q) {
+            $q->where('is_active', 1);
+        }], 'sale_price');
+
+        // Sắp xếp theo giá nhỏ nhất
+        if ($sort == 'desc') {
+            // dd('ádv');
+            $query->orderBy('product_items_min_sale_price', 'desc');
+        }
+        if ($sort == 'asc') {
+            $query->orderBy('product_items_min_sale_price', 'asc');
+        }
+
+
         # Trường hợp chỉ lọc theo color
         if (is_array($colors) && !is_array($sizes)) {
             return $query->whereHas('productItems', function ($q) use ($colors) {
                 $q->whereIn('color_id', $colors);
-            })->orderByDesc('created_at')->paginate(8);
+            })
+                ->orderBy('product_items_min_sale_price', $sort ?? 'asc')
+                ->paginate(8);
         }
         # Trường hợp chỉ lọc theo size
         if (!is_array($colors) && is_array($sizes)) {
             return $query->whereHas('productItems', function ($q) use ($sizes) {
                 $q->whereIn('size_id', $sizes);
-            })->orderByDesc('created_at')->paginate(8);
+            })
+                ->orderBy('product_items_min_sale_price', $sort ?? 'asc')
+                ->paginate(8);
         }
-        # Trường hợp chỉ lọc theo size và color
+        # Trường hợp lọc theo cả size và color
         if (is_array($colors) && is_array($sizes)) {
             return $query->whereHas('productItems', function ($q) use ($colors, $sizes) {
                 $q->whereIn('color_id', $colors)
                     ->whereIn('size_id', $sizes);
-            })->orderByDesc('created_at')->paginate(8);
+            })
+                ->orderBy('product_items_min_sale_price', $sort ?? 'asc')
+                ->paginate(8);
         }
 
-        return $query->orderByDesc('created_at')->paginate(8);
+        return $query->paginate(8);
     }
     public function getColors()
     {
