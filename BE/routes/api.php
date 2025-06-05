@@ -112,6 +112,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
     Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
+    Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->name('products.show');
+    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/trash', [AdminProductController::class, 'trash'])->name('products.trash');
+    Route::post('/products/restore/{id}', [AdminProductController::class, 'restore'])->name('products.restore');
 });
 
 
