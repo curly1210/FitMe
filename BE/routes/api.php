@@ -30,8 +30,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 //router quản lý biến thể
 Route::prefix('admin')->group(function () {
     // màu sắc
-    Route::middleware('auth:api')->get('/variations/color', [VariationController::class, 'listColor']);
-    // Route::get('/variations/color', [VariationController::class, 'listColor']);
+    // Route::middleware('auth:api')->get('/variations/color', [VariationController::class, 'listColor']);
+    Route::get('/variations/color', [VariationController::class, 'listColor']);
     Route::post('/variations/color', [VariationController::class, 'storeColor']);
     Route::get('/variations/color/{id}', [VariationController::class, 'showColor']);
     Route::patch('/variations/color/{id}', [VariationController::class, 'updateColor']);
@@ -58,6 +58,7 @@ Route::prefix('admin')->group(function () {
 });
 
 
+Route::get('/products/{slug}', [ProductController::class, 'show']);
 
 
 
@@ -105,6 +106,7 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 
+
 //Route quản lý sản phẩm
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
@@ -128,6 +130,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
+//client
+Route::get("/category/{slug}", [ProductController::class, "getProductsByCategory"]);
+Route::get("/search", [ProductController::class, "getProductsByKeyWord"]);
+Route::get("/get-colors", [ProductController::class, "getColors"]);
+Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 
 
 

@@ -10,8 +10,8 @@ class ProductResource extends JsonResource
 {
     use CloudinaryTrait;
 
-    
-    public function toArray(Request $request): array
+
+    public function toArray(Request $request)
     {
         return [
             'id' => $this->id,
@@ -19,41 +19,38 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'short_description' => $this->short_description,
             'description' => $this->description,
-            'is_active' => $this->is_active,
             'category' => [
                 'id' => $this->category->id,
+                'slug' => $this->category->slug,
                 'name' => $this->category->name,
                 'image' => $this->buildImageUrl($this->category->image),
             ],
-            'product_items' => $this->whenLoaded('productItems', function () {
-                return $this->productItems->map(function ($item) {
+            'product_items' => $this->productItems->where('is_active', 1)->sortBy('sale_price')
+                ->values()->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'price' => $item->price,
                         'sale_price' => $item->sale_price,
                         'stock' => $item->stock,
                         'sku' => $item->sku,
-                        'is_active' => $item->is_active,
-                        'color' => $item->color ? [
+                        'color' => [
                             'id' => $item->color->id,
                             'name' => $item->color->name,
-                        ] : null,
-                        'size' => $item->size ? [
+                            'code' => $item->color->code,
+                            'images' => $this->productImages->map(function ($img) {
+                                return [
+                                    'id' => $img->id,
+                                    'url' => $this->buildImageUrl($img->url),
+                                ];
+                            }),
+                        ],
+                        'size' =>  [
                             'id' => $item->size->id,
                             'name' => $item->size->name,
-                        ] : null,
-                        'images' => $item->productImages->map(function ($image) {
-                            return [
-                                'id' => $image->id,
-                                'url' => $this->buildImageUrl($image->url),
-                                'is_active' => $image->is_active,
-                            ];
-                        })->toArray(),
+                        ],
                     ];
-                })->toArray();
-            }),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+                })
+
         ];
     }
 }

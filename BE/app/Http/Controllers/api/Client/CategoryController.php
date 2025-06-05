@@ -13,15 +13,15 @@ class CategoryController extends Controller
     public function index()
     {
         //lấy danh mục đang còn hoạt động
-        $listCategory = Category::where('is_active',1)->get();
+        $listCategory = Category::query()->get();
 
 
         //Lấy riêng danh mục cha
         $parentCategories = $listCategory->whereNull('parent_id');
 
         //Báo lỗi nếu không có danh mục cha
-        if($parentCategories->isEmpty()){
-            return response()->json([])->status(200);
+        if ($parentCategories->isEmpty()) {
+            return response()->json([], 200);
         }
 
         return new CategoryResource($parentCategories, $listCategory);
