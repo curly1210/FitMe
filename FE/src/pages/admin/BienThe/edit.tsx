@@ -84,7 +84,7 @@ export default function Edit({ open, onClose, type, id }: EditProps) {
     >
       {isLoading ? (
         <Spin
-          className="!absolute z-100 backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+          className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
           style={{ textAlign: "center" }}
           size="large"
         />

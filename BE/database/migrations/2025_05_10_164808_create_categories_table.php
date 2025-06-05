@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug', 100);
 
             $table->integer('parent_id')->nullable();
-            $table->tinyInteger('is_active')->default(1);
+            // $table->tinyInteger('is_active')->default(1);
             $table->string('image');
             $table->timestamps();
         });

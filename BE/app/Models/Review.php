@@ -27,8 +27,13 @@ class Review extends Model
     }
 
     // Quan hệ với bảng Product
-    public function product()
+public function productItem()
+{
+    return $this->belongsTo(ProductItem::class);
+}
+public function reviewImages()
     {
-        return $this->belongsTo(Product::class);
+        return $this->hasMany(ReviewImage::class, 'review_id', 'id');
     }
+    
 }
