@@ -66,6 +66,7 @@ class ProductDetailResource extends JsonResource
                         'name' => $comment->user?->name,
                     ],
                     'is_active' => $comment->is_active,
+                    'created_at' => $comment->created_at->format('Y-m-d H:i:s'),
                 ];
             }),
 

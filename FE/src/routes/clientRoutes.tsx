@@ -20,8 +20,8 @@ export const clientRoutes = [
         path: "contact",
         element: <Contact />,
       },
-          {
-        path: "detail",
+      {
+        path: "/products/:slug",
         element: <ProductDetail />,
       },
 
