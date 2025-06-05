@@ -32,7 +32,7 @@ const ModalLogin = () => {
       },
       onError: (error) => {
         console.log(error);
-        notify("error", "Đăng nhập", error.message);
+        notify("error", "Đăng nhập", error?.response?.data?.message);
       },
     },
   });

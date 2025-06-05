@@ -20,7 +20,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return $this->error('Thông tin đăng nhập không chính xác', [], 401, );
+            return $this->error('Thông tin đăng nhập không chính xác', [], 402,);
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT

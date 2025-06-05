@@ -97,7 +97,7 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
+                // 'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
@@ -156,8 +156,8 @@ class ProductController extends Controller
             foreach ($validatedData['images'] as $imageData) {
                 $file = $imageData['url'];
                 $uploadResult = $this->uploadImageToCloudinary($file, [
-                    'width' => 600,
-                    'height' => 600,
+                    // 'width' => 600,
+                    // 'height' => 600,
                     'quality' => 80,
                     'folder' => "products/{$slug}",
                 ]);
@@ -309,7 +309,6 @@ class ProductController extends Controller
                     'is_active' => $product->is_active,
                 ],
             ], 'Cập nhật sản phẩm thành công.');
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->error('Dữ liệu không hợp lệ.', $e->errors(), 422);
         } catch (\Exception $e) {
@@ -317,5 +316,4 @@ class ProductController extends Controller
             return $this->error('Lỗi khi cập nhật sản phẩm.', $e->getMessage(), 500);
         }
     }
-
 }

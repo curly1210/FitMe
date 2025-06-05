@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import {
   Button,
@@ -149,12 +150,12 @@ const Category: React.FC = () => {
       notification.warning({ message: "Vui lòng nhập tên mục con!" });
       return;
     }
-     console.log("Tên mục con: ", itemName);
+    console.log("Tên mục con: ", itemName);
     if (!itemImage) {
       notification.warning({ message: "Vui lòng chọn ảnh mục con!" });
       return;
     }
-    
+
     const now = getNow();
     const newItemId = Date.now();
     const newItem = { id: newItemId, name: itemName, image: "" };
