@@ -1,4 +1,5 @@
 import {
+  DownOutlined,
   InboxOutlined,
   PercentageOutlined,
   PictureOutlined,
@@ -8,11 +9,12 @@ import {
   UnorderedListOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, MenuProps, theme } from "antd";
+import { Breadcrumb, Dropdown, Layout, Menu, MenuProps, theme } from "antd";
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import { useState } from "react";
 import { Link, Outlet } from "react-router";
+import { useAuthen } from "../hooks/useAuthen";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -30,7 +32,7 @@ function getItem(
   } as MenuItem;
 }
 
-const items: MenuItem[] = [
+const itemsNavigate: MenuItem[] = [
   getItem(<Link to="/admin">Dashboard</Link>, "1", <PieChartOutlined />),
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
@@ -42,15 +44,27 @@ const items: MenuItem[] = [
     "3",
     <UnorderedListOutlined />
   ),
-  getItem(<Link to="/admin">Quản lý sản phẩm</Link>, "4", <InboxOutlined />),
-  getItem(<Link to="/admin/bienthe">Quản lý biến thể</Link>, "5", <ProductOutlined />),
+  getItem(
+    <Link to="/admin/products">Quản lý sản phẩm</Link>,
+    "4",
+    <InboxOutlined />
+  ),
+  getItem(
+    <Link to="/admin/bienthe">Quản lý biến thể</Link>,
+    "5",
+    <ProductOutlined />
+  ),
   getItem(<Link to="/admin">Quản lý đơn hàng</Link>, "6", <ShoppingOutlined />),
   getItem(
     <Link to="/admin">Quản lý khuyến mãi</Link>,
     "7",
     <PercentageOutlined />
   ),
-  getItem(<Link to="/admin/users">Quản lý khách hàng</Link>, "8", <UserOutlined />),
+  getItem(
+    <Link to="/admin/users">Quản lý khách hàng</Link>,
+    "8",
+    <UserOutlined />
+  ),
 
   // getItem("Team", "sub2", <TeamOutlined />, [
   //   getItem("Team 1", "6"),
@@ -73,9 +87,26 @@ const siderStyle: React.CSSProperties = {
 
 const LayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
+
+  const { logout } = useAuthen();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
+    if (key === "1") {
+      logout();
+    }
+  };
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: <div className="text-base font-bold py-1">Đăng xuất</div>,
+    },
+  ];
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -96,11 +127,46 @@ const LayoutAdmin = () => {
           theme="dark"
           defaultSelectedKeys={["1"]}
           mode="inline"
-          items={items}
+          items={itemsNavigate}
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Header
+          style={{
+            padding: "0 20px",
+            background: colorBgContainer,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
+          <div className="flex gap-2 items-center ">
+            <div>
+              <img
+                src="https://pbs.twimg.com/media/FoUoGo3XsAMEPFr?format=jpg&name=4096x4096"
+                alt=""
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+            </div>
+            <div className="flex flex-col ">
+              <p className="text-sm">Pham Cuong</p>
+              <p className="text-sm text-gray-400">Admin</p>
+            </div>
+            <Dropdown
+              // overlay={customMenu}
+              menu={{ items, onClick: handleMenuClick }}
+              placement="bottomLeft"
+              trigger={["click"]}
+            >
+              <div className="flex items-center gap-1 cursor-pointer">
+                <DownOutlined className="!text-gray-400 !text-xs cursor-pointer" />
+                {/* <p className="text-sm font-bold">{user?.name}</p> */}
+              </div>
+            </Dropdown>
+          </div>
+        </Header>
         <Content style={{ margin: "0 16px" }}>
           <Breadcrumb
             style={{ margin: "16px 0" }}

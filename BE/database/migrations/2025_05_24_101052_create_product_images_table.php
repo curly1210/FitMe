@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 use function Laravel\Prompts\table;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,13 +15,11 @@ return new class extends Migration
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
             $table->string('url');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('color_id')->constrained()->onDelete('cascade');
             $table->tinyInteger('is_active')->default(1);
-            $table->unsignedBigInteger('product_item_id');
-
-
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('product_item_id')->references('id')->on('product_items');
         });
     }
 
@@ -32,7 +29,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('product_images', function (Blueprint $table) {
-            $table->dropForeign(['product_item_id']);
+            $table->dropForeign(['product_id']);
+            $table->dropForeign(['color_id']);
         });
         Schema::dropIfExists('product_images');
     }
