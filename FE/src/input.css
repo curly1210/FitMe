@@ -121,3 +121,18 @@ body {
 .ant-input-number {
   width: 100% !important;
 }
+
+.ant-cascader .ant-select-selector {
+  height: 100% !important;
+  border-radius: 6px !important;
+}
+
+.list-product .ant-select-selector {
+  height: 100% !important;
+  border-radius: 6px !important;
+}
+
+/* .ant-layout-content .ant-select-selector {
+  height: 100% !important;
+  border-radius: 6px !important;
+} */

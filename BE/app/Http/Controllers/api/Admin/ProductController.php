@@ -56,7 +56,7 @@ class ProductController extends Controller
                     'category_name' => optional($product->category)->name ?? 'Không có danh mục',
                     'total_inventory' => $product->total_inventory,
                     'is_active' => $product->is_active,
-                    'image' => $image,
+                    'image' => $this->buildImageUrl($image),
                 ];
             });
 
