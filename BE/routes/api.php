@@ -106,8 +106,6 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 
-//client
-Route::get("/category/{slug}", [ProductController::class, "getProductsByCategory"]);
 
 //Route quản lý sản phẩm
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -128,7 +126,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
-
+//client
+Route::get("/category/{slug}", [ProductController::class, "getProductsByCategory"]);
+Route::get("/search", [ProductController::class, "getProductsByKeyWord"]);
+Route::get("/get-colors", [ProductController::class, "getColors"]);
+Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 
 
 

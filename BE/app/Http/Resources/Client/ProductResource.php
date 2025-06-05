@@ -11,7 +11,7 @@ class ProductResource extends JsonResource
     use CloudinaryTrait;
 
 
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
         return [
             'id' => $this->id,
@@ -47,13 +47,6 @@ class ProductResource extends JsonResource
                         'id' => $item->size->id,
                         'name' => $item->size->name,
                     ],
-                    // 'images' => $item->productImages->map(function ($image) {
-                    //     return [
-                    //         'id' => $image->id,
-                    //         'url' => $this->buildImageUrl($image->url),
-
-                    //     ];
-                    // })
                 ];
             })
 
