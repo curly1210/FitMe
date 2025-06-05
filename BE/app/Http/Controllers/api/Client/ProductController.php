@@ -462,10 +462,10 @@ class ProductController extends Controller
             'category',
             'productItems.color',
             'productItems.size',
-            'productItems.images',
             'reviews.user',
             'reviews.reviewImages',
             'comments.user',
+            'productImages', 
         ])->where('slug', $slug)->firstOrFail();
 
 
