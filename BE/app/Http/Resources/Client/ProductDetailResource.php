@@ -18,6 +18,32 @@ class ProductDetailResource extends JsonResource
     {
         $productItems = $this->productItems;
 
+        // Gom ảnh theo màu từ product->images dựa vào color_id
+        $colorImages = [];
+        foreach ($this->images as $image) {
+            $colorId = $image->color_id;
+
+            if (!isset($colorImages[$colorId])) {
+                $color = $this->productItems->firstWhere('color.id', $colorId)?->color;
+
+                if (!$color) continue;
+
+                $colorImages[$colorId] = [
+                    'color' => [
+                        'id' => $color->id,
+                        'name' => $color->name,
+                        'code' => $color->code,
+                    ],
+                    'images' => [],
+                ];
+            }
+
+            $colorImages[$colorId]['images'][] = [
+                'id' => $image->id,
+                'url' => $this->buildImageUrl($image->url),
+            ];
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -32,6 +58,7 @@ class ProductDetailResource extends JsonResource
             'product_items' => $productItems->map(function ($item) {
                 return [
                     'id' => $item->id,
+                    'import_price' => $item->import_price,
                     'price' => $item->price,
                     'sale_price' => $item->sale_price,
                     'stock' => $item->stock,
@@ -40,23 +67,20 @@ class ProductDetailResource extends JsonResource
                         'id' => $item->color->id,
                         'name' => $item->color->name,
                         'code' => $item->color->code,
-                        'images' => $item->images->map(function ($img) {
-                            return [
-                                'id' => $img->id,
-                                'url' => $this->buildImageUrl($img->url),
-                            ];
-                        }),
                     ],
                     'size' => [
                         'id' => $item->size->id,
                         'name' => $item->size->name,
                     ],
+                    'images' => $this->images->where('color_id', $item->color->id)->values()->map(function ($img) {
+                        return [
+                            'id' => $img->id,
+                            'url' => $this->buildImageUrl($img->url),
+                        ];
+                    }),
                 ];
             }),
-
-           
-
-            // Thêm comments
+            // 'color_images' => array_values($colorImages),
             'comments' => $this->comments->map(function ($comment) {
                 return [
                     'id' => $comment->id,
@@ -66,35 +90,38 @@ class ProductDetailResource extends JsonResource
                         'name' => $comment->user?->name,
                     ],
                     'is_active' => $comment->is_active,
+                    'created_at' => $comment->created_at?->format('Y-m-d H:i:s'),
                 ];
             }),
-
             'related_products' => $this->getRelatedProducts(),
         ];
     }
 
     protected function getRelatedProducts()
-    {
-        $related = Product::where('category_id', $this->category_id)
-            ->where('id', '!=', $this->id)
-            ->take(4)
-            ->get();
+{
+    $related = Product::where('id', '!=', $this->id)
+        ->where('category_id', $this->category_id) // lọc theo cùng category
+        ->take(4)
+        ->get();
 
-        return $related->map(function ($product) {
-            $firstItem = $product->productItems->first();
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'price' => $firstItem?->price,
-                'images' => $firstItem
-                    ? $firstItem->images->take(2)->map(fn($img) => [
-                        'url' => $this->buildImageUrl($img->url)
+    return $related->map(function ($product) {
+        $firstItem = $product->productItems->first();
+
+        return [
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'price' => $firstItem?->price,
+            'images' => $firstItem
+                ? $product->images
+                    ->where('color_id', $firstItem->color_id)
+                    ->take(2)
+                    ->map(fn($img) => [
+                        'url' => $this->buildImageUrl($img->url),
                     ])->values()
-                    : [],
-            ];
-        });
-    }
+                : [],
+        ];
+    });
+}
 
 
 

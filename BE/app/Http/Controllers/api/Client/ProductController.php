@@ -317,21 +317,21 @@ class ProductController extends Controller
     public function show($slug)
     {
 
-          $product = Product::with([
-        'category',
-        'productItems.color',
-        'productItems.size',
-        'productItems.images',
-        'reviews.user',
-        'reviews.reviewImages',
-        'comments.user',
-    ])->where('slug', $slug)->firstOrFail();
+        $product = Product::with([
+            'category',
+            'productItems.color',
+            'productItems.size',
+            'reviews.user',
+            'reviews.reviewImages',
+            'comments.user',
+            'images', 
+        ])->where('slug', $slug)->firstOrFail();
 
 
         return new ProductDetailResource($product);
     }
 
-    public function getProductByCategory(String $slug)
+    public function getProductByCategory(string $slug)
     {
         $category = Category::query()->where('slug', 'LIKE', $slug)->first(['name', 'id', 'slug', 'parent_id']);
 
@@ -344,9 +344,10 @@ class ProductController extends Controller
                 $subCategoryIds = Category::query()->where('parent_id', $category->id)->pluck('id')->toArray();
 
                 $products = Product::query()->whereIn('category_id', $subCategoryIds)->paginate(8);
-            };
+            }
+            ;
 
-            return  ProductResource::collection($products)->additional(['total_products' => $products->total()]);
+            return ProductResource::collection($products)->additional(['total_products' => $products->total()]);
         } else {
             return $this->error("Danh mục không tồn tại", "Không tìm thấy danh mục", 404);
         }
