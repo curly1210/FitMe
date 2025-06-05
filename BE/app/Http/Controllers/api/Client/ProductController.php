@@ -434,7 +434,7 @@ class ProductController extends Controller
             'reviews.user',
             'reviews.reviewImages',
             'comments.user',
-            'images', 
+            'productImages', 
         ])->where('slug', $slug)->firstOrFail();
 
 

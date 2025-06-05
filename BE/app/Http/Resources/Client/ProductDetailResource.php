@@ -20,7 +20,7 @@ class ProductDetailResource extends JsonResource
 
         $colorImages = [];
 
-        foreach ($this->images as $image) {
+        foreach ($this->productImages as $image) {
             $colorId = $image->color_id;
 
             if (!isset($colorImages[$colorId])) {
@@ -106,7 +106,7 @@ class ProductDetailResource extends JsonResource
                 'slug' => $product->slug,
                 'price' => $firstItem?->price,
                 'images' => $firstItem
-                    ? $product->images
+                    ? $product->productImages
                         ->where('color_id', $firstItem->color_id)
                         ->take(2)
                         ->map(fn($img) => [
