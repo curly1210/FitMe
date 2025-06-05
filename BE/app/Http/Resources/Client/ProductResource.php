@@ -25,30 +25,31 @@ class ProductResource extends JsonResource
                 'name' => $this->category->name,
                 'image' => $this->buildImageUrl($this->category->image),
             ],
-            'product_items' => $this->productItems->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'price' => $item->price,
-                    'sale_price' => $item->sale_price,
-                    'stock' => $item->stock,
-                    'sku' => $item->sku,
-                    'color' => [
-                        'id' => $item->color->id,
-                        'name' => $item->color->name,
-                        'code' => $item->color->code,
-                        'images' => $this->productImages->map(function ($img) {
-                            return [
-                                'id' => $img->id,
-                                'url' => $this->buildImageUrl($img->url),
-                            ];
-                        }),
-                    ],
-                    'size' =>  [
-                        'id' => $item->size->id,
-                        'name' => $item->size->name,
-                    ],
-                ];
-            })
+            'product_items' => $this->productItems->where('is_active', 1)->sortBy('sale_price')
+                ->values()->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'price' => $item->price,
+                        'sale_price' => $item->sale_price,
+                        'stock' => $item->stock,
+                        'sku' => $item->sku,
+                        'color' => [
+                            'id' => $item->color->id,
+                            'name' => $item->color->name,
+                            'code' => $item->color->code,
+                            'images' => $this->productImages->map(function ($img) {
+                                return [
+                                    'id' => $img->id,
+                                    'url' => $this->buildImageUrl($img->url),
+                                ];
+                            }),
+                        ],
+                        'size' =>  [
+                            'id' => $item->size->id,
+                            'name' => $item->size->name,
+                        ],
+                    ];
+                })
 
         ];
     }
