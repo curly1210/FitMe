@@ -107,15 +107,32 @@ class ProductDetailResource extends JsonResource
     protected function getRelatedProducts()
     {
         $related = Product::where('id', '!=', $this->id)
-            ->where('category_id', $this->category_id) // lọc theo cùng category
+            ->where('category_id', $this->category_id)
             ->take(4)
             ->get();
 
         return $related->map(function ($product) {
             $firstItem = $product->productItems->first();
 
+
+
+            $colors = $product->productItems
+                ->pluck('color')
+                ->unique('id')
+                ->map(function ($color) {
+                    return [
+                        'id' => $color->id,
+                        'name' => $color->name,
+                        'code' => $color->code,
+
+                    ];
+                })->values();
+
+
             return [
+
                 'name' => $product->name,
+
                 'slug' => $product->slug,
                 'price' => $firstItem?->price,
                 'images' => $firstItem
@@ -126,9 +143,11 @@ class ProductDetailResource extends JsonResource
                             'url' => $this->buildImageUrl($img->url),
                         ])->values()
                     : [],
+                'colors' => $colors,
             ];
         });
     }
+
 
 
 
