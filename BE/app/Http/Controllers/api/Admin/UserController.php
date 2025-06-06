@@ -13,24 +13,29 @@ class UserController extends Controller
     use ApiResponse;
     //Hàm sử lý hiển thị danh sách người dùng
     public function index(Request $request)
-{
-    $query = User::query()
-        ->where('role', '!=', 'admin');
+    {
+        $query = User::query()
+            ->where('role', '!=', 'admin');
 
-    if ($request->has('name')) {
-        $query->where('name', 'like', '%' . $request->name . '%');
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->is_ban == null) {
+            $query = User::query()
+                ->where('role', '!=', 'admin');
+        } else if ($request->has('is_ban')) {
+            $query->where('is_ban', $request->is_ban);
+
+        }
+
+
+
+        $users = $query->get();
+
+        return UserResource::collection($users);
     }
 
-    if ($request->has('is_ban')) {
-        $query->where('is_ban', $request->is_ban);
-    }
-
-    $users = $query->get(); 
-
-    return UserResource::collection($users);
-}
-
-    // Xem chi tiết người dùng + đơn hàng
     public function show($id)
     {
         $user = User::with('orders')->findOrFail($id);
@@ -39,8 +44,7 @@ class UserController extends Controller
     }
 
 
-    // Hàm sử lý khóa hoặc mở khóa người dùng
-   public function lock($id)
+    public function lock($id)
     {
         try {
             $user = User::findOrFail($id);

@@ -56,7 +56,7 @@ interface RelatedProductImage {
 }
 interface RelatedProductColor{
   id:string;
-  code:
+  code:string;
 }
 
 interface RelatedProduct {
@@ -64,6 +64,7 @@ interface RelatedProduct {
   name: string;
   slug: string;
   price: number;
+  colors:RelatedProductColor[];
   images: RelatedProductImage[];
 }
 
@@ -204,6 +205,8 @@ const ProductDetail = () => {
   // Ảnh nhỏ theo màu
   const images = colors.find((c) => c.id === selectedColorId)?.images || [];
 
+  console.log("Colors:", colors);
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
   if (!product) return <p>Không tìm thấy sản phẩm</p>;
@@ -253,7 +256,7 @@ const ProductDetail = () => {
                       ? selectedItem.sale_price
                       : selectedItem.price
                   ).toLocaleString()
-                : "Liên hệ"}{" "}
+                : ""}{" "}
               ₫
             </p>
 
@@ -353,27 +356,57 @@ const ProductDetail = () => {
         <h2 className="text-lg font-semibold mb-4 text-center">
           Sản phẩm liên quan
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4  ">
-          {product.related_products.slice(0,4).map((rp) => (
-            <div key={rp.slug}  onClick={() => nav(`/products/${rp.slug}`)}  className="border rounded-md   hover:shadow transition cursor-pointer">
-              <img
-                src={rp.images?.[0]?.url}
-                alt={rp.name}
-                className="w-full h-80 object-cover "
-                loading="lazy"
-              />
-              <div className="p-3 pt-4">
-                 <p className=" font-bold">
-                  {rp.price.toLocaleString()} ₫
-                </p>
-                <p className="text-sm font-bold">{rp.name}</p>
-          
+
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {product.related_products.slice(0, 4).map((rp) => (
+          <div
+            key={rp.slug}
+            onClick={() => nav(`/products/${rp.slug}`)}
+            className="border rounded-md hover:shadow transition cursor-pointer overflow-hidden group"
+          >
+            {/* Wrapper có kích thước cố định */}
+            <div className="relative w-full h-80 overflow-hidden">
+              {/* Container chứa 2 ảnh xếp ngang */}
+              <div className="flex w-[200%] h-full transition-transform duration-500 ease-in-out group-hover:-translate-x-1/2">
+                <img
+                  src={rp.images?.[0]?.url}
+                  alt={rp.name}
+                  className="w-1/2 h-full object-cover"
+                />
+                <img
+                  src={rp.images?.[1]?.url}
+                  alt={rp.name}
+                  className="w-1/2 h-full object-cover"
+                />
               </div>
-           
-           
             </div>
-          ))}
-        </div>
+
+            {/* Nội dung */}
+            <div className="p-3 pt-4 space-y-2">
+              {/* Màu sắc */}
+              <div className="flex gap-2">
+                {rp.colors?.map((c, index) => (
+                  <div
+                    key={index}
+                    className="w-5 h-5 rounded-full border"
+                    style={{ backgroundColor: c.code }}
+                    
+                  />
+                  
+                ))}
+              </div>
+
+              <p className="font-bold text-red-500">
+                {rp.price.toLocaleString()} ₫
+              </p>
+              <p className="text-sm font-bold line-clamp-2">{rp.name}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+
         <div className="text-lg font-semibold mt-4 text-center"> <Button>Xem thêm</Button></div>
        
       </div>

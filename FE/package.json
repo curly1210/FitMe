@@ -16,7 +16,6 @@
     "@ant-design/icons": "^6.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/material": "^7.1.1",
     "@refinedev/antd": "^5.46.1",
     "@refinedev/core": "^4.57.9",
     "@refinedev/react-router-v6": "^4.6.2",

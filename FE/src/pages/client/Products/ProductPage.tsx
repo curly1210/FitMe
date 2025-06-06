@@ -3,8 +3,7 @@ import { HiBars3 } from "react-icons/hi2";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import FilterProduct from "../../../components/Products/FilterProduct";
 import { useProduct } from "../../../hooks/useProduct";
-import Pagination from "@mui/material/Pagination";
-import Stack from "@mui/material/Stack";
+import { Pagination } from "antd";
 
 function ProductPage() {
   const {
@@ -29,17 +28,9 @@ function ProductPage() {
           <div className="border border-gray-200 rounded-sm mb-4">
             <div className="flex justify-between items-center px-6 py-4 relative">
               <div className="text-sm text-gray-500 space-x-2">
-                <span className="hover:underline cursor-pointer">
-                  Trang chủ
-                </span>
-                /
-                <span className="hover:underline cursor-pointer">
-                  Thời trang
-                </span>
-                /
-                <span className="font-semibold text-black">
-                  {categoryData.name}
-                </span>
+                <span className="hover:underline cursor-pointer">Trang chủ</span> /
+                <span className="hover:underline cursor-pointer">Thời trang</span> /
+                <span className="font-semibold text-black">{categoryData.name}</span>
               </div>
               <div className="flex items-center gap-2">
                 {/* Filter Button */}
@@ -63,9 +54,7 @@ function ProductPage() {
                   </button>
                   {showSort && (
                     <div className="absolute right-0 z-10 mt-2 w-52 bg-white border border-gray-200 rounded-md shadow-lg">
-                      <div className="p-3 border-b font-semibold">
-                        Sắp xếp theo
-                      </div>
+                      <div className="p-3 border-b font-semibold">Sắp xếp theo</div>
                       <div
                         className="flex items-center px-4 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
@@ -91,100 +80,76 @@ function ProductPage() {
             </div>
           </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {listProduct.map((product) => {
-              const item = product.product_items?.[0];
-              const imgUrl = item?.image?.[0]?.url || "";
-
-              return (
-                <div
-                  key={product.id}
-                  className="group border border-gray-100 relative"
-                >
-                  <div className="relative">
-                    <img
-                      src={imgUrl}
-                      alt={product.name}
-                      className="w-full h-[400px] object-contain object-center bg-white"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition bg-white">
-                      <div className="flex border-t border-gray-200 divide-x divide-gray-200">
-                        <button className="flex-1 text-xs py-2 bg-black text-white hover:opacity-90 cursor-pointer">
-                          Mua nhanh
-                        </button>
-                        <button className="flex-1 text-xs py-2 hover:bg-gray-100 cursor-pointer">
-                          Xem chi tiết
-                        </button>
+          {/* Product Grid or Empty Message */}
+          {listProduct.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {listProduct.map((product) => {
+                const item = product.product_items || [];
+                const imgUrl = item?.image?.[0]?.url || "";
+                const productImage = item.flatMap((value) => value.color.images);
+                return (
+                  <div key={product.id} className="group border border-gray-100 relative">
+                    <div className="relative">
+                      <img
+                        src={imgUrl}
+                        alt={product.name}
+                        className="w-full h-[400px] object-contain object-center bg-white"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition bg-white">
+                        <div className="flex border-t border-gray-200 divide-x divide-gray-200">
+                          <button className="flex-1 text-xs py-2 bg-black text-white hover:opacity-90 cursor-pointer">
+                            Mua nhanh
+                          </button>
+                          <button className="flex-1 text-xs py-2 hover:bg-gray-100 cursor-pointer">
+                            Xem chi tiết
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-2 pt-2 pb-3 space-y-1">
+                      <p className="text-sm font-semibold text-black">{product.name}</p>
+                      <p className="text-lg font-semibold text-gray-800">
+                        {item[0]?.sale_price
+                          ?.toString()
+                          ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                        ₫
+                      </p>
+                      <div className="flex gap-1 mt-2">
+                        {productImage.slice(0, 5).map((modelImg, key) => (
+                          <img
+                            key={modelImg.id + key}
+                            src={modelImg.url}
+                            alt={modelImg.id}
+                            className="w-6 h-6 object-cover border rounded"
+                          />
+                        ))}
                       </div>
                     </div>
                   </div>
-                  <div className="px-2 pt-2 pb-3 space-y-1">
-                    <p className="text-sm font-semibold text-black">
-                      {product.name}
-                    </p>
-                  <p className="text-lg font-semibold text-gray-800">
-  {item?.sale_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}₫
-</p>
-
-                    {/* Ảnh nhỏ của biến thể */}
-                    <div className="flex gap-1 mt-2">
-                      {item?.image?.slice(0, 5).map((img, idx) => (
-                        <img
-                          key={idx}
-                          src={img.url}
-                          alt={`variant-${idx}`}
-                          className="w-6 h-6 object-cover border rounded"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center text-gray-500 text-base py-10">
+              Không có sản phẩm nào phù hợp với bộ lọc
+            </div>
+          )}
 
           {/* Pagination */}
           <div className="flex justify-center items-center gap-1 mt-6">
-            {(metaLink !== null && listProduct.length > 0) && (
-              <Stack spacing={2} alignItems="center" mt={2}>
-                <Pagination
-                  count={metaLink?.last_page}
-                  page={metaLink?.current_page}
-                  onChange={(e, value) => {
-                    if (value !== currentPage) {
-                      setCurrentPage(value);
-                      handleSearch();
-                    }
-                  }}
-                  color="primary"
-                />
-              </Stack>
+            {metaLink !== null && listProduct.length > 0 && (
+              <Pagination
+                className="flex justify-end col-span-full"
+                size="small"
+                current={metaLink.current_page}
+                pageSize={metaLink.per_page}
+                total={metaLink.last_page}
+                onChange={(e) => {
+                  setCurrentPage(e);
+                  handleSearch();
+                }}
+              />
             )}
-            {/* <button className="w-8 h-8 text-sm bg-black text-white rounded border">
-              1
-            </button>
-            <button className="w-8 h-8 text-sm border rounded hover:bg-gray-100">
-              2
-            </button>
-            <button className="w-8 h-8 text-sm border rounded hover:bg-gray-100">
-              3
-            </button>
-            <span className="text-sm text-gray-500">...</span> */}
-            {/* <button
-              className="w-8 h-8 text-sm border rounded hover:bg-gray-100"
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-              disabled={currentPage === 1}
-            >
-              &lt;
-            </button>
-            <button
-              className="w-8 h-8 text-sm border rounded hover:bg-gray-100"
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              disabled={currentPage === metaLink?.last_page}
-            >
-              &gt;
-            </button> */}
           </div>
         </div>
       </div>

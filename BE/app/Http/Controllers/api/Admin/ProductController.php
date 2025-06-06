@@ -97,10 +97,11 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                // 'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
+                'variants.*.sale_price' => 'nullable|numeric|min:0',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
+                'is_active' => 'nullable|boolean',
             ]);
 
             DB::beginTransaction();
@@ -112,7 +113,7 @@ class ProductController extends Controller
                 'short_description' => $validatedData['short_description'],
                 'description' => $validatedData['description'],
                 'slug' => $slug,
-                'is_active' => 1,
+                'is_active' => $validatedData['is_active'] ?? 1,
             ]);
 
             // Lấy categoryName
@@ -131,7 +132,7 @@ class ProductController extends Controller
 
                 $salePrice = null;
                 if (!empty($variant['sale_price'])) {
-                    $percentage = (float) str_replace('%', '', $variant['sale_price']);
+                    $percentage = $variant['sale_price'];
                     $discount = $variant['price'] * ($percentage / 100);
                     $salePrice = $variant['price'] - $discount;
                 }
@@ -216,6 +217,11 @@ class ProductController extends Controller
                         && $fail("The $att must be a file or string.")
                 ],
                 'images.*.color_id' => 'required_with:images|exists:colors,id',
+                'variants.*.sale_price' => 'nullable|numeric|min:0',
+                'images' => 'sometimes|array|min:1',
+                'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
+                'images.*.color_id' => 'required|exists:colors,id',
+                'is_active' => 'nullable|boolean',
             ]);
 
             DB::beginTransaction();
@@ -228,6 +234,7 @@ class ProductController extends Controller
                 'short_description' => $validatedData['short_description'],
                 'description' => $validatedData['description'],
                 'slug' => $slug,
+                'is_active' => $validatedData['is_active'] ?? 1,
             ]);
 
             // Xóa các product_items cũ và thêm lại từ biến thể mới
@@ -256,6 +263,7 @@ class ProductController extends Controller
                         'sale_price' => $variant['sale_price'],
                     ]);
                 } else {
+
 
                     $categoryName = $product->category ? $product->category->name : 'unknown';
                     $year = date('Y');
@@ -391,12 +399,16 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
         try {
             $product = Product::whereNull('deleted_at')->find($id);
-
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
+            }
             DB::beginTransaction();
+
+            $product->update(['is_active' => 0]);
 
             $product->delete();
 
@@ -405,7 +417,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             //throw $th;
             DB::rollBack();
-            return $this->error('Lỗi khi xóa mềm', $e->getMessage(), 500);
+            return $this->error('Lỗi khi xóa mềm', $e->getMessage(), 403);
         }
     }
 
@@ -457,7 +469,12 @@ class ProductController extends Controller
         try {
             $product = Product::onlyTrashed()->findOrFail($id);
 
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
+            }
             DB::beginTransaction();
+
+            $product->update(['is_active' => 1]);
 
             // Khôi phục sản phẩm
             $product->restore();
@@ -468,6 +485,40 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error('Lỗi khi khôi phục sản phẩm.', $e->getMessage(), 500);
+        }
+    }
+    public function destroy($id)
+    {
+        try {
+            $product = Product::onlyTrashed()->findOrFail($id);
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
+            }
+
+            DB::beginTransaction();
+
+            // 1. Xóa từng ảnh trong folder bằng deleteImageFromCloudinary
+            $images = ProductImage::where('product_id', $product->id)->get();
+            foreach ($images as $image) {
+                $this->deleteImageFromCloudinary($image->url); // Xóa Cloudinary
+                $image->forceDelete();                          // Xóa trong DB
+            }
+
+            // 2. Xóa folder sau khi đã xóa toàn bộ ảnh
+            $folderPath = 'products/' . $product->id;
+            $this->deleteFolderFromCloudinary($folderPath);
+
+            // 3. Xóa product items
+            ProductItem::where('product_id', $product->id)->forceDelete();
+
+            // 4. Xóa chính sản phẩm
+            $product->forceDelete();
+
+            DB::commit();
+            return $this->success(null, 'Sản phẩm đã được xóa vĩnh viễn thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error('Lỗi khi xóa vĩnh viễn sản phẩm.', $e->getMessage(), 500);
         }
     }
 }
