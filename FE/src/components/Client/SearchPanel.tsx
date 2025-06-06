@@ -51,8 +51,11 @@ const SearchPanel = () => {
                           className="object-cover h-full"
                         />
                       </div>
-
-                      <p>{sub.name}</p>
+                      <Link
+                        to={`category/${sub.slug}`}
+                        state={{ categoryData: sub }}>
+                        <p>{sub.name}</p>
+                      </Link>
                     </Link>
                   ))}
                 </div>
