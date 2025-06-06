@@ -8,6 +8,7 @@ import BannerList from "../pages/admin/Banner";
 import ProtectAdmin from "../components/ProtectAdmin";
 import User from "../pages/admin/User/indext";
 import ListProducts from "../pages/admin/Product";
+import TrashProducts from "../pages/admin/Product/TrashProducts";
 
 export const adminRoutes = [
   {
@@ -40,6 +41,10 @@ export const adminRoutes = [
           {
             path: "products",
             element: <ListProducts />,
+          },
+          {
+            path: "products/trash",
+            element: <TrashProducts />,
           },
         ],
       },
