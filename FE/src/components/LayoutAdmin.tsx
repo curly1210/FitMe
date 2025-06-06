@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DownOutlined,
   InboxOutlined,
@@ -13,7 +14,7 @@ import { Breadcrumb, Dropdown, Layout, Menu, MenuProps, theme } from "antd";
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import { useState } from "react";
-import { Link, Outlet } from "react-router";
+import { Link, Outlet, useLocation } from "react-router";
 import { useAuthen } from "../hooks/useAuthen";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -45,24 +46,30 @@ const itemsNavigate: MenuItem[] = [
     <UnorderedListOutlined />
   ),
   getItem(
-    <Link to="/admin/products">Quản lý sản phẩm</Link>,
-    "4",
-    <InboxOutlined />
+    "Quản lý sản phẩm",
+    "sub1",
+    <InboxOutlined />,
+    [
+      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "4"),
+      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "5"),
+    ]
+
+    // <InboxOutlined />
   ),
   getItem(
     <Link to="/admin/bienthe">Quản lý biến thể</Link>,
-    "5",
+    "6",
     <ProductOutlined />
   ),
-  getItem(<Link to="/admin">Quản lý đơn hàng</Link>, "6", <ShoppingOutlined />),
+  getItem(<Link to="/admin">Quản lý đơn hàng</Link>, "7", <ShoppingOutlined />),
   getItem(
     <Link to="/admin">Quản lý khuyến mãi</Link>,
-    "7",
+    "8",
     <PercentageOutlined />
   ),
   getItem(
     <Link to="/admin/users">Quản lý khách hàng</Link>,
-    "8",
+    "9",
     <UserOutlined />
   ),
 
@@ -87,6 +94,30 @@ const siderStyle: React.CSSProperties = {
 
 const LayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+
+  const getCurrentKey = (path: any) => {
+    switch (path) {
+      case "/admin":
+        return "1";
+      case "/admin/banner":
+        return "2";
+      case "/admin/category":
+        return "3";
+      case "/admin/products":
+        return "4";
+      case "/admin/products/trash":
+        return "5";
+      case "/admin/bienthe":
+        return "6";
+      case "/admin/users":
+        return "9";
+      default:
+        return "";
+    }
+  };
+
+  const currentKey = getCurrentKey(location.pathname);
 
   const { logout } = useAuthen();
 
@@ -125,7 +156,8 @@ const LayoutAdmin = () => {
         </div>
         <Menu
           theme="dark"
-          defaultSelectedKeys={["1"]}
+          selectedKeys={[currentKey]}
+          // defaultSelectedKeys={["1"]}
           mode="inline"
           items={itemsNavigate}
         />

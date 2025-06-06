@@ -19,14 +19,21 @@ import {
 } from "antd";
 import { useWatch } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type DrawerAddPros = {
   openDrawerAdd: boolean;
   setOpenDrawerAdd: (openDrawerAdd: boolean) => void;
+  options: any[];
+  refetch: () => void;
 };
 
-const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
+const DrawerAdd = ({
+  openDrawerAdd,
+  setOpenDrawerAdd,
+  options,
+  refetch,
+}: DrawerAddPros) => {
   const [formData, setFormData] = useState<any>({
     name: "",
     category: 0,
@@ -93,22 +100,8 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
     setOpenDrawerAdd(false);
   };
 
-  const { data: categories } = useList({ resource: "client/categories" });
   const { data: colors } = useList({ resource: "admin/variations/color" });
   const { data: sizes } = useList({ resource: "admin/variations/size" });
-
-  const options = useMemo(() => {
-    if (!categories?.data) return [];
-
-    return categories?.data.map((category: any) => ({
-      label: category?.name,
-      value: category?.id,
-      children: category?.children?.map((child: any) => ({
-        label: child?.name,
-        value: child?.id,
-      })),
-    }));
-  }, [categories]);
 
   const validateColorsWithImages = () => {
     const errors = selectedColors.filter((color: any) => {
@@ -178,6 +171,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
         onSuccess: (response) => {
           resetAllStates();
           onClose();
+          refetch();
           notification.success({ message: response?.data?.message });
         },
         onError: (err) => {
@@ -422,6 +416,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
             gia_ban: 0,
             gia_nhap: 0,
             percent: 0,
+            status: "1",
           }}
           form={form}
           onFinish={onFinish}
@@ -436,7 +431,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               }
               name="name"
               required={false}
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
             >
               <Input />
             </Form.Item>
@@ -448,7 +443,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               }
               name="category"
               required={false}
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
             >
               <Cascader options={options} />
             </Form.Item>
@@ -463,9 +458,10 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               rules={[{ required: true }]}
             >
               <Select
+                defaultValue={"1"}
                 options={[
-                  { value: "active", label: "Hiển thị" },
-                  { value: "inactive", label: "Ân" },
+                  { value: "1", label: "Hiển thị" },
+                  { value: "0", label: "Ẩn" },
                 ]}
               />
             </Form.Item>
@@ -511,7 +507,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               name="percent"
               required={false}
               rules={[
-                { pattern: /^[1-9]\d*$/, message: "Vui lòng nhập số dương!" },
+                { pattern: /^[0-9]\d*$/, message: "Vui lòng nhập số dương!" },
               ]}
             >
               <InputNumber onChange={(value) => setPercent(value)} />
@@ -539,7 +535,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               }
               name="description"
               required={false}
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
             >
               <Input />
             </Form.Item>
@@ -551,7 +547,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               }
               name="long_description"
               required={false}
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
             >
               <TextArea />
             </Form.Item>
@@ -621,7 +617,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
               </div>
             ) : (
               <>
-                <div>
+                <div className="flex gap-3 mb-3">
                   {selectedColors?.map((color: any) => (
                     <Button
                       key={color?.id}
@@ -654,7 +650,7 @@ const DrawerAdd = ({ openDrawerAdd, setOpenDrawerAdd }: DrawerAddPros) => {
                     beforeUpload={() => false}
                     onChange={handleUploadChange2}
                     onRemove={handleRemoveFile}
-                    listType="picture"
+                    listType="picture-card"
                     fileList={uploadImagesMap[selectedColorForImages?.id] || []}
                   >
                     <Button type="primary" icon={<UploadOutlined />}>
