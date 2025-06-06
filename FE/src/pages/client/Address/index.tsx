@@ -28,7 +28,7 @@ const Address = () => {
   const { mutate, isLoading: isLoadingDeleteAddress } = useDelete();
 
   const deleteAddress = (addressId: any) => {
-    setDeletingId(addressId);
+    // setDeletingId(addressId);
     mutate(
       { resource: "addresses", id: addressId },
       {
