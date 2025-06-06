@@ -21,17 +21,14 @@ export const clientRoutes = [
         element: <Contact />,
       },
       {
-        path: "/products/:slug",
+        path: "category/:categorySlug",
+        element: <ListProducts />,
+      },
+          {
+        path: "products/:slug",
         element: <ProductDetail />,
       },
-
-
-
-
-      {
-            path: "product",
-            element: <ListProducts />,
-          },
+      
       {
         element: <ProtectClient role="client" />,
         children: [
@@ -39,7 +36,7 @@ export const clientRoutes = [
             path: "address",
             element: <Address />,
           },
-          
+
         ],
       },
 

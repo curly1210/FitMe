@@ -71,10 +71,11 @@ class ProductController extends Controller
     public function getProductsByCategory(Request $request, String $slug)
     {
         # Lấy tham số sau khi được endcode bên FE và giải mã decode các tham số
-        $colors = json_decode($request->input('colors'), true);
-        $sizes = json_decode($request->input('sizes'), true);
+        $colors = json_decode($request->input('color'), true);
+        $sizes = json_decode($request->input('size'), true);
         $prices = json_decode($request->input('price'), true);
         $sort = $request->query('sort');
+        // dd($colors);
         $sort = strtolower($sort);
         if ($sort !== 'asc' && $sort !== 'desc') {
             $sort = 'asc';
@@ -465,7 +466,7 @@ class ProductController extends Controller
             'reviews.user',
             'reviews.reviewImages',
             'comments.user',
-            'productImages', 
+            'productImages',
         ])->where('slug', $slug)->firstOrFail();
 
 

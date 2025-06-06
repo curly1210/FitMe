@@ -1,73 +1,76 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PlusOutlined } from "@ant-design/icons";
+import { useCreate, useList } from "@refinedev/core";
 import {
   Cascader,
   Input,
   notification,
   Popconfirm,
-  Select,
   Skeleton,
   Table,
   Tag,
 } from "antd";
-
 import { useMemo, useState } from "react";
-import DrawerAdd from "./DrawerAdd";
-import { useDelete, useList } from "@refinedev/core";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaTrash, FaTrashRestoreAlt } from "react-icons/fa";
 
 const { Search } = Input;
 
-const ListProducts = () => {
-  const [openDrawerAdd, setOpenDrawerAdd] = useState(false);
-  // const [uploadKey, setUploadKey] = useState(Date.now());
-
+const TrashProducts = () => {
   const [searchText, setSearchText] = useState<any>(undefined);
   const [selectCategory, setSelectCategory] = useState<any>(undefined);
-  const [selectStatus, setSelectStatus] = useState<any>(undefined);
 
   const { data: categories } = useList({
     resource: "client/categories",
   });
 
   const {
-    data: productResponse,
+    data: productDeletedResponse,
     isLoading,
     refetch,
   } = useList({
-    resource: "admin/products",
+    resource: "admin/products/trash",
     filters: [
       { field: "search", operator: "eq", value: searchText },
       { field: "category_id", operator: "eq", value: selectCategory },
-      { field: "is_active", operator: "eq", value: selectStatus },
     ],
   });
 
-  const { mutate: deleteProduct } = useDelete();
+  const { mutate: restoreProduct } = useCreate();
 
-  // useEffect(() => {
-  //   console.log(searchText);
-  //   refetch();
-  // }, [searchText]);
+  const productsDeleted =
+    productDeletedResponse?.data.map((product) => ({
+      ...product,
+      key: product?.id,
+    })) || [];
 
-  const products =
-    productResponse?.data.map((product) => ({ ...product, key: product.id })) ||
-    [];
+  const options = useMemo(() => {
+    if (!categories?.data) return [];
 
-  const handleDeleteProduct = (id: number) => {
-    deleteProduct(
-      { resource: "admin/products", id: id },
+    return categories?.data.map((category: any) => ({
+      label: category?.name,
+      value: category?.id,
+      children: category?.children?.map((child: any) => ({
+        label: child?.name,
+        value: child?.id,
+      })),
+    }));
+  }, [categories]);
+
+  const handleRestoreProduct = (id: number) => {
+    restoreProduct(
+      { resource: `admin/products/restore/${id}`, values: {} },
       {
-        onSuccess: (_response) => {
+        onSuccess: (response) => {
+          console.log(response);
+          notification.success({ message: response?.data?.message });
           refetch();
-          notification.success({ message: "Xóa sản phẩm thành công" });
         },
         onError: (_err) => {
           notification.error({ message: "Xóa sản phẩm thất bại" });
         },
       }
     );
+    console.log(id);
   };
 
   const handleSearchText = (value: any) => {
@@ -86,32 +89,6 @@ const ListProducts = () => {
     } else {
       setSelectCategory(value[value.length - 1]);
     }
-  };
-
-  const handleSelectStatus = (value: any) => {
-    // console.log(value);
-    if (!value) {
-      setSelectStatus(undefined);
-    } else {
-      setSelectStatus(Number(value));
-    }
-  };
-
-  const options = useMemo(() => {
-    if (!categories?.data) return [];
-
-    return categories?.data.map((category: any) => ({
-      label: category?.name,
-      value: category?.id,
-      children: category?.children?.map((child: any) => ({
-        label: child?.name,
-        value: child?.id,
-      })),
-    }));
-  }, [categories]);
-
-  const showDrawer = () => {
-    setOpenDrawerAdd(true);
   };
 
   const columns = [
@@ -135,6 +112,22 @@ const ListProducts = () => {
       },
     },
     {
+      title: "Ngày xóa",
+      key: "deleted_at",
+      dataIndex: "deleted_at",
+      render: (date: string) => {
+        if (!date) return "-";
+
+        const formattedDate = new Date(date).toLocaleDateString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+
+        return formattedDate;
+      },
+    },
+    {
       title: "Danh mục",
       key: "category_name",
       dataIndex: "category_name",
@@ -148,7 +141,7 @@ const ListProducts = () => {
       title: "Trạng thái",
       key: "is_active",
       dataIndex: "is_active",
-      render: (status: boolean, _product: any) => {
+      render: (status: boolean) => {
         return !status ? (
           <Tag color="red">Đang ẩn</Tag>
         ) : (
@@ -161,13 +154,21 @@ const ListProducts = () => {
       render: (_: any, product: any) => {
         return (
           <div className="flex items-center gap-5">
-            <FaEdit className="text-2xl text-blue-400 cursor-pointer" />
+            <Popconfirm
+              okText="Đồng ý"
+              cancelText="Không"
+              title="Khôi phục sản phẩm"
+              description="Bạn có muốn khôi phục sản phẩm này không?"
+              onConfirm={() => handleRestoreProduct(product.id)}
+            >
+              <FaTrashRestoreAlt className="text-2xl text-blue-400 cursor-pointer" />
+            </Popconfirm>
             <Popconfirm
               okText="Đồng ý"
               cancelText="Không"
               title="Xóa sản phẩm"
-              description="Bạn có muốn xóa sản phẩm này không?"
-              onConfirm={() => handleDeleteProduct(product?.id)}
+              description="Bạn có muốn xóa vĩnh viễn sản phẩm này không?"
+              // onConfirm={() => mutate(product.id)}
             >
               <FaTrash className="text-2xl text-red-400 cursor-pointer" />
             </Popconfirm>
@@ -178,8 +179,8 @@ const ListProducts = () => {
   ];
 
   return (
-    <div className="list-product">
-      <h1 className="text-2xl font-semibold mb-3">Danh sách sản phẩm</h1>
+    <div>
+      <h1 className="text-2xl font-semibold mb-3">Thùng rác sản phẩm</h1>
       <div className="flex items-center justify-between mb-5">
         <div className="flex gap-3">
           <Search
@@ -196,24 +197,6 @@ const ListProducts = () => {
             options={options}
             allowClear
           />
-          <Select
-            style={{ width: 200 }}
-            // value={selectStatus}
-            onChange={(value) => handleSelectStatus(value)}
-            placeholder="Lọc theo trạng thái"
-            allowClear
-            options={[
-              { value: "1", label: "Đang hiển thị" },
-              { value: "0", label: "Đang ẩn" },
-            ]}
-          ></Select>
-        </div>
-        <div
-          onClick={showDrawer}
-          className="flex gap-2 items-center bg-blue-600 text-white py-2 px-4 rounded-sm cursor-pointer"
-        >
-          <PlusOutlined className="!text-white" />
-          <p>Thêm sản phẩm</p>
         </div>
       </div>
 
@@ -221,17 +204,10 @@ const ListProducts = () => {
         {isLoading ? (
           <Skeleton active />
         ) : (
-          <Table dataSource={products} columns={columns} />
+          <Table dataSource={productsDeleted} columns={columns} />
         )}
       </div>
-
-      <DrawerAdd
-        refetch={refetch}
-        options={options}
-        openDrawerAdd={openDrawerAdd}
-        setOpenDrawerAdd={setOpenDrawerAdd}
-      />
     </div>
   );
 };
-export default ListProducts;
+export default TrashProducts;

@@ -159,7 +159,7 @@ class ProductController extends Controller
                     // 'width' => 600,
                     // 'height' => 600,
                     'quality' => 80,
-                    'folder' => "products/{$slug}",
+                    'folder' => "products/{$product->id}",
                 ]);
 
                 ProductImage::create([
@@ -284,7 +284,7 @@ class ProductController extends Controller
                         'width' => 600,
                         'height' => 600,
                         'quality' => 80,
-                        'folder' => "products/{$slug}",
+                        'folder' => "products/{$product->id}",
                     ]);
 
                     ProductImage::create([
@@ -306,7 +306,6 @@ class ProductController extends Controller
             ]);
 
             return $this->success([], 'Cập nhật sản phẩm thành công.', 200);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->error('Dữ liệu không hợp lệ.', $e->errors(), 422);
         } catch (\Exception $e) {
@@ -319,17 +318,17 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with([
-                'category'=>function($query){
-                    $query->select('id','name','slug');
-                }, 
-                'productItems.color'=>function($query){
-                    $query->select('id','name');
+                'category' => function ($query) {
+                    $query->select('id', 'name', 'slug');
                 },
-                'productItems.size'=>function($query){
-                    $query->select('id','name');
+                'productItems.color' => function ($query) {
+                    $query->select('id', 'name');
                 },
-                'productImages.color'=>function($query){
-                    $query->select('id','name');
+                'productItems.size' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'productImages.color' => function ($query) {
+                    $query->select('id', 'name');
                 }
             ])->whereNull('deleted_at')->findOrFail($id);
 
@@ -349,11 +348,11 @@ class ProductController extends Controller
             $product->delete();
 
             DB::commit();
-            return $this->success(null,'Xóa mềm sản phẩm thành công',200);
+            return $this->success(null, 'Xóa mềm sản phẩm thành công', 200);
         } catch (\Exception $e) {
             //throw $th;
             DB::rollBack();
-            return $this->error('Lỗi khi xóa mềm',$e->getMessage(),500);
+            return $this->error('Lỗi khi xóa mềm', $e->getMessage(), 500);
         }
     }
 
@@ -388,7 +387,7 @@ class ProductController extends Controller
                     'category_name' => optional($product->category)->name ?? 'Không có danh mục',
                     'total_inventory' => $product->total_inventory,
                     'is_active' => $product->is_active,
-                    'image' => $image,
+                    'image' => $this->buildImageUrl($image),
                     'deleted_at' => $product->deleted_at,
                 ];
             });
@@ -400,7 +399,7 @@ class ProductController extends Controller
     }
 
 
-     public function restore($id)
+    public function restore($id)
     {
         try {
             $product = Product::onlyTrashed()->findOrFail($id);
@@ -412,7 +411,7 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return $this->success(null, 'Sản phẩm đã được khôi phục thành công.',200);
+            return $this->success(null, 'Sản phẩm đã được khôi phục thành công.', 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error('Lỗi khi khôi phục sản phẩm.', $e->getMessage(), 500);

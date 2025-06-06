@@ -18,31 +18,43 @@ class ProductDetailResource extends JsonResource
     {
         $productItems = $this->productItems;
 
-        $colorImages = [];
+      $colorImages = [];
 
-        foreach ($this->productImages as $image) {
-            $colorId = $image->color_id;
+$colors = $productItems
+    ->pluck('color')
+    ->unique('id');
 
-            if (!isset($colorImages[$colorId])) {
-                $item = $this->productItems->firstWhere('color_id', $colorId);
-                $color = $item?->color;
+foreach ($colors as $color) {
+    $colorImages[$color->id] = [
+        'id' => $color->id,
+        'name' => $color->name,
+        'code' => $color->code,
+        'images' => [],
+    ];
+}
 
-                if (!$color)
-                    continue;
+// Gắn ảnh vào đúng color_id nếu có
+foreach ($this->productImages as $image) {
+    $colorId = $image->color_id;
 
-                $colorImages[$colorId] = [
-                    'id' => $color->id,
-                    'name' => $color->name,
-                    'code' => $color->code,
-                    'images' => [],
+    if (isset($colorImages[$colorId])) {
+        $colorImages[$colorId]['images'][] = [
+            'id' => $image->id,
+            'url' => $this->buildImageUrl($image->url),
+        ];
+    }
+}
+        $sizes = $productItems
+            ->pluck('size')
+            ->unique('id')
+            ->sortBy('id')
+            ->values()
+            ->map(function ($size) {
+                return [
+                    'id' => $size->id,
+                    'name' => $size->name,
                 ];
-            }
-
-            $colorImages[$colorId]['images'][] = [
-                'id' => $image->id,
-                'url' => $this->buildImageUrl($image->url),
-            ];
-        }
+            });
 
 
         return [
@@ -74,6 +86,7 @@ class ProductDetailResource extends JsonResource
 
                 ];
             }),
+            'sizes' => $sizes,
             'color_images' => array_values($colorImages),
             'comments' => $this->comments->map(function ($comment) {
                 return [
@@ -95,15 +108,32 @@ class ProductDetailResource extends JsonResource
     protected function getRelatedProducts()
     {
         $related = Product::where('id', '!=', $this->id)
-            ->where('category_id', $this->category_id) // lọc theo cùng category
+            ->where('category_id', $this->category_id)
             ->take(4)
             ->get();
 
         return $related->map(function ($product) {
             $firstItem = $product->productItems->first();
 
+
+
+            $colors = $product->productItems
+                ->pluck('color')
+                ->unique('id')
+                ->map(function ($color) {
+                    return [
+                        'id' => $color->id,
+                        'name' => $color->name,
+                        'code' => $color->code,
+
+                    ];
+                })->values();
+
+
             return [
+
                 'name' => $product->name,
+
                 'slug' => $product->slug,
                 'price' => $firstItem?->price,
                 'images' => $firstItem
@@ -114,9 +144,12 @@ class ProductDetailResource extends JsonResource
                             'url' => $this->buildImageUrl($img->url),
                         ])->values()
                     : [],
+                'colors' => $colors,
             ];
         });
     }
+
+
 
 
 
