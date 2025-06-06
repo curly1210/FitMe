@@ -3,8 +3,7 @@ import { HiBars3 } from "react-icons/hi2";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import FilterProduct from "../../../components/Products/FilterProduct";
 import { useProduct } from "../../../hooks/useProduct";
-import Pagination from "@mui/material/Pagination";
-import Stack from "@mui/material/Stack";
+import { Pagination } from "antd";
 
 function ProductPage() {
   const {
@@ -94,9 +93,9 @@ function ProductPage() {
           {/* Product Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {listProduct.map((product) => {
-              const item = product.product_items?.[0];
+              const item = product.product_items || [];
               const imgUrl = item?.image?.[0]?.url || "";
-
+              const productImage = item.flatMap((value) => value.color.images);
               return (
                 <div
                   key={product.id}
@@ -123,17 +122,17 @@ function ProductPage() {
                     <p className="text-sm font-semibold text-black">
                       {product.name}
                     </p>
-                  <p className="text-lg font-semibold text-gray-800">
-  {item?.sale_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}₫
-</p>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {item[0]?.sale_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}₫
+                    </p>
 
                     {/* Ảnh nhỏ của biến thể */}
                     <div className="flex gap-1 mt-2">
-                      {item?.image?.slice(0, 5).map((img, idx) => (
+                       {productImage.slice(0, 5).map((modelImg) => (
                         <img
-                          key={idx}
-                          src={img.url}
-                          alt={`variant-${idx}`}
+                          key={modelImg.id}
+                          src={modelImg.url}
+                          alt={modelImg.id}
                           className="w-6 h-6 object-cover border rounded"
                         />
                       ))}
@@ -147,19 +146,13 @@ function ProductPage() {
           {/* Pagination */}
           <div className="flex justify-center items-center gap-1 mt-6">
             {(metaLink !== null && listProduct.length > 0) && (
-              <Stack spacing={2} alignItems="center" mt={2}>
-                <Pagination
-                  count={metaLink?.last_page}
-                  page={metaLink?.current_page}
-                  onChange={(e, value) => {
-                    if (value !== currentPage) {
-                      setCurrentPage(value);
-                      handleSearch();
-                    }
-                  }}
-                  color="primary"
-                />
-              </Stack>
+              <Pagination
+                className="flex justify-end col-span-full"
+                size="small"
+                current={metaLink.current_page}
+                pageSize={metaLink.per_page}
+                total={metaLink.last_page}
+              />
             )}
             {/* <button className="w-8 h-8 text-sm bg-black text-white rounded border">
               1
