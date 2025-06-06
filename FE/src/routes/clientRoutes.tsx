@@ -24,6 +24,11 @@ export const clientRoutes = [
         path: "category/:categorySlug",
         element: <ListProducts />,
       },
+          {
+        path: "products/:slug",
+        element: <ProductDetail />,
+      },
+      
       {
         element: <ProtectClient role="client" />,
         children: [
