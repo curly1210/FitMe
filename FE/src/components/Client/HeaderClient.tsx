@@ -116,11 +116,10 @@ const HeaderClient = () => {
             {categories.map((category: any) => (
               <li
                 key={category.id}
-                className={`cursor-pointer   ${
-                  selectedCategory?.id === category.id
-                    ? "border-b-2 border-black font-semibold"
-                    : ""
-                }`}
+                className={`cursor-pointer   ${selectedCategory?.id === category.id
+                  ? "border-b-2 border-black font-semibold"
+                  : ""
+                  }`}
                 onClick={() => {
                   setSelectedCategory(category);
                   setIsOpenSearchPanel(true);
