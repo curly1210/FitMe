@@ -1,19 +1,18 @@
 <?php
 
-
 namespace App\Traits;
 
 use Cloudinary\Cloudinary;
 use Intervention\Image\Laravel\Facades\Image;
 
-
 trait CloudinaryTrait
 {
-
     # Hàm lấy ra link ảnh thông qua public_id lưu trong trường image ở các bảng
     protected function buildImageUrl($image)
     {
-        if (!$image) return null;
+        if (!$image) {
+            return null;
+        }
         // Nếu là URL thật thì trả về luôn
         if (filter_var($image, FILTER_VALIDATE_URL)) {
             return $image;
@@ -64,7 +63,9 @@ trait CloudinaryTrait
     # hàm xóa ảnh ở trên Cloudinary (sử dụng khi update hoặc delete ảnh)
     protected function deleteImageFromCloudinary($publicId)
     {
-        if (!$publicId) return false;
+        if (!$publicId) {
+            return false;
+        }
         try {
             $cloudinary = new Cloudinary();
             $cloudinary->uploadApi()->destroy($publicId);
@@ -74,4 +75,21 @@ trait CloudinaryTrait
             return false;
         }
     }
+
+    protected function deleteFolderFromCloudinary($folderPath)
+    {
+        if (!$folderPath) {
+            return false;
+        }
+
+        try {
+            $cloudinary = new Cloudinary();
+            $cloudinary->adminApi()->deleteFolder($folderPath);
+            return true;
+        } catch (\Exception $e) {
+            // Ghi log nếu cần: Log::error('Xóa folder thất bại: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 }
