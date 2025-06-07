@@ -10,8 +10,10 @@ use App\Models\ProductItem;
 use App\Traits\ApiResponse;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use PhpParser\Node\Stmt\TryCatch;
 
 class ProductController extends Controller
 {
@@ -97,7 +99,7 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                // 'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
+                'variants.*.sale_price' => 'nullable',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
@@ -129,9 +131,9 @@ class ProductController extends Controller
             foreach ($validatedData['variants'] as $variant) {
                 $totalInventory += $variant['stock'];
 
-                $salePrice = null;
+                $salePrice = 0;
                 if (!empty($variant['sale_price'])) {
-                    $percentage = (float) str_replace('%', '', $variant['sale_price']);
+                    $percentage = $variant['sale_price'];
                     $discount = $variant['price'] * ($percentage / 100);
                     $salePrice = $variant['price'] - $discount;
                 }
@@ -169,6 +171,7 @@ class ProductController extends Controller
                 ]);
             }
 
+
             DB::commit();
 
             return $this->success([
@@ -193,6 +196,9 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
+        // dd($request->validatedData['images']);
+        // dd(223);
+        // dd($request->images);
         try {
             $product = Product::findOrFail($id);
 
@@ -207,18 +213,24 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                // 'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
-                'images' => 'sometimes|array|min:1',
+                'variants.*.id' => 'required',
+
+                'variants.*.sale_price' => 'nullable',
+                'images' => 'required|array|min:1',
+                // 'images.*.url' => 'nullable',
                 'images.*.url' => [
                     'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
                     fn($att, $val, $fail) =>
                     !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
                         && $fail("The $att must be a file or string.")
                 ],
-                'images.*.color_id' => 'required_with:images|exists:colors,id',
+                // 'images.*.color_id' => 'required_with:images|exists:colors,id',
+                'images.*.color_id' => 'required|exists:colors,id',
             ]);
 
             DB::beginTransaction();
+
+
 
             $slug = Str::slug($validatedData['name']);
 
@@ -236,6 +248,8 @@ class ProductController extends Controller
 
             // Lưu lại tất cả ID từ FE gửi lên
             $inputIds = [];
+
+            // dd($request->variants);
 
             // Lấy danh sách ID hiện tại trong DB theo product
             $existingIds = ProductItem::where('product_id', $product->id)->pluck('id')->toArray();
@@ -279,6 +293,73 @@ class ProductController extends Controller
             }
 
             $product->update(['total_inventory' => $totalInventory]);
+
+
+            $idsToDelete = array_diff($existingIds, $inputIds);
+            ProductItem::whereIn('id', $idsToDelete)->delete();
+
+            // Xử lý ảnh 
+            // return response()->json($request->images);
+            foreach ($request->images as $imageData) {
+                $file = $imageData['url'];
+
+                if ($file instanceof UploadedFile) {
+                    // return response()->json();
+                    $uploadResult = $this->uploadImageToCloudinary($file, [
+                        // 'width' => 600,
+                        // 'height' => 600,
+                        'quality' => 80,
+                        'folder' => "products/{$product->id}",
+                    ]);
+
+                    // return response()->json($uploadResult['public_id']);
+
+                    try {
+                        $item = new ProductImage();
+                        $item->product_id = $product->id;
+                        $item->color_id = (int)$imageData['color_id'];
+                        $item->url = $uploadResult['public_id'];
+                        $item->save();
+                        // $checkCreate = ProductImage::create([
+                        //     'product_id' => $product->id,
+                        //     'color_id' =>  (int)$imageData['color_id'],
+                        //     'url' => $uploadResult['public_id'],
+                        // ]);
+                    } catch (\Throwable $th) {
+                        return response()->json($th->getMessage());
+                    }
+
+
+                    // return response()->json($checkCreate);
+                }
+            }
+
+            $inputUrls = [];
+
+            foreach ($request->images as $img) {
+                if (is_string($img['url'])) {
+                    $inputUrls[] = $img['url'];
+                }
+            }
+            // foreach ($validatedData['images'] as $img) {
+            //     if (is_string($img['url'])) {
+            //         $inputUrls[] = $img['url'];
+            //     }
+            // }
+
+            $existingImages = ProductImage::where('product_id', $product->id)->get();
+
+            // dd(response()->json([1, 2]));
+            foreach ($existingImages as $dbImage) {
+                // return response()->json($dbImage);
+                $checkUrl = $this->buildImageUrl($dbImage->url);
+                if (!in_array($checkUrl, $inputUrls)) {
+
+                    $this->deleteImageFromCloudinary($dbImage->url);
+                    $productDelete = ProductImage::find($dbImage->id);
+                    $productDelete->delete();
+                }
+            }
 
 
             // $totalInventory = 0;
@@ -353,15 +434,16 @@ class ProductController extends Controller
             // Load lại đầy đủ các quan hệ sau khi cập nhật
             // $product->load([
             //     'category',
-            //     'items.color',
-            //     'items.size',
-            //     'images.color',
+            //     // 'color',
+            //     // 'size',
+            //     'productImages',
             // ]);
 
             return $this->success([], 'Cập nhật sản phẩm thành công.', 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->error('Dữ liệu không hợp lệ.', $e->errors(), 422);
         } catch (\Exception $e) {
+
             DB::rollBack();
             return $this->error('Lỗi khi cập nhật sản phẩm.', $e->getMessage(), 500);
         }
