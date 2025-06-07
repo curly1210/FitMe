@@ -220,6 +220,7 @@ class ProductController extends Controller
                 'variants.*.sale_price' => 'nullable',
                 'images' => 'required|array|min:1',
                 // 'images.*.url' => 'nullable',
+
                 'images.*.url' => [
                     'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
                     fn($att, $val, $fail) =>
@@ -227,6 +228,7 @@ class ProductController extends Controller
                         && $fail("The $att must be a file or string.")
                 ],
                 // 'images.*.color_id' => 'required_with:images|exists:colors,id',
+
                 'images.*.color_id' => 'required|exists:colors,id',
                 //                 'variants.*.sale_price' => 'nullable|numeric|min:0',
                 //                 'images' => 'sometimes|array|min:1',
@@ -257,7 +259,6 @@ class ProductController extends Controller
             // Lưu lại tất cả ID từ FE gửi lên
             $inputIds = [];
 
-            // dd($request->variants);
 
             // Lấy danh sách ID hiện tại trong DB theo product
             $existingIds = ProductItem::where('product_id', $product->id)->pluck('id')->toArray();
@@ -300,13 +301,13 @@ class ProductController extends Controller
                     //     $percentage = $variant['sale_price'];
                     //     $discount = $variant['price'] * ($percentage / 100);
                     //     $salePrice = $variant['price'] - $discount;
+
                 }
 
                 $totalInventory += $variant['stock'];
             }
 
             $product->update(['total_inventory' => $totalInventory]);
-
 
             $idsToDelete = array_diff($existingIds, $inputIds);
             ProductItem::whereIn('id', $idsToDelete)->delete();
@@ -373,6 +374,73 @@ class ProductController extends Controller
                     $productDelete->delete();
                 }
             }
+
+            // $totalInventory = 0;
+            // foreach ($validatedData['variants'] as $variant) {
+            //     $totalInventory += $variant['stock'];
+
+            //     $salePrice = null;
+            //     if (!empty($variant['sale_price'])) {
+            //         $percentage = (float) str_replace('%', '', $variant['sale_price']);
+            //         $discount = $variant['price'] * ($percentage / 100);
+            //         $salePrice = $variant['price'] - $discount;
+            //     }
+
+            //     $categoryName = $product->category ? $product->category->name : 'unknown';
+            //     $year = date('Y');
+
+            //     $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
+
+            //     ProductItem::create([
+            //         'product_id' => $product->id,
+            //         'color_id' => $variant['color_id'],
+            //         'size_id' => $variant['size_id'],
+            //         'sku' => $sku,
+            //         'stock' => $variant['stock'],
+            //         'import_price' => $variant['import_price'],
+            //         'price' => $variant['price'],
+            //         'sale_price' => $salePrice,
+            //     ]);
+            // }
+
+            // $product->update(['total_inventory' => $totalInventory]);
+
+            // Nếu có dữ liệu ảnh mới, xử lý cập nhật ảnh
+            // if (!empty($validatedData['images'])) {
+            //     $colorIds = collect($validatedData['images'])->pluck('color_id')->unique();
+
+            //     // Xóa ảnh cũ trên Cloudinary và database theo từng color_id mới được cập nhật
+            //     foreach ($colorIds as $colorId) {
+            //         $oldImages = ProductImage::where('product_id', $product->id)
+            //             ->where('color_id', $colorId)
+            //             ->get();
+
+            //         foreach ($oldImages as $oldImage) {
+            //             // Xóa ảnh trên Cloudinary
+            //             $this->deleteImageFromCloudinary($oldImage->url);
+
+            //             // Xóa record ảnh trong DB
+            //             $oldImage->delete();
+            //         }
+            //     }
+
+            //     // Thêm ảnh mới
+            //     foreach ($validatedData['images'] as $imageData) {
+            //         $file = $imageData['url'];
+            //         $uploadResult = $this->uploadImageToCloudinary($file, [
+            //             'width' => 600,
+            //             'height' => 600,
+            //             'quality' => 80,
+            //             'folder' => "products/{$product->id}",
+            //         ]);
+
+            //         ProductImage::create([
+            //             'product_id' => $product->id,
+            //             'color_id' => $imageData['color_id'],
+            //             'url' => $uploadResult['public_id'],
+            //         ]);
+            //     }
+            // }
 
 
             // $totalInventory = 0;
@@ -450,6 +518,7 @@ class ProductController extends Controller
             //     // 'color',
             //     // 'size',
             //     'productImages',
+
             // ]);
 
             return $this->success([], 'Cập nhật sản phẩm thành công.', 200);

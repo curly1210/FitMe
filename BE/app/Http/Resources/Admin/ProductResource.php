@@ -34,7 +34,7 @@ class ProductResource extends JsonResource
                     'id' => $item->id,
                     'sku' => $item->sku,
                     'price' => $item->price,
-                    'sale_price' => $item->sale_price,
+                    'sale_percent' => $item->sale_price,
                     'import_price' => $item->import_price,
                     'price' => $item->price,
                     'stock' => $item->stock,

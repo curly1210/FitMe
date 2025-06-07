@@ -106,7 +106,7 @@ const DrawerEdit = ({
         long_description: productDetail?.description,
       });
 
-      // console.log(productDetail);
+
 
       const arraySelectedColor = Array.from(
         new Map(
@@ -157,6 +157,7 @@ const DrawerEdit = ({
 
   if (!idProduct) return null;
 
+
   const validateColorsWithImages = () => {
     const errors = selectedColors.filter((color: any) => {
       const files = uploadImagesMap[color.id];
@@ -186,6 +187,7 @@ const DrawerEdit = ({
 
     // formDataRequest.append("_method", "PATCH");
 
+
     formDataRequest.append("name", values.name);
     formDataRequest.append(
       "category_id",
@@ -214,6 +216,7 @@ const DrawerEdit = ({
         `variants[${index}][sale_price]`,
         variant.sale_price
       );
+
       formDataRequest.append(
         `variants[${index}][import_price]`,
         variant.import_price
@@ -241,6 +244,7 @@ const DrawerEdit = ({
     for (let [key, value] of formDataRequest.entries()) {
       console.log(key, value);
     }
+
 
     updateProduct(
       {
@@ -293,6 +297,7 @@ const DrawerEdit = ({
       ...formData,
       variants: formData.variants.map((variant: any) =>
         variant.id === variantId ? { ...variant, percent } : variant
+
       ),
     });
   };
@@ -306,6 +311,7 @@ const DrawerEdit = ({
           imagesArray.push({
             colorId: Number(colorId),
             url: file.originFileObj,
+
           });
         }
       });
@@ -356,6 +362,7 @@ const DrawerEdit = ({
             import_price: 10000,
             price: 10000,
             sale_price: 0,
+
           });
         }
       });
@@ -748,6 +755,7 @@ const DrawerEdit = ({
                           type="number"
                           min="0"
                           value={variant?.sale_price}
+
                           onChange={(e) =>
                             updatePercent(
                               variant.id,
