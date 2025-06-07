@@ -18,31 +18,32 @@ class ProductDetailResource extends JsonResource
     {
         $productItems = $this->productItems;
 
-        $colorImages = [];
+      $colorImages = [];
 
-        foreach ($this->productImages as $image) {
-            $colorId = $image->color_id;
+$colors = $productItems
+    ->pluck('color')
+    ->unique('id');
 
-            if (!isset($colorImages[$colorId])) {
-                $item = $this->productItems->firstWhere('color_id', $colorId);
-                $color = $item?->color;
+foreach ($colors as $color) {
+    $colorImages[$color->id] = [
+        'id' => $color->id,
+        'name' => $color->name,
+        'code' => $color->code,
+        'images' => [],
+    ];
+}
 
-                if (!$color)
-                    continue;
+// Gắn ảnh vào đúng color_id nếu có
+foreach ($this->productImages as $image) {
+    $colorId = $image->color_id;
 
-                $colorImages[$colorId] = [
-                    'id' => $color->id,
-                    'name' => $color->name,
-                    'code' => $color->code,
-                    'images' => [],
-                ];
-            }
-
-            $colorImages[$colorId]['images'][] = [
-                'id' => $image->id,
-                'url' => $this->buildImageUrl($image->url),
-            ];
-        }
+    if (isset($colorImages[$colorId])) {
+        $colorImages[$colorId]['images'][] = [
+            'id' => $image->id,
+            'url' => $this->buildImageUrl($image->url),
+        ];
+    }
+}
         $sizes = $productItems
             ->pluck('size')
             ->unique('id')
