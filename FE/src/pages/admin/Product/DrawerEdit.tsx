@@ -106,8 +106,6 @@ const DrawerEdit = ({
         long_description: productDetail?.description,
       });
 
-
-
       const arraySelectedColor = Array.from(
         new Map(
           productDetail?.product_items
@@ -157,7 +155,6 @@ const DrawerEdit = ({
 
   if (!idProduct) return null;
 
-
   const validateColorsWithImages = () => {
     const errors = selectedColors.filter((color: any) => {
       const files = uploadImagesMap[color.id];
@@ -187,7 +184,6 @@ const DrawerEdit = ({
 
     // formDataRequest.append("_method", "PATCH");
 
-
     formDataRequest.append("name", values.name);
     formDataRequest.append(
       "category_id",
@@ -207,7 +203,7 @@ const DrawerEdit = ({
       ...syncImagesToFormData(uploadImagesMap),
     ];
 
-    const testImage = syncImagesToFormData(uploadImagesMap);
+    // const testImage = syncImagesToFormData(uploadImagesMap);
 
     formData.variants.forEach((variant: any, index: any) => {
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
@@ -226,7 +222,7 @@ const DrawerEdit = ({
       formDataRequest.append(`variants[${index}][id]`, variant.id);
     });
 
-    formDataRequest.append("testImage", testImage[0].url);
+    // formDataRequest.append("testImage", testImage[0].url);
 
     totalImages.forEach((image: any, index: any) => {
       formDataRequest.append(`images[${index}][color_id]`, image.colorId);
@@ -241,10 +237,11 @@ const DrawerEdit = ({
 
     // console.log(totalImages);
 
-    for (let [key, value] of formDataRequest.entries()) {
-      console.log(key, value);
-    }
+    // for (let [key, value] of formDataRequest.entries()) {
+    //   console.log(key, value);
+    // }
 
+    console.log("formDataRequest", formData);
 
     updateProduct(
       {
@@ -297,7 +294,6 @@ const DrawerEdit = ({
       ...formData,
       variants: formData.variants.map((variant: any) =>
         variant.id === variantId ? { ...variant, percent } : variant
-
       ),
     });
   };
@@ -311,7 +307,6 @@ const DrawerEdit = ({
           imagesArray.push({
             colorId: Number(colorId),
             url: file.originFileObj,
-
           });
         }
       });
@@ -362,7 +357,6 @@ const DrawerEdit = ({
             import_price: 10000,
             price: 10000,
             sale_price: 0,
-
           });
         }
       });
@@ -755,7 +749,6 @@ const DrawerEdit = ({
                           type="number"
                           min="0"
                           value={variant?.sale_price}
-
                           onChange={(e) =>
                             updatePercent(
                               variant.id,
