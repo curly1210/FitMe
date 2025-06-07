@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('sku', 30)->unique();
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
-            $table->softDeletes();
+            // $table->softDeletes();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }

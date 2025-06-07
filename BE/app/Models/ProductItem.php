@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ProductItem extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductItemFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
     protected $fillable = [
         'import_price',
         'price',

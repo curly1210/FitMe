@@ -156,6 +156,7 @@ class BannerController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // return response()->json($request->url_image);
         $banner = Banner::find($id);
         if (!$banner) {
             return $this->error('Không tìm thấy banner', 404);

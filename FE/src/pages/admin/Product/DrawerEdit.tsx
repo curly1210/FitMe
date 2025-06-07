@@ -106,7 +106,7 @@ const DrawerEdit = ({
         long_description: productDetail?.description,
       });
 
-      console.log(productDetail);
+
 
       const arraySelectedColor = Array.from(
         new Map(
@@ -155,7 +155,8 @@ const DrawerEdit = ({
     }
   }, [productDetail, openDrawerEdit]);
 
-  if (!idProduct) return <div>Loading...</div>;
+  if (!idProduct) return null;
+
 
   const validateColorsWithImages = () => {
     const errors = selectedColors.filter((color: any) => {
@@ -184,6 +185,9 @@ const DrawerEdit = ({
 
     const formDataRequest = new FormData();
 
+    // formDataRequest.append("_method", "PATCH");
+
+
     formDataRequest.append("name", values.name);
     formDataRequest.append(
       "category_id",
@@ -203,10 +207,16 @@ const DrawerEdit = ({
       ...syncImagesToFormData(uploadImagesMap),
     ];
 
+    const testImage = syncImagesToFormData(uploadImagesMap);
+
     formData.variants.forEach((variant: any, index: any) => {
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
       formDataRequest.append(`variants[${index}][size_id]`, variant.size.id);
-      formDataRequest.append(`variants[${index}][sale_price]`, variant.percent);
+      formDataRequest.append(
+        `variants[${index}][sale_price]`,
+        variant.sale_price
+      );
+
       formDataRequest.append(
         `variants[${index}][import_price]`,
         variant.import_price
@@ -216,10 +226,25 @@ const DrawerEdit = ({
       formDataRequest.append(`variants[${index}][id]`, variant.id);
     });
 
+    formDataRequest.append("testImage", testImage[0].url);
+
     totalImages.forEach((image: any, index: any) => {
       formDataRequest.append(`images[${index}][color_id]`, image.colorId);
-      formDataRequest.append(`images[${index}][url]`, image.image);
+
+      if (image.url instanceof File) {
+        formDataRequest.append(`images[${index}][url]`, image.url); // gửi file
+      } else {
+        formDataRequest.append(`images[${index}][url]`, image.url); // gửi string (URL)
+      }
+      // formDataRequest.append(`images[${index}][url]`, image.url);
     });
+
+    // console.log(totalImages);
+
+    for (let [key, value] of formDataRequest.entries()) {
+      console.log(key, value);
+    }
+
 
     updateProduct(
       {
@@ -267,11 +292,12 @@ const DrawerEdit = ({
       ),
     });
   };
-  const updatePercent = (variantId: number, sale_percent: number) => {
+  const updatePercent = (variantId: number, percent: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, sale_percent } : variant
+        variant.id === variantId ? { ...variant, percent } : variant
+
       ),
     });
   };
@@ -284,7 +310,8 @@ const DrawerEdit = ({
         if (file.originFileObj) {
           imagesArray.push({
             colorId: Number(colorId),
-            image: file.originFileObj,
+            url: file.originFileObj,
+
           });
         }
       });
@@ -334,7 +361,8 @@ const DrawerEdit = ({
             stock: 10,
             import_price: 10000,
             price: 10000,
-            sale_percent: 0,
+            sale_price: 0,
+
           });
         }
       });
@@ -726,7 +754,8 @@ const DrawerEdit = ({
                         <Input
                           type="number"
                           min="0"
-                          value={0}
+                          value={variant?.sale_price}
+
                           onChange={(e) =>
                             updatePercent(
                               variant.id,
