@@ -208,6 +208,15 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
+                // 'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
+                'images' => 'sometimes|array|min:1',
+                'images.*.url' => [
+                    'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
+                    fn($att, $val, $fail) =>
+                    !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
+                        && $fail("The $att must be a file or string.")
+                ],
+                'images.*.color_id' => 'required_with:images|exists:colors,id',
                 'variants.*.sale_price' => 'nullable|numeric|min:0',
                 'images' => 'sometimes|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
@@ -229,84 +238,133 @@ class ProductController extends Controller
             ]);
 
             // Xóa các product_items cũ và thêm lại từ biến thể mới
-            ProductItem::where('product_id', $product->id)->delete();
+            // ProductItem::where('product_id', $product->id)->delete();
+            // ProductItem::where('product_id', $product->id)->forceDelete();
+
+            // Lưu lại tất cả ID từ FE gửi lên
+            $inputIds = [];
+
+            // Lấy danh sách ID hiện tại trong DB theo product
+            $existingIds = ProductItem::where('product_id', $product->id)->pluck('id')->toArray();
 
             $totalInventory = 0;
             foreach ($validatedData['variants'] as $variant) {
-                $totalInventory += $variant['stock'];
+                $inputIds[] = $variant['id'];
+                // $totalInventory += $variant['stock'];
 
-                $salePrice = null;
-                if (!empty($variant['sale_price'])) {
-                    $percentage = $variant['sale_price'];
-                    $discount = $variant['price'] * ($percentage / 100);
-                    $salePrice = $variant['price'] - $discount;
+                if (in_array($variant['id'], $existingIds)) {
+                    // Đã tồn tại → cập nhật
+                    ProductItem::where('id', $variant['id'])->update([
+                        // 'color_id' => $variant['color'],
+                        // 'size' => $variant['size'],
+                        'stock' => $variant['stock'],
+                        'import_price' => $variant['import_price'],
+                        'price' => $variant['price'],
+                        'sale_price' => $variant['sale_price'],
+                    ]);
+                } else {
+
+
+                    $categoryName = $product->category ? $product->category->name : 'unknown';
+                    $year = date('Y');
+
+                    $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
+                    // Chưa có → tạo mới
+                    ProductItem::create([
+                        // 'id' => $variant['id'], // chỉ dùng nếu bạn cho phép tự set id
+                        'product_id' => $product->id,
+                        'color_id' => $variant['color_id'],
+                        'size_id' => $variant['size_id'],
+                        'sku' => $sku,
+                        'stock' => $variant['stock'],
+                        'import_price' => $variant['import_price'],
+                        'price' => $variant['price'],
+                        'sale_price' => $variant['sale_price'],
+                    ]);
                 }
 
-                $categoryName = $product->category ? $product->category->name : 'unknown';
-                $year = date('Y');
-
-                $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
-
-                ProductItem::create([
-                    'product_id' => $product->id,
-                    'color_id' => $variant['color_id'],
-                    'size_id' => $variant['size_id'],
-                    'sku' => $sku,
-                    'stock' => $variant['stock'],
-                    'import_price' => $variant['import_price'],
-                    'price' => $variant['price'],
-                    'sale_price' => $salePrice,
-                ]);
+                $totalInventory += $variant['stock'];
             }
 
             $product->update(['total_inventory' => $totalInventory]);
 
+
+            // $totalInventory = 0;
+            // foreach ($validatedData['variants'] as $variant) {
+            //     $totalInventory += $variant['stock'];
+
+            //     $salePrice = null;
+            //     if (!empty($variant['sale_price'])) {
+            //         $percentage = (float) str_replace('%', '', $variant['sale_price']);
+            //         $discount = $variant['price'] * ($percentage / 100);
+            //         $salePrice = $variant['price'] - $discount;
+            //     }
+
+            //     $categoryName = $product->category ? $product->category->name : 'unknown';
+            //     $year = date('Y');
+
+            //     $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
+
+            //     ProductItem::create([
+            //         'product_id' => $product->id,
+            //         'color_id' => $variant['color_id'],
+            //         'size_id' => $variant['size_id'],
+            //         'sku' => $sku,
+            //         'stock' => $variant['stock'],
+            //         'import_price' => $variant['import_price'],
+            //         'price' => $variant['price'],
+            //         'sale_price' => $salePrice,
+            //     ]);
+            // }
+
+            // $product->update(['total_inventory' => $totalInventory]);
+
             // Nếu có dữ liệu ảnh mới, xử lý cập nhật ảnh
-            if (!empty($validatedData['images'])) {
-                $colorIds = collect($validatedData['images'])->pluck('color_id')->unique();
+            // if (!empty($validatedData['images'])) {
+            //     $colorIds = collect($validatedData['images'])->pluck('color_id')->unique();
 
-                // Xóa ảnh cũ trên Cloudinary và database theo từng color_id mới được cập nhật
-                foreach ($colorIds as $colorId) {
-                    $oldImages = ProductImage::where('product_id', $product->id)
-                        ->where('color_id', $colorId)
-                        ->get();
+            //     // Xóa ảnh cũ trên Cloudinary và database theo từng color_id mới được cập nhật
+            //     foreach ($colorIds as $colorId) {
+            //         $oldImages = ProductImage::where('product_id', $product->id)
+            //             ->where('color_id', $colorId)
+            //             ->get();
 
-                    foreach ($oldImages as $oldImage) {
-                        // Xóa ảnh trên Cloudinary
-                        $this->deleteImageFromCloudinary($oldImage->url);
+            //         foreach ($oldImages as $oldImage) {
+            //             // Xóa ảnh trên Cloudinary
+            //             $this->deleteImageFromCloudinary($oldImage->url);
 
-                        // Xóa record ảnh trong DB
-                        $oldImage->delete();
-                    }
-                }
+            //             // Xóa record ảnh trong DB
+            //             $oldImage->delete();
+            //         }
+            //     }
 
-                // Thêm ảnh mới
-                foreach ($validatedData['images'] as $imageData) {
-                    $file = $imageData['url'];
-                    $uploadResult = $this->uploadImageToCloudinary($file, [
-                        'width' => 600,
-                        'height' => 600,
-                        'quality' => 80,
-                        'folder' => "products/{$product->id}",
-                    ]);
+            //     // Thêm ảnh mới
+            //     foreach ($validatedData['images'] as $imageData) {
+            //         $file = $imageData['url'];
+            //         $uploadResult = $this->uploadImageToCloudinary($file, [
+            //             'width' => 600,
+            //             'height' => 600,
+            //             'quality' => 80,
+            //             'folder' => "products/{$product->id}",
+            //         ]);
 
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'color_id' => $imageData['color_id'],
-                        'url' => $uploadResult['public_id'],
-                    ]);
-                }
-            }
+            //         ProductImage::create([
+            //             'product_id' => $product->id,
+            //             'color_id' => $imageData['color_id'],
+            //             'url' => $uploadResult['public_id'],
+            //         ]);
+            //     }
+            // }
 
             DB::commit();
 
             // Load lại đầy đủ các quan hệ sau khi cập nhật
-            $product->load([
-                'category',
-                'items.color',
-                'items.size',
-                'images.color',
-            ]);
+            // $product->load([
+            //     'category',
+            //     'items.color',
+            //     'items.size',
+            //     'images.color',
+            // ]);
 
             return $this->success([], 'Cập nhật sản phẩm thành công.', 200);
         } catch (\Illuminate\Validation\ValidationException $e) {

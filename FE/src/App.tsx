@@ -10,20 +10,12 @@ import { SearchPanelProvider } from "./context/SearchPanelProvider";
 import { PopupProvider } from "./context/PopupMessageProvider";
 import { API_URL } from "./utils/constant";
 
-
 // const axiosInstance = axios.create({
 //   baseURL: "http://localhost:8000/api",
 //   withCredentials: true,
 // });
 
-
-const dataProvider = simpleRestDataProvider(
-  API_URL,
-  axiosInstance
-);
-
-
-
+const dataProvider = simpleRestDataProvider(API_URL, axiosInstance);
 
 function App() {
   return (

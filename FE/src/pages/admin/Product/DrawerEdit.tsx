@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UploadOutlined } from "@ant-design/icons";
-import { useCreate, useList } from "@refinedev/core";
+import { useCreate, useList, useOne } from "@refinedev/core";
 import {
   Button,
   Cascader,
@@ -9,100 +11,151 @@ import {
   Drawer,
   Form,
   Input,
-  InputNumber,
   notification,
   Select,
   Spin,
-  Tooltip,
   Upload,
   UploadFile,
 } from "antd";
-import { useWatch } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type DrawerAddPros = {
-  openDrawerAdd: boolean;
-  setOpenDrawerAdd: (openDrawerAdd: boolean) => void;
+type DrawerEditProps = {
+  idProduct: any;
+  openDrawerEdit: boolean;
+  setOpenDrawerEdit: (openDrawerAdd: boolean) => void;
   options: any[];
   refetch: () => void;
 };
 
-const DrawerAdd = ({
-  openDrawerAdd,
-  setOpenDrawerAdd,
-  options,
+const DrawerEdit = ({
+  idProduct,
+  openDrawerEdit,
+  setOpenDrawerEdit,
   refetch,
-}: DrawerAddPros) => {
-  const [formData, setFormData] = useState<any>({
-    name: "",
-    category: 0,
-    description: "",
-    status: 0,
-    long_description: "",
-    price: 0,
-    variants: [],
-    images: [],
-  });
-  // const [uploadKey, setUploadKey] = useState(Date.now());
-
-  const [form] = Form.useForm();
-
-  const resetAllStates = () => {
-    setImportPrice(0);
-    setSellingPrice(0);
-    setPercent(0);
-
-    setUploadImagesMap({});
-    setSelectedColors([]);
-    setSelectedColorsId([]);
-
-    setSelectedSizes([]);
-    setSelectedSizesId([]);
-
-    setDefaultStock(10);
-    setSelectedColorForImages(null);
-
-    setFormData({
-      name: "",
-      category: 0,
-      description: "",
-      status: 0,
-      long_description: "",
-      price: 0,
-      variants: [],
-      images: [],
-    });
-
-    form.resetFields();
-  };
-
-  const [importPrice, setImportPrice] = useState<any>(0);
-  const [sellingPrice, setSellingPrice] = useState<any>(0);
-  const [percent, setPercent] = useState<any>(0);
-
-  const [uploadImagesMap, setUploadImagesMap] = useState<{
-    [colorId: string]: UploadFile[];
-  }>({});
-
+  options,
+}: DrawerEditProps) => {
   const [selectedColors, setSelectedColors] = useState<any>([]);
   const [selectedColorsId, setSelectedColorsId] = useState<any>([]);
 
   const [selectedSizes, setSelectedSizes] = useState<any>([]);
   const [selectedSizesId, setSelectedSizesId] = useState<any>([]);
 
-  const [defaultStock, setDefaultStock] = useState<any>(10);
   const [selectedColorForImages, setSelectedColorForImages] =
     useState<any>(null);
 
-  // const onSearch = () => {};
+  const [uploadImagesMap, setUploadImagesMap] = useState<{
+    [colorId: string]: UploadFile[];
+  }>({});
 
-  const onClose = () => {
-    setOpenDrawerAdd(false);
-  };
+  const [formData, setFormData] = useState<any>({
+    // name: "",
+    // category: 0,
+    // description: "",
+    // status: 0,
+    // long_description: "",
+    // price: 0,
+    variants: [],
+    images: [],
+  });
 
-  const { data: colors } = useList({ resource: "admin/variations/color" });
-  const { data: sizes } = useList({ resource: "admin/variations/size" });
+  const { data: productDetailResponse } = useOne({
+    resource: "admin/products/show",
+    id: idProduct,
+    queryOptions: { enabled: openDrawerEdit },
+  });
+
+  const { mutate: updateProduct, isLoading } = useCreate();
+
+  const { data: colors } = useList({
+    resource: "admin/variations/color",
+    queryOptions: { enabled: !!idProduct },
+  });
+  const { data: sizes } = useList({
+    resource: "admin/variations/size",
+    queryOptions: { enabled: !!idProduct },
+  });
+
+  const productDetail: any = productDetailResponse?.data || [];
+  const [form] = Form.useForm();
+
+  function findCategoryPath(
+    categories: any[],
+    childId: number
+  ): number[] | null {
+    for (const parent of categories) {
+      const found = parent.children?.find(
+        (child: any) => child.value === childId
+      );
+      if (found) {
+        return [parent.value, childId];
+      }
+    }
+    return null; // Không tìm thấy
+  }
+
+  useEffect(() => {
+    if (!openDrawerEdit) return;
+
+    if (productDetail.length !== 0) {
+      form.setFieldsValue({
+        category: findCategoryPath(options, productDetail?.category?.id),
+        name: productDetail?.name,
+        status: productDetail?.is_active ? "1" : "0",
+        description: productDetail?.short_description,
+        long_description: productDetail?.description,
+      });
+
+      console.log(productDetail);
+
+      const arraySelectedColor = Array.from(
+        new Map(
+          productDetail?.product_items
+            .map((item: any) => item.color)
+            .map((color: any) => [color.id, color])
+        ).values()
+      );
+
+      setSelectedColors(arraySelectedColor);
+      setSelectedColorsId(arraySelectedColor.map((color: any) => color.id));
+      setSelectedColorForImages(arraySelectedColor[0]);
+
+      const arraySelectedSize = Array.from(
+        new Map(
+          productDetail?.product_items
+            .map((item: any) => item.size)
+            .map((size: any) => [size.id, size])
+        ).values()
+      );
+
+      setSelectedSizes(arraySelectedSize);
+      setSelectedSizesId(arraySelectedColor.map((size: any) => size.id));
+
+      const grouped: { [colorId: string]: UploadFile[] } = {};
+      if (productDetail?.images) {
+        productDetail.images.forEach((img: any, index: any) => {
+          const colorId = img.color?.id.toString(); // hoặc img.color?.id tùy cấu trúc
+          if (!grouped[colorId]) grouped[colorId] = [];
+
+          grouped[colorId].push({
+            uid: `${img.id}-${index}-${img.colorId}`,
+            name: img.url.split("/").pop() || `image-${index}`,
+            status: "done",
+            url: img.url,
+          });
+        });
+        setUploadImagesMap(grouped);
+      }
+
+      setFormData({
+        ...formData,
+        images: productDetail?.images,
+        variants: productDetail?.product_items,
+      });
+    }
+  }, [productDetail, openDrawerEdit]);
+
+  if (!idProduct) return <div>Loading...</div>;
 
   const validateColorsWithImages = () => {
     const errors = selectedColors.filter((color: any) => {
@@ -120,8 +173,6 @@ const DrawerAdd = ({
 
     return true;
   };
-
-  const { mutate: createProduct, isLoading } = useCreate();
 
   const onFinish = (values: any) => {
     // console.log(values);
@@ -143,35 +194,44 @@ const DrawerAdd = ({
     // formDataRequest.append("variants", formData.variants);
     // formDataRequest.append("images", formData.images);
 
+    // console.log(formData);
+
+    // console.log("anh moi upload:", syncImagesToFormData(uploadImagesMap));
+
+    const totalImages = [
+      ...(formData?.images || []),
+      ...syncImagesToFormData(uploadImagesMap),
+    ];
+
     formData.variants.forEach((variant: any, index: any) => {
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
       formDataRequest.append(`variants[${index}][size_id]`, variant.size.id);
       formDataRequest.append(`variants[${index}][sale_price]`, variant.percent);
       formDataRequest.append(
         `variants[${index}][import_price]`,
-        variant.importPrice
+        variant.import_price
       );
-      formDataRequest.append(`variants[${index}][price]`, variant.sellingPrice);
+      formDataRequest.append(`variants[${index}][price]`, variant.price);
       formDataRequest.append(`variants[${index}][stock]`, variant.stock);
+      formDataRequest.append(`variants[${index}][id]`, variant.id);
     });
 
-    formData.images.forEach((image: any, index: any) => {
+    totalImages.forEach((image: any, index: any) => {
       formDataRequest.append(`images[${index}][color_id]`, image.colorId);
       formDataRequest.append(`images[${index}][url]`, image.image);
-      // if (image.file?.originFileObj) {
-      // }
     });
 
-    createProduct(
+    updateProduct(
       {
-        resource: "admin/products",
+        resource: `admin/products/${idProduct}`,
         values: formDataRequest,
         meta: { headers: { "Content-Type": "multipart/form-data" } },
       },
       {
         onSuccess: (response) => {
-          resetAllStates();
-          onClose();
+          // resetAllStates();
+          // onClose();
+          setOpenDrawerEdit(false);
           refetch();
           notification.success({ message: response?.data?.message });
         },
@@ -183,9 +243,6 @@ const DrawerAdd = ({
     );
   };
 
-  const gia_nhap = useWatch("gia_nhap", form); // Giá bán
-  const gia_ban = useWatch("gia_ban", form); // Giá nhập
-
   const updateVariantStock = (variantId: number, stock: number) => {
     setFormData({
       ...formData,
@@ -194,90 +251,29 @@ const DrawerAdd = ({
       ),
     });
   };
-  const updateImportPrice = (variantId: number, importPrice: number) => {
+  const updateImportPrice = (variantId: number, import_price: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, importPrice } : variant
+        variant.id === variantId ? { ...variant, import_price } : variant
       ),
     });
   };
-  const updateSellingPrice = (variantId: number, sellingPrice: number) => {
+  const updateSellingPrice = (variantId: number, price: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, sellingPrice } : variant
+        variant.id === variantId ? { ...variant, price } : variant
       ),
     });
   };
-  const updatePercent = (variantId: number, percentSell: number) => {
+  const updatePercent = (variantId: number, sale_percent: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId
-          ? { ...variant, percent: percentSell }
-          : variant
+        variant.id === variantId ? { ...variant, sale_percent } : variant
       ),
     });
-  };
-
-  const handleColorToggle = (color: any, checked: any) => {
-    let updatedColors: any;
-
-    if (checked) {
-      updatedColors = [...selectedColors, color];
-      setSelectedColors(updatedColors);
-      setSelectedColorsId((prev: any) => [...prev, color.id]);
-      // console.log(updatedColors);
-
-      if (selectedColors.length === 0) {
-        setSelectedColorForImages(color);
-      }
-    } else {
-      updatedColors = selectedColors?.filter((c: any) => c?.id !== color?.id);
-      setSelectedColors(updatedColors);
-      setSelectedColorsId((prev: any) =>
-        prev.filter((id: any) => id !== color.id)
-      );
-
-      setUploadImagesMap((prev) => {
-        const newMap = { ...prev };
-        delete newMap[color.id];
-
-        syncImagesToFormData(newMap);
-
-        return newMap;
-      });
-
-      if (selectedColorForImages?.id === color?.id) {
-        setSelectedColorForImages(
-          updatedColors.length > 0 ? updatedColors[0] : null
-        );
-      }
-    }
-
-    generateVariants(updatedColors, selectedSizes);
-  };
-
-  const handleSizeToggle = (size: any, checked: any) => {
-    let updatedSizes: any;
-
-    if (checked) {
-      updatedSizes = [...selectedSizes, size];
-      setSelectedSizesId((prev: any) => [...prev, size.id]);
-    } else {
-      updatedSizes = selectedSizes.filter((s: any) => s?.id !== size?.id);
-      setSelectedSizesId((prev: any) =>
-        prev.filter((id: any) => id !== size.id)
-      );
-    }
-
-    // const updatedSizes = checked
-    //   ? [...selectedSizes, size]
-    //   : selectedSizes.filter((s: any) => s?.id !== size?.id);
-
-    setSelectedSizes(updatedSizes);
-    generateVariants(selectedColors, updatedSizes);
   };
 
   const syncImagesToFormData = (map: Record<string, UploadFile[]>) => {
@@ -294,43 +290,12 @@ const DrawerAdd = ({
       });
     });
 
-    setFormData((prev: any) => ({
-      ...prev,
-      images: imagesArray,
-    }));
-  };
+    return imagesArray;
 
-  const handleUploadChange2 = (info: { fileList: UploadFile[] }) => {
-    const colorId = selectedColorForImages?.id;
-    if (!colorId) return;
-
-    const updatedMap = {
-      ...uploadImagesMap,
-      [colorId]: info.fileList,
-    };
-
-    setUploadImagesMap(updatedMap);
-    syncImagesToFormData(updatedMap); // cập nhật luôn formData.images
-  };
-
-  const handleRemoveFile = (file: UploadFile) => {
-    if (!selectedColorForImages) return;
-
-    const colorId = selectedColorForImages.id;
-
-    const updatedList =
-      uploadImagesMap[selectedColorForImages.id]?.filter(
-        (f) => f.uid !== file.uid
-      ) || [];
-
-    const newMap = {
-      ...uploadImagesMap,
-      [colorId]: updatedList,
-    };
-
-    setUploadImagesMap(newMap);
-
-    syncImagesToFormData(newMap);
+    // setFormData((prev: any) => ({
+    //   ...prev,
+    //   images: [...prev.images, ...imagesArray],
+    // }));
   };
 
   const generateVariants = (colorsList: any, sizesList: any) => {
@@ -366,10 +331,10 @@ const DrawerAdd = ({
             id: variantId++,
             color,
             size,
-            stock: defaultStock,
-            importPrice: importPrice,
-            sellingPrice: sellingPrice,
-            percent: percent,
+            stock: 10,
+            import_price: 10000,
+            price: 10000,
+            sale_percent: 0,
           });
         }
       });
@@ -380,6 +345,117 @@ const DrawerAdd = ({
       variants: newVariants,
     });
   };
+
+  const handleUploadChange2 = (info: { fileList: UploadFile[] }) => {
+    const colorId = selectedColorForImages?.id;
+    if (!colorId) return;
+
+    const updatedMap = {
+      ...uploadImagesMap,
+      [colorId]: info.fileList,
+    };
+
+    setUploadImagesMap(updatedMap);
+    // syncImagesToFormData(updatedMap); // cập nhật luôn formData.images
+  };
+
+  const handleRemoveFile = (file: UploadFile) => {
+    if (!selectedColorForImages) return;
+
+    const colorId = selectedColorForImages.id;
+
+    const updatedList =
+      uploadImagesMap[selectedColorForImages.id]?.filter(
+        (f) => f.uid !== file.uid
+      ) || [];
+
+    const newMap = {
+      ...uploadImagesMap,
+      [colorId]: updatedList,
+    };
+
+    setUploadImagesMap(newMap);
+
+    const idImageDeleted = Number(file.uid.split("-")[0]);
+
+    const updateListImage = formData?.images.filter(
+      (image: any) => image?.id !== idImageDeleted
+    );
+
+    setFormData({ ...formData, images: updateListImage });
+  };
+
+  const handleSizeToggle = (size: any, checked: any) => {
+    let updatedSizes: any;
+
+    if (checked) {
+      updatedSizes = [...selectedSizes, size];
+      setSelectedSizesId((prev: any) => [...prev, size.id]);
+    } else {
+      updatedSizes = selectedSizes.filter((s: any) => s?.id !== size?.id);
+      setSelectedSizesId((prev: any) =>
+        prev.filter((id: any) => id !== size.id)
+      );
+    }
+
+    // const updatedSizes = checked
+    //   ? [...selectedSizes, size]
+    //   : selectedSizes.filter((s: any) => s?.id !== size?.id);
+
+    setSelectedSizes(updatedSizes);
+    generateVariants(selectedColors, updatedSizes);
+  };
+
+  const handleColorToggle = (color: any, checked: any) => {
+    let updatedColors: any;
+
+    if (checked) {
+      updatedColors = [...selectedColors, color];
+      setSelectedColors(updatedColors);
+      setSelectedColorsId((prev: any) => [...prev, color.id]);
+      // console.log(updatedColors);
+
+      if (selectedColors.length === 0) {
+        setSelectedColorForImages(color);
+      }
+
+      const updatedMap = {
+        ...uploadImagesMap,
+        [color?.id]: [],
+      };
+
+      setUploadImagesMap(updatedMap);
+    } else {
+      updatedColors = selectedColors?.filter((c: any) => c?.id !== color?.id);
+      setSelectedColors(updatedColors);
+      setSelectedColorsId((prev: any) =>
+        prev.filter((id: any) => id !== color.id)
+      );
+
+      setUploadImagesMap((prev) => {
+        const newMap = { ...prev };
+        delete newMap[color.id];
+
+        // syncImagesToFormData(newMap);
+
+        return newMap;
+      });
+
+      if (selectedColorForImages?.id === color?.id) {
+        setSelectedColorForImages(
+          updatedColors.length > 0 ? updatedColors[0] : null
+        );
+      }
+    }
+
+    generateVariants(updatedColors, selectedSizes);
+  };
+
+  // console.log(selectedSizesId);
+  // console.log(formData);
+  // console.log(productDetail);
+
+  // console.log(findCategoryPath(options, productDetail?.category?.id));
 
   const contentStyle = {
     padding: 50,
@@ -392,13 +468,16 @@ const DrawerAdd = ({
     <div>
       <Drawer
         width="60%"
-        title="Thêm sản phẩm"
+        title="Sửa sản phẩm"
         closable={{ "aria-label": "Close Button" }}
-        onClose={onClose}
-        open={openDrawerAdd}
+        onClose={() => setOpenDrawerEdit(false)}
+        open={openDrawerEdit}
         footer={
           <div style={{ textAlign: "right" }}>
-            <Button onClick={onClose} style={{ marginRight: 8 }}>
+            <Button
+              onClick={() => setOpenDrawerEdit(false)}
+              style={{ marginRight: 8 }}
+            >
               Hủy
             </Button>
             <Button
@@ -418,19 +497,15 @@ const DrawerAdd = ({
             </Spin>
           </div>
         )}
-
-        <p className="text-xl font-semibold mb-5">Thông tin chung</p>
         <Form
-          initialValues={{
-            defaultStock: defaultStock,
-            gia_ban: 0,
-            gia_nhap: 0,
-            percent: 0,
-            status: "1",
-          }}
-          form={form}
           onFinish={onFinish}
           layout="vertical"
+          form={form}
+          // initialValues={{
+          //   category: findCategoryPath(options, productDetail?.category?.id),
+          //   name: productDetail?.name,
+          //   // status: productDetail?.is_active,
+          // }}
         >
           <div className="grid grid-cols-3 gap-6">
             <Form.Item
@@ -468,7 +543,6 @@ const DrawerAdd = ({
               rules={[{ required: true }]}
             >
               <Select
-                defaultValue={"1"}
                 options={[
                   { value: "1", label: "Hiển thị" },
                   { value: "0", label: "Ẩn" },
@@ -477,66 +551,6 @@ const DrawerAdd = ({
             </Form.Item>
           </div>
           <div className="grid grid-cols-3 gap-6">
-            <Form.Item
-              label={
-                <span>
-                  Giá nhập<span className="text-red-500 ml-1">*</span>
-                </span>
-              }
-              name="gia_nhap"
-              required={false}
-              rules={[
-                { required: true, message: "Vui lòng nhập giá!" },
-                { pattern: /^[1-9]\d*$/, message: "Vui lòng nhập số dương!" },
-              ]}
-            >
-              <InputNumber onChange={(value) => setImportPrice(value)} />
-            </Form.Item>
-            <Form.Item
-              label={
-                <span>
-                  Giá bán<span className="text-red-500 ml-1">*</span>
-                </span>
-              }
-              name="gia_ban"
-              required={false}
-              rules={[
-                { required: true, message: "Vui lòng nhập giá!" },
-                { pattern: /^[1-9]\d*$/, message: "Vui lòng nhập số dương!" },
-              ]}
-            >
-              <InputNumber onChange={(value) => setSellingPrice(value)} />
-            </Form.Item>
-            <Form.Item
-              label={
-                <span>
-                  Phần trăm khuyến mãi
-                  <span className="text-red-500 ml-1">*</span>
-                </span>
-              }
-              name="percent"
-              required={false}
-              rules={[
-                { pattern: /^[0-9]\d*$/, message: "Vui lòng nhập số dương!" },
-              ]}
-            >
-              <InputNumber onChange={(value) => setPercent(value)} />
-            </Form.Item>
-          </div>
-          <div className="grid grid-cols-3 gap-6">
-            <Form.Item
-              label={
-                <span>
-                  Tồn kho<span className="text-red-500 ml-1">*</span>
-                </span>
-              }
-              name="defaultStock"
-            >
-              <InputNumber
-                className=""
-                onChange={(value) => setDefaultStock(value)}
-              />
-            </Form.Item>
             <Form.Item
               label={
                 <span>
@@ -562,30 +576,22 @@ const DrawerAdd = ({
               <TextArea />
             </Form.Item>
           </div>
+
           <h3 className="text-2xl font-semibold mb-3">Biến thể sản phẩm</h3>
           <div className="grid grid-cols-2 gap-5 mb-3">
             <div className="border py-5 px-4 rounded-md">
               <p className="text-base mb-5 font-semibold">Màu sắc</p>
               <div className="grid grid-cols-2 gap-y-3 max-h-60 overflow-y-auto">
                 {colors?.data?.map((color: any) => (
-                  <div key={color?.id}>
-                    <Tooltip
-                      className="flex items-center gap-2"
-                      title={
-                        !gia_ban || !gia_nhap ? "Vui lòng nhập giá trước" : ""
+                  <div className="flex items-center gap-2" key={color?.id}>
+                    <Checkbox
+                      id={`${color?.id}`}
+                      checked={selectedColorsId.includes(color.id)}
+                      onChange={(e: CheckboxChangeEvent) =>
+                        handleColorToggle(color, e.target.checked === true)
                       }
-                    >
-                      <Checkbox
-                        id={`${color?.id}`}
-                        // value={color.id}
-                        checked={selectedColorsId.includes(color.id)}
-                        disabled={!gia_ban || !gia_nhap}
-                        onChange={(e: CheckboxChangeEvent) =>
-                          handleColorToggle(color, e.target.checked === true)
-                        }
-                      />
-                      <label htmlFor={`${color?.id}`}>{color?.name}</label>
-                    </Tooltip>
+                    />
+                    <label htmlFor={`${color?.id}`}>{color?.name}</label>
                   </div>
                 ))}
               </div>
@@ -594,24 +600,15 @@ const DrawerAdd = ({
               <p className="text-base font-semibold mb-5">Kích cỡ</p>
               <div className="grid grid-cols-2 gap-y-3 max-h-60 overflow-y-auto">
                 {sizes?.data?.map((size: any) => (
-                  <div key={size?.id}>
-                    <Tooltip
-                      className="flex items-center gap-2"
-                      title={
-                        !gia_ban || !gia_nhap ? "Vui lòng nhập giá trước" : ""
+                  <div className="flex items-center gap-2" key={size?.id}>
+                    <Checkbox
+                      id={`${size?.id}`}
+                      checked={selectedSizesId.includes(size.id)}
+                      onChange={(e: CheckboxChangeEvent) =>
+                        handleSizeToggle(size, e.target.checked === true)
                       }
-                    >
-                      <Checkbox
-                        id={`${size?.id}`}
-                        // value={size.id}
-                        disabled={!gia_ban || !gia_nhap}
-                        checked={selectedSizesId.includes(size.id)}
-                        onChange={(e: CheckboxChangeEvent) =>
-                          handleSizeToggle(size, e.target.checked === true)
-                        }
-                      />
-                      <label htmlFor={`${size?.id}`}>{size?.name}</label>
-                    </Tooltip>
+                    />
+                    <label htmlFor={`${size?.id}`}>{size?.name}</label>
                   </div>
                 ))}
               </div>
@@ -640,13 +637,7 @@ const DrawerAdd = ({
                     >
                       {color?.name}
                       <span className="text-xs">
-                        (
-                        {
-                          formData.images.filter(
-                            (img: any) => img.colorId === color?.id
-                          ).length
-                        }{" "}
-                        ảnh)
+                        ({uploadImagesMap[color?.id].length} ảnh)
                       </span>
                     </Button>
                   ))}
@@ -707,7 +698,7 @@ const DrawerAdd = ({
                         <Input
                           type="number"
                           min="0"
-                          value={variant?.importPrice}
+                          value={variant?.import_price}
                           onChange={(e) =>
                             updateImportPrice(
                               variant.id,
@@ -721,7 +712,7 @@ const DrawerAdd = ({
                         <Input
                           type="number"
                           min="0"
-                          value={variant?.sellingPrice}
+                          value={variant?.price}
                           onChange={(e) =>
                             updateSellingPrice(
                               variant.id,
@@ -735,7 +726,7 @@ const DrawerAdd = ({
                         <Input
                           type="number"
                           min="0"
-                          value={variant?.percent}
+                          value={0}
                           onChange={(e) =>
                             updatePercent(
                               variant.id,
@@ -761,4 +752,4 @@ const DrawerAdd = ({
     </div>
   );
 };
-export default DrawerAdd;
+export default DrawerEdit;
