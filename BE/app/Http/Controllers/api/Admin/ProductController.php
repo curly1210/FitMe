@@ -480,32 +480,4 @@ class ProductController extends Controller
             return $this->error('Lỗi khi khôi phục sản phẩm.', $e->getMessage(), 500);
         }
     }
-    public function destroy($id)
-    {
-        try {
-            $product = Product::onlyTrashed()->findOrFail($id);
-
-            DB::beginTransaction();
-
-            // Xóa ảnh trên Cloudinary
-            $images = ProductImage::where('product_id', $product->id)->get();
-            foreach ($images as $image) {
-                $this->deleteImageFromCloudinary($image->url);
-                $image->forceDelete(); // Xóa vĩnh viễn ảnh
-            }
-
-            // Xóa vĩnh viễn các product items
-            ProductItem::where('product_id', $product->id)->forceDelete();
-
-            // Xóa vĩnh viễn sản phẩm
-            $product->forceDelete();
-
-            DB::commit();
-
-            return $this->success(null, 'Sản phẩm đã được xóa vĩnh viễn thành công.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->error('Lỗi khi xóa vĩnh viễn sản phẩm.', $e->getMessage(), 500);
-        }
-    }
 }
