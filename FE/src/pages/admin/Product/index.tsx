@@ -16,11 +16,14 @@ import { useMemo, useState } from "react";
 import DrawerAdd from "./DrawerAdd";
 import { useDelete, useList } from "@refinedev/core";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import DrawerEdit from "./DrawerEdit";
 
 const { Search } = Input;
 
 const ListProducts = () => {
   const [openDrawerAdd, setOpenDrawerAdd] = useState(false);
+  const [openDrawerEdit, setOpenDrawerEdit] = useState(false);
+  const [idProductEdit, setIdProductEdit] = useState(undefined);
   // const [uploadKey, setUploadKey] = useState(Date.now());
 
   const [searchText, setSearchText] = useState<any>(undefined);
@@ -161,7 +164,13 @@ const ListProducts = () => {
       render: (_: any, product: any) => {
         return (
           <div className="flex items-center gap-5">
-            <FaEdit className="text-2xl text-blue-400 cursor-pointer" />
+            <FaEdit
+              onClick={() => {
+                setOpenDrawerEdit(true);
+                setIdProductEdit(product?.id);
+              }}
+              className="text-2xl text-blue-400 cursor-pointer"
+            />
             <Popconfirm
               okText="Đồng ý"
               cancelText="Không"
@@ -230,6 +239,14 @@ const ListProducts = () => {
         options={options}
         openDrawerAdd={openDrawerAdd}
         setOpenDrawerAdd={setOpenDrawerAdd}
+      />
+
+      <DrawerEdit
+        idProduct={idProductEdit}
+        refetch={refetch}
+        options={options}
+        openDrawerEdit={openDrawerEdit}
+        setOpenDrawerEdit={setOpenDrawerEdit}
       />
     </div>
   );

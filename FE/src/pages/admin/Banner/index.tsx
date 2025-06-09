@@ -10,7 +10,7 @@ import {
   Image,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useList, useUpdate } from "@refinedev/core";
+import { useCreate, useList, useUpdate } from "@refinedev/core";
 import BannerDetailDrawer from "./BannerDetail";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -70,7 +70,11 @@ export default function BannerList() {
 
   const [categories, setCategories] = useState<Category[]>([]);
 
-  const { data: bannersData, isLoading } = useList<Banner>({
+  const {
+    data: bannersData,
+    isLoading,
+    refetch,
+  } = useList<Banner>({
     resource: "admin/banners",
   });
   const banners = bannersData?.data ?? [];
@@ -93,7 +97,8 @@ export default function BannerList() {
     if (categoriesData) setCategories(categoriesData.data);
   }, [categoriesData]);
 
-  const { mutate: updateBanner, isLoading: updating } = useUpdate();
+  // const { mutate: updateBanner, isLoading: updating } = useUpdate();
+  const { mutate: updateBanner, isLoading: updating } = useCreate();
 
   const handleEdit = (banner: Banner) => {
     setSelectedBanner(banner);
@@ -219,6 +224,7 @@ export default function BannerList() {
     formData.append("direct_value", value || "");
     formData.append("sub_direct_value", sub ?? "");
     formData.append("direct_link", directLink);
+    formData.append("_method", "PATCH");
     formData.append(
       "updated_at",
       dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")
@@ -230,13 +236,14 @@ export default function BannerList() {
 
     updateBanner(
       {
-        resource: "admin/banners",
-        id: selectedBanner.id,
+        resource: `admin/banners/${selectedBanner.id}`,
+        // id: selectedBanner.id,
         values: formData,
-        meta: { isFormData: true },
+        meta: { headers: { "Content-Type": "multipart/form-data" } },
       },
       {
         onSuccess: () => {
+          refetch();
           message.success("Cập nhật banner thành công");
           handleClose();
         },

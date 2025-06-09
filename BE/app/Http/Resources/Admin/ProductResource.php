@@ -14,7 +14,7 @@ class ProductResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-   public function toArray($request)
+    public function toArray($request)
     {
         return [
             'id' => $this->id,
@@ -36,6 +36,7 @@ class ProductResource extends JsonResource
                     'price' => $item->price,
                     'sale_price' => $item->sale_price,
                     'import_price' => $item->import_price,
+                    'price' => $item->price,
                     'stock' => $item->stock,
                     'is_active' => (bool) $item->is_active,
                     'color' => $item->color ? [
@@ -53,6 +54,7 @@ class ProductResource extends JsonResource
                     'id' => $image->id,
                     'url' => $this->buildImageUrl($image->url),
                     'is_active' => (bool) $image->is_active,
+                    'colorId' => $image->color->id,
                     'color' => $image->color ? [
                         'id' => $image->color->id,
                         'name' => $image->color->name,

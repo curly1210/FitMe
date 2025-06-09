@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 use function Laravel\Prompts\table;
 
-return new class () extends Migration {
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,7 +19,7 @@ return new class () extends Migration {
             $table->foreignId('color_id')->constrained()->onDelete('cascade');
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
-            $table->softDeletes();
+            // $table->softDeletes();
         });
     }
 

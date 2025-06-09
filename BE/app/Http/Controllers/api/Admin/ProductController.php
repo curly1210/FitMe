@@ -10,8 +10,10 @@ use App\Models\ProductItem;
 use App\Traits\ApiResponse;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use PhpParser\Node\Stmt\TryCatch;
 
 class ProductController extends Controller
 {
@@ -97,10 +99,12 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                // 'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
+                'variants.*.sale_price' => 'nullable',
+                // 'variants.*.sale_price' => 'nullable|numeric|min:0',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
+                'is_active' => 'nullable|boolean',
             ]);
 
             DB::beginTransaction();
@@ -112,7 +116,7 @@ class ProductController extends Controller
                 'short_description' => $validatedData['short_description'],
                 'description' => $validatedData['description'],
                 'slug' => $slug,
-                'is_active' => 1,
+                'is_active' => $validatedData['is_active'] ?? 1,
             ]);
 
             // Lấy categoryName
@@ -129,9 +133,9 @@ class ProductController extends Controller
             foreach ($validatedData['variants'] as $variant) {
                 $totalInventory += $variant['stock'];
 
-                $salePrice = null;
+                $salePrice = 0;
                 if (!empty($variant['sale_price'])) {
-                    $percentage = (float) str_replace('%', '', $variant['sale_price']);
+                    $percentage = $variant['sale_price'];
                     $discount = $variant['price'] * ($percentage / 100);
                     $salePrice = $variant['price'] - $discount;
                 }
@@ -169,6 +173,7 @@ class ProductController extends Controller
                 ]);
             }
 
+
             DB::commit();
 
             return $this->success([
@@ -193,6 +198,7 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
+
         try {
             $product = Product::findOrFail($id);
 
@@ -207,13 +213,25 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                'variants.*.sale_price' => 'nullable|string|regex:/^\d+%$/',
-                'images' => 'sometimes|array|min:1',
-                'images.*.url' => 'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048',
-                'images.*.color_id' => 'required_with:images|exists:colors,id',
+                'variants.*.id' => 'required',
+
+                'variants.*.sale_price' => 'nullable',
+                'images' => 'required|array|min:1',
+                // 'images.*.url' => 'nullable',
+
+                'images.*.url' => [
+                    'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
+                    fn($att, $val, $fail) =>
+                    !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
+                        && $fail("The $att must be a file or string.")
+                ],
+
+                'images.*.color_id' => 'required|exists:colors,id',
             ]);
 
             DB::beginTransaction();
+
+
 
             $slug = Str::slug($validatedData['name']);
 
@@ -223,93 +241,128 @@ class ProductController extends Controller
                 'short_description' => $validatedData['short_description'],
                 'description' => $validatedData['description'],
                 'slug' => $slug,
+                'is_active' => $validatedData['is_active'] ?? 1,
             ]);
 
             // Xóa các product_items cũ và thêm lại từ biến thể mới
-            ProductItem::where('product_id', $product->id)->delete();
+            // ProductItem::where('product_id', $product->id)->delete();
+            // ProductItem::where('product_id', $product->id)->forceDelete();
+
+            // Lưu lại tất cả ID từ FE gửi lên
+            $inputIds = [];
+
+
+            // Lấy danh sách ID hiện tại trong DB theo product
+            $existingIds = ProductItem::where('product_id', $product->id)->pluck('id')->toArray();
 
             $totalInventory = 0;
             foreach ($validatedData['variants'] as $variant) {
-                $totalInventory += $variant['stock'];
+                $inputIds[] = $variant['id'];
+                // $totalInventory += $variant['stock'];
 
-                $salePrice = null;
-                if (!empty($variant['sale_price'])) {
-                    $percentage = (float) str_replace('%', '', $variant['sale_price']);
-                    $discount = $variant['price'] * ($percentage / 100);
-                    $salePrice = $variant['price'] - $discount;
+                // Kiểm tra xem variant đã tồn tại trong DB chưa
+                if (in_array($variant['id'], $existingIds)) {
+                    // Đã tồn tại → cập nhật    
+                    ProductItem::where('id', $variant['id'])->update([
+                        // 'color_id' => $variant['color'],
+                        // 'size' => $variant['size'],
+                        'stock' => $variant['stock'],
+                        'import_price' => $variant['import_price'],
+                        'price' => $variant['price'],
+                        'sale_price' => $variant['sale_price'],
+                    ]);
+                } else { // Chưa có → tạo mới   
+
+                    $categoryName = $product->category ? $product->category->name : 'unknown';
+                    $year = date('Y');
+
+                    $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
+                    // Chưa có → tạo mới    
+                    ProductItem::create([
+                        // 'id' => $variant['id'], // chỉ dùng nếu bạn cho phép tự set id
+                        'product_id' => $product->id,
+                        'color_id' => $variant['color_id'],
+                        'size_id' => $variant['size_id'],
+                        'sku' => $sku,
+                        'stock' => $variant['stock'],
+                        'import_price' => $variant['import_price'],
+                        'price' => $variant['price'],
+                        'sale_price' => $variant['sale_price'],
+                    ]);
+                    // $salePrice = null;
+                    // if (!empty($variant['sale_price'])) {
+                    //     $percentage = $variant['sale_price'];
+                    //     $discount = $variant['price'] * ($percentage / 100);
+                    //     $salePrice = $variant['price'] - $discount;
+
                 }
 
-                $categoryName = $product->category ? $product->category->name : 'unknown';
-                $year = date('Y');
-
-                $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
-
-                ProductItem::create([
-                    'product_id' => $product->id,
-                    'color_id' => $variant['color_id'],
-                    'size_id' => $variant['size_id'],
-                    'sku' => $sku,
-                    'stock' => $variant['stock'],
-                    'import_price' => $variant['import_price'],
-                    'price' => $variant['price'],
-                    'sale_price' => $salePrice,
-                ]);
+                $totalInventory += $variant['stock'];
             }
-
+            // Cập nhật lại tổng số lượng tồn kho của sản phẩm
             $product->update(['total_inventory' => $totalInventory]);
 
-            // Nếu có dữ liệu ảnh mới, xử lý cập nhật ảnh
-            if (!empty($validatedData['images'])) {
-                $colorIds = collect($validatedData['images'])->pluck('color_id')->unique();
+            // Xóa các product_item không còn trong danh sách gửi lên
+            $idsToDelete = array_diff($existingIds, $inputIds);
+            ProductItem::whereIn('id', $idsToDelete)->delete();
 
-                // Xóa ảnh cũ trên Cloudinary và database theo từng color_id mới được cập nhật
-                foreach ($colorIds as $colorId) {
-                    $oldImages = ProductImage::where('product_id', $product->id)
-                        ->where('color_id', $colorId)
-                        ->get();
+            $inputUrls = [];
 
-                    foreach ($oldImages as $oldImage) {
-                        // Xóa ảnh trên Cloudinary
-                        $this->deleteImageFromCloudinary($oldImage->url);
-
-                        // Xóa record ảnh trong DB
-                        $oldImage->delete();
-                    }
+            // Lấy tất cả URL từ mảng API gửi lên
+            foreach ($validatedData['images'] as $img) {
+                // Nếu là UploadedFile thì lấy URL từ Cloudinary
+                if (is_string($img['url'])) {
+                    $inputUrls[] = $img['url'];
                 }
+            }
+            // Lấy tất cả ảnh hiện tại trong DB theo product
+            $existingImages = ProductImage::where('product_id', $product->id)->get();
 
-                // Thêm ảnh mới
-                foreach ($validatedData['images'] as $imageData) {
-                    $file = $imageData['url'];
+            // Xóa các ảnh không còn trong danh sách gửi lên
+            foreach ($existingImages as $dbImage) {
+                $checkUrl = $this->buildImageUrl($dbImage->url);
+                if (!in_array($checkUrl, $inputUrls)) {
+
+                    $this->deleteImageFromCloudinary($dbImage->url);
+                    $productDelete = ProductImage::find($dbImage->id);
+                    $productDelete->delete();
+                }
+            }
+
+            // Thêm mới các ảnh từ mảng API gửi lên
+            foreach ($validatedData['images'] as $imageData) {
+                $file = $imageData['url'];
+
+                if ($file instanceof UploadedFile) {
                     $uploadResult = $this->uploadImageToCloudinary($file, [
-                        'width' => 600,
-                        'height' => 600,
+                        // 'width' => 600,
+                        // 'height' => 600,
                         'quality' => 80,
                         'folder' => "products/{$slug}",
                     ]);
 
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'color_id' => $imageData['color_id'],
-                        'url' => $uploadResult['public_id'],
-                    ]);
+
+                    try {
+
+                        ProductImage::create([
+                            'product_id' => $product->id,
+                            'color_id' =>  (int)$imageData['color_id'],
+                            'url' => $uploadResult['public_id'],
+                        ]);
+                    } catch (\Throwable $th) {
+                        return response()->json($th->getMessage());
+                    }
                 }
             }
 
             DB::commit();
-
-            // Load lại đầy đủ các quan hệ sau khi cập nhật
-            $product->load([
-                'category',
-                'items.color',
-                'items.size',
-                'images.color',
-            ]);
 
             return $this->success([], 'Cập nhật sản phẩm thành công.', 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->error('Dữ liệu không hợp lệ.', $e->errors(), 422);
         } catch (\Exception $e) {
+
             DB::rollBack();
             return $this->error('Lỗi khi cập nhật sản phẩm.', $e->getMessage(), 500);
         }
@@ -343,8 +396,12 @@ class ProductController extends Controller
     {
         try {
             $product = Product::whereNull('deleted_at')->find($id);
-
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
+            }
             DB::beginTransaction();
+
+            $product->update(['is_active' => 0]);
 
             $product->delete();
 
@@ -353,7 +410,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             //throw $th;
             DB::rollBack();
-            return $this->error('Lỗi khi xóa mềm', $e->getMessage(), 500);
+            return $this->error('Lỗi khi xóa mềm', $e->getMessage(), 403);
         }
     }
 
@@ -405,7 +462,12 @@ class ProductController extends Controller
         try {
             $product = Product::onlyTrashed()->findOrFail($id);
 
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
+            }
             DB::beginTransaction();
+
+            $product->update(['is_active' => 1]);
 
             // Khôi phục sản phẩm
             $product->restore();
@@ -418,5 +480,32 @@ class ProductController extends Controller
             return $this->error('Lỗi khi khôi phục sản phẩm.', $e->getMessage(), 500);
         }
     }
+    public function destroy($id)
+    {
+        try {
+            $product = Product::onlyTrashed()->findOrFail($id);
 
+            DB::beginTransaction();
+
+            // Xóa ảnh trên Cloudinary
+            $images = ProductImage::where('product_id', $product->id)->get();
+            foreach ($images as $image) {
+                $this->deleteImageFromCloudinary($image->url);
+                $image->forceDelete(); // Xóa vĩnh viễn ảnh
+            }
+
+            // Xóa vĩnh viễn các product items
+            ProductItem::where('product_id', $product->id)->forceDelete();
+
+            // Xóa vĩnh viễn sản phẩm
+            $product->forceDelete();
+
+            DB::commit();
+
+            return $this->success(null, 'Sản phẩm đã được xóa vĩnh viễn thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error('Lỗi khi xóa vĩnh viễn sản phẩm.', $e->getMessage(), 500);
+        }
+    }
 }
