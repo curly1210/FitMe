@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\Api\Admin\CouponController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -122,6 +123,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
+//Route quản lí phiếu giảm giá
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/coupons',         [CouponController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons',        [CouponController::class, 'store'])->name('coupons.store');
+    Route::post('/coupons/{id}',   [CouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
+});
 
 
 
