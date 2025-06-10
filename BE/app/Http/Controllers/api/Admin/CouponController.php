@@ -41,62 +41,11 @@ class CouponController extends Controller
             'name' => 'required|string|max:50',
             'code' => 'required|string|max:20|unique:coupons',
             'value' => 'required|integer|min:0',
-            'time_start' => 'date|after:now',
-            'time_end' => 'date|after:time_start',
-            'min_amount' => 'integer|min:0',
-            'max_amount' => 'integer|min:0|gte:min_amount',
-            'limit_use' => 'integer|min:0',
-            'is_active' => 'boolean',
-        ],[
-            'name.required' => 'Tên mã giảm giá là bắt buộc.',
-            'name.max' => 'Tên mã giảm giá không được vượt quá 50 ký tự.',
-            'code.required' => 'Mã giảm giá là bắt buộc.',
-            'code.max' => 'Mã giảm giá không được vượt quá 20 ký tự.',
-            'code.unique' => 'Mã giảm giá đã tồn tại.',
-            'value.required' => 'Giá trị giảm giá là bắt buộc.',
-            'value.integer' => 'Giá trị giảm giá phải là số nguyên.',
-            'value.min' => 'Giá trị giảm giá không được nhỏ hơn 0.',
-            'time_start.date' => 'Thời gian bắt đầu không hợp lệ.',
-            'time_start.after' => 'Thời gian bắt đầu phải sau thời điểm hiện tại.',
-            'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
-            'time_end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
-            'min_amount.integer' => 'Số tiền tối thiểu phải là số nguyên.',
-            'min_amount.min' => 'Số tiền tối thiểu không được nhỏ hơn 0.',
-            'max_amount.integer' => 'Số tiền tối đa phải là số nguyên.',
-            'max_amount.min' => 'Số tiền tối đa không được nhỏ hơn 0.',
-            'max_amount.gte' => 'Số tiền tối đa phải lớn hơn hoặc bằng số tiền tối thiểu.',
-            'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
-            'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
-            'is_active.boolean' => 'Trạng thái hoạt động không hợp lệ.',
-        ]);
-
-        if($validate->fails())
-        {
-            return $this->error('Dữ liệu không hợp lệ',$validate->errors(),422);
-        }
-
-        $coupon = Coupon::create($request->all());
-
-        return $this->success(new CouponResource($coupon),'Tạo mã giảm giá thành công',201);
-    }
-    public function update(Request $request, $id)
-    {
-        $coupon = Coupon::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:50',
-            'code' => [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('coupons')->ignore($coupon->id),
-            ],
-            'value' => 'required|integer|min:0',
-            'time_start' => 'date|after:now',
-            'time_end' => 'date|after:time_start',
-            'min_amount' => 'integer|min:0',
-            'max_amount' => 'integer|min:0|gte:min_amount',
-            'limit_use' => 'integer|min:0',
+            'time_start' => 'nullable|date|after:now',
+            'time_end' => 'nullable|date|after_or_equal:time_start',
+            'min_amount' => 'nullable|integer|min:0',
+            'max_amount' => 'nullable|integer|min:0|gte:min_amount',
+            'limit_use' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
         ], [
             'name.required' => 'Tên mã giảm giá là bắt buộc.',
@@ -110,12 +59,58 @@ class CouponController extends Controller
             'time_start.date' => 'Thời gian bắt đầu không hợp lệ.',
             'time_start.after' => 'Thời gian bắt đầu phải sau thời điểm hiện tại.',
             'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
-            'time_end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+            'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
             'min_amount.integer' => 'Số tiền tối thiểu phải là số nguyên.',
             'min_amount.min' => 'Số tiền tối thiểu không được nhỏ hơn 0.',
             'max_amount.integer' => 'Số tiền tối đa phải là số nguyên.',
             'max_amount.min' => 'Số tiền tối đa không được nhỏ hơn 0.',
-            'max_amount.gte' => 'Số tiền tối đa phải lớn hơn hoặc bằng số tiền tối thiểu.',
+            'max_amount.gte' => 'Số tiền tối đa phải lớn hơn hoặc bằng số tiền tối thiểu khi cả hai được cung cấp.',
+            'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
+            'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
+            'is_active.boolean' => 'Trạng thái hoạt động không hợp lệ.',
+        ]);
+
+        if ($validate->fails()) {
+            return $this->error('Dữ liệu không hợp lệ', $validate->errors(), 422);
+        }
+
+        $coupon = Coupon::create($request->all());
+
+        return $this->success(new CouponResource($coupon), 'Tạo mã giảm giá thành công', 201);
+    }
+    public function update(Request $request, $id)
+    {
+        $coupon = Coupon::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|max:50',
+            'code' => [
+                'string',
+                'max:20',
+                Rule::unique('coupons')->ignore($coupon->id),
+            ],
+            'value' => 'integer|min:0',
+            'time_start' => 'nullable|date|after:now',
+            'time_end' => 'nullable|date|after_or_equal:time_start',
+            'min_amount' => 'nullable|integer|min:0',
+            'max_amount' => 'nullable|integer|min:0|gte:min_amount',
+            'limit_use' => 'nullable|integer|min:0',
+            'is_active' => 'boolean',
+        ], [
+            'name.max' => 'Tên mã giảm giá không được vượt quá 50 ký tự.',
+            'code.max' => 'Mã giảm giá không được vượt quá 20 ký tự.',
+            'code.unique' => 'Mã giảm giá đã tồn tại, vui lòng chọn mã khác.',
+            'value.integer' => 'Giá trị giảm giá phải là số nguyên.',
+            'value.min' => 'Giá trị giảm giá không được nhỏ hơn 0.',
+            'time_start.date' => 'Thời gian bắt đầu không hợp lệ.',
+            'time_start.after' => 'Thời gian bắt đầu phải sau thời điểm hiện tại.',
+            'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
+            'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+            'min_amount.integer' => 'Số tiền tối thiểu phải là số nguyên.',
+            'min_amount.min' => 'Số tiền tối thiểu không được nhỏ hơn 0.',
+            'max_amount.integer' => 'Số tiền tối đa phải là số nguyên.',
+            'max_amount.min' => 'Số tiền tối đa không được nhỏ hơn 0.',
+            'max_amount.gte' => 'Số tiền tối đa phải lớn hơn hoặc bằng số tiền tối thiểu khi cả hai được cung cấp.',
             'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
             'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
             'is_active.boolean' => 'Trạng thái hoạt động không hợp lệ.',
@@ -137,7 +132,7 @@ class CouponController extends Controller
             $coupon = Coupon::findOrFail($id);
 
             $coupon->delete();
-            
+
             return $this->success(null, 'Xóa mã giảm giá thành công');
         } catch (\Exception $e) {
             return $this->error('Không thể xóa mã giảm giá', ['error' => $e->getMessage()], 500);
