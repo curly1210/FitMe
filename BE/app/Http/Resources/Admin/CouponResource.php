@@ -24,7 +24,7 @@ class CouponResource extends JsonResource
             'min_amount' => $this->min_amount,
             'max_amount' => $this->max_amount,
             'limit_use' => $this->limit_use,
-            'is_active' => (bool) $this->is_active,
+            'is_active' =>$this->is_active ? 1:0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
