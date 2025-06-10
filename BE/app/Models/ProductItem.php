@@ -25,10 +25,11 @@ class ProductItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
-    // public function cart()
-    // {
-    //     return $this->belongsTo(Cart::class);
-    // }
+    // Một product item có thể nằm trong nhiều cart item
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
     // public function productConfigurations()
     // {
     //     return $this->hasMany(ProductConfiguration::class);

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CartItem extends Model
 {
     //
-     use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'quantity',
@@ -22,9 +22,9 @@ class CartItem extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Quan hệ: Mỗi cart thuộc về 1 product item
+    // Quan hệ: Mỗi cart item chỉ liên kết với một product item
     public function productItem()
     {
-        return $this->hasMany(ProductItem::class);
+        return $this->belongsTo(ProductItem::class);
     }
 }
