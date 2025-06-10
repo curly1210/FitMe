@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\Api\Admin\CouponController;
+use App\Http\Controllers\api\Client\CartItemController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -122,6 +124,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
+//Route quản lí phiếu giảm giá
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/coupons', [CouponController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
+    Route::post('/coupons/{id}', [CouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
+});
 
 
 
@@ -269,4 +278,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{product_id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+});
+
+
+Route::prefix('cart-items')->group(function () {
+    Route::get('/', [CartItemController::class, 'index'])->name('cart-items.index');
+    Route::post('/', [CartItemController::class, 'store'])->name('cart-items.store');
+    // Route::post('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
+    Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
+    Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
 });
