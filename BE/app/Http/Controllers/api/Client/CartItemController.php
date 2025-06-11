@@ -46,20 +46,30 @@ class CartItemController extends Controller
             $formattedCartItems = $validCartItems->map(function ($cartItem) {
                 $productItem = $cartItem->productItem;
                 $product = $productItem->product;
+                $image = $product->productImages->first()?->url ?? null;
 
                 return [
                     'id' => $cartItem->id,
+                    'idProduct_item' => $productItem->id,
+                    'name' => $product->name,
                     'quantity' => $cartItem->quantity,
-                    'product_name' => $product->name,
                     'price' => $productItem->price,
-                    'sale_price' => $productItem->sale_price,
-                    'color' => $productItem->color->name,
-                    'size' => $productItem->size->name,
-                    'image_url' => $product->productImages->first()?->url
+                    'image' => $image,
+                    'subtotal' => $cartItem->quantity * $productItem->price,
                 ];
-            });
+            })->values();
 
-            return response()->json($formattedCartItems);
+            $totalItem = $formattedCartItems->count();
+            $totalPrice = $formattedCartItems->sum('subtotal');
+
+            $result = [
+                'cartItems' => $formattedCartItems,
+                'idUser' => $user->id,
+                'totalItem' => $totalItem,
+                'totalPrice' => $totalPrice,
+            ];
+
+            return response()->json($result);
 
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy danh sách sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
