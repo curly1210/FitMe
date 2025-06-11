@@ -16,8 +16,8 @@ class Coupon extends Model
         'value',
         'time_start',
         'time_end',
-        'min_amount',
-        'max_amount',
+        'min_price_order',
+        'max_price_discount',
         'limit_use',
         'is_active',
     ];
