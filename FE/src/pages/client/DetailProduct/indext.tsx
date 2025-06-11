@@ -12,6 +12,7 @@ import ModalLogin from "../../../components/Modal/ModalLogin";
 import { AiOutlineMinus } from "react-icons/ai";
 
 import { IoAdd } from "react-icons/io5";
+import { useCart } from "../../../hooks/useCart";
 
 const { TabPane } = Tabs;
 
@@ -98,10 +99,11 @@ const ProductDetail = () => {
   const { openModal } = useModal();
 
   const [quantity, setQuantity] = useState(1);
+  const { addToCartHandler, isLoadingAddtoCart } = useCart();
 
   const onHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (/^\d*$/.test(value)) {
+    if (/^[1-9]\d*$/.test(value)) {
       setQuantity(value === "" ? 1 : Number(value));
     }
   };
@@ -135,7 +137,9 @@ const ProductDetail = () => {
       return;
     }
 
-    alert(`Thêm vào giỏ hàng thành công, idBienthe: ${selectedItem?.id}`);
+    addToCartHandler(selectedItem?.id, quantity);
+
+    // alert(`Thêm vào giỏ hàng thành công, idBienthe: ${selectedItem?.id}`);
     // if (!selectedItem || selectedItem.stock <= 0) {
     //   return; // Không thêm vào giỏ hàng nếu không có item hoặc hết hàng
     // }
@@ -347,7 +351,6 @@ const ProductDetail = () => {
               </div>
             </div>
 
-
             {/* Chọn màu */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-sm">Màu:</span>
@@ -402,7 +405,7 @@ const ProductDetail = () => {
                 <AiOutlineMinus />
               </button>
               <input
-                defaultValue={1}
+                // defaultValue={1}
                 value={quantity}
                 onChange={onHandleChange}
                 className="w-[30px] text-center "
@@ -426,6 +429,7 @@ const ProductDetail = () => {
             title={!selectedSizeId ? "Vui lòng chọn màu sắc và kích cỡ" : ""}
           >
             <Button
+              loading={isLoadingAddtoCart}
               size="large"
               className="!bg-black !text-white !border-none !rounded-none     w-full !py-6"
               disabled={!selectedItem || selectedItem.stock <= 0}
@@ -525,7 +529,6 @@ const ProductDetail = () => {
                 </p>
                 <p className="text-sm font-bold line-clamp-2">{rp.name}</p>
               </div>
-
             </div>
           ))}
         </div>
