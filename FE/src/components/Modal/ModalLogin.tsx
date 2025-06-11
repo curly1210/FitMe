@@ -7,7 +7,7 @@ import ModalRegister from "./ModalRegister";
 import { useModal } from "../../hooks/useModal";
 import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../hooks/useAuthen";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { usePopupMessage } from "../../hooks/usePopupMessage";
 
 const ModalLogin = () => {
@@ -16,6 +16,7 @@ const ModalLogin = () => {
   const { setAccessToken, setUser } = useAuthen();
   // const navigate = useNavigate();
   const navi = useNavigate();
+  const location = useLocation();
 
   const { mutate, isLoading } = useCreate({
     resource: "login",
@@ -26,7 +27,8 @@ const ModalLogin = () => {
         setAccessToken(response?.data?.data?.access_token);
         notify("success", "Đăng nhập", "Thành công");
         localStorage.setItem("persist", JSON.stringify(true));
-        navi("/");
+        // navi("/");
+        navi(location.pathname);
         closeModal();
         // openPopup(<ModalLogin />);
       },

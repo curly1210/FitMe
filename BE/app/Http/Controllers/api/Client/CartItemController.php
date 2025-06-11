@@ -21,19 +21,19 @@ class CartItemController extends Controller
         try {
             $user = auth('api')->user();
             $cartItems = CartItem::with([
-            // Load quan hệ với điều kiện is_active = 1 cho tất cả các bảng
-            'productItem' => function ($query) {
-                $query->where('is_active', 1)
-                    ->with([
-                        'product' => fn ($q) => $q->where('is_active', 1),
-                        'color' => fn ($q) => $q->where('is_active', 1),
-                        'size' => fn ($q) => $q->where('is_active', 1),
-                        'product.productImages' => fn ($q) => $q->where('is_active', 1)
-                    ]);
-            }
+                // Load quan hệ với điều kiện is_active = 1 cho tất cả các bảng
+                'productItem' => function ($query) {
+                    $query->where('is_active', 1)
+                        ->with([
+                            'product' => fn($q) => $q->where('is_active', 1),
+                            'color' => fn($q) => $q->where('is_active', 1),
+                            'size' => fn($q) => $q->where('is_active', 1),
+                            'product.productImages' => fn($q) => $q->where('is_active', 1)
+                        ]);
+                }
             ])
-            ->where('user_id', $user->id)
-            ->orderBy('id', 'desc')->get();
+                ->where('user_id', $user->id)
+                ->orderBy('id', 'desc')->get();
 
             // Lọc các cart item có dữ liệu hợp lệ
             $validCartItems = $cartItems->filter(function ($cartItem) {
@@ -60,7 +60,6 @@ class CartItemController extends Controller
             });
 
             return response()->json($formattedCartItems);
-
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy danh sách sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
         }
@@ -152,7 +151,6 @@ class CartItemController extends Controller
                 DB::rollback();
                 return $this->error('Lỗi thêm sản phẩm vào giỏ hàng', [$th->getMessage()], 403);
             }
-
         } catch (\Throwable $th) {
             return $this->error('Lỗi thêm sản phẩm vào giỏ hàng', [$th->getMessage()], 403);
         }
@@ -175,7 +173,7 @@ class CartItemController extends Controller
             $user = auth('api')->user();
 
             $cartItem = CartItem::where('user_id', $user->id)
-               ->findOrFail($id);
+                ->findOrFail($id);
 
             $validated = $request->validate([
                 'quantity' => 'required|integer|min:1',
@@ -228,7 +226,7 @@ class CartItemController extends Controller
             $user = auth('api')->user();
 
             $cartItem = CartItem::where('user_id', $user->id)
-               ->findOrFail($id);
+                ->findOrFail($id);
 
             $cartItem->delete();
 

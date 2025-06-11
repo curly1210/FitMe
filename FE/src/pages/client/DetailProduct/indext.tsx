@@ -1,7 +1,17 @@
-import { Tabs, Radio, Button } from "antd";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Tabs, Radio, Button, Tooltip } from "antd";
 import { useOne } from "@refinedev/core";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
+import { RightOutlined } from "@ant-design/icons";
+import { useAuthen } from "../../../hooks/useAuthen";
+import { useModal } from "../../../hooks/useModal";
+import ModalLogin from "../../../components/Modal/ModalLogin";
+
+import { AiOutlineMinus } from "react-icons/ai";
+
+import { IoAdd } from "react-icons/io5";
 
 const { TabPane } = Tabs;
 
@@ -54,9 +64,9 @@ interface Comment {
 interface RelatedProductImage {
   url: string;
 }
-interface RelatedProductColor{
-  id:string;
-  code:string;
+interface RelatedProductColor {
+  id: string;
+  code: string;
 }
 
 interface RelatedProduct {
@@ -64,7 +74,7 @@ interface RelatedProduct {
   name: string;
   slug: string;
   price: number;
-  colors:RelatedProductColor[];
+  colors: RelatedProductColor[];
   images: RelatedProductImage[];
 }
 
@@ -84,6 +94,22 @@ interface Product {
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { accessToken, user } = useAuthen();
+  const { openModal } = useModal();
+
+  const [quantity, setQuantity] = useState(1);
+
+  const onHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setQuantity(value === "" ? 1 : Number(value));
+    }
+  };
+
+  const onHandleQuantity = async (newQuantity: number) => {
+    if (newQuantity < 1) return;
+    setQuantity(newQuantity);
+  };
 
   const { data, isLoading, error } = useOne<Product>({
     resource: "products",
@@ -91,7 +117,7 @@ const ProductDetail = () => {
     queryOptions: { enabled: !!slug },
   });
 
-  const nav= useNavigate()
+  const nav = useNavigate();
 
   const product = data?.data;
   const productItems: ProductItem[] = product?.product_items || [];
@@ -102,6 +128,22 @@ const ProductDetail = () => {
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const handleAddToCart = () => {
+    if (!accessToken || !user) {
+      openModal(<ModalLogin />);
+      return;
+    }
+
+    alert(`Thêm vào giỏ hàng thành công, idBienthe: ${selectedItem?.id}`);
+    // if (!selectedItem || selectedItem.stock <= 0) {
+    //   return; // Không thêm vào giỏ hàng nếu không có item hoặc hết hàng
+    // }
+
+    // // Giả lập thêm vào giỏ hàng
+    // console.log("Thêm vào giỏ hàng:", selectedItem);
+    // // Thực hiện logic thêm vào giỏ hàng ở đây
+  };
 
   // Khởi tạo chọn mặc định khi có data
   useEffect(() => {
@@ -120,7 +162,7 @@ const ProductDetail = () => {
       setSelectedColorId(firstInStock.color_id);
       setSelectedSizeId(firstInStock.size.id);
       setSelectedItem(firstInStock);
-      // Chọn ảnh màu đầu tiên 
+      // Chọn ảnh màu đầu tiên
       const color = colors.find((c) => c.id === firstInStock.color_id);
       if (color?.images?.length) setSelectedImage(color.images[0].url);
       else setSelectedImage(null);
@@ -152,7 +194,7 @@ const ProductDetail = () => {
       (item) =>
         item.color_id === colorId &&
         item.size.id === selectedSizeId &&
-        item.stock > 0
+        item.stock > 0 // Chỉ chọn những item còn hàng
     );
 
     if (matchedWithCurrentSize) {
@@ -160,14 +202,22 @@ const ProductDetail = () => {
       setSelectedSizeId(matchedWithCurrentSize.size.id);
     } else {
       // Chọn size đầu tiên còn hàng với màu này
-      const firstForColor = productItems.find(
+      const firstForColor: any = productItems.find(
+        // (item) => item.color_id === colorId
         (item) => item.color_id === colorId && item.stock > 0
       );
+      // setSelectedItem(firstForColor);
+      // if (firstForColor.stock > 0) {
+      //   setSelectedSizeId(firstForColor.size.id);
+      // } else {
+      //   setSelectedSizeId(null);
+      // }
+
       if (firstForColor) {
         setSelectedItem(firstForColor);
         setSelectedSizeId(firstForColor.size.id);
       } else {
-        setSelectedItem(null);
+        setSelectedItem(productItems[0]);
         setSelectedSizeId(null);
       }
     }
@@ -205,31 +255,58 @@ const ProductDetail = () => {
   // Ảnh nhỏ theo màu
   const images = colors.find((c) => c.id === selectedColorId)?.images || [];
 
-  console.log("Colors:", colors);
+  // console.log("Colors:", colors);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
   if (!product) return <p>Không tìm thấy sản phẩm</p>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="flex gap-4">
+    <div className="space-y-10">
+      <div className="flex gap-3 border border-gray-300 items-center py-5 px-4 mb-5">
+        <Link className="text-gray-500" to={"/"}>
+          Trang chủ
+        </Link>
+        <RightOutlined className="text-sm text-gray-500" />
+        <Link
+          className="text-gray-500"
+          state={{ categoryData: product.category }}
+          to={`/category/${product.category.slug}`}
+        >
+          {product.category.name}
+        </Link>
+        <RightOutlined className="text-sm text-gray-500" />
+        <Link className="font-bold" to={""}>
+          {product.name}
+        </Link>
+
+        {/* {Array.from({ length: 50 }).map((_, i) => (
+        <div key={i} className="p-4  rounded">
+          Gợi ý #{i + 1}
+        </div>
+      ))} */}
+      </div>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-2 flex gap-4">
           {/* Ảnh nhỏ kéo dọc, max chiều cao fix */}
-          <div className="flex flex-col gap-2 w-20 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+          <div className="flex flex-col gap-2 w-20 max-h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             {images.map((img) => (
-              <img
+              <div
                 key={img.id}
-                src={img.url}
-                alt="thumb"
-                loading="lazy"
-                onClick={() => setSelectedImage(img.url)}
-                className={`w-full object-cover rounded-md border cursor-pointer transition ring-2 ${
+                className={`w-[80px] h-[80px]  overflow-hidden border  cursor-pointer    ${
                   selectedImage === img.url
-                    ? "ring-black"
-                    : "ring-transparent hover:ring-gray-400"
+                    ? " border-black"
+                    : " border-gray-300"
                 }`}
-              />
+              >
+                <img
+                  src={img.url}
+                  alt="thumb"
+                  loading="lazy"
+                  onClick={() => setSelectedImage(img.url)}
+                  className={`w-full h-full object-cover  duration-200 hover:scale-110 `}
+                />
+              </div>
             ))}
           </div>
           {/* Ảnh lớn */}
@@ -238,30 +315,40 @@ const ProductDetail = () => {
               src={selectedImage || images[0]?.url}
               alt="main"
               loading="lazy"
-              className="w-full object-cover rounded-md border max-h-[500px]"
+              className="w-full object-cover  h-[700px]"
             />
           </div>
         </div>
 
-        <div className="border border-gray-200 rounded-md p-4 space-y-4 self-start">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">{product.name}</h1>
-            <p className="text-sm text-gray-500">
-              SKU: {selectedItem?.sku || "Đang cập nhật"}
-            </p>
-            <p className="text-xl text-red-600 font-semibold">
-              {selectedItem
-                ? (
-                    selectedItem.sale_price > 0
+        <div className="col-span-1 border border-gray-200 rounded-md p-4 space-y-4 self-start">
+          <div className="">
+            <div className="flex flex-col gap-1 mb-4">
+              <h1 className="text-2xl font-bold">{product.name}</h1>
+              <p className="text-sm text-gray-500">
+                SKU: {selectedItem?.sku || "Đang cập nhật"}
+              </p>
+              <p className="text-xl text-black-600 font-semibold">
+                {selectedItem
+                  ? (selectedItem.sale_price > 0
                       ? selectedItem.sale_price
                       : selectedItem.price
-                  ).toLocaleString()
-                : ""}{" "}
-              ₫
-            </p>
+                    ).toLocaleString()
+                  : ""}{" "}
+                ₫
+              </p>
+              <div className="text-sm flex items-center gap-2 mb-3">
+                {/* Số lượng còn */}
+                <p>Số lượng còn:</p>
+                <span className="font-medium">
+                  {selectedItem?.stock && selectedItem.stock > 0
+                    ? selectedItem.stock
+                    : "Hết hàng"}
+                </span>
+              </div>
+            </div>
 
             {/* Chọn màu */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-3">
               <span className="text-sm">Màu:</span>
               {colors.map((color) => (
                 <div
@@ -277,20 +364,12 @@ const ProductDetail = () => {
                 />
               ))}
             </div>
-              {/* Số lượng còn */}
-            <div className="text-sm">
-              <p>Số lượng còn:</p>
-              <span className="font-medium">
-                {selectedItem?.stock && selectedItem.stock > 0
-                  ? selectedItem.stock
-                  : "Hết hàng"}
-              </span>
-            </div>
 
             {/* Chọn size */}
-            <div className="relative z-0">
-              <p className="text-sm mb-1">Chọn size:</p>
+            <div className="relative z-0 product-size-select mb-7">
+              {/* <p className="text-sm mb-1">Chọn size:</p> */}
               <Radio.Group
+                className="!flex !gap-3 !rounded-none"
                 value={selectedSizeId}
                 onChange={(e) => handleSizeChange(e.target.value)}
               >
@@ -298,24 +377,62 @@ const ProductDetail = () => {
                   <Radio.Button
                     key={size.id}
                     value={size.id}
-                    disabled={size.disabled}// nếu stock = 0 chặn ấn
+                    disabled={size.disabled} // nếu stock = 0 chặn ấn
+                    className="font-bold p-5 relative"
                   >
                     {size.name}
+                    {size.disabled && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="absolute w-full h-[1px] bg-gray-500 rotate-30"></div>
+                        <div className="absolute w-full h-[1px] bg-gray-500 -rotate-30"></div>
+                      </div>
+                    )}
                   </Radio.Button>
                 ))}
               </Radio.Group>
             </div>
 
-          
+            <div className="border border-solid border-neutral-400 w-fit   flex items-center">
+              <button
+                onClick={() => onHandleQuantity(quantity - 1)}
+                className="py-2 px-4 cursor-pointer"
+              >
+                {/* <FaMinus className="font-light" /> */}
+                <AiOutlineMinus />
+              </button>
+              <input
+                defaultValue={1}
+                value={quantity}
+                onChange={onHandleChange}
+                className="w-[30px] text-center "
+                type="text"
+              />
+              <button
+                onClick={() => onHandleQuantity(quantity + 1)}
+                className="py-2 px-4 cursor-pointer"
+              >
+                <IoAdd />
+              </button>
+            </div>
           </div>
 
-          <Button
-            size="large"
-            className="bg-black text-white border-none hover:!bg-black hover:!opacity-90 hover:!text-white w-full"
-            disabled={!selectedItem || selectedItem.stock <= 0}
-          >
+          {/* <button disabled={!selectedItem || selectedItem.stock <= 0}>
             Thêm vào giỏ hàng
-          </Button>
+          </button> */}
+
+          <Tooltip
+            placement="bottom"
+            title={!selectedSizeId ? "Vui lòng chọn màu sắc và kích cỡ" : ""}
+          >
+            <Button
+              size="large"
+              className="!bg-black !text-white !border-none !rounded-none     w-full !py-6"
+              disabled={!selectedItem || selectedItem.stock <= 0}
+              onClick={() => handleAddToCart()}
+            >
+              Thêm vào giỏ hàng
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
@@ -330,7 +447,11 @@ const ProductDetail = () => {
             </p>
           </TabPane>
 
-          <TabPane tab="Bình luận" key="2" className="border border-gray-200 p-4">
+          <TabPane
+            tab="Bình luận"
+            key="2"
+            className="border border-gray-200 p-4"
+          >
             {product.comments?.filter((c) => c.is_active === 1).length > 0 ? (
               product.comments
                 .filter((c) => c.is_active === 1)
@@ -346,7 +467,11 @@ const ProductDetail = () => {
               <p>Chưa có bình luận nào.</p>
             )}
           </TabPane>
-          <TabPane tab="Đánh giá" key="3" className="border border-gray-200 p-4">
+          <TabPane
+            tab="Đánh giá"
+            key="3"
+            className="border border-gray-200 p-4"
+          >
             <p>Chưa có đánh giá nào.</p>
           </TabPane>
         </Tabs>
@@ -357,58 +482,56 @@ const ProductDetail = () => {
           Sản phẩm liên quan
         </h2>
 
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {product.related_products.slice(0, 4).map((rp) => (
-          <div
-            key={rp.slug}
-            onClick={() => nav(`/products/${rp.slug}`)}
-            className="border rounded-md hover:shadow transition cursor-pointer overflow-hidden group"
-          >
-            {/* Wrapper có kích thước cố định */}
-            <div className="relative w-full h-80 overflow-hidden">
-              {/* Container chứa 2 ảnh xếp ngang */}
-              <div className="flex w-[200%] h-full transition-transform duration-500 ease-in-out group-hover:-translate-x-1/2">
-                <img
-                  src={rp.images?.[0]?.url}
-                  alt={rp.name}
-                  className="w-1/2 h-full object-cover"
-                />
-                <img
-                  src={rp.images?.[1]?.url}
-                  alt={rp.name}
-                  className="w-1/2 h-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* Nội dung */}
-            <div className="p-3 pt-4 space-y-2">
-              {/* Màu sắc */}
-              <div className="flex gap-2">
-                {rp.colors?.map((c, index) => (
-                  <div
-                    key={index}
-                    className="w-5 h-5 rounded-full border"
-                    style={{ backgroundColor: c.code }}
-                    
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {product.related_products.slice(0, 4).map((rp) => (
+            <div
+              key={rp.slug}
+              onClick={() => nav(`/products/${rp.slug}`)}
+              className="border rounded-md hover:shadow transition cursor-pointer overflow-hidden group"
+            >
+              {/* Wrapper có kích thước cố định */}
+              <div className="relative w-full h-80 overflow-hidden">
+                {/* Container chứa 2 ảnh xếp ngang */}
+                <div className="flex w-[200%] h-full transition-transform duration-500 ease-in-out group-hover:-translate-x-1/2">
+                  <img
+                    src={rp.images?.[0]?.url}
+                    alt={rp.name}
+                    className="w-1/2 h-full object-cover"
                   />
-                  
-                ))}
+                  <img
+                    src={rp.images?.[1]?.url}
+                    alt={rp.name}
+                    className="w-1/2 h-full object-cover"
+                  />
+                </div>
               </div>
 
-              <p className="font-bold text-red-500">
-                {rp.price.toLocaleString()} ₫
-              </p>
-              <p className="text-sm font-bold line-clamp-2">{rp.name}</p>
+              {/* Nội dung */}
+              <div className="p-3 pt-4 space-y-2">
+                {/* Màu sắc */}
+                <div className="flex gap-2">
+                  {rp.colors?.map((c, index) => (
+                    <div
+                      key={index}
+                      className="w-5 h-5 rounded-full border"
+                      style={{ backgroundColor: c.code }}
+                    />
+                  ))}
+                </div>
+
+                <p className="font-bold text-red-500">
+                  {rp.price.toLocaleString()} ₫
+                </p>
+                <p className="text-sm font-bold line-clamp-2">{rp.name}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-
-        <div className="text-lg font-semibold mt-4 text-center"> <Button>Xem thêm</Button></div>
-       
+        <div className="text-lg font-semibold mt-4 text-center">
+          {" "}
+          <Button>Xem thêm</Button>
+        </div>
       </div>
     </div>
   );
