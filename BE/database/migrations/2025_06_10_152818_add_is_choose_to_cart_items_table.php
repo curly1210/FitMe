@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('shipping_address', function (Blueprint $table) {
-            $table->string('email', 50)->after('phone');
+        Schema::table('cart_items', function (Blueprint $table) {
+            $table->boolean('is_choose')->default(true)->after('product_item_id');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('shipping_address', function (Blueprint $table) {
-            $table->dropColumn('email');
+        Schema::table('cart_items', function (Blueprint $table) {
+            $table->dropColumn('is_choose');
         });
     }
 };

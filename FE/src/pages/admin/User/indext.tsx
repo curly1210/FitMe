@@ -65,6 +65,7 @@ const { data, isLoading } = useList({
       dataIndex: "is_ban",
       key: "is_ban",
       render: (value: number) => {
+
         if (value === 0) return <span style={{ color: "green" }}>Hoạt động</span>;
         if (value === 1) return <span style={{ color: "red" }}>Khóa</span>;
         return <span>Không xác định</span>;
@@ -122,34 +123,38 @@ const { data, isLoading } = useList({
   return (
     <>
       {/* Thanh tìm kiếm & lọc */}
-      <Row gutter={16} className="mb-4">
-        <Col span={8}>
+    <Row gutter={16} className="mb-4">
+     <Col span={8}>
           <Space.Compact style={{ width: "100%" }}>
             <Input
               placeholder="Tìm theo tên"
               allowClear
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
+              style={{ width: "100%" ,height: 40}}
             />
            
           </Space.Compact>
         </Col>
-        <Col span={8}>
-          <Select
-            placeholder="Lọc theo trạng thái"
-            allowClear
-            value={statusFilter}
-            onChange={(value) => {
-              setStatusFilter(value);
-              setCurrent(1);
-            }}
-            style={{ width: "100%" }}
-          >
-            <Select.Option value={0}>Hoạt động</Select.Option>
-            <Select.Option value={1}>Khóa</Select.Option>
-          </Select>
-        </Col>
-      </Row>
+  <Col span={8}>
+    <Select
+      placeholder="Lọc theo trạng thái"
+      allowClear
+      value={statusFilter}
+      onChange={(value) => {
+        setStatusFilter(value);
+        setCurrent(1);
+      }}
+      size="middle" // phải giống với Input
+      style={{ width: "100%" }}
+    >
+      <Select.Option value={undefined}>Tất cả</Select.Option>
+      <Select.Option value={0}>Hoạt động</Select.Option>
+      <Select.Option value={1}>Khóa</Select.Option>
+    </Select>
+  </Col>
+</Row>
+
 
       <Table
         className="border-gray rounded-2xl"

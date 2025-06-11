@@ -38,7 +38,8 @@ const SearchPanel = () => {
                 <div className="grid grid-cols-4 gap-y-8 px-5">
                   {selectedCategory?.items.map((sub: any) => (
                     <Link
-                      to={""}
+                      to={`category/${sub.slug}`}
+                      state={{ categoryData: sub }}
                       key={sub.id}
                       className="flex gap-2 items-center"
                       // onClick={() => navigate(`/category/${sub.id}`)}
@@ -51,11 +52,8 @@ const SearchPanel = () => {
                           className="object-cover h-full"
                         />
                       </div>
-                      <Link
-                        to={`category/${sub.slug}`}
-                        state={{ categoryData: sub }}>
-                        <p>{sub.name}</p>
-                      </Link>
+
+                      <p>{sub.name}</p>
                     </Link>
                   ))}
                 </div>

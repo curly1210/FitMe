@@ -141,10 +141,9 @@ export default function Detail({ open, onClose, record }: DetailProps) {
                     <DatePicker className="w-full"  />
                   </Form.Item>
                   <Form.Item label="Trạng thái hoạt động" name="is_ban">
-                    <Input
-                      
-                      value={user.is_ban === 0 ? "Hoạt động" : "Khóa"}
-                    />
+                     <span style={{ color: user.is_ban === 0 ? "green" : "red" }}>
+                      {user.is_ban === 0 ? "Hoạt động" : "Khóa"}
+                      </span>
                   </Form.Item>
                 </div>
               </Form>

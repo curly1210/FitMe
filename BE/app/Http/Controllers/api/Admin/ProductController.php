@@ -163,7 +163,7 @@ class ProductController extends Controller
                     // 'width' => 600,
                     // 'height' => 600,
                     'quality' => 80,
-                    'folder' => "products/{$product->id}",
+                    'folder' => "products/{$slug}",
                 ]);
 
                 ProductImage::create([
@@ -338,7 +338,7 @@ class ProductController extends Controller
                         // 'width' => 600,
                         // 'height' => 600,
                         'quality' => 80,
-                        'folder' => "products/{$product->id}",
+                        'folder' => "products/{$slug}",
                     ]);
 
 
@@ -358,6 +358,7 @@ class ProductController extends Controller
             DB::commit();
 
             return $this->success([], 'Cập nhật sản phẩm thành công.', 200);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->error('Dữ liệu không hợp lệ.', $e->errors(), 422);
         } catch (\Exception $e) {
@@ -391,7 +392,7 @@ class ProductController extends Controller
         }
     }
 
-    public function delete($id)
+    public function destroy($id)
     {
         try {
             $product = Product::whereNull('deleted_at')->find($id);
@@ -444,7 +445,7 @@ class ProductController extends Controller
                     'category_name' => optional($product->category)->name ?? 'Không có danh mục',
                     'total_inventory' => $product->total_inventory,
                     'is_active' => $product->is_active,
-                    'image' => $this->buildImageUrl($image),
+                    'image' => $image,
                     'deleted_at' => $product->deleted_at,
                 ];
             });
@@ -477,40 +478,6 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error('Lỗi khi khôi phục sản phẩm.', $e->getMessage(), 500);
-        }
-    }
-    public function destroy($id)
-    {
-        try {
-            $product = Product::onlyTrashed()->findOrFail($id);
-            if (!$product) {
-                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
-            }
-
-            DB::beginTransaction();
-
-            // 1. Xóa từng ảnh trong folder bằng deleteImageFromCloudinary
-            $images = ProductImage::where('product_id', $product->id)->get();
-            foreach ($images as $image) {
-                $this->deleteImageFromCloudinary($image->url); // Xóa Cloudinary
-                $image->forceDelete();                          // Xóa trong DB
-            }
-
-            // 2. Xóa folder sau khi đã xóa toàn bộ ảnh
-            $folderPath = 'products/' . $product->id;
-            $this->deleteFolderFromCloudinary($folderPath);
-
-            // 3. Xóa product items
-            ProductItem::where('product_id', $product->id)->forceDelete();
-
-            // 4. Xóa chính sản phẩm
-            $product->forceDelete();
-
-            DB::commit();
-            return $this->success(null, 'Sản phẩm đã được xóa vĩnh viễn thành công.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->error('Lỗi khi xóa vĩnh viễn sản phẩm.', $e->getMessage(), 500);
         }
     }
 }

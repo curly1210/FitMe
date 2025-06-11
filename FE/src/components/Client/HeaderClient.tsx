@@ -25,6 +25,17 @@ const HeaderClient = () => {
   } = useSearchPanel();
   const navigate = useNavigate();
 
+  const handleClickToCartPage = () => {
+    if (!accessToken) {
+      openModal(<ModalLogin />);
+      return;
+    }
+    // Nếu đã ở trang /carts thì không push thêm vào history
+    if (location.pathname === "/carts") return;
+
+    navigate("/carts");
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
 
@@ -116,10 +127,11 @@ const HeaderClient = () => {
             {categories.map((category: any) => (
               <li
                 key={category.id}
-                className={`cursor-pointer   ${selectedCategory?.id === category.id
-                  ? "border-b-2 border-black font-semibold"
-                  : ""
-                  }`}
+                className={`cursor-pointer   ${
+                  selectedCategory?.id === category.id
+                    ? "border-b-2 border-black font-semibold"
+                    : ""
+                }`}
                 onClick={() => {
                   setSelectedCategory(category);
                   setIsOpenSearchPanel(true);
@@ -169,7 +181,10 @@ const HeaderClient = () => {
               </Dropdown>
             )}
           </div>
-          <ShoppingCartOutlined className="text-3xl" />
+          <ShoppingCartOutlined
+            onClick={() => handleClickToCartPage()}
+            className="text-3xl cursor-pointer"
+          />
           <EllipsisOutlined className="text-3xl" />
         </div>
       </div>

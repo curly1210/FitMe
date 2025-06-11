@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { filterColor, filterSize } from "../pages/client/Products/product";
@@ -62,9 +63,13 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
     config: {
       query: {
         page: currentPage,
-        color: fieldFilter.color.length ? `[${fieldFilter.color.join(",")}]` : "",
+        color: fieldFilter.color.length
+          ? `[${fieldFilter.color.join(",")}]`
+          : "",
         size: fieldFilter.size.length ? `[${fieldFilter.size.join(",")}]` : "",
-        price: fieldFilter.price.length ? `[${fieldFilter.price.join(",")}]` : "",
+        price: fieldFilter.price.length
+          ? `[${fieldFilter.price.join(",")}]`
+          : "",
         sort: sortData,
       },
     },
@@ -90,7 +95,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   }, [isLoading, response]);
   useEffect(() => {
     setCallapiList(true);
-  }, [categorySlug])
+  }, [categorySlug]);
   useEffect(() => {
     if (showFilter) setShowSort(false);
   }, [showFilter]);
@@ -139,16 +144,19 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   const handleAppendQueryUrl = () => {
     const params = new URLSearchParams();
     if (fieldFilter.color.length) {
-      params.set('color', JSON.stringify(fieldFilter.color));
+      params.set("color", JSON.stringify(fieldFilter.color));
     }
     if (fieldFilter.price.length) {
-      params.set('price', JSON.stringify(fieldFilter.price));
+      params.set("price", JSON.stringify(fieldFilter.price));
     }
     if (fieldFilter.size.length) {
-      params.set('size', JSON.stringify(fieldFilter.size));
+      params.set("size", JSON.stringify(fieldFilter.size));
     }
-    navigate({ search: params.toString() }, { replace: true, state: { categoryData } });
-  }
+    navigate(
+      { search: params.toString() },
+      { replace: true, state: { categoryData } }
+    );
+  };
 
   return (
     <ProductContext.Provider

@@ -188,8 +188,8 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
         >
           <Input className="!h-[48px] !rounded-none " placeholder="Họ và tên" />
         </Form.Item>
-        <div className="grid grid-cols-2 gap-x-2">
-          <Form.Item
+        {/* <div className="grid grid-cols-2 gap-x-2"> */}
+        {/* <Form.Item
             required={false}
             name="email"
             rules={[
@@ -199,25 +199,25 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
             className="!mb-[10px]"
           >
             <Input className="!h-[48px] !rounded-none " placeholder="Email" />
-          </Form.Item>
-          <Form.Item
-            required={false}
-            name="phone"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-              {
-                pattern: /^0\d{9}$/,
-                message: "Nhập đúng định dạng số điện thoại",
-              },
-            ]}
-            className="!mb-[10px]"
-          >
-            <Input
-              className="!h-[48px] !rounded-none "
-              placeholder="Số điện thoại"
-            />
-          </Form.Item>
-        </div>
+          </Form.Item> */}
+        <Form.Item
+          required={false}
+          name="phone"
+          rules={[
+            { required: true, message: "Vui lòng nhập số điện thoại!" },
+            {
+              pattern: /^0\d{9}$/,
+              message: "Nhập đúng định dạng số điện thoại",
+            },
+          ]}
+          className="!mb-[10px]"
+        >
+          <Input
+            className="!h-[48px] !rounded-none "
+            placeholder="Số điện thoại"
+          />
+        </Form.Item>
+        {/* </div> */}
         <Form.Item
           required={false}
           rules={[{ required: true, message: "Vui lòng chọn tỉnh" }]}
