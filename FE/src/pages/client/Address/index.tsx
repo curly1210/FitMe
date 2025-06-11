@@ -104,7 +104,7 @@ const Address = () => {
                       <div className="flex items-center gap-2">
                         <p className="font-bold">
                           {address?.name_receive} | {address?.phone} |
-                          {address?.email}
+                          {/* {address?.email} */}
                         </p>
                         {address?.is_default ? (
                           <span className="bg-black text-white text-xs px-2 py-1">

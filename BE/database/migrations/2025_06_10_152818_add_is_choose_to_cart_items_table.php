@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cart_items', function (Blueprint $table) {
-            $table->boolean('is_choose')->default(false)->after('product_item_id');
+            $table->boolean('is_choose')->default(true)->after('product_item_id');
         });
     }
 
