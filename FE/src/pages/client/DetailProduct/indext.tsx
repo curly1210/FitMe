@@ -249,16 +249,26 @@ const ProductDetail = () => {
             <p className="text-sm text-gray-500">
               SKU: {selectedItem?.sku || "Đang cập nhật"}
             </p>
-            <p className="text-xl text-red-600 font-semibold">
-              {selectedItem
-                ? (
-                    selectedItem.sale_price > 0
-                      ? selectedItem.sale_price
-                      : selectedItem.price
-                  ).toLocaleString()
-                : ""}{" "}
-              ₫
-            </p>
+      <p className="text-xl font-semibold text-red-600">
+        {selectedItem ? (
+          selectedItem.sale_price > 0 ? (
+            <>
+              <span className="text-black mr-2">
+                {selectedItem.sale_price.toLocaleString()} VNĐ
+              </span>
+              <span className="line-through text-gray-500">
+                {selectedItem.price.toLocaleString()} VNĐ
+              </span>
+            </>
+          ) : (
+            <span>{selectedItem.price.toLocaleString()} VNĐ</span>
+          )
+        ) : (
+          ""
+        )}
+      </p>
+
+
 
             {/* Chọn màu */}
             <div className="flex items-center gap-2">
@@ -397,7 +407,7 @@ const ProductDetail = () => {
                 ))}
               </div>
 
-              <p className="font-bold text-red-500">
+              <p className="font-bold ">
                 {rp.price.toLocaleString()} ₫
               </p>
               <p className="text-sm font-bold line-clamp-2">{rp.name}</p>
