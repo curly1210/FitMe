@@ -347,6 +347,7 @@ const ProductDetail = () => {
               </div>
             </div>
 
+
             {/* Chọn màu */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-sm">Màu:</span>
@@ -524,6 +525,7 @@ const ProductDetail = () => {
                 </p>
                 <p className="text-sm font-bold line-clamp-2">{rp.name}</p>
               </div>
+
             </div>
           ))}
         </div>
