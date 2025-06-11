@@ -14,6 +14,7 @@ class ProductItem extends Model
         'import_price',
         'price',
         'sale_price',
+        'sale_percent',
         'stock',
         'sku',
         'is_active',

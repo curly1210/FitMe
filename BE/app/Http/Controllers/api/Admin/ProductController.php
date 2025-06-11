@@ -100,7 +100,7 @@ class ProductController extends Controller
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
                 'variants.*.sale_price' => 'nullable',
-                // 'variants.*.sale_price' => 'nullable|numeric|min:0',
+                'variants.*.sale_percent' => 'nullable|numeric|min:0',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
@@ -133,10 +133,9 @@ class ProductController extends Controller
             foreach ($validatedData['variants'] as $variant) {
                 $totalInventory += $variant['stock'];
 
-                $salePrice = 0;
-                if (!empty($variant['sale_price'])) {
-                    $percentage = $variant['sale_price'];
-                    $discount = $variant['price'] * ($percentage / 100);
+                $salePrice = $variant['price'];
+                if (!empty($variant['sale_percent']) && $variant['sale_percent'] > 0) {
+                    $discount = $variant['price'] * ($variant['sale_percent'] / 100);
                     $salePrice = $variant['price'] - $discount;
                 }
 
@@ -152,6 +151,7 @@ class ProductController extends Controller
                     'import_price' => $variant['import_price'],
                     'price' => $variant['price'],
                     'sale_price' => $salePrice,
+                    'sale_percent' => $variant['sale_percent'],
                 ]);
             }
 
@@ -181,11 +181,7 @@ class ProductController extends Controller
                     'id' => $product->id,
                     'name' => $product->name,
                     'category_id' => $product->category_id,
-                    'short_description' => $product->short_description,
-                    'description' => $product->description,
-                    'slug' => $product->slug,
                     'total_inventory' => $product->total_inventory,
-                    'is_active' => $product->is_active,
                 ],
             ], 'Sản phẩm đã được thêm thành công.', 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -214,14 +210,14 @@ class ProductController extends Controller
                 'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
                 'variants.*.id' => 'required',
-
                 'variants.*.sale_price' => 'nullable',
+                'variants.*.sale_percent' => 'nullable|numeric|min:0',
                 'images' => 'required|array|min:1',
                 // 'images.*.url' => 'nullable',
 
                 'images.*.url' => [
                     'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
-                    fn($att, $val, $fail) =>
+                    fn ($att, $val, $fail) =>
                     !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
                         && $fail("The $att must be a file or string.")
                 ],
@@ -260,24 +256,35 @@ class ProductController extends Controller
                 $inputIds[] = $variant['id'];
                 // $totalInventory += $variant['stock'];
 
+                // Tính sale_price dựa trên sale_percent nếu có
+                $salePrice = $variant['price']; // Giá mặc định là price
+                $salePercent = $variant['sale_percent'] ?? null;
+                if ($salePercent !== null && $salePercent > 0) {
+                    $discount = $variant['price'] * ($salePercent / 100);
+                    $salePrice = $variant['price'] - $discount;
+                } elseif (!empty($variant['sale_price'])) {
+                    // Nếu sale_price được gửi lên nhưng không có sale_percent, giữ nguyên sale_price
+                    $salePrice = $variant['sale_price'];
+                }
                 // Kiểm tra xem variant đã tồn tại trong DB chưa
                 if (in_array($variant['id'], $existingIds)) {
-                    // Đã tồn tại → cập nhật    
+                    // Đã tồn tại → cập nhật
                     ProductItem::where('id', $variant['id'])->update([
                         // 'color_id' => $variant['color'],
                         // 'size' => $variant['size'],
                         'stock' => $variant['stock'],
                         'import_price' => $variant['import_price'],
                         'price' => $variant['price'],
-                        'sale_price' => $variant['sale_price'],
+                        'sale_price' => $salePrice,
+                        'sale_percent' => $salePercent,
                     ]);
-                } else { // Chưa có → tạo mới   
+                } else { // Chưa có → tạo mới
 
                     $categoryName = $product->category ? $product->category->name : 'unknown';
                     $year = date('Y');
 
                     $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
-                    // Chưa có → tạo mới    
+                    // Chưa có → tạo mới
                     ProductItem::create([
                         // 'id' => $variant['id'], // chỉ dùng nếu bạn cho phép tự set id
                         'product_id' => $product->id,
@@ -287,7 +294,8 @@ class ProductController extends Controller
                         'stock' => $variant['stock'],
                         'import_price' => $variant['import_price'],
                         'price' => $variant['price'],
-                        'sale_price' => $variant['sale_price'],
+                        'sale_price' => $salePrice,
+                        'sale_percent' => $salePercent,
                     ]);
                     // $salePrice = null;
                     // if (!empty($variant['sale_price'])) {
