@@ -6,16 +6,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\api\Admin\BannerController;
-use App\Http\Controllers\Api\Admin\CategoryController;
-use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Api\Admin\VariationController;
-use App\Http\Controllers\api\Client\AddressController;
-use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
-use App\Http\Controllers\Api\Client\PostController as ClientPostController;
-use App\Http\Controllers\Api\Client\ProductController;
-use App\Http\Controllers\Api\Client\WishlistController;
-use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Api\Admin\CouponController;
+use App\Http\Controllers\Api\Client\OrderController;
+use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\api\Client\AddressController;
+use App\Http\Controllers\Api\Client\ProductController;
+use App\Http\Controllers\Api\Admin\VariationController;
+use App\Http\Controllers\Api\Client\WishlistController;
+use App\Http\Controllers\Api\Client\PostController as ClientPostController;
+use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
+use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -61,7 +62,8 @@ Route::prefix('admin')->group(function () {
 
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 
-
+Route::post('/orders/preview', [OrderController::class, 'preview']);
+Route::post('/orders/checkout', [OrderController::class, 'store']);
 
 
 
