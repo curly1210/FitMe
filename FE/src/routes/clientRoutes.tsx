@@ -25,11 +25,11 @@ export const clientRoutes = [
         path: "category/:categorySlug",
         element: <ListProducts />,
       },
-          {
+      {
         path: "products/:slug",
         element: <ProductDetail />,
       },
-               {
+      {
         path: "checkout",
         element: <CheckOut />,
       },
@@ -41,11 +41,8 @@ export const clientRoutes = [
             path: "address",
             element: <Address />,
           },
-
         ],
       },
-
-
     ],
   },
 ];
