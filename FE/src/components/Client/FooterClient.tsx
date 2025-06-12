@@ -6,7 +6,7 @@ import {
 
 const FooterClient = () => {
   return (
-    <div className="w-7xl mx-auto px-4 mt-24">
+    <div className="w-7xl mx-auto px-4 mt-24 mb-24">
       <div className="mb-6">
         <img
           width={138}
