@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\ShippingAddress;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -78,6 +79,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Order::class);
     }
 
+    public function addresses()
+{
+    return $this->hasMany(ShippingAddress::class);
+}
     public function shipping_address()
     {
         return $this->hasMany(ShippingAddress::class);
