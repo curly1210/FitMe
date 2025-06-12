@@ -24,26 +24,26 @@ class OrderController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $items = [];
-        $cartItems = CartItem::with('productItem.product')
+        $cartItems = CartItem::with('productItem.product', 'productItem.color', 'productItem.size')
             ->where('user_id', $user->id)
             ->get();
 
         if ($cartItems->isEmpty()) {
-
-            $items = 'Giỏ hàng trống.';
+            return response()->json(['items' => 'Giỏ hàng trống.']);
         }
 
         $total = 0;
 
-
         foreach ($cartItems as $item) {
             $productItem = $item->productItem;
-
             if (!$productItem || !$productItem->product) {
                 continue;
             }
 
-            $price = $productItem->price;
+            $price = $productItem->sale_percent > 0
+                ? $productItem->price * (1 - ($productItem->sale_percent / 100))
+                : $productItem->price;
+
             $subtotal = $price * $item->quantity;
             $total += $subtotal;
 
@@ -51,8 +51,9 @@ class OrderController extends Controller
                 'product_name' => $productItem->product->name,
                 'sku' => $productItem->sku,
                 'quantity' => $item->quantity,
-                'price' => $price,
-                'sale_price' => $productItem->sale_price,
+                'price' => $productItem->price,
+                'sale_price' => $price,
+                'sale_percent' => $productItem->sale_percent,
                 'total' => $subtotal,
                 'color' => optional($productItem->color)->name,
                 'size' => optional($productItem->size)->name,
@@ -67,18 +68,27 @@ class OrderController extends Controller
 
             $coupon = Coupon::where('code', $code)
                 ->where('is_active', true)
+                ->where('limit_use', '>', 0)
                 ->where('time_start', '<=', now())
                 ->where('time_end', '>=', now())
                 ->first();
 
-            if ($coupon && $total >= $coupon->min_amount) {
-                $discount = min($coupon->value, $coupon->max_amount);
+            if ($coupon && $total >= $coupon->min_price_order) {
+                $discount = ceil(min(
+                    ($total * ($coupon->value / 100)),
+                    $coupon->max_price_discount
+                ));
             }
         }
 
-        $finalTotal = ceil($total - ($total * ($discount / 100)));
+        $shippingPrice = $request->has('shipping_price') ? (int) $request->input('shipping_price') : 0;
+        $finalTotal = ceil($total - $discount + $shippingPrice);
 
         $defaultAddress = $user->addresses()->where('is_default', true)->first();
+        if (!$defaultAddress) {
+            $defaultAddress = $user->addresses()->first();
+        }
+
         $addressInfo = null;
 
         if ($defaultAddress) {
@@ -96,30 +106,25 @@ class OrderController extends Controller
                 'email' => $defaultAddress->email,
             ];
         } else {
-            $addressInfo = 'Bạn chưa có địa chỉ giao hàng mặc định.';
+            $addressInfo = 'Bạn chưa có địa chỉ giao hàng.';
         }
 
-
         return response()->json([
-            'default_address' => $addressInfo,
+            // 'default_address' => $addressInfo,
             'items' => $items,
-            'total' => $total,
+            'total_price' => $total,
             'discount' => $discount,
-            'final_total' => $finalTotal,
+            'shipping_price' => $shippingPrice,
+            'total_amount' => $finalTotal,
             'coupon' => $coupon ? $coupon->code : null,
         ]);
-
-
     }
-
-
-
 
     public function store(Request $request)
     {
         $request->validate([
-            'address_id' => 'required|exists:shipping_address,id',
             'payment_method' => 'required|string',
+            'shipping_price' => 'required|in:20000,40000',
             'coupon_code' => 'nullable|string',
         ]);
 
@@ -134,9 +139,10 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            $total = 0;
+            $totalPriceItem = 0;
             $discount = 0;
             $orderDetails = [];
+            $productItemIds = [];
 
             foreach ($cartItems as $item) {
                 $productItem = $item->productItem;
@@ -145,9 +151,13 @@ class OrderController extends Controller
                     throw new \Exception("Sản phẩm {$productItem->sku} không đủ hàng.");
                 }
 
-                $price = $productItem->sale_price ?? $productItem->price;
+                $price = $productItem->sale_percent > 0
+                    ? $productItem->price * (1 - ($productItem->sale_percent / 100))
+                    : $productItem->price;
+
                 $subtotal = $price * $item->quantity;
-                $total += $subtotal;
+                $totalPriceItem += $subtotal;
+                $productItemIds[] = $productItem->id;
 
                 $orderDetails[] = [
                     'product_item_id' => $productItem->id,
@@ -162,22 +172,44 @@ class OrderController extends Controller
                 $productItem->decrement('stock', $item->quantity);
             }
 
-            // Xử lý mã giảm giá
+            $coupon = null;
             if ($request->has('coupon_code')) {
                 $coupon = Coupon::where('code', $request->coupon_code)
                     ->where('is_active', true)
+                    ->where('limit_use', '>', 0)
                     ->where('time_start', '<=', now())
                     ->where('time_end', '>=', now())
                     ->first();
 
-                if ($coupon && $total >= $coupon->min_amount) {
-                    $discount = min($coupon->value, $coupon->max_amount);
+                if ($coupon && $totalPriceItem >= $coupon->min_price_order) {
+                    $discount = ceil(min(
+                        ($totalPriceItem * ($coupon->value / 100)),
+                        $coupon->max_price_discount
+                    ));
                 }
             }
 
-            $finalAmount = ceil($total - ($total * ($discount / 100)));
+            $shippingPrice = (int) $request->shipping_price;
+            $totalAmount = ceil($totalPriceItem - $discount + $shippingPrice);
 
-            $address = $user->addresses()->find($request->address_id);
+            if ($request->filled('address_id')) {
+                $address = $user->addresses()->find($request->address_id);
+
+                if (!$address) {
+                    return response()->json(['message' => 'Địa chỉ không hợp lệ.'], 400);
+                }
+            } else {
+                $address = $user->addresses()->where('is_default', true)->first();
+
+                if (!$address) {
+                    $address = $user->addresses()->first();
+                }
+
+                if (!$address) {
+                    return response()->json(['message' => 'Bạn không có địa chỉ nào, vui lòng tạo địa chỉ giao hàng.'], 400);
+                }
+            }
+
             $fullAddress = implode(', ', array_filter([
                 $address->detail_address,
                 $address->ward,
@@ -185,15 +217,13 @@ class OrderController extends Controller
                 $address->city,
             ]));
 
-            $datePart = now()->format('ymd');
-            $productIds = implode('', collect($orderDetails)->pluck('product_item_id')->toArray());
-            $randomPart = strtoupper(Str::random(5));
-            $orderCode = $datePart . $productIds . $randomPart;
-
             $order = Order::create([
-                'orders_code' => $orderCode,
-                'total_amount' => $finalAmount,
-                'status_payment' => 0,
+                'orders_code' => now()->format('ymd') . implode('', $productItemIds) . strtoupper(Str::random(5)),
+                'total_price_item' => $totalPriceItem,
+                'shipping_price' => $shippingPrice,
+                'discount' => $discount,
+                'total_amount' => $totalAmount,
+                'status_payment' => 1,
                 'payment_method' => $request->payment_method,
                 'status_order_id' => 1,
                 'user_id' => $user->id,
@@ -206,12 +236,14 @@ class OrderController extends Controller
                 OrdersDetail::create(array_merge(['order_id' => $order->id], $detail));
             }
 
+            if ($coupon) {
+                $coupon->decrement('limit_use');
+            }
+
             CartItem::where('user_id', $user->id)->delete();
 
+            Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderDetails));
 
-            
-                Mail::to('trinhhbaoo0510@gmail.com')->send(new OrderConfirmationMail($order, $orderDetails));
-            
             DB::commit();
 
             return response()->json([
