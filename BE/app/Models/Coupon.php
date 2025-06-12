@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Coupon extends Model
 {
     /** @use HasFactory<\Database\Factories\CouponFactory> */
-    use HasFactory;
+    use HasFactory,SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -16,8 +17,8 @@ class Coupon extends Model
         'value',
         'time_start',
         'time_end',
-        'min_amount',
-        'max_amount',
+        'min_price_order',
+        'max_price_discount',
         'limit_use',
         'is_active',
     ];
