@@ -10,13 +10,15 @@ import ModalLogin from "../Modal/ModalLogin";
 import { useModal } from "../../hooks/useModal";
 import { Link, useNavigate } from "react-router";
 import { useSearchPanel } from "../../hooks/useSearchPanel";
-import { Dropdown, MenuProps } from "antd";
+import { Badge, Dropdown, MenuProps } from "antd";
+import { useCart } from "../../hooks/useCart";
 
 const HeaderClient = () => {
   /* Start dont-delete */
 
   const { openModal } = useModal();
   const { accessToken, user, logout } = useAuthen();
+  const { cart } = useCart();
   const {
     categories,
     selectedCategory,
@@ -35,6 +37,8 @@ const HeaderClient = () => {
 
     navigate("/carts");
   };
+
+  // console.log(cart);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -181,10 +185,17 @@ const HeaderClient = () => {
               </Dropdown>
             )}
           </div>
-          <ShoppingCartOutlined
+
+          <Badge count={cart?.totalItem ? cart?.totalItem : 0} showZero>
+            <ShoppingCartOutlined
+              onClick={handleClickToCartPage}
+              className="text-3xl cursor-pointer"
+            />
+          </Badge>
+          {/* <ShoppingCartOutlined
             onClick={() => handleClickToCartPage()}
             className="text-3xl cursor-pointer"
-          />
+          /> */}
           <EllipsisOutlined className="text-3xl" />
         </div>
       </div>
