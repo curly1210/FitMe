@@ -8,13 +8,14 @@ use App\Models\ProductItem;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\CloudinaryTrait;
 
 class CartItemController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    use ApiResponse;
+    use ApiResponse, CloudinaryTrait;
 
     public function index()
     {
@@ -43,10 +44,11 @@ class CartItemController extends Controller
                     && $cartItem->productItem->size;
             });
 
+
             $formattedCartItems = $validCartItems->map(function ($cartItem) {
                 $productItem = $cartItem->productItem;
                 $product = $productItem->product;
-                $image = $product->productImages->first()?->url ?? null;
+                $image = $this->buildImageUrl($product->productImages->first()?->url) ?? null;
 
                 return [
                     'id' => $cartItem->id,
@@ -54,8 +56,11 @@ class CartItemController extends Controller
                     'name' => $product->name,
                     'quantity' => $cartItem->quantity,
                     'price' => $productItem->price,
+                    'sale_percent' => $productItem->sale_percent,
+                    'sale_price' => $productItem->sale_price,
+                    'sku' => $productItem->sku,
                     'image' => $image,
-                    'subtotal' => $cartItem->quantity * $productItem->price,
+                    'subtotal' => $cartItem->quantity * $productItem->sale_price,
                 ];
             })->values();
 
@@ -69,9 +74,8 @@ class CartItemController extends Controller
                 'totalPrice' => $totalPrice,
             ];
 
-//             return response()->json($formattedCartItems);
+            //             return response()->json($formattedCartItems);
             return response()->json($result);
-
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy danh sách sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
         }
@@ -222,7 +226,7 @@ class CartItemController extends Controller
                 return $this->success($cartItem, 'Cập nhật giỏ hàng thành công', 200);
             } catch (\Throwable $th) {
                 DB::rollBack();
-                return $this->error('Lỗi cập nhật sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
+                return $this->error('Lỗi cập nhật sản phẩm trong giỏ hàng', [$th->getMessage()], 402);
             }
         } catch (\Throwable $th) {
             return $this->error('Lỗi cập nhật sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
