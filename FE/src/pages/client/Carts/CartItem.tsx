@@ -5,7 +5,6 @@ import { IoAdd } from "react-icons/io5";
 import { LuTrash } from "react-icons/lu";
 import { useCart } from "../../../hooks/useCart";
 import { Button, Popconfirm } from "antd";
-import emptyCart from "../../../assets/images/empty_cart.png";
 
 const CartItem = ({ item }: any) => {
   const [quantity, setQuantity] = useState(item.quantity);
@@ -36,8 +35,7 @@ const CartItem = ({ item }: any) => {
           </p>
           <div className="flex items-center gap-4">
             <p className="text-sm text-gray-400">
-              WHITE/BLACK
-              {/* {item.product_item.color}/{item.product_item.size} */}
+              {item?.color?.name}/{item?.size?.name}
             </p>
             <p className="font-bold">
               {item?.sale_percent > 0 ? (
