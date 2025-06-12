@@ -19,9 +19,11 @@ interface ModalAddressProps {
   refetch: () => void;
   mode: "create" | "edit";
   record?: any;
+  showCloseIcon?: boolean;
 }
 
-const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
+
+const ModalAddress = ({ refetch, mode, record,showCloseIcon=true }: ModalAddressProps) => {
   const [isLoading, setIsLoading] = useState(true); // loading data dữ liệu các tỉnh thành
   const [data, setData] = useState<any>([]);
   const { closeModal } = useModal();
@@ -155,15 +157,18 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
   // if (isLoading) return null;
 
   return (
-    <div className="w-[500px] bg-white p-6">
+    <div className="w-[500px]  p-6">
       <div className="flex justify-between items-center mb-8">
         <div className="font-bold text-xl">
           {mode === "edit" ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ"}
         </div>
-        <CloseOutlined
+        {showCloseIcon !== false && (
+               <CloseOutlined
           onClick={() => closeModal()}
           className="text-xl cursor-pointer"
         />
+        )}
+   
       </div>
       <Form
         form={form}
