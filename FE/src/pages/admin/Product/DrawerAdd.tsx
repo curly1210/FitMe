@@ -146,7 +146,10 @@ const DrawerAdd = ({
     formData.variants.forEach((variant: any, index: any) => {
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
       formDataRequest.append(`variants[${index}][size_id]`, variant.size.id);
-      formDataRequest.append(`variants[${index}][sale_price]`, variant.percent);
+      formDataRequest.append(
+        `variants[${index}][sale_percent]`,
+        variant.percent
+      );
       formDataRequest.append(
         `variants[${index}][import_price]`,
         variant.importPrice

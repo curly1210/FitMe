@@ -154,3 +154,8 @@ body {
 .ant-radio-button-wrapper-checked:hover {
   color: black !important;
 }
+
+.ant-btn-variant-outline:hover {
+  color: red !important;
+  border-color: red !important;
+}

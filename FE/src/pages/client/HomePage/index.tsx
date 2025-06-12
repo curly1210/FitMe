@@ -17,7 +17,8 @@ import ModalLogin from "../../../components/Modal/ModalLogin";
 import { useModal } from "../../../hooks/useModal";
 import { useSearchPanel } from "../../../hooks/useSearchPanel";
 import { Link, useNavigate } from "react-router";
-import { Dropdown, MenuProps } from "antd";
+import { Badge, Dropdown, MenuProps } from "antd";
+import { useCart } from "../../../hooks/useCart";
 // import HeaderClient from "../../../components/Client/HeaderClient";
 
 const contentStyle: React.CSSProperties = {
@@ -50,7 +51,20 @@ const HomePage = () => {
 
   const { openModal } = useModal();
   const { accessToken, user, logout } = useAuthen();
+  const { cart } = useCart();
+
   const navigate = useNavigate();
+
+  const handleClickToCartPage = () => {
+    if (!accessToken) {
+      openModal(<ModalLogin />);
+      return;
+    }
+    // Nếu đã ở trang /carts thì không push thêm vào history
+    if (location.pathname === "/carts") return;
+
+    navigate("/carts");
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -199,7 +213,7 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
                 {!accessToken ? (
                   <>
@@ -225,7 +239,13 @@ const HomePage = () => {
                   </Dropdown>
                 )}
               </div>
-              <ShoppingCartOutlined className="text-3xl" />
+              <Badge count={cart?.totalItem ? cart?.totalItem : 0} showZero>
+                <ShoppingCartOutlined
+                  onClick={handleClickToCartPage}
+                  className="text-3xl cursor-pointer !text-white"
+                />
+              </Badge>
+              {/* <ShoppingCartOutlined className="text-3xl" /> */}
               <EllipsisOutlined className="text-3xl" />
             </div>
           </div>
