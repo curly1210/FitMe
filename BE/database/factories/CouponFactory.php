@@ -16,11 +16,11 @@ class CouponFactory extends Factory
         return [
             'name' => 'Giảm giá ' . $this->faker->word(),
             'code' => strtoupper(Str::random(8)),
-            'value' => $this->faker->numberBetween(5, 50),
+            'value' => $this->faker->numberBetween(1,5)*10,
             'time_start' => $start,
             'time_end' => $end,
-            'min_amount' => $this->faker->numberBetween(100000, 500000),
-            'max_amount' => $this->faker->numberBetween(600000, 1000000),
+            'min_price_order' => $this->faker->numberBetween(0, 5)*100000,
+            'max_price_discount' => $this->faker->numberBetween(1,5 )*100000,
             'limit_use' => $this->faker->numberBetween(10, 100),
         ];
     }
