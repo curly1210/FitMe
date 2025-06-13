@@ -15,12 +15,15 @@ use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Admin\VariationController;
 
 use App\Http\Controllers\api\Client\CartItemController;
+
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+
+
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
