@@ -17,19 +17,18 @@ class UserController extends Controller
         $query = User::query()
             ->where('role', '!=', 'admin');
 
-        if ($request->has('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
         }
 
-        if ($request->is_ban == null) {
-            $query = User::query()
-                ->where('role', '!=', 'admin');
-        } else if ($request->has('is_ban')) {
+        if (!is_null($request->is_ban)) {
             $query->where('is_ban', $request->is_ban);
-
         }
-
-
 
         $users = $query->get();
 

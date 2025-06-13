@@ -126,96 +126,122 @@ class OrderController extends Controller
             'payment_method' => 'required|string',
             'shipping_price' => 'required|in:20000,40000',
             'coupon_code' => 'nullable|string',
+            'address_id' => 'nullable|exists:addresses,id',
+            'preview' => 'nullable|boolean',
         ]);
 
         $user = JWTAuth::parseToken()->authenticate();
         $cartItems = CartItem::with('productItem.product', 'productItem.color', 'productItem.size')
-            ->where('user_id', $user->id)->get();
+            ->where('user_id', $user->id)
+            ->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Giỏ hàng trống.'], 400);
         }
 
-        DB::beginTransaction();
+        $items = [];
+        $totalPriceItem = 0;
+        $discount = 0;
+        $productItemIds = [];
 
-        try {
-            $totalPriceItem = 0;
-            $discount = 0;
-            $orderDetails = [];
-            $productItemIds = [];
+        foreach ($cartItems as $item) {
+            $productItem = $item->productItem;
 
-            foreach ($cartItems as $item) {
-                $productItem = $item->productItem;
+            if (!$productItem || !$productItem->product)
+                continue;
 
-                if ($productItem->stock < $item->quantity) {
-                    throw new \Exception("Sản phẩm {$productItem->sku} không đủ hàng.");
-                }
-
-                $price = $productItem->sale_percent > 0
-                    ? $productItem->price * (1 - ($productItem->sale_percent / 100))
-                    : $productItem->price;
-
-                $subtotal = $price * $item->quantity;
-                $totalPriceItem += $subtotal;
-                $productItemIds[] = $productItem->id;
-
-                $orderDetails[] = [
-                    'product_item_id' => $productItem->id,
-                    'quantity' => $item->quantity,
-                    'price' => $price,
-                    'subtotal' => $subtotal,
-                    'name_product' => $productItem->product->name,
-                    'color' => optional($productItem->color)->name,
-                    'size' => optional($productItem->size)->name,
-                ];
-
-                $productItem->decrement('stock', $item->quantity);
+            if ($productItem->stock < $item->quantity) {
+                return response()->json(['message' => "Sản phẩm {$productItem->sku} không đủ hàng."], 400);
             }
 
-            $coupon = null;
-            if ($request->has('coupon_code')) {
-                $coupon = Coupon::where('code', $request->coupon_code)
-                    ->where('is_active', true)
-                    ->where('limit_use', '>', 0)
-                    ->where('time_start', '<=', now())
-                    ->where('time_end', '>=', now())
-                    ->first();
+            $price = $productItem->sale_percent > 0
+                ? $productItem->price * (1 - ($productItem->sale_percent / 100))
+                : $productItem->price;
 
-                if ($coupon && $totalPriceItem >= $coupon->min_price_order) {
-                    $discount = ceil(min(
-                        ($totalPriceItem * ($coupon->value / 100)),
-                        $coupon->max_price_discount
-                    ));
-                }
+            $subtotal = $price * $item->quantity;
+            $totalPriceItem += $subtotal;
+
+            $productItemIds[] = $productItem->id;
+
+            $items[] = [
+                'product_name' => $productItem->product->name,
+                'sku' => $productItem->sku,
+                'quantity' => $item->quantity,
+                'price' => $productItem->price,
+                'sale_price' => $price,
+                'sale_percent' => $productItem->sale_percent,
+                'total' => $subtotal,
+                'color' => optional($productItem->color)->name,
+                'size' => optional($productItem->size)->name,
+            ];
+        }
+
+        $coupon = null;
+        if ($request->filled('coupon_code')) {
+            $coupon = Coupon::where('code', $request->coupon_code)
+                ->where('is_active', true)
+                ->where('limit_use', '>', 0)
+                ->where('time_start', '<=', now())
+                ->where('time_end', '>=', now())
+                ->first();
+
+            if ($coupon && $totalPriceItem >= $coupon->min_price_order) {
+                $discount = ceil(min(
+                    ($totalPriceItem * ($coupon->value / 100)),
+                    $coupon->max_price_discount
+                ));
             }
+        }
 
-            $shippingPrice = (int) $request->shipping_price;
-            $totalAmount = ceil($totalPriceItem - $discount + $shippingPrice);
+        $shippingPrice = (int) $request->shipping_price;
+        $totalAmount = ceil($totalPriceItem - $discount + $shippingPrice);
 
-            if ($request->filled('address_id')) {
-                $address = $user->addresses()->find($request->address_id);
-
-                if (!$address) {
-                    return response()->json(['message' => 'Địa chỉ không hợp lệ.'], 400);
-                }
-            } else {
-                $address = $user->addresses()->where('is_default', true)->first();
-
-                if (!$address) {
-                    $address = $user->addresses()->first();
-                }
-
-                if (!$address) {
-                    return response()->json(['message' => 'Bạn không có địa chỉ nào, vui lòng tạo địa chỉ giao hàng.'], 400);
-                }
+        $defaultAddress = null;
+        if ($request->filled('address_id')) {
+            $defaultAddress = $user->addresses()->find($request->address_id);
+            if (!$defaultAddress) {
+                return response()->json(['message' => 'Địa chỉ không hợp lệ.'], 400);
             }
+        } else {
+            $defaultAddress = $user->addresses()->where('is_default', true)->first()
+                ?? $user->addresses()->first();
+        }
 
+        $addressInfo = null;
+        if ($defaultAddress) {
             $fullAddress = implode(', ', array_filter([
-                $address->detail_address,
-                $address->ward,
-                $address->district,
-                $address->city,
+                $defaultAddress->detail_address,
+                $defaultAddress->ward,
+                $defaultAddress->district,
+                $defaultAddress->city,
             ]));
+
+            $addressInfo = [
+                'name' => $defaultAddress->name_receive,
+                'phone' => $defaultAddress->phone,
+                'full_address' => $fullAddress,
+        
+            ];
+        }
+
+        $preview = filter_var($request->input('preview'), FILTER_VALIDATE_BOOLEAN);
+        if ($preview) {
+            return response()->json([
+                'items' => $items,
+                'total_price' => $totalPriceItem,
+                'discount' => $discount,
+                'shipping_price' => $shippingPrice,
+                'total_amount' => $totalAmount,
+                'coupon' => $coupon ? $coupon->code : null,
+                'default_address' => $addressInfo ?: 'Bạn chưa có địa chỉ giao hàng.',
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            if (!$defaultAddress) {
+                return response()->json(['message' => 'Bạn chưa có địa chỉ giao hàng.'], 400);
+            }
 
             $order = Order::create([
                 'orders_code' => now()->format('ymd') . implode('', $productItemIds) . strtoupper(Str::random(5)),
@@ -227,22 +253,35 @@ class OrderController extends Controller
                 'payment_method' => $request->payment_method,
                 'status_order_id' => 1,
                 'user_id' => $user->id,
-                'receiving_address' => $fullAddress,
-                'recipient_name' => $address->name_receive,
-                'recipient_phone' => $address->phone,
+                'receiving_address' => $addressInfo['full_address'],
+                'recipient_name' => $addressInfo['name'],
+                'recipient_phone' => $addressInfo['phone'],
             ]);
 
-            foreach ($orderDetails as $detail) {
-                OrdersDetail::create(array_merge(['order_id' => $order->id], $detail));
+            foreach ($items as $item) {
+                OrdersDetail::create([
+                    'order_id' => $order->id,
+                    'product_item_id' => ProductItem::where('sku', $item['sku'])->value('id'),
+                    'quantity' => $item['quantity'],
+                    'price' => $item['sale_price'],
+                    'subtotal' => $item['total'],
+                    'name_product' => $item['product_name'],
+                    'color' => $item['color'],
+                    'size' => $item['size'],
+                ]);
             }
 
             if ($coupon) {
                 $coupon->decrement('limit_use');
             }
 
+            foreach ($cartItems as $item) {
+                $item->productItem->decrement('stock', $item->quantity);
+            }
+
             CartItem::where('user_id', $user->id)->delete();
 
-            Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderDetails));
+            Mail::to($user->email)->send(new OrderConfirmationMail($order, $items));
 
             DB::commit();
 
@@ -255,5 +294,6 @@ class OrderController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
 }

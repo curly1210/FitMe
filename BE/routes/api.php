@@ -23,7 +23,6 @@ use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
 
-use App\Http\Controllers\api\Client\CartItemController;
 
 
 // Route Authen
