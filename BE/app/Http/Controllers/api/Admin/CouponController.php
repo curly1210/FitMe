@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use App\Traits\ApiResponse;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -117,10 +118,15 @@ class CouponController extends Controller
     public function delete($id)
     {
         try {
+            DB::beginTransaction();
 
             $coupon = Coupon::findOrFail($id);
 
+            $coupon->update(['is_active' => 0]);
+
             $coupon->delete();//Xóa mềm
+            
+            DB::commit();
 
             return $this->success(null, 'Xóa phiếu giảm giá thành công');
         } catch (\Exception $e) {
