@@ -35,7 +35,7 @@ const CartItem = ({ item }: any) => {
           </p>
           <div className="flex items-center gap-4">
             <p className="text-sm text-gray-400">
-              {item?.color?.name}/{item?.size?.name}
+              {item?.color}/{item?.size}
             </p>
             <p className="font-bold">
               {item?.sale_percent > 0 ? (

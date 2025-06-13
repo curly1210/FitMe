@@ -62,14 +62,16 @@ class CartItemController extends Controller
                     'sku' => $productItem->sku,
                     'image' => $image,
                     'subtotal' => $cartItem->quantity * $productItem->sale_price,
-                    'color' => [
-                        'id' => $productItem->color->id,
-                        'name' => $productItem->color->name,
-                    ],
-                    'size' => [
-                        'id' => $productItem->size->id,
-                        'name' => $productItem->size->name,
-                    ],
+                    'color' => optional($productItem->color)->name,
+                    'size' => optional($productItem->size)->name,
+                    // 'color' => [
+                    //     'id' => $productItem->color->id,
+                    //     'name' => $productItem->color->name,
+                    // ],
+                    // 'size' => [
+                    //     'id' => $productItem->size->id,
+                    //     'name' => $productItem->size->name,
+                    // ],
                 ];
             })->values();
 

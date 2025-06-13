@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
 import { useCreate, useCustom, useList } from "@refinedev/core";
 import { useNavigate } from "react-router";
-import { useCart } from "../../../hooks/useCart";
 
 type OrderItem = {
   product_name: string;
@@ -37,8 +36,6 @@ const CheckOut = () => {
     undefined
   ); // mã sẽ gửi BE
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // vận chuyển
-
-  // const { cart } = useCart();
 
   const { mutate: createOder } = useCreate();
   const nav = useNavigate();
