@@ -9,6 +9,8 @@ import ProtectAdmin from "../components/ProtectAdmin";
 import User from "../pages/admin/User/indext";
 import ListProducts from "../pages/admin/Product";
 import TrashProducts from "../pages/admin/Product/TrashProducts";
+import CouponsList from "../pages/admin/Khuyenmai/indext";
+
 
 export const adminRoutes = [
   {
@@ -46,6 +48,11 @@ export const adminRoutes = [
             path: "products/trash",
             element: <TrashProducts />,
           },
+               {
+            path: "coupons",
+            element: <CouponsList />,
+          },
+      
         ],
       },
     ],
