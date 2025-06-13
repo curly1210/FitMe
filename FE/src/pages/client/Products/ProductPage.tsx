@@ -4,6 +4,7 @@ import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import FilterProduct from "../../../components/Products/FilterProduct";
 import { useProduct } from "../../../hooks/useProduct";
 import { Pagination } from "antd";
+import { Link } from "react-router";
 
 function ProductPage() {
   const {
@@ -28,9 +29,17 @@ function ProductPage() {
           <div className="border border-gray-200 rounded-sm mb-4">
             <div className="flex justify-between items-center px-6 py-4 relative">
               <div className="text-sm text-gray-500 space-x-2">
-                <span className="hover:underline cursor-pointer">Trang chủ</span> /
-                <span className="hover:underline cursor-pointer">Thời trang</span> /
-                <span className="font-semibold text-black">{categoryData.name}</span>
+                <span className="hover:underline cursor-pointer">
+                  Trang chủ
+                </span>{" "}
+                /
+                <span className="hover:underline cursor-pointer">
+                  Thời trang
+                </span>{" "}
+                /
+                <span className="font-semibold text-black">
+                  {categoryData.name}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 {/* Filter Button */}
@@ -54,7 +63,9 @@ function ProductPage() {
                   </button>
                   {showSort && (
                     <div className="absolute right-0 z-10 mt-2 w-52 bg-white border border-gray-200 rounded-md shadow-lg">
-                      <div className="p-3 border-b font-semibold">Sắp xếp theo</div>
+                      <div className="p-3 border-b font-semibold">
+                        Sắp xếp theo
+                      </div>
                       <div
                         className="flex items-center px-4 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
@@ -86,9 +97,14 @@ function ProductPage() {
               {listProduct.map((product) => {
                 const item = product.product_items || [];
                 const imgUrl = item?.image?.[0]?.url || "";
-                const productImage = item.flatMap((value) => value.color.images);
+                const productImage = item.flatMap(
+                  (value) => value.color.images
+                );
                 return (
-                  <div key={product.id} className="group border border-gray-100 relative">
+                  <div
+                    key={product.id}
+                    className="group border border-gray-100 relative"
+                  >
                     <div className="relative">
                       <img
                         src={imgUrl}
@@ -100,14 +116,19 @@ function ProductPage() {
                           <button className="flex-1 text-xs py-2 bg-black text-white hover:opacity-90 cursor-pointer">
                             Mua nhanh
                           </button>
-                          <button className="flex-1 text-xs py-2 hover:bg-gray-100 cursor-pointer">
-                            Xem chi tiết
-                          </button>
+                          <Link
+                            className="flex-1 text-xs py-2 hover:bg-gray-100 cursor-pointer flex justify-center items-center"
+                            to={`/products/${product.slug}`}
+                          >
+                            <button className="">Xem chi tiết</button>
+                          </Link>
                         </div>
                       </div>
                     </div>
                     <div className="px-2 pt-2 pb-3 space-y-1">
-                      <p className="text-sm font-semibold text-black">{product.name}</p>
+                      <p className="text-sm font-semibold text-black">
+                        {product.name}
+                      </p>
                       <p className="text-lg font-semibold text-gray-800">
                         {item[0]?.sale_price
                           ?.toString()

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined } from "@ant-design/icons";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
 import { Button } from "antd";
 import CartItem from "./CartItem";
@@ -8,6 +8,7 @@ import emptyCart from "../../../assets/images/empty_cart.png";
 
 const Carts = () => {
   const { cart } = useCart();
+  const navigate = useNavigate();
   return (
     <div>
       <div className="flex gap-3 border border-gray-300 items-center py-5 px-4 mb-5">
@@ -48,14 +49,14 @@ const Carts = () => {
         <div className="col-span-3 py-3 px-4 border border-gray-200 flex flex-col gap-5">
           <div className="flex justify-between items-center  font-semibold">
             <p>Tổng tiền</p>
-            <p>{(cart?.totalPrice || 0).toLocaleString()}đ</p>
+            <p>{(cart?.totalPriceCart || 0).toLocaleString()}đ</p>
           </div>
           <Button
             // loading={isLoadingAddtoCart}
             size="large"
             className="!bg-black !text-white !border-none !rounded-none     w-full !py-6"
             disabled={cart?.cartItems?.length === 0}
-            // onClick={() => handleAddToCart()}
+            onClick={() => navigate("/checkout")}
           >
             Thanh toán
           </Button>
