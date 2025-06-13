@@ -10,6 +10,11 @@ import {
 } from 'antd';
 import { useUpdate } from '@refinedev/core';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface EditCouponProps {
   visible: boolean;
@@ -33,8 +38,8 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         name: couponData.name,
         code: couponData.code,
         value: couponData.value,
-        time_start: dayjs(couponData.time_start),
-        time_end: dayjs(couponData.time_end),
+        time_start: couponData.time_start ? dayjs(couponData.time_start) : null,
+        time_end: couponData.time_end ? dayjs(couponData.time_end) : null,
         min_price_order: couponData.min_price_order,
         max_price_discount: couponData.max_price_discount,
         limit_use: couponData.limit_use,
@@ -50,8 +55,8 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         id: couponData.id,
         values: {
           ...values,
-          time_start: values.time_start.format('YYYY-MM-DD HH:mm:ss'),
-          time_end: values.time_end.format('YYYY-MM-DD HH:mm:ss'),
+          time_start: values.time_start?.format('YYYY-MM-DD HH:mm:ss'),
+          time_end: values.time_end?.format('YYYY-MM-DD HH:mm:ss'),
           is_active: values.is_active ? 1 : 0,
         },
       },
@@ -141,8 +146,8 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         >
           <DatePicker
             style={{ width: '100%' }}
-            showTime
-            format="YYYY-MM-DD"
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
             disabled
           />
         </Form.Item>
@@ -154,8 +159,8 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         >
           <DatePicker
             style={{ width: '100%' }}
-            showTime
-            format="YYYY-MM-DD"
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
           />
         </Form.Item>
 
