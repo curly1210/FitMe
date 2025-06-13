@@ -11,6 +11,7 @@ import HomePage from "../pages/client/HomePage";
 import ListProducts from "../pages/client/Products";
 import { SearchPanelProvider } from "../context/SearchPanelProvider";
 import CheckoutSuccess from "../pages/client/CheckOut/success";
+import Order from "../pages/client/Order";
 
 export const clientRoutes = [
   {
@@ -62,6 +63,10 @@ export const clientRoutes = [
               {
                 path: "checkout/success",
                 element: <CheckoutSuccess />,
+              },
+              {
+                path: "order",
+                element: <Order />,
               },
             ],
           },

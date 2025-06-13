@@ -68,6 +68,10 @@ const HeaderClient = () => {
       navigate("/address");
     }
 
+    if (key === "3") {
+      navigate("/order");
+    }
+
     if (key === "4") {
       logout();
     }
@@ -92,7 +96,7 @@ const HeaderClient = () => {
             alt=""
           />
           <div className="flex flex-col">
-            <p className="font-bold">Thông tin đơn hàng</p>
+            <p className="font-bold">Thông tin người dùng</p>
             <span className="text-xs">
               Tài khoản, Đơn hàng, Địa chỉ giao nhận
             </span>
