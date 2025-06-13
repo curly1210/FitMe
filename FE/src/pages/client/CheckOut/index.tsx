@@ -81,6 +81,9 @@ const CheckOut = () => {
         cartItems: orderItems.map((item: any) => ({
           idProduct_item: item.id,
           quantity: item.quantity,
+          idItem: item.id,
+          salePrice: item.sale_price,
+
         })),
         payment_method: "cod",
         shipping_address_id: selectedAddress.id,
