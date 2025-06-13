@@ -72,7 +72,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->password; // Đảm bảo tên cột password khớp với database
     }
-    
+
     public function orders()
     {
         return $this->hasMany(Order::class);
@@ -87,6 +87,4 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(CartItem::class);
     }
-
-    
 }

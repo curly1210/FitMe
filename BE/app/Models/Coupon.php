@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Coupon extends Model
 {
     /** @use HasFactory<\Database\Factories\CouponFactory> */
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -28,5 +28,4 @@ class Coupon extends Model
         'time_end' => 'datetime',
         'is_active' => 'boolean',
     ];
-
 }
