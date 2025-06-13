@@ -1,7 +1,6 @@
 <?php
+
 namespace App\Http\Controllers\Api\Client;
-
-
 
 use Log;
 use Carbon\Carbon;
@@ -17,11 +16,12 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\OrderConfirmationMail;
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
-
+    use ApiResponse;
     public function redem(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -111,7 +111,7 @@ class OrderController extends Controller
             'cartItems' => 'required|array|min:1',
             'cartItems.*.idProduct_item' => 'required|exists:product_items,id',
             'cartItems.*.quantity' => 'required|integer|min:1',
-            'cartItems.*.idItem' => 'required|exists:cart_items,id', 
+            'cartItems.*.idItem' => 'required|exists:cart_items,id',
             'cartItems.*.salePrice' => 'required|numeric|min:0',
             'total_price_cart' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
@@ -223,7 +223,71 @@ class OrderController extends Controller
         }
     }
 
+    public function index()
+    {
+        try {
+            $user = auth('api')->user();
 
+            $orders = Order::with(['statusOrder', 'orderDetails'])
+                ->where('user_id', $user->id)
+                ->orderBy('id', 'desc')
+                ->get()
+                ->map(function ($order) {
+                    // Tính tổng quantity từ order_details
+                    $totalAmountItems = $order->orderDetails->sum('quantity');
+
+                    return [
+                        'id' => $order->id,
+                        'orders_code' => $order->orders_code,
+                        'created_at' => $order->created_at,
+                        'total_amount_items' => $totalAmountItems, // Tổng số lượng sản phẩm
+                        'total_amount' => $order->total_amount,
+                        'receiving_address' => $order->receiving_address,
+                        'status_order_id' => $order->status_order_id,
+                        'status_name' => $order->statusOrder->name ?? 'Không xác định', // Lấy name từ status_orders
+                    ];
+                });
+
+            return response()->json($orders);
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi lấy danh sách đơn hàng', [$th->getMessage()], 403);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+            $user = auth('api')->user();
+
+            // Kiểm tra quyền sở hữu đơn hàng
+            if ($order->user_id !== $user->id) {
+                return $this->error('Bạn không có quyền chỉnh sửa đơn hàng này.', [], 403);
+            }
+
+            $currentStatus = $order->status_order_id;
+            $newStatus = $request->input('status_order_id');
+
+            // Xử lý logic cập nhật trạng thái
+            if ($currentStatus == 1 && $newStatus == 6) {
+                // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (6)
+                $order->update(['status_order_id' => 6]);
+                $message = 'Đơn hàng đã được hủy thành công.';
+            } elseif ($currentStatus == 3 && $newStatus == 4) {
+                // Chuyển từ "Đang giao hàng" (3) sang "Giao hàng thành công" (4)
+                $order->update(['status_order_id' => 4]);
+                $message = 'Đơn hàng đã được xác nhận nhận hàng thành công.';
+            } else {
+                return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
+            }
+
+            return $this->success([
+                    'order_code' => $order->orders_code
+                ], $message, 200);
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi cập nhật trạng thái đơn hàng', [$th->getMessage()], 500);
+        }
+    }
 
 
 

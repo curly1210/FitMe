@@ -20,10 +20,10 @@ class StatusOrderFactory extends Factory
 
         $data = [
             'Chưa xác nhận' => "#6c757d",
-            'Đã xác nhận' => '#0d6efd',
+            'Đang chuẩn bị hàng' => '#0d6efd',
             'Đang giao hàng' => '#ffc107',
-            'Đã giao hàng' => '#0dcaf0',
             'Giao hàng thành công' => '#198754',
+            'Giao hàng thất bại' => '#0dcaf0',
             'Đã hủy' => '#dc3545'
         ];
         // Chuyển associative array thành indexed array
