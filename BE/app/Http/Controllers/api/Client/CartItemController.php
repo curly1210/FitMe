@@ -27,10 +27,10 @@ class CartItemController extends Controller
                 'productItem' => function ($query) {
                     $query->where('is_active', 1)
                         ->with([
-                            'product' => fn($q) => $q->where('is_active', 1),
-                            'color' => fn($q) => $q->where('is_active', 1),
-                            'size' => fn($q) => $q->where('is_active', 1),
-                            'product.productImages' => fn($q) => $q->where('is_active', 1)
+                            'product' => fn ($q) => $q->where('is_active', 1),
+                            'color' => fn ($q) => $q->where('is_active', 1),
+                            'size' => fn ($q) => $q->where('is_active', 1),
+                            'product.productImages' => fn ($q) => $q->where('is_active', 1)
                         ]);
                 }
             ])
@@ -49,7 +49,9 @@ class CartItemController extends Controller
             $formattedCartItems = $validCartItems->map(function ($cartItem) {
                 $productItem = $cartItem->productItem;
                 $product = $productItem->product;
-                $image = $this->buildImageUrl($product->productImages->first()?->url) ?? null;
+                // Lấy ảnh đầu tiên khớp với color_id của productItem
+                $image = $product->productImages->where('color_id', $productItem->color_id)->first()?->url;
+                $image = $this->buildImageUrl($image) ?? null;
 
                 return [
                     'id' => $cartItem->id,
