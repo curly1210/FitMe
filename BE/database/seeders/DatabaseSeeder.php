@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\ProductImage;
 use App\Models\User;
 use App\Models\Wishlist;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +42,7 @@ class DatabaseSeeder extends Seeder
             CouponSeeder::class,
             BannerSeeder::class,
             ContactSeeder::class,
+
         ]);
     }
 }

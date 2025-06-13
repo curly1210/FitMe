@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Seeders\CouponCodeUsageSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -47,5 +48,4 @@ class Order extends Model
     {
         return $this->hasMany(OrdersDetail::class);
     }
-
 }
