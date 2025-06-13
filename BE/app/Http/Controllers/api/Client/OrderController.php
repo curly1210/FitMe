@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api\Client;
 
 
 
+use Log;
 use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\Coupon;
@@ -34,7 +35,6 @@ class OrderController extends Controller
         $code = $request->input('coupon_code');
         $discount = 0;
 
-        // Tìm mã giảm giá
         $coupon = Coupon::where('code', $code)->first();
 
         if (!$coupon) {
@@ -120,7 +120,6 @@ class OrderController extends Controller
         $items = $request->input('cartItems');
         $productItemIds = [];
         $orderItems = [];
-        $totalPriceItem = 0;
 
         foreach ($items as $item) {
             $productItem = ProductItem::with('product', 'color', 'size')->find($item['idProduct_item']);
@@ -133,19 +132,13 @@ class OrderController extends Controller
                 return response()->json(['message' => "Sản phẩm {$productItem->sku} không đủ hàng."], 400);
             }
 
-            $price = $productItem->sale_percent > 0
-                ? $productItem->price * (1 - ($productItem->sale_percent / 100))
-                : $productItem->price;
-
-            $subtotal = $price * $item['quantity'];
-            $totalPriceItem += $subtotal;
             $productItemIds[] = $productItem->id;
 
             $orderItems[] = [
                 'product_item_id' => $productItem->id,
                 'quantity' => $item['quantity'],
-                'price' => $price,
-                'subtotal' => $subtotal,
+                'price' => $productItem->price,
+                'subtotal' => 0,
                 'name_product' => $productItem->product->name,
                 'color' => optional($productItem->color)->name,
                 'size' => optional($productItem->size)->name,
@@ -165,20 +158,12 @@ class OrderController extends Controller
                 return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'], 400);
             }
 
-            if ($totalPriceItem < $coupon->min_price_order) {
+            if ($request->total_price_cart < $coupon->min_price_order) {
                 return response()->json([
                     'message' => "Đơn hàng phải có giá trị tối thiểu {$coupon->min_price_order} để áp dụng mã giảm giá."
                 ], 400);
             }
         }
-
-        $shippingPrice = (int) $request->shipping_price;
-        $discount = (int) $request->discount ?? 0;
-        $totalAmount = ceil($totalPriceItem - $discount + $shippingPrice);
-
-        // if ($totalAmount != $request->total_amount) {
-        //     return response()->json(['message' => 'Tổng thanh toán không hợp lệ.'], 400);
-        // }
 
         $address = $user->addresses()->find($request->shipping_address_id);
         if (!$address) {
@@ -192,14 +177,17 @@ class OrderController extends Controller
             $address->city,
         ]));
 
+
+
         DB::beginTransaction();
+        
         try {
             $order = Order::create([
                 'orders_code' => now()->format('ymd') . implode('', $productItemIds) . strtoupper(Str::random(5)),
-                'total_price_item' => $totalPriceItem,
-                'shipping_price' => $shippingPrice,
-                'discount' => $discount,
-                'total_amount' => $totalAmount,
+                'total_price_item' => $request->total_price_cart,
+                'shipping_price' => $request->shipping_price,
+                'discount' => $request->discount ?? 0,
+                'total_amount' => $request->total_amount,
                 'status_payment' => 1,
                 'payment_method' => $request->payment_method,
                 'status_order_id' => 1,
@@ -218,6 +206,8 @@ class OrderController extends Controller
                 $coupon->decrement('limit_use');
             }
 
+            $user->cart_items()->whereIn('product_item_id', $productItemIds)->delete();
+
             Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderItems));
 
             DB::commit();
@@ -231,6 +221,8 @@ class OrderController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
 
 
 
