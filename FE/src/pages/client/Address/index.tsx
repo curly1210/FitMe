@@ -72,10 +72,8 @@ const Address = () => {
       <div className="grid grid-cols-12 gap-x-[10px] pt-5">
         <div className="col-span-4 flex flex-col gap-7">
           <Link to={""}>Tài khoản</Link>
-          <Link to={""}>Đơn hàng</Link>
-          <Link className="font-bold" to={"/address"}>
-            Địa chỉ
-          </Link>
+          <Link to={"/order"}>Đơn hàng</Link>
+          <p className="font-bold cursor-pointer">Địa chỉ</p>
           <Link to={""}>Đổi mật khẩu</Link>
         </div>
         <div className="col-span-8">
