@@ -45,16 +45,6 @@ export const clientRoutes = [
             element: <ProductDetail />,
           },
           {
-            path: "checkout",
-            element: <CheckOut />,
-          },
-          {
-            path: "checkout/success",
-            element: <CheckoutSuccess />,
-          },
-          
-
-          {
             element: <ProtectClient role="client" />,
             children: [
               {
@@ -64,6 +54,14 @@ export const clientRoutes = [
               {
                 path: "carts",
                 element: <Carts />,
+              },
+              {
+                path: "checkout",
+                element: <CheckOut />,
+              },
+              {
+                path: "checkout/success",
+                element: <CheckoutSuccess />,
               },
             ],
           },

@@ -4,7 +4,6 @@ import AddressList from "./AddressList";
 import { useCreate, useCustom, useList } from "@refinedev/core";
 import { useNavigate } from "react-router";
 
-
 type OrderItem = {
   product_name: string;
   sku: string;
@@ -29,29 +28,32 @@ type OrderData = {
 const CheckOut = () => {
   const [isSelectingAddress, setIsSelectingAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [addressListDefaultMode, setAddressListDefaultMode] = useState<"create" | "list">("list");
-  const [couponCode,setCouponCode]=useState("")// mã giảm giá ng dùng gõ
-  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(undefined); // mã sẽ gửi BE
-  const [shippingPrice, setShippingPrice] = useState<number>(20000);// vận chuyển
+  const [addressListDefaultMode, setAddressListDefaultMode] = useState<
+    "create" | "list"
+  >("list");
+  const [couponCode, setCouponCode] = useState(""); // mã giảm giá ng dùng gõ
+  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(
+    undefined
+  ); // mã sẽ gửi BE
+  const [shippingPrice, setShippingPrice] = useState<number>(20000); // vận chuyển
 
-  const{mutate: createOder}=useCreate()
-  const nav=useNavigate()
+  const { mutate: createOder } = useCreate();
+  const nav = useNavigate();
 
   const { data: addressData } = useList({ resource: "addresses" });
 
-  const { data: orderResponse ,refetch:refetchOder } = useCustom<OrderData>({
+  const { data: orderResponse, refetch: refetchOder } = useCustom<OrderData>({
     url: "orders/preview",
     method: "post",
-    config:{
-       headers: {
+    config: {
+      headers: {
         "Content-Type": "application/json",
       },
-       payload:{
-        coupon_code: appliedCoupon  , // dùng mã sau khi ấn
-        shipping_price: shippingPrice
-
-    }
-  },
+      payload: {
+        coupon_code: appliedCoupon, // dùng mã sau khi ấn
+        shipping_price: shippingPrice,
+      },
+    },
   });
 
   const orderData = orderResponse?.data;
@@ -65,25 +67,28 @@ const CheckOut = () => {
       }
     }
   }, [addressData, selectedAddress]);
-   
- const handleCheckout = ()=>{
-  createOder({
-    resource:"orders/checkout",
-    values :{
-       address_id: selectedAddress.id,
-        shipping_price: shippingPrice,
-        payment_method: "cod",
-        coupon_code:couponCode,
-    }
-  },{
-      onSuccess: ()=>{
-        nav("success")
+
+  const handleCheckout = () => {
+    createOder(
+      {
+        resource: "orders/checkout",
+        values: {
+          address_id: selectedAddress.id,
+          shipping_price: shippingPrice,
+          payment_method: "cod",
+          coupon_code: couponCode,
+        },
       },
-      onError: (error)=>{
-        console.error("Thanh toán thất bại:", error);
+      {
+        onSuccess: () => {
+          nav("success");
+        },
+        onError: (error) => {
+          console.error("Thanh toán thất bại:", error);
+        },
       }
-    })
- }
+    );
+  };
 
   return (
     <>
@@ -123,7 +128,9 @@ const CheckOut = () => {
               ) : (
                 <>
                   <p>
-                    <span className="font-bold">{selectedAddress.name_receive}</span>
+                    <span className="font-bold">
+                      {selectedAddress.name_receive}
+                    </span>
                     {selectedAddress.is_default && (
                       <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 rounded">
                         Mặc định
@@ -144,36 +151,35 @@ const CheckOut = () => {
           {/* Giao hàng */}
           <div className="bg-white p-4 border border-gray-300 rounded shadow-sm space-y-4">
             <p className="font-semibold">Phương thức vận chuyển</p>
-              <div className="flex justify-between items-center text-sm">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                checked={shippingPrice === 40000}
-                onChange={() => {
-                  setShippingPrice(40000);
-                  refetchOder(); // gửi lại đơn hàng với phí mới
-                }}
-              />
-              <span>Giao Hàng tiết kiệm</span>
-            </label>
-            <span>40.000VNĐ</span>
-          </div>
+            <div className="flex justify-between items-center text-sm">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  checked={shippingPrice === 40000}
+                  onChange={() => {
+                    setShippingPrice(40000);
+                    refetchOder(); // gửi lại đơn hàng với phí mới
+                  }}
+                />
+                <span>Giao Hàng tiết kiệm</span>
+              </label>
+              <span>40.000VNĐ</span>
+            </div>
 
-          <div className="flex justify-between items-center text-sm">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                checked={shippingPrice === 20000}
-                onChange={() => {
-                  setShippingPrice(20000);
-                  refetchOder(); // gửi lại đơn hàng với phí mới
-                }}
-              />
-              <span>ViettelPost</span>
-            </label>
-            <span>20.000VNĐ</span>
-          </div>
-
+            <div className="flex justify-between items-center text-sm">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  checked={shippingPrice === 20000}
+                  onChange={() => {
+                    setShippingPrice(20000);
+                    refetchOder(); // gửi lại đơn hàng với phí mới
+                  }}
+                />
+                <span>ViettelPost</span>
+              </label>
+              <span>20.000VNĐ</span>
+            </div>
           </div>
 
           {/* Thanh toán */}
@@ -198,12 +204,11 @@ const CheckOut = () => {
                 setAppliedCoupon(couponCode);
                 refetchOder();
               }}
-             className="bg-black text-white font-semibold px-4 text-sm cursor-pointer"
+              className="bg-black text-white font-semibold px-4 text-sm cursor-pointer"
             >
               Áp dụng
             </button>
           </div>
-
         </div>
 
         {/* Cột 3: Đơn hàng */}
@@ -235,7 +240,9 @@ const CheckOut = () => {
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
               <p className="flex items-start gap-2">
                 <span>🎁</span>
-                <span>Áp dụng mã: <strong>{orderData.coupon}</strong></span>
+                <span>
+                  Áp dụng mã: <strong>{orderData.coupon}</strong>
+                </span>
               </p>
             </div>
           )}
