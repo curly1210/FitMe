@@ -69,7 +69,7 @@ Route::prefix('admin')->group(function () {
 
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 
-Route::post('/orders/preview', [OrderController::class, 'preview']);
+Route::post('/orders/redem', [OrderController::class, 'redem']);
 Route::post('/orders/checkout', [OrderController::class, 'store']);
 
 
@@ -136,7 +136,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/coupons',         [CouponController::class, 'index'])->name('coupons.index');
     Route::post('/coupons',        [CouponController::class, 'store'])->name('coupons.store');
-    Route::patch('/coupons/{id}',   [CouponController::class, 'update'])->name('coupons.update');
+    Route::post('/coupons/{id}',   [CouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
 });
 
