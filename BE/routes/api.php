@@ -69,7 +69,7 @@ Route::prefix('admin')->group(function () {
 
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 
-Route::post('/orders/preview', [OrderController::class, 'preview']);
+Route::post('/orders/redem', [OrderController::class, 'redem']);
 Route::post('/orders/checkout', [OrderController::class, 'store']);
 
 
