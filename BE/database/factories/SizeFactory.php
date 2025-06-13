@@ -24,7 +24,7 @@ class SizeFactory extends Factory
 
         return [
             'name' => $name, // Tạo kích cỡ lần lượt
-            'is_active' => $this->faker->boolean(90), // 90% khả năng là true
+            'is_active' => 1, // 90% khả năng là true
             'created_at' => now(),
             'updated_at' => now(),
         ];

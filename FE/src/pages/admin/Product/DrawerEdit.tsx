@@ -208,8 +208,8 @@ const DrawerEdit = ({
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
       formDataRequest.append(`variants[${index}][size_id]`, variant.size.id);
       formDataRequest.append(
-        `variants[${index}][sale_price]`,
-        variant.sale_price
+        `variants[${index}][sale_percent]`,
+        variant.sale_percent
       );
 
       formDataRequest.append(
@@ -289,10 +289,13 @@ const DrawerEdit = ({
     });
   };
   const updatePercent = (variantId: number, percent: number) => {
+    console.log("cuong");
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, percent } : variant
+        variant.id === variantId
+          ? { ...variant, sale_percent: percent }
+          : variant
       ),
     });
   };
@@ -355,7 +358,7 @@ const DrawerEdit = ({
             stock: 10,
             import_price: 10000,
             price: 10000,
-            sale_price: 0,
+            sale_percent: 0,
           });
         }
       });
@@ -747,7 +750,7 @@ const DrawerEdit = ({
                         <Input
                           type="number"
                           min="0"
-                          value={variant?.sale_price}
+                          value={variant?.sale_percent}
                           onChange={(e) =>
                             updatePercent(
                               variant.id,

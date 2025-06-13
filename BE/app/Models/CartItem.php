@@ -24,7 +24,9 @@ class CartItem extends Model
 
     // Quan hệ: Mỗi cart item chỉ liên kết với một product item
     public function productItem()
+
     {
         return $this->belongsTo(ProductItem::class);
     }
+
 }

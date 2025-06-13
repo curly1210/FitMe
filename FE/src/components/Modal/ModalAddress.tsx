@@ -19,9 +19,15 @@ interface ModalAddressProps {
   refetch: () => void;
   mode: "create" | "edit";
   record?: any;
+  showCloseIcon?: boolean;
 }
 
-const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
+const ModalAddress = ({
+  refetch,
+  mode,
+  record,
+  showCloseIcon = true,
+}: ModalAddressProps) => {
   const [isLoading, setIsLoading] = useState(true); // loading data dữ liệu các tỉnh thành
   const [data, setData] = useState<any>([]);
   const { closeModal } = useModal();
@@ -30,6 +36,8 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
+
+  const [checkOpen, setCheckOpen] = useState<boolean>(true);
 
   const [districts, setDistricts] = useState<any[]>([]);
   const [wards, setWards] = useState<any[]>([]);
@@ -54,7 +62,7 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
     const province = data.find((p: any) => p.Name === provinceName);
     setSelectedProvince(province?.Name);
     setDistricts(province?.Districts || []);
-
+    // console.log(province?.Districts);
     if (mode === "create" || userInteracted) {
       form.setFieldsValue({ district: null });
       setSelectedDistrict(null);
@@ -62,16 +70,17 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
     }
 
     setUserInteracted(true);
-
-    // console.log("province", province);
   };
 
   const handleDistrictChange = (districtName: string) => {
-    const district = districts.find((d) => d.Name === districtName);
-    setSelectedDistrict(district?.Name);
-    setWards(district?.Wards || []);
+    const districtData = districts.find((d) => d.Name === districtName);
+    setSelectedDistrict(districtData?.Name);
+    setWards(districtData?.Wards || []);
+    console.log(districts);
     if (mode === "create" || userInteracted) {
-      form.setFieldsValue({ ward: null });
+      if (!checkOpen) {
+        form.setFieldsValue({ ward: null });
+      }
       setSelectedWard(null);
     }
 
@@ -85,24 +94,27 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
     setSelectedWard(ward.Name);
   };
 
-  useEffect(() => {
-    setUserInteracted(false);
-  }, [mode, record]);
+  // useEffect(() => {
+  //   setUserInteracted(false);
+  // }, [mode, record]);
 
   useEffect(() => {
     getData();
   }, []);
 
   useEffect(() => {
-    if (mode === "edit" && record && data.length > 0) {
+    if (mode === "edit" && record && data.length > 0 && checkOpen) {
       form.setFieldsValue(record);
       handleProvinceChange(record.city);
-      // setTimeout(() => {
-      handleDistrictChange(record.district);
-      setSelectedWard(record.ward);
-      // }, 3000);
     }
   }, [mode, record, data]);
+
+  useEffect(() => {
+    if (mode === "edit" && districts.length > 0 && checkOpen) {
+      handleDistrictChange(record?.district);
+      setCheckOpen(false);
+    }
+  }, [mode, districts]);
 
   const { mutate: createMutate, isLoading: isLoadingCreateAddress } = useCreate(
     {
@@ -155,15 +167,17 @@ const ModalAddress = ({ refetch, mode, record }: ModalAddressProps) => {
   // if (isLoading) return null;
 
   return (
-    <div className="w-[500px] bg-white p-6">
+    <div className="w-[500px]  p-6">
       <div className="flex justify-between items-center mb-8">
         <div className="font-bold text-xl">
           {mode === "edit" ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ"}
         </div>
-        <CloseOutlined
-          onClick={() => closeModal()}
-          className="text-xl cursor-pointer"
-        />
+        {showCloseIcon !== false && (
+          <CloseOutlined
+            onClick={() => closeModal()}
+            className="text-xl cursor-pointer"
+          />
+        )}
       </div>
       <Form
         form={form}

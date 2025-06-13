@@ -1,3 +1,4 @@
+import { Outlet } from "react-router";
 import LayoutClient from "../components/LayoutClient";
 import ProtectClient from "../components/ProtectClient";
 import { CartProvider } from "../context/CartProvider";
@@ -8,51 +9,112 @@ import Contact from "../pages/client/Contact";
 import ProductDetail from "../pages/client/DetailProduct/indext";
 import HomePage from "../pages/client/HomePage";
 import ListProducts from "../pages/client/Products";
+import { SearchPanelProvider } from "../context/SearchPanelProvider";
+import CheckoutSuccess from "../pages/client/CheckOut/success";
 
 export const clientRoutes = [
   {
     path: "/",
-    element: <HomePage />,
-    index: true,
-  },
-  {
-    path: "/",
     element: (
-      <CartProvider>
-        <LayoutClient />
-      </CartProvider>
+      <SearchPanelProvider>
+        <CartProvider>
+          <Outlet />
+        </CartProvider>
+      </SearchPanelProvider>
     ),
     children: [
       {
-        path: "contact",
-        element: <Contact />,
+        path: "/",
+        element: <HomePage />,
+        index: true,
       },
       {
-        path: "category/:categorySlug",
-        element: <ListProducts />,
-      },
-      {
-        path: "products/:slug",
-        element: <ProductDetail />,
-      },
-      {
-        path: "checkout",
-        element: <CheckOut />,
-      },
-
-      {
-        element: <ProtectClient role="client" />,
+        path: "/",
+        element: <LayoutClient />,
         children: [
           {
-            path: "address",
-            element: <Address />,
+            path: "contact",
+            element: <Contact />,
           },
           {
-            path: "carts",
-            element: <Carts />,
+            path: "category/:categorySlug",
+            element: <ListProducts />,
+          },
+          {
+            path: "products/:slug",
+            element: <ProductDetail />,
+          },
+          {
+            path: "checkout",
+            element: <CheckOut />,
+          },
+          {
+            path: "checkout/success",
+            element: <CheckoutSuccess />,
+          },
+          
+
+          {
+            element: <ProtectClient role="client" />,
+            children: [
+              {
+                path: "address",
+                element: <Address />,
+              },
+              {
+                path: "carts",
+                element: <Carts />,
+              },
+            ],
           },
         ],
       },
     ],
   },
+
+  // {
+  //   path: "/",
+  //   element: <HomePage />,
+  //   index: true,
+  // },
+  // {
+  //   path: "/",
+  //   element: (
+  //     <CartProvider>
+  //       <LayoutClient />
+  //     </CartProvider>
+  //   ),
+  //   children: [
+  //     {
+  //       path: "contact",
+  //       element: <Contact />,
+  //     },
+  //     {
+  //       path: "category/:categorySlug",
+  //       element: <ListProducts />,
+  //     },
+  //     {
+  //       path: "products/:slug",
+  //       element: <ProductDetail />,
+  //     },
+  //     {
+  //       path: "checkout",
+  //       element: <CheckOut />,
+  //     },
+
+  //     {
+  //       element: <ProtectClient role="client" />,
+  //       children: [
+  //         {
+  //           path: "address",
+  //           element: <Address />,
+  //         },
+  //         {
+  //           path: "carts",
+  //           element: <Carts />,
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
 ];
