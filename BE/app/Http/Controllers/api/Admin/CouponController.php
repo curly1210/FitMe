@@ -47,7 +47,7 @@ class CouponController extends Controller
                 'time_start' => 'required|date|after:now',
                 'time_end' => 'nullable|date|after_or_equal:time_start',
                 'min_price_order' => 'required|integer|min:0',
-                'max_price_discount' => 'required|integer|min:0|gte:min_price_order',
+                'max_price_discount' => 'required|integer|min:0|lte:min_price_order',
                 'limit_use' => 'required|integer|min:0',
                 'is_active' => 'boolean',
             ], [
@@ -70,7 +70,7 @@ class CouponController extends Controller
                 'max_price_discount.required' => 'Mức giảm giá tối đa là bắt buộc.',
                 'max_price_discount.integer' => 'Mức giảm giá tối đa phải là số nguyên.',
                 'max_price_discount.min' => 'Mức giảm giá tối đa không được nhỏ hơn 0.',
-                'max_price_discount.gte' => 'Mức giảm giá tối đa phải lớn hơn hoặc bằng giá trị đơn hàng tối thiểu.',
+                'max_price_discount.lte' => 'Mức giảm giá tối đa phải nhỏ hơn hoặc bằng giá trị đơn hàng tối thiểu.',
                 'limit_use.required' => 'Giới hạn sử dụng là bắt buộc.',
                 'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
                 'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',

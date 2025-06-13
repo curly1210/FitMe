@@ -130,7 +130,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/coupons',         [CouponController::class, 'index'])->name('coupons.index');
     Route::post('/coupons',        [CouponController::class, 'store'])->name('coupons.store');
-    Route::post('/coupons/{id}',   [CouponController::class, 'update'])->name('coupons.update');
+    Route::patch('/coupons/{id}',   [CouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
 });
 
