@@ -95,7 +95,7 @@ class CouponController extends Controller
 
             $validate = Validator::make($request->all(), [
                 'name' => 'required|string|max:50',
-                'time_end' => 'nullable|date|after:now',
+                'time_end' => 'nullable|date|after_or_equal:time_start|after_or_equal:now',
                 'limit_use' => 'required|integer|min:0',
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
@@ -103,7 +103,8 @@ class CouponController extends Controller
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
                 'time_end.after' => 'Thời gian kết thúc phải sau thời điểm hiện tại.',
                 'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
-
+                'time_end.after_or_equal.time_start' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+                'time_end.after_or_equal.now' => 'Thời gian kết thúc phải bằng hoặc sau thời điểm hiện tại.',
                 'limit_use.required' => 'Giới hạn sử dụng là bắt buộc.',
                 'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
                 'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
