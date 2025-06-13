@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Modal, Spin, message } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import { useCreate, useList, useCustom, useCustomMutation } from "@refinedev/core";
+import { useCreate, useList, useCustomMutation } from "@refinedev/core";
 import { useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
 
 const CheckOut = () => {
   const [isSelectingAddress, setIsSelectingAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [addressListDefaultMode, setAddressListDefaultMode] = useState<"create" | "list">("list");// nút thêm mới địa chỉ và lấy địa chỉ
+  const [addressListDefaultMode, setAddressListDefaultMode] = useState<
+    "create" | "list"
+  >("list"); // nút thêm mới địa chỉ và lấy địa chỉ
 
   // nhập mã
   const [couponCode, setCouponCode] = useState(""); // Mã người dùng nhập
@@ -17,18 +20,20 @@ const CheckOut = () => {
 
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
 
-  
-  const { mutate: createOrder,isLoading } = useCreate();// gửi thông tin về be khi ấn thanh toán
+  const { mutate: createOrder, isLoading } = useCreate(); // gửi thông tin về be khi ấn thanh toán
 
   const { data: addressData } = useList({ resource: "addresses" });
   const { mutate: redeemCoupon } = useCustomMutation();
   const nav = useNavigate();
 
-  const { cart } = useCart();// lấy đơn hàng từ cart
+  const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
   const orderItems = cart?.cartItems || [];
 
-  const totalPrice = orderItems.reduce((sum: number, item: any) => sum + item.subtotal, 0);
-  const totalAmount = totalPrice + shippingPrice - discount;// tính giá sau khi nhập mã
+  const totalPrice = orderItems.reduce(
+    (sum: number, item: any) => sum + item.subtotal,
+    0
+  );
+  const totalAmount = totalPrice + shippingPrice - discount; // tính giá sau khi nhập mã
 
   useEffect(() => {
     if (addressData?.data && !selectedAddress) {
@@ -39,13 +44,13 @@ const CheckOut = () => {
     }
   }, [addressData, selectedAddress]);
 
-// này gửi mã về be
+  // này gửi mã về be
   const handleApplyCoupon = () => {
     redeemCoupon(
       {
         url: "orders/redem",
         method: "post",
-        
+
         values: {
           coupon_code: couponCode,
           total_price_item: totalPrice,
@@ -77,26 +82,28 @@ const CheckOut = () => {
       {
         resource: "orders/checkout",
         values: {
-
-        cartItems: orderItems.map((item: any) => ({
-          idProduct_item: item.id,
-          quantity: item.quantity,
-          idItem: item.id,
-          salePrice: item.sale_price,
-
-        })),
-        payment_method: "cod",
-        shipping_address_id: selectedAddress.id,
-        total_price_cart: totalPrice,
-        shipping_price: shippingPrice,
-        discount: discount, 
-        total_amount: totalAmount,
-        coupon_code: appliedCoupon || "",
-      
+          cartItems: orderItems.map((item: any) => ({
+            idProduct_item: item.id,
+            quantity: item.quantity,
+            idItem: item.id,
+            salePrice: item.sale_price,
+          })),
+          payment_method: "cod",
+          shipping_address_id: selectedAddress.id,
+          total_price_cart: totalPrice,
+          shipping_price: shippingPrice,
+          discount: discount,
+          total_amount: totalAmount,
+          coupon_code: appliedCoupon || "",
         },
       },
       {
-        onSuccess: () => nav("success"),
+        onSuccess: () => {
+          // if (refetch) {
+          refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
+          // }
+          nav("success");
+        },
         onError: (error) => console.error("Thanh toán thất bại:", error),
       }
     );
@@ -140,7 +147,9 @@ const CheckOut = () => {
               ) : (
                 <>
                   <p>
-                    <span className="font-bold">{selectedAddress.name_receive}</span>
+                    <span className="font-bold">
+                      {selectedAddress.name_receive}
+                    </span>
                     {selectedAddress.is_default && (
                       <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 rounded">
                         Mặc định
@@ -217,7 +226,11 @@ const CheckOut = () => {
 
           {orderItems.map((item: any, index: number) => (
             <div key={index} className="flex space-x-4 items-center">
-              <img src={item.image} alt={item.name} className="w-16 h-16 object-cover" />
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-16 h-16 object-cover"
+              />
               <div className="flex-1">
                 <p className="text-sm font-semibold">{item.name}</p>
                 <p className="text-xs text-gray-500">
@@ -240,7 +253,9 @@ const CheckOut = () => {
           <div className="text-sm text-gray-800 space-y-1">
             <div className="flex justify-between">
               <span>Tổng giá trị đơn hàng</span>
-              <span className="font-semibold">{totalPrice.toLocaleString()}đ</span>
+              <span className="font-semibold">
+                {totalPrice.toLocaleString()}đ
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Phí vận chuyển</span>
@@ -278,15 +293,15 @@ const CheckOut = () => {
           </p>
         </div>
       </div>
-     {isLoading ? (
-          <Spin
-            className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
-            style={{ textAlign: "center" }}
-            size="large"
-          />
-        ) : (
-          ""
-        )}
+      {isLoading ? (
+        <Spin
+          className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+          style={{ textAlign: "center" }}
+          size="large"
+        />
+      ) : (
+        ""
+      )}
 
       <Modal
         open={isSelectingAddress}

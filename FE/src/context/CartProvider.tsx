@@ -13,6 +13,7 @@ interface CartContextType {
   isLoadingUpdateToCart?: boolean;
   loadingItemId?: string | null;
   deleteCartItemHandler?: (idCartItem: any) => void;
+  refetch: () => void;
 }
 
 export const CartContext = createContext<CartContextType>({
@@ -23,6 +24,7 @@ export const CartContext = createContext<CartContextType>({
   isLoadingUpdateToCart: false,
   loadingItemId: null,
   deleteCartItemHandler: () => {},
+  refetch: () => {},
 });
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
@@ -128,6 +130,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         isLoadingUpdateToCart,
         loadingItemId,
         deleteCartItemHandler,
+        refetch,
       }}
     >
       {/* Children components will go here */}
