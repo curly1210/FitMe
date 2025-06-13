@@ -10,6 +10,7 @@ import ProductDetail from "../pages/client/DetailProduct/indext";
 import HomePage from "../pages/client/HomePage";
 import ListProducts from "../pages/client/Products";
 import { SearchPanelProvider } from "../context/SearchPanelProvider";
+import CheckoutSuccess from "../pages/client/CheckOut/success";
 
 export const clientRoutes = [
   {
@@ -47,6 +48,11 @@ export const clientRoutes = [
             path: "checkout",
             element: <CheckOut />,
           },
+          {
+            path: "checkout/success",
+            element: <CheckoutSuccess />,
+          },
+          
 
           {
             element: <ProtectClient role="client" />,

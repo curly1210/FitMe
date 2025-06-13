@@ -1,17 +1,61 @@
 import { Button, Modal } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import { useList } from "@refinedev/core";
+import { useCreate, useCustom, useList } from "@refinedev/core";
+import { useNavigate } from "react-router";
+
+
+type OrderItem = {
+  product_name: string;
+  sku: string;
+  quantity: number;
+  price: number;
+  sale_price: number;
+  sale_percent: number;
+  total: number;
+  color: string;
+  size: string;
+};
+
+type OrderData = {
+  items: OrderItem[];
+  total_price: number;
+  discount: number;
+  shipping_price: number;
+  total_amount: number;
+  coupon?: string;
+};
 
 const CheckOut = () => {
   const [isSelectingAddress, setIsSelectingAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [addressListDefaultMode, setAddressListDefaultMode] = useState<"create" | "list">("list");
+  const [couponCode,setCouponCode]=useState("")// mã giảm giá ng dùng gõ
+  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(undefined); // mã sẽ gửi BE
+  const [shippingPrice, setShippingPrice] = useState<number>(20000);// vận chuyển
 
-  // ✅ Gọi danh sách địa chỉ để tìm địa chỉ mặc định
-  const { data: addressData, isLoading } = useList({
-    resource: "addresses",
+  const{mutate: createOder}=useCreate()
+  const nav=useNavigate()
+
+  const { data: addressData } = useList({ resource: "addresses" });
+
+  const { data: orderResponse ,refetch:refetchOder } = useCustom<OrderData>({
+    url: "orders/preview",
+    method: "post",
+    config:{
+       headers: {
+        "Content-Type": "application/json",
+      },
+       payload:{
+        coupon_code: appliedCoupon  , // dùng mã sau khi ấn
+        shipping_price: shippingPrice
+
+    }
+  },
   });
+
+  const orderData = orderResponse?.data;
+  const orderItems = orderData?.items || [];
 
   useEffect(() => {
     if (addressData?.data && !selectedAddress) {
@@ -21,11 +65,30 @@ const CheckOut = () => {
       }
     }
   }, [addressData, selectedAddress]);
+   
+ const handleCheckout = ()=>{
+  createOder({
+    resource:"orders/checkout",
+    values :{
+       address_id: selectedAddress.id,
+        shipping_price: shippingPrice,
+        payment_method: "cod",
+        coupon_code:couponCode,
+    }
+  },{
+      onSuccess: ()=>{
+        nav("success")
+      },
+      onError: (error)=>{
+        console.error("Thanh toán thất bại:", error);
+      }
+    })
+ }
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50">
-        {/* Cột 1: Thông tin giao hàng */}
+        {/* Cột 1: Địa chỉ giao hàng */}
         <div className="space-y-4">
           <div className="bg-white p-4 border border-gray-300 rounded shadow-sm">
             <div className="flex justify-between font-semibold">
@@ -76,27 +139,41 @@ const CheckOut = () => {
           </div>
         </div>
 
-          {/* Cột 2: Giao hàng + Thanh toán */}
+        {/* Cột 2: Giao hàng + Thanh toán */}
         <div className="space-y-4">
           {/* Giao hàng */}
           <div className="bg-white p-4 border border-gray-300 rounded shadow-sm space-y-4">
             <p className="font-semibold">Phương thức vận chuyển</p>
-            
-            <div className="flex justify-between items-center text-sm">
-              <label className="flex items-center space-x-2">
-                <input type="radio"  />
-                <span>Giao Hàng tiết kiệm</span>
-              </label>
-              <span>40.000VNĐ</span>
-            </div>
-
               <div className="flex justify-between items-center text-sm">
-              <label className="flex items-center space-x-2">
-                <input type="radio" checked />
-                <span>ViettelPort</span>
-              </label>
-              <span>20.000VNĐ</span>
-            </div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                checked={shippingPrice === 40000}
+                onChange={() => {
+                  setShippingPrice(40000);
+                  refetchOder(); // gửi lại đơn hàng với phí mới
+                }}
+              />
+              <span>Giao Hàng tiết kiệm</span>
+            </label>
+            <span>40.000VNĐ</span>
+          </div>
+
+          <div className="flex justify-between items-center text-sm">
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                checked={shippingPrice === 20000}
+                onChange={() => {
+                  setShippingPrice(20000);
+                  refetchOder(); // gửi lại đơn hàng với phí mới
+                }}
+              />
+              <span>ViettelPost</span>
+            </label>
+            <span>20.000VNĐ</span>
+          </div>
+
           </div>
 
           {/* Thanh toán */}
@@ -109,78 +186,89 @@ const CheckOut = () => {
           </div>
 
           {/* Mã giảm giá */}
-          <div className="bg-white p-4 border border-gray-300 rounded shadow-sm">
-            <div className="flex justify-between">
-              <p className="font-semibold">Voucher và Coupon</p>
-              <button className="text-sm text-gray-500">Xem tất cả</button>
-            </div>
-            <div className="mt-2 flex">
-              <input
-                className="flex-1 border border-gray-300 px-3 py-2 text-sm rounded-l"
-                placeholder="Nhập mã giảm giá (nếu có)"
-              />
-              <button className="bg-black text-white px-4 py-2 rounded-r text-sm">
-                Áp dụng
-              </button>
-            </div>
+          <div className="mt-2 flex border border-gray-300 rounded overflow-hidden">
+            <input
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="flex-1 px-3 py-2 text-sm outline-none"
+              placeholder="Nhập mã giảm giá (nếu có)"
+            />
+            <button
+              onClick={() => {
+                setAppliedCoupon(couponCode);
+                refetchOder();
+              }}
+             className="bg-black text-white font-semibold px-4 text-sm cursor-pointer"
+            >
+              Áp dụng
+            </button>
           </div>
-      
+
         </div>
 
         {/* Cột 3: Đơn hàng */}
         <div className="bg-white p-4 border border-gray-300 rounded shadow-md space-y-4">
           <h2 className="font-semibold text-lg">Đơn hàng</h2>
 
-          {/* Ví dụ sản phẩm */}
-          <div className="flex space-x-4 items-center">
-            <img
-              src="https://via.placeholder.com/60"
-              alt="Áo khoác"
-              className="w-16 h-16 object-cover"
-            />
-            <div className="flex-1">
-              <p className="text-sm font-semibold">
-                Áo khoác xẻ tà cotton form fitted - 10F21JACW016_001
-              </p>
-              <p className="text-xs text-gray-500">BLACK BEAUTY, S</p>
-         
+          {/* Danh sách sản phẩm */}
+          {orderItems.map((item, index) => (
+            <div key={index} className="flex space-x-4 items-center">
+              <img
+                src="https://via.placeholder.com/60"
+                alt={item.product_name}
+                className="w-16 h-16 object-cover"
+              />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">{item.product_name}</p>
+                <p className="text-xs text-gray-500">
+                  {item.color}, {item.size} – SL: {item.quantity}
+                </p>
+              </div>
+              <div className="text-sm font-semibold">
+                {item.total.toLocaleString()}đ
+              </div>
             </div>
-            <div className="text-sm font-semibold">1.228.000đ</div>
-          </div>
+          ))}
 
-          <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
-            <p className="flex items-start gap-2">
-              <span>🎁</span>
-              <span>Bạn có một phần quà cho đơn hàng này. Nhấn để chọn quà.</span>
-            </p>
-          </div>
+          {/* Thông tin khuyến mãi */}
+          {orderData?.coupon && (
+            <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
+              <p className="flex items-start gap-2">
+                <span>🎁</span>
+                <span>Áp dụng mã: <strong>{orderData.coupon}</strong></span>
+              </p>
+            </div>
+          )}
 
+          {/* Tổng kết đơn hàng */}
           <div className="text-sm text-gray-800 space-y-1">
             <div className="flex justify-between">
               <span>Tổng giá trị đơn hàng</span>
-              <span className="font-semibold">1.228.000đ</span>
+              <span className="font-semibold">
+                {orderData?.total_price.toLocaleString()}đ
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Phí vận chuyển</span>
-              <span>0 đ</span>
+              <span>{orderData?.shipping_price.toLocaleString()}đ</span>
             </div>
             <div className="flex justify-between">
               <span>Giảm giá</span>
-              <span>0 đ</span>
+              <span>{orderData?.discount.toLocaleString()}đ</span>
             </div>
           </div>
 
           <div className="border-t pt-2 text-sm text-gray-900 space-y-1">
             <div className="flex justify-between font-semibold">
               <span>Thành tiền</span>
-              <span>1.228.000đ</span>
+              <span>{orderData?.total_amount.toLocaleString()}đ</span>
             </div>
-     
           </div>
 
           <button
             disabled={!selectedAddress}
-            className={`w-full py-2 rounded text-sm font-semibold ${
+            onClick={handleCheckout}
+            className={`w-full py-2 rounded text-sm font-semibold cursor-pointer ${
               selectedAddress
                 ? "bg-black text-white"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -195,7 +283,6 @@ const CheckOut = () => {
             <span className="underline">Chính sách</span> của chúng tôi.
           </p>
         </div>
-
       </div>
 
       {/* Modal chọn địa chỉ */}
