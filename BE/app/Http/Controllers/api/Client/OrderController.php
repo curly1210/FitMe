@@ -111,6 +111,8 @@ class OrderController extends Controller
             'cartItems' => 'required|array|min:1',
             'cartItems.*.idProduct_item' => 'required|exists:product_items,id',
             'cartItems.*.quantity' => 'required|integer|min:1',
+            'cartItems.*.idItem' => 'required|exists:cart_items,id', 
+            'cartItems.*.salePrice' => 'required|numeric|min:0',
             'total_price_cart' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
@@ -119,6 +121,7 @@ class OrderController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $items = $request->input('cartItems');
         $productItemIds = [];
+        $cartItemIds = [];
         $orderItems = [];
 
         foreach ($items as $item) {
@@ -133,11 +136,12 @@ class OrderController extends Controller
             }
 
             $productItemIds[] = $productItem->id;
+            $cartItemIds[] = $item['idItem'];
 
             $orderItems[] = [
                 'product_item_id' => $productItem->id,
                 'quantity' => $item['quantity'],
-                'price' => $productItem->price,
+                'price' => $item['salePrice'],
                 'subtotal' => 0,
                 'name_product' => $productItem->product->name,
                 'color' => optional($productItem->color)->name,
@@ -177,10 +181,7 @@ class OrderController extends Controller
             $address->city,
         ]));
 
-
-
         DB::beginTransaction();
-        
         try {
             $order = Order::create([
                 'orders_code' => now()->format('ymd') . implode('', $productItemIds) . strtoupper(Str::random(5)),
@@ -206,7 +207,7 @@ class OrderController extends Controller
                 $coupon->decrement('limit_use');
             }
 
-            $user->cart_items()->whereIn('product_item_id', $productItemIds)->delete();
+            $user->cart_items()->whereIn('id', $cartItemIds)->delete();
 
             Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderItems));
 
@@ -221,6 +222,7 @@ class OrderController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
 
 
