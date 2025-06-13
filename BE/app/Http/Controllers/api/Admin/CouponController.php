@@ -108,6 +108,7 @@ class CouponController extends Controller
                 'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
                 'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
             ]);
+
             if ($validate->fails()) {
                 return $this->error('Dữ liệu không hợp lệ', $validate->errors(), 422);
             }
