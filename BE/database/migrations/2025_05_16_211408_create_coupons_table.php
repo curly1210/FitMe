@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name', 50);
             $table->string('code', 50);
             $table->integer('value');
-            $table->timestamp('time_start');
-            $table->timestamp('time_end')->nullable();
+            $table->datetime('time_start');
+            $table->datetime('time_end')->nullable();
             $table->unsignedInteger('min_price_order');
             $table->unsignedInteger('max_price_discount');
             $table->integer('limit_use');
