@@ -34,21 +34,28 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        // Xóa khóa ngoại và cột mới
         Schema::table('reviews', function (Blueprint $table) {
             $table->dropForeign(['product_item_id']);
             $table->dropForeign(['order_detail_id']);
-
             $table->dropColumn('product_item_id');
             $table->dropColumn('order_detail_id');
         });
+
+        // Thêm lại 2 cột cũ, có nullable để tránh lỗi dữ liệu
         Schema::table('reviews', function (Blueprint $table) {
-            
+            $table->unsignedBigInteger('product_id')->nullable()->after('id'); // hoặc after cột phù hợp
+            $table->unsignedBigInteger('order_id')->nullable()->after('product_id');
 
-            $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('order_id');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->onDelete('cascade');
 
+            $table->foreign('order_id')
+                ->references('id')
+                ->on('orders')
+                ->onDelete('cascade');
         });
     }
 };
