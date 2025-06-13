@@ -1,63 +1,34 @@
-import { Button, Modal } from "antd";
+import { Button, Modal, Spin, message } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import { useCreate, useCustom, useList } from "@refinedev/core";
+import { useCreate, useList, useCustom, useCustomMutation } from "@refinedev/core";
 import { useNavigate } from "react-router";
-
-type OrderItem = {
-  product_name: string;
-  sku: string;
-  quantity: number;
-  price: number;
-  sale_price: number;
-  sale_percent: number;
-  total: number;
-  color: string;
-  size: string;
-};
-
-type OrderData = {
-  items: OrderItem[];
-  total_price: number;
-  discount: number;
-  shipping_price: number;
-  total_amount: number;
-  coupon?: string;
-};
+import { useCart } from "../../../hooks/useCart";
 
 const CheckOut = () => {
   const [isSelectingAddress, setIsSelectingAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [addressListDefaultMode, setAddressListDefaultMode] = useState<
-    "create" | "list"
-  >("list");
-  const [couponCode, setCouponCode] = useState(""); // mã giảm giá ng dùng gõ
-  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(
-    undefined
-  ); // mã sẽ gửi BE
-  const [shippingPrice, setShippingPrice] = useState<number>(20000); // vận chuyển
+  const [addressListDefaultMode, setAddressListDefaultMode] = useState<"create" | "list">("list");// nút thêm mới địa chỉ và lấy địa chỉ
 
-  const { mutate: createOder } = useCreate();
-  const nav = useNavigate();
+  // nhập mã
+  const [couponCode, setCouponCode] = useState(""); // Mã người dùng nhập
+  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
+  const [discount, setDiscount] = useState<number>(0);
+
+  const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
+
+  
+  const { mutate: createOrder,isLoading } = useCreate();// gửi thông tin về be khi ấn thanh toán
 
   const { data: addressData } = useList({ resource: "addresses" });
+  const { mutate: redeemCoupon } = useCustomMutation();
+  const nav = useNavigate();
 
-  const { data: orderResponse, refetch: refetchOder } = useCustom<OrderData>({
-    url: "orders/preview",
-    method: "post",
-    config: {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      payload: {
-        coupon_code: appliedCoupon, // dùng mã sau khi ấn
-        shipping_price: shippingPrice,
-      },
-    },
-  });
+  const { cart } = useCart();// lấy đơn hàng từ cart
+  const orderItems = cart?.cartItems || [];
 
-  const orderData = orderResponse?.data;
-  const orderItems = orderData?.items || [];
+  const totalPrice = orderItems.reduce((sum: number, item: any) => sum + item.subtotal, 0);
+  const totalAmount = totalPrice + shippingPrice - discount;// tính giá sau khi nhập mã
 
   useEffect(() => {
     if (addressData?.data && !selectedAddress) {
@@ -68,24 +39,62 @@ const CheckOut = () => {
     }
   }, [addressData, selectedAddress]);
 
-  const handleCheckout = () => {
-    createOder(
+// này gửi mã về be
+  const handleApplyCoupon = () => {
+    redeemCoupon(
       {
-        resource: "orders/checkout",
+        url: "orders/redem",
+        method: "post",
+        
         values: {
-          address_id: selectedAddress.id,
-          shipping_price: shippingPrice,
-          payment_method: "cod",
           coupon_code: couponCode,
+          total_price_item: totalPrice,
         },
       },
       {
-        onSuccess: () => {
-          nav("success");
+        onSuccess: (response) => {
+          const res = response?.data;
+          if (res?.discount) {
+            setDiscount(res.discount);
+            setAppliedCoupon(res.coupon_code);
+            message.success("Áp dụng mã giảm giá thành công!");
+          } else {
+            message.error("Mã không hợp lệ hoặc không áp dụng được.");
+          }
         },
-        onError: (error) => {
-          console.error("Thanh toán thất bại:", error);
+        onError: () => {
+          message.error("Mã giảm giá không hợp lệ.");
         },
+      }
+    );
+  };
+
+  // hàm gửi thông tin sau ấn thanh toán
+  const handleCheckout = () => {
+    if (!selectedAddress) return;
+
+    createOrder(
+      {
+        resource: "orders/checkout",
+        values: {
+
+        cartItems: orderItems.map((item: any) => ({
+          idProduct_item: item.id,
+          quantity: item.quantity,
+        })),
+        payment_method: "cod",
+        shipping_address_id: selectedAddress.id,
+        total_price_cart: totalPrice,
+        shipping_price: shippingPrice,
+        discount: discount, 
+        total_amount: totalAmount,
+        coupon_code: appliedCoupon || "",
+      
+        },
+      },
+      {
+        onSuccess: () => nav("success"),
+        onError: (error) => console.error("Thanh toán thất bại:", error),
       }
     );
   };
@@ -93,7 +102,7 @@ const CheckOut = () => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50">
-        {/* Cột 1: Địa chỉ giao hàng */}
+        {/* Cột 1: Thông tin giao hàng */}
         <div className="space-y-4">
           <div className="bg-white p-4 border border-gray-300 rounded shadow-sm">
             <div className="flex justify-between font-semibold">
@@ -128,9 +137,7 @@ const CheckOut = () => {
               ) : (
                 <>
                   <p>
-                    <span className="font-bold">
-                      {selectedAddress.name_receive}
-                    </span>
+                    <span className="font-bold">{selectedAddress.name_receive}</span>
                     {selectedAddress.is_default && (
                       <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 rounded">
                         Mặc định
@@ -148,7 +155,7 @@ const CheckOut = () => {
 
         {/* Cột 2: Giao hàng + Thanh toán */}
         <div className="space-y-4">
-          {/* Giao hàng */}
+          {/* Vận chuyển */}
           <div className="bg-white p-4 border border-gray-300 rounded shadow-sm space-y-4">
             <p className="font-semibold">Phương thức vận chuyển</p>
             <div className="flex justify-between items-center text-sm">
@@ -156,25 +163,18 @@ const CheckOut = () => {
                 <input
                   type="radio"
                   checked={shippingPrice === 40000}
-                  onChange={() => {
-                    setShippingPrice(40000);
-                    refetchOder(); // gửi lại đơn hàng với phí mới
-                  }}
+                  onChange={() => setShippingPrice(40000)}
                 />
                 <span>Giao Hàng tiết kiệm</span>
               </label>
               <span>40.000VNĐ</span>
             </div>
-
             <div className="flex justify-between items-center text-sm">
               <label className="flex items-center space-x-2">
                 <input
                   type="radio"
                   checked={shippingPrice === 20000}
-                  onChange={() => {
-                    setShippingPrice(20000);
-                    refetchOder(); // gửi lại đơn hàng với phí mới
-                  }}
+                  onChange={() => setShippingPrice(20000)}
                 />
                 <span>ViettelPost</span>
               </label>
@@ -200,10 +200,7 @@ const CheckOut = () => {
               placeholder="Nhập mã giảm giá (nếu có)"
             />
             <button
-              onClick={() => {
-                setAppliedCoupon(couponCode);
-                refetchOder();
-              }}
+              onClick={handleApplyCoupon}
               className="bg-black text-white font-semibold px-4 text-sm cursor-pointer"
             >
               Áp dụng
@@ -215,60 +212,47 @@ const CheckOut = () => {
         <div className="bg-white p-4 border border-gray-300 rounded shadow-md space-y-4">
           <h2 className="font-semibold text-lg">Đơn hàng</h2>
 
-          {/* Danh sách sản phẩm */}
-          {orderItems.map((item, index) => (
+          {orderItems.map((item: any, index: number) => (
             <div key={index} className="flex space-x-4 items-center">
-              <img
-                src="https://via.placeholder.com/60"
-                alt={item.product_name}
-                className="w-16 h-16 object-cover"
-              />
+              <img src={item.image} alt={item.name} className="w-16 h-16 object-cover" />
               <div className="flex-1">
-                <p className="text-sm font-semibold">{item.product_name}</p>
+                <p className="text-sm font-semibold">{item.name}</p>
                 <p className="text-xs text-gray-500">
                   {item.color}, {item.size} – SL: {item.quantity}
                 </p>
               </div>
               <div className="text-sm font-semibold">
-                {item.total.toLocaleString()}đ
+                {(item.subtotal || 0).toLocaleString()}đ
               </div>
             </div>
           ))}
 
-          {/* Thông tin khuyến mãi */}
-          {orderData?.coupon && (
+          {appliedCoupon && (
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
-              <p className="flex items-start gap-2">
-                <span>🎁</span>
-                <span>
-                  Áp dụng mã: <strong>{orderData.coupon}</strong>
-                </span>
-              </p>
+              🎁 Áp dụng mã: <strong>{appliedCoupon}</strong> – Giảm{" "}
+              {discount.toLocaleString()}đ
             </div>
           )}
 
-          {/* Tổng kết đơn hàng */}
           <div className="text-sm text-gray-800 space-y-1">
             <div className="flex justify-between">
               <span>Tổng giá trị đơn hàng</span>
-              <span className="font-semibold">
-                {orderData?.total_price.toLocaleString()}đ
-              </span>
+              <span className="font-semibold">{totalPrice.toLocaleString()}đ</span>
             </div>
             <div className="flex justify-between">
               <span>Phí vận chuyển</span>
-              <span>{orderData?.shipping_price.toLocaleString()}đ</span>
+              <span>{shippingPrice.toLocaleString()}đ</span>
             </div>
             <div className="flex justify-between">
               <span>Giảm giá</span>
-              <span>{orderData?.discount.toLocaleString()}đ</span>
+              <span>{discount.toLocaleString()}đ</span>
             </div>
           </div>
 
-          <div className="border-t pt-2 text-sm text-gray-900 space-y-1">
-            <div className="flex justify-between font-semibold">
+          <div className="border-t pt-2 text-sm text-gray-900 space-y-1  ">
+            <div className="flex justify-between font-semibold  ">
               <span>Thành tiền</span>
-              <span>{orderData?.total_amount.toLocaleString()}đ</span>
+              <span>{totalAmount.toLocaleString()}đ</span>
             </div>
           </div>
 
@@ -291,8 +275,16 @@ const CheckOut = () => {
           </p>
         </div>
       </div>
+     {isLoading ? (
+          <Spin
+            className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+            style={{ textAlign: "center" }}
+            size="large"
+          />
+        ) : (
+          ""
+        )}
 
-      {/* Modal chọn địa chỉ */}
       <Modal
         open={isSelectingAddress}
         onCancel={() => setIsSelectingAddress(false)}
