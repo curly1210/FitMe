@@ -2,7 +2,6 @@
 
 
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
@@ -22,7 +21,6 @@ use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
