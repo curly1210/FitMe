@@ -40,7 +40,7 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
+            $validate = Validator::make($request->only(['name', 'code', 'value', 'time_start', 'time_end', 'min_price_order', 'max_price_discount', 'limit_use']), [
                 'name' => 'required|string|max:50',
                 'code' => 'required|string|max:50|unique:coupons,code',
                 'value' => 'required|integer|min:0',
@@ -49,7 +49,7 @@ class CouponController extends Controller
                 'min_price_order' => 'required|integer|min:0',
                 'max_price_discount' => 'required|integer|min:0|lte:min_price_order',
                 'limit_use' => 'required|integer|min:0',
-                'is_active' => 'boolean',
+
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
@@ -74,14 +74,23 @@ class CouponController extends Controller
                 'limit_use.required' => 'Giới hạn sử dụng là bắt buộc.',
                 'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
                 'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
-                'is_active.boolean' => 'Trạng thái hoạt động không hợp lệ.',
+
             ]);
 
             if ($validate->fails()) {
                 return $this->error('Dữ liệu không hợp lệ', $validate->errors(), 422);
             }
-
-            $coupon = Coupon::create($request->all());
+            $coupon = Coupon::create([
+                'name' => $request->name,
+                'code' => $request->code,
+                'value' => $request->value,
+                'time_start' => $request->time_start,
+                'time_end' => $request->time_end,
+                'min_price_order' => $request->min_price_order,
+                'max_price_discount' => $request->max_price_discount,
+                'limit_use' => $request->limit_use,
+                'is_active' => 1, // Mặc định là hoạt động
+            ]);
 
             return $this->success(new CouponResource($coupon), 'Tạo phiếu giảm giá thành công', 201);
         } catch (\Exception $e) {
@@ -90,31 +99,45 @@ class CouponController extends Controller
     }
     public function update(Request $request, $id)
     {
+
+        // return response()->json('time_start' . $request->time_start);
         try {
             $coupon = Coupon::findOrFail($id);
 
-            $validate = Validator::make($request->all(), [
+            $validate = Validator::make($request->only(['name', 'time_start', 'time_end', 'limit_use']), [
                 'name' => 'required|string|max:50',
-                'time_end' => 'nullable|date|after_or_equal:time_start|after_or_equal:now',
+                'time_end' => 'nullable|date|after_or_equal:time_start',
                 'limit_use' => 'required|integer|min:0',
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
-                'time_end.after' => 'Thời gian kết thúc phải sau thời điểm hiện tại.',
+                'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
 
-                'time_end.after_or_equal.time_start' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
-                'time_end.after_or_equal.now' => 'Thời gian kết thúc phải bằng hoặc sau thời điểm hiện tại.',
+
+
                 'limit_use.required' => 'Giới hạn sử dụng là bắt buộc.',
                 'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
                 'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
             ]);
 
             if ($validate->fails()) {
+                $errors = $validate->errors();
+                if ($request->has('time_end') && !$errors->has('time_end')) {
+                    $validate->after(function ($validator) use ($request) {
+                        if ($request->time_end && strtotime($request->time_end) < strtotime(now())) {
+                            $validator->errors()->add('time_end', 'Thời gian kết thúc phải bằng hoặc sau thời gian hiện tại.');
+                        }
+                    });
+                }
                 return $this->error('Dữ liệu không hợp lệ', $validate->errors(), 422);
             }
-
-            $coupon->update($request->all());
+            $data = [
+                'name' => $request->name,
+                'time_end' => $request->time_end,
+                'limit_use' => $request->limit_use,
+            ];
+            $coupon->update($data);
 
             return $this->success(new CouponResource($coupon), 'Cập nhật phiếu giảm giá thành công');
         } catch (\Exception $e) {
