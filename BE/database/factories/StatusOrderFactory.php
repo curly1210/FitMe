@@ -19,7 +19,7 @@ class StatusOrderFactory extends Factory
     {
 
         $data = [
-            'Chưa xác nhận' => "#6c757d",
+            'Chờ xác nhận' => "#6c757d",
             'Đang chuẩn bị hàng' => '#0d6efd',
             'Đang giao hàng' => '#ffc107',
             'Giao hàng thành công' => '#198754',

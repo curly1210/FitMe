@@ -266,14 +266,14 @@ class OrderController extends Controller
             }
 
             $currentStatus = $order->status_order_id;
-            $newStatus = $request->input('status_order_id');
+            // $newStatus = $request->input('status_order_id');
 
             // Xử lý logic cập nhật trạng thái
-            if ($currentStatus == 1 && $newStatus == 6) {
+            if ($currentStatus == 1) {
                 // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (6)
                 $order->update(['status_order_id' => 6]);
                 $message = 'Đơn hàng đã được hủy thành công.';
-            } elseif ($currentStatus == 3 && $newStatus == 4) {
+            } elseif ($currentStatus == 3) {
                 // Chuyển từ "Đang giao hàng" (3) sang "Giao hàng thành công" (4)
                 $order->update(['status_order_id' => 4]);
                 $message = 'Đơn hàng đã được xác nhận nhận hàng thành công.';
@@ -282,16 +282,10 @@ class OrderController extends Controller
             }
 
             return $this->success([
-                    'order_code' => $order->orders_code
-                ], $message, 200);
+                'order_code' => $order->orders_code
+            ], $message, 200);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi cập nhật trạng thái đơn hàng', [$th->getMessage()], 500);
         }
     }
-
-
-
-
-
-
 }
