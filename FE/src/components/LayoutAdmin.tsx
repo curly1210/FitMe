@@ -72,6 +72,12 @@ const itemsNavigate: MenuItem[] = [
     "9",
     <UserOutlined />
   ),
+  getItem(
+    <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
+    "10",
+    <UserOutlined />
+  ),
+
 
   // getItem("Team", "sub2", <TeamOutlined />, [
   //   getItem("Team 1", "6"),

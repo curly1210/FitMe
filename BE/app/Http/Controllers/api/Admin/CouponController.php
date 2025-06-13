@@ -102,7 +102,7 @@ class CouponController extends Controller
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
                 'time_end.after' => 'Thời gian kết thúc phải sau thời điểm hiện tại.',
-                'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+             
                 'time_end.after_or_equal.time_start' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
                 'time_end.after_or_equal.now' => 'Thời gian kết thúc phải bằng hoặc sau thời điểm hiện tại.',
                 'limit_use.required' => 'Giới hạn sử dụng là bắt buộc.',
