@@ -7,16 +7,17 @@ import {
   DatePicker,
   notification,
   Form,
-  // Switch, // ❌ Nếu bạn cần hiển thị lại thì bỏ comment
+  // Switch,
 } from "antd";
 import { useCreate } from "@refinedev/core";
 
 interface AddCouponProps {
   visible: boolean;
   onClose: () => void;
+  onSuccessCreate?: () => void; // ✅ callback từ component cha để reload danh sách
 }
 
-const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose }) => {
+const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate }) => {
   const [form] = Form.useForm();
   const { mutate: createCoupon } = useCreate();
 
@@ -28,12 +29,12 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose }) => {
           name: values.name,
           code: values.code,
           value: values.value,
-          time_start: values.time_start?.format("YYYY-MM-DD"),
-          time_end: values.time_end?.format("YYYY-MM-DD") || null,
+          time_start: values.time_start?.format("YYYY-MM-DD HH:mm:ss"),
+          time_end: values.time_end?.format("YYYY-MM-DD HH:mm:ss") || null,
           min_price_order: values.min_price_order,
           max_price_discount: values.max_price_discount,
           limit_use: values.limit_use,
-          is_active: 1, // ✅ Mặc định là đang hoạt động
+          is_active: 1,
         },
       },
       {
@@ -44,10 +45,10 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose }) => {
           });
           form.resetFields();
           onClose();
+          onSuccessCreate?.(); // ✅ gọi callback để reload danh sách ở component cha
         },
         onError: (error: any) => {
           const response = error?.response?.data;
-
           if (response?.errors) {
             const fieldErrors = Object.entries(response.errors).map(
               ([field, messages]) => ({
@@ -57,7 +58,6 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose }) => {
             );
             form.setFields(fieldErrors);
           }
-
           notification.error({
             message: "Lỗi khi thêm chương trình khuyến mãi",
             description: response?.message || "Dữ liệu không hợp lệ!",
@@ -111,17 +111,19 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose }) => {
           rules={[{ required: true, message: "Vui lòng chọn thời gian bắt đầu!" }]}
         >
           <DatePicker
+            showTime={{ format: "HH:mm:ss" }}
+            format="YYYY-MM-DD HH:mm:ss"
             style={{ width: "100%" }}
-            format="YYYY-MM-DD"
-            placeholder="Chọn ngày bắt đầu"
+            placeholder="Chọn thời gian bắt đầu"
           />
         </Form.Item>
 
         <Form.Item label="Thời gian kết thúc" name="time_end">
           <DatePicker
+            showTime={{ format: "HH:mm:ss" }}
+            format="YYYY-MM-DD HH:mm:ss"
             style={{ width: "100%" }}
-            format="YYYY-MM-DD"
-            placeholder="Chọn ngày kết thúc (có thể bỏ trống)"
+            placeholder="Chọn thời gian kết thúc (có thể bỏ trống)"
           />
         </Form.Item>
 

@@ -27,7 +27,7 @@ const CouponsList = () => {
   const [selectedCoupon, setSelectedCoupon] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [keyword, setKeyword] = useState("");
-  const [searchTrigger, setSearchTrigger] = useState(""); // giữ keyword thực tế
+  const [searchTrigger, setSearchTrigger] = useState("");
   const [cacheBuster, setCacheBuster] = useState(0);
   const pageSize = 10;
 
@@ -71,7 +71,7 @@ const CouponsList = () => {
             message: "Xóa thành công",
             description: `Chương trình khuyến mãi ID ${id} đã được xóa.`,
           });
-          setCacheBuster((prev) => prev + 1); // ép reload
+          setCacheBuster((prev) => prev + 1);
         },
         onError: () => {
           notification.error({
@@ -96,17 +96,17 @@ const CouponsList = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    setCacheBuster((prev) => prev + 1); // ép gọi lại với trang mới
+    setCacheBuster((prev) => prev + 1);
   };
 
   const handleSearch = () => {
     setCurrentPage(1);
     setSearchTrigger(keyword.trim());
-    setCacheBuster((prev) => prev + 1); // ép gọi lại API
+    setCacheBuster((prev) => prev + 1);
   };
 
   const formatDateTimeVN = (value: any) => {
-    return dayjs(value).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY");
+    return dayjs(value).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss");
   };
 
   const columns = [
@@ -153,13 +153,15 @@ const CouponsList = () => {
       title: "Số tiền tối thiểu",
       dataIndex: "min_price_order",
       key: "min_price_order",
-      render: (amount: any) => `${amount} VND`,
+      render: (amount: any) =>
+        amount ? `${amount.toLocaleString("vi-VN")} VND` : "—",
     },
     {
       title: "Số tiền tối đa",
       dataIndex: "max_price_discount",
       key: "max_price_discount",
-      render: (amount: any) => `${amount} VND`,
+      render: (amount: any) =>
+        amount ? `${amount.toLocaleString("vi-VN")} VND` : "—",
     },
     {
       title: "Số lần sử dụng",
@@ -189,8 +191,7 @@ const CouponsList = () => {
     },
   ];
 
-const menu = (record: any) => {
-  return (
+  const menu = (record: any) => (
     <Menu>
       {record.is_active ? (
         <Menu.Item onClick={() => handleEdit(record)}>Sửa</Menu.Item>
@@ -198,7 +199,6 @@ const menu = (record: any) => {
       <Menu.Item onClick={() => showDeleteConfirm(record.id)}>Xóa</Menu.Item>
     </Menu>
   );
-};
 
   return (
     <div className="coupons-list p-5 bg-gray-50 rounded-lg shadow-lg">
