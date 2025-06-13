@@ -22,8 +22,8 @@ class CouponController extends Controller
 
         //Tìm kiếm theo name hoặc code
         if ($request->has('keyword')) {
-            $keyword = trim($request->input('keyword')); 
-            if ($keyword !== '') { 
+            $keyword = trim($request->input('keyword'));
+            if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('name', 'like', "%{$keyword}%")->orWhere('code', 'like', "%{$keyword}%");
                 });
@@ -32,7 +32,7 @@ class CouponController extends Controller
 
         // Phân trang
         $perPage = $request->input('per_page', 10);
-        $coupons = $query->paginate($perPage);
+        $coupons = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return CouponResource::collection($coupons);
     }
@@ -95,12 +95,19 @@ class CouponController extends Controller
 
             $validate = Validator::make($request->all(), [
                 'name' => 'required|string|max:50',
-                'time_end' => 'nullable|date|after_or_equal:time_start',
+                'time_end' => 'nullable|date|after_or_equal:time_start|after_or_equal:now',
+                'limit_use' => 'required|integer|min:0',
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
+                'time_end.after' => 'Thời gian kết thúc phải sau thời điểm hiện tại.',
                 'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+                'time_end.after_or_equal.time_start' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+                'time_end.after_or_equal.now' => 'Thời gian kết thúc phải bằng hoặc sau thời điểm hiện tại.',
+                'limit_use.required' => 'Giới hạn sử dụng là bắt buộc.',
+                'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
+                'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
             ]);
 
             if ($validate->fails()) {
@@ -124,8 +131,8 @@ class CouponController extends Controller
 
             $coupon->update(['is_active' => 0]);
 
-            $coupon->delete();//Xóa mềm
-            
+            $coupon->delete(); //Xóa mềm
+
             DB::commit();
 
             return $this->success(null, 'Xóa phiếu giảm giá thành công');

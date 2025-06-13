@@ -14,7 +14,7 @@ return new class extends Migration
     {
         DB::unprepared("
         CREATE EVENT IF NOT EXISTS auto_deactivate_expired_coupons
-        ON SCHEDULE EVERY 1 HOUR
+        ON SCHEDULE EVERY 5 MINUTE
         DO
             UPDATE coupons
             SET is_active = 0 

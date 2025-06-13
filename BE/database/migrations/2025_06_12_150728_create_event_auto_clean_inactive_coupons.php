@@ -43,7 +43,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::unprepared("DROP EVENT IF EXISTS soft_delete_inactive_coupons;");
+        DB::unprepared("DROP EVENT IF EXISTS soft_delete_expired_coupons;");
         DB::unprepared("DROP EVENT IF EXISTS hard_delete_old_soft_deleted_coupons;");
     }
 };
