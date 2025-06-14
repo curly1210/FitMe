@@ -24,7 +24,7 @@ const filters: CrudFilters = [];
 
 if (searchName) {
   filters.push({
-    field: "name",
+    field: "search",
     operator: "eq",
     value: searchName,
   });
