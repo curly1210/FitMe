@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\api\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\CouponResource;
+use Carbon\Carbon;
 use App\Models\Coupon;
 use App\Traits\ApiResponse;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Validated;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Admin\CouponResource;
+
 
 class CouponController extends Controller
 {
@@ -45,7 +47,7 @@ class CouponController extends Controller
                 'code' => 'required|string|max:50|unique:coupons,code',
                 'value' => 'required|integer|min:0',
                 'time_start' => 'required|date|after:now',
-                'time_end' => 'nullable|date|after_or_equal:time_start',
+                'time_end' => 'nullable|date|after:time_start',
                 'min_price_order' => 'required|integer|min:0',
                 'max_price_discount' => 'required|integer|min:0|lte:min_price_order',
                 'limit_use' => 'required|integer|min:0',
@@ -63,7 +65,7 @@ class CouponController extends Controller
                 'time_start.date' => 'Thời gian bắt đầu không hợp lệ.',
                 'time_start.after' => 'Thời gian bắt đầu phải sau thời điểm hiện tại.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
-                'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+                'time_end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
                 'min_price_order.required' => 'Giá trị đơn hàng tối thiểu là bắt buộc.',
                 'min_price_order.integer' => 'Giá trị đơn hàng tối thiểu phải là số nguyên.',
                 'min_price_order.min' => 'Giá trị đơn hàng tối thiểu không được nhỏ hơn 0.',
@@ -99,20 +101,25 @@ class CouponController extends Controller
     }
     public function update(Request $request, $id)
     {
-
+        // $time_end =  $request->time_end;
+        // $time_now =  now('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s');
+        // return response()->json([
+        //     'time_end' => $time_end,
+        //     'time_now' => $time_now,
+        // ]);
         // return response()->json('time_start' . $request->time_start);
         try {
             $coupon = Coupon::findOrFail($id);
 
             $validate = Validator::make($request->only(['name', 'time_start', 'time_end', 'limit_use']), [
                 'name' => 'required|string|max:50',
-                'time_end' => 'nullable|date|after_or_equal:time_start',
+                'time_end' => 'nullable|date|after:time_start',
                 'limit_use' => 'required|integer|min:0',
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
-                'time_end.after_or_equal' => 'Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.',
+                'time_end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
 
 
 
@@ -120,16 +127,19 @@ class CouponController extends Controller
                 'limit_use.integer' => 'Giới hạn sử dụng phải là số nguyên.',
                 'limit_use.min' => 'Giới hạn sử dụng không được nhỏ hơn 0.',
             ]);
+            $errors = $validate->errors();
+            if ($request->has('time_end') && !$errors->has('time_end')) {
+                $validate->after(function ($validator) use ($request) {
+                    $timeEnd =  Carbon::parse($request->time_end, 'Asia/Ho_Chi_Minh');
+                    $now =  now('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s');
+                    if ($request->time_end && $timeEnd->lt($now)) {
 
+                        $validator->errors()->add('time_end', 'Thời gian kết thúc phải bằng hoặc sau thời gian hiện tại.');
+                    }
+                });
+            }
             if ($validate->fails()) {
-                $errors = $validate->errors();
-                if ($request->has('time_end') && !$errors->has('time_end')) {
-                    $validate->after(function ($validator) use ($request) {
-                        if ($request->time_end && strtotime($request->time_end) < strtotime(now())) {
-                            $validator->errors()->add('time_end', 'Thời gian kết thúc phải bằng hoặc sau thời gian hiện tại.');
-                        }
-                    });
-                }
+
                 return $this->error('Dữ liệu không hợp lệ', $validate->errors(), 422);
             }
             $data = [
