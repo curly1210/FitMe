@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\api\Client\VNPayController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -155,7 +156,9 @@ Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 
 
 
-
+# VNPAY
+Route::post('/vnpay/payment', [VNPayController::class, 'handle']);
+Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 
 
 
