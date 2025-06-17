@@ -169,11 +169,11 @@ class OrderController extends Controller
             // Xử lý logic cập nhật trạng thái
             if ($currentStatus == 1) {
                 // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (6)
-                $order->update(['status_order_id' => 6]);
+                $order->update(['status_order_id' => 7]);
                 $message = 'Đơn hàng đã được hủy thành công.';
-            } elseif ($currentStatus == 3) {
+            } elseif ($currentStatus == 4) {
                 // Chuyển từ "Đang giao hàng" (3) sang "Giao hàng thành công" (4)
-                $order->update(['status_order_id' => 4]);
+                $order->update(['status_order_id' => 5]);
                 $message = 'Đơn hàng đã được xác nhận nhận hàng thành công.';
             } else {
                 return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
