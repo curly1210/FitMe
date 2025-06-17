@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryControll
 
 use App\Http\Controllers\api\Client\VNPayController;
 use App\Http\Controllers\Api\Client\CommentController;
-
+use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -147,7 +147,9 @@ Route::get('/comments', [CommentController::class, 'index'])->name('comments.ind
 Route::middleware('auth:api')->group(function () {
     Route::post('products/{productId}/comments', [CommentController::class, 'store']);
 });
-
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/products/{id}/comments', [AdminCommentController::class, 'show'])->name('comments.show');
+});
 
 
 
