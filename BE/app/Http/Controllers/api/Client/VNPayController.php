@@ -5,26 +5,64 @@ namespace App\Http\Controllers\api\Client;
 use DateTime;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Traits\CreateOrderTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class VNPayController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, CreateOrderTrait;
     public function handle(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'amount' => 'required|numeric|min:1000',
+                'payment_method' => 'required|string',
+                'shipping_address_id' => 'required|exists:shipping_address,id',
+                'shipping_price' => 'required|integer|min:0',
+                'coupon_code' => 'nullable|string',
+                'cartItems' => 'required|array|min:1',
+                'cartItems.*.idProduct_item' => 'required|exists:product_items,id',
+                'cartItems.*.quantity' => 'required|integer|min:1',
+                'cartItems.*.idItem' => 'required|exists:cart_items,id',
+                'cartItems.*.salePrice' => 'required|numeric|min:0',
+                'total_price_cart' => 'required|numeric|min:0',
+                'discount' => 'nullable|numeric|min:0',
+                'total_amount' => 'required|numeric|min:0',
 
             ], [
-                'amount.required' => 'Số tiền thanh toán là bắt buộc.',
-                'amount.numeric' => 'Số tiền thanh toán phải là một số.',
-                'amount.min' => 'Số tiền thanh toán tối thiểu là 1000.',
+                'payment_method.required' => 'Phương thức thanh toán là bắt buộc.',
+                'payment_method.string' => 'Phương thức thanh toán phải là một chuỗi.',
+                'shipping_address_id.required' => 'Địa chỉ giao hàng là bắt buộc.',
+                'shipping_address_id.exists' => 'Địa chỉ giao hàng không tồn tại.',
+                'shipping_price.required' => 'Phí vận chuyển là bắt buộc.',
+                'shipping_price.integer' => 'Phí vận chuyển phải là một số nguyên.',
+                'shipping_price.min' => 'Phí vận chuyển tối thiểu là 0.',
+                'coupon_code.string' => 'Mã giảm giá phải là một chuỗi.',
+                'cartItems.required' => 'Danh sách sản phẩm trong giỏ hàng là bắt buộc.',
+                'cartItems.array' => 'Danh sách sản phẩm trong giỏ hàng phải là một mảng.',
+                'cartItems.min' => 'Giỏ hàng phải có ít nhất một sản phẩm.',
+                'cartItems.*.idProduct_item.required' => 'ID sản phẩm là bắt buộc.',
+                'cartItems.*.idProduct_item.exists' => 'Sản phẩm không tồn tại.',
+                'cartItems.*.quantity.required' => 'Số lượng sản phẩm là bắt buộc.',
+                'cartItems.*.quantity.integer' => 'Số lượng sản phẩm phải là một số nguyên.',
+                'cartItems.*.quantity.min' => 'Số lượng sản phẩm tối thiểu là 1.',
+                'cartItems.*.idItem.required' => 'ID mặt hàng giỏ hàng là bắt buộc.',
+                'cartItems.*.idItem.exists' => 'Mặt hàng giỏ hàng không tồn tại.',
+                'cartItems.*.salePrice.required' => 'Giá bán của sản phẩm là bắt buộc.',
+                'cartItems.*.salePrice.numeric' => 'Giá bán của sản phẩm phải là một số.',
+                'cartItems.*.salePrice.min' => 'Giá bán của sản phẩm tối thiểu là 0.',
+                'total_price_cart.required' => 'Tổng giá trị giỏ hàng là bắt buộc.',
+                'total_price_cart.numeric' => 'Tổng giá trị giỏ hàng phải là một số.',
+                'total_price_cart.min' => 'Tổng giá trị giỏ hàng tối thiểu là 0.',
+                'discount.numeric' => 'Giá trị giảm giá phải là một số.',
+                'discount.min' => 'Giá trị giảm giá tối thiểu là 0.',
+                'total_amount.required' => 'Số tiền thanh toán là bắt buộc.',
+                'total_amount.numeric' => 'Số tiền thanh toán phải là một số.',
+                'total_amount.min' => 'Số tiền thanh toán tối thiểu là 0.',
             ]);
             if (!$validator->fails()) {
                 $vnp_TxnRef = rand(1, 10000); //Mã giao dịch thanh toán tham chiếu của merchant
-                $vnp_Amount = $request->input('amount'); // Số tiền thanh toán
+                $vnp_Amount = $request->input('total_amount'); // Số tiền thanh toán
                 $vnp_Locale = "vn"; //Ngôn ngữ chuyển hướng thanh toán
                 $vnp_BankCode = "NCB"; //Mã phương thức thanh toán
                 $vnp_IpAddr = $request->ip(); //IP Khách hàng thanh toán
@@ -105,24 +143,13 @@ class VNPayController extends Controller
 
         $secureHash = hash_hmac('sha512', $hashData, env('VNP_HASH_SECRET'));
         if ($secureHash == $vnp_SecureHash) {
-            $dataReturn = [
-                "order_code" => $request->query('vnp_TxnRef'), //Mã đơn hàng
-                "amount" => $request->query('vnp_Amount') / 100, // Chia cho 100 để chuyển đổi từ đồng sang tiền tệ
-                "content" => $request->query('vnp_OrderInfo'), // Nội dung thanh toán
-                "response_code" => $request->query('vnp_ResponseCode'), // Mã phản hồi từ VNPay
-                "transaction_code" => $request->query('vnp_TransactionNo'), // Mã giao dịch từ VNPay
-                "bank_code" => $request->query('vnp_BankCode'), // Mã ngân hàng
-                "pay_date" => DateTime::createFromFormat('YmdHis', $request->query('vnp_PayDate'))->format('Y-m-d H:i:s'), // Ngày thanh toán
-            ];
-            if ($request->query('vnp_ResponseCode') == '00') {
-                $dataReturn['status'] = "success"; // Trạng thái giao dịch thành công
 
-            } else {
-                $dataReturn['status'] = "fail"; // Trạng thái giao dịch thành công
+            if ($request->query('vnp_ResponseCode') == '00') {
+
+                return $this->createOrder($request, 1);
             }
         } else {
-            $dataReturn['status'] = "invalid"; // Hiển thị thông báo lỗi nếu mã bảo mật không hợp lệ
+            return response()->json(['message' => "mã bảo mật không hợp lệ"]); // Hiển thị thông báo lỗi nếu mã bảo mật không hợp lệ
         }
-        return response()->json($dataReturn);
     }
 }
