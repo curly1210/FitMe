@@ -7,6 +7,14 @@ import { useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
 
 const CheckOut = () => {
+  const [selectedMethod, setSelectedMethod] = useState("COD");
+
+  const paymentMethods = [
+    { id: "COD", label: "Trả tiền mặt khi nhận hàng (COD)" },
+    { id: "VNPAY", label: "Thanh toán qua VNPAY" },
+    // Bạn có thể thêm các phương thức khác ở đây
+  ];
+
   const [isSelectingAddress, setIsSelectingAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [addressListDefaultMode, setAddressListDefaultMode] = useState<
@@ -78,35 +86,56 @@ const CheckOut = () => {
   const handleCheckout = () => {
     if (!selectedAddress) return;
 
-    createOrder(
-      {
-        resource: "orders/checkout",
-        values: {
-          cartItems: orderItems.map((item: any) => ({
-            idProduct_item: item.id,
-            quantity: item.quantity,
-            idItem: item.id,
-            salePrice: item.sale_price,
-          })),
-          payment_method: "cod",
-          shipping_address_id: selectedAddress.id,
-          total_price_cart: totalPrice,
-          shipping_price: shippingPrice,
-          discount: discount,
-          total_amount: totalAmount,
-          coupon_code: appliedCoupon || "",
+    const values = {
+      cartItems: orderItems.map((item: any) => ({
+        idProduct_item: item.id,
+        quantity: item.quantity,
+        idItem: item.id,
+        salePrice: item.sale_price,
+      })),
+      payment_method: selectedMethod,
+      shipping_address_id: selectedAddress.id,
+      total_price_cart: totalPrice,
+      shipping_price: shippingPrice,
+      discount: discount,
+      total_amount: totalAmount,
+      coupon_code: appliedCoupon || "",
+    };
+
+    localStorage.setItem("order", JSON.stringify(values));
+
+    if (selectedMethod === "COD") {
+      createOrder(
+        {
+          resource: "orders/checkout",
+          values,
         },
-      },
-      {
-        onSuccess: () => {
-          // if (refetch) {
-          refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
-          // }
-          nav("success");
+        {
+          onSuccess: () => {
+            // if (refetch) {
+            refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
+            // }
+            nav("success");
+          },
+          onError: (error) => console.error("Thanh toán thất bại:", error),
+        }
+      );
+    }
+
+    if (selectedMethod === "VNPAY") {
+      createOrder(
+        {
+          resource: "vnpay/payment",
+          values,
         },
-        onError: (error) => console.error("Thanh toán thất bại:", error),
-      }
-    );
+        {
+          onSuccess: (response) => {
+            window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+          },
+          onError: (error) => console.error("Thanh toán thất bại:", error),
+        }
+      );
+    }
   };
 
   return (
@@ -197,8 +226,28 @@ const CheckOut = () => {
           {/* Thanh toán */}
           <div className="bg-white p-4 border border-gray-300 rounded shadow-sm flex justify-between items-start">
             <div>
-              <p className="font-semibold">Phương thức thanh toán</p>
-              <p className="text-sm mt-2">Trả tiền mặt khi nhận hàng (COD)</p>
+              <p className="font-semibold mb-3">Phương thức thanh toán</p>
+              <div className="space-y-2">
+                {paymentMethods.map((method) => (
+                  <label
+                    key={method.id}
+                    className="flex items-start space-x-3 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      value={method.id}
+                      checked={selectedMethod === method.id}
+                      onChange={() => setSelectedMethod(method.id)}
+                      className="mt-1"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {method.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {/* <p className="text-sm mt-2">Trả tiền mặt khi nhận hàng (COD)</p> */}
             </div>
             <button className="text-gray-500 text-sm">Thay đổi</button>
           </div>

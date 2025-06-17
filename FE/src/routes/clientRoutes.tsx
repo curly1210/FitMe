@@ -12,6 +12,7 @@ import ListProducts from "../pages/client/Products";
 import { SearchPanelProvider } from "../context/SearchPanelProvider";
 import CheckoutSuccess from "../pages/client/CheckOut/success";
 import Order from "../pages/client/Order";
+import CheckPayment from "../pages/client/Checkpayment";
 
 export const clientRoutes = [
   {
@@ -67,6 +68,10 @@ export const clientRoutes = [
               {
                 path: "order",
                 element: <Order />,
+              },
+              {
+                path: "payment-result",
+                element: <CheckPayment />,
               },
             ],
           },
