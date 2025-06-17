@@ -168,7 +168,7 @@ Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 
 # VNPAY
 Route::post('/vnpay/payment', [VNPayController::class, 'handle']);
-Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
+Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 
 
 
