@@ -97,7 +97,7 @@ const Order = () => {
                         </button>
                       </Popconfirm>
                     )}
-                    {order.status_name == "Đang giao hàng" && (
+                    {order.status_name == "Đã giao" && (
                       <Popconfirm
                         title="Cập nhật trạng thái"
                         onConfirm={() => onHandleChangeStatus(order.id)}
