@@ -146,7 +146,10 @@ class VNPayController extends Controller
 
             if ($request->query('vnp_ResponseCode') == '00') {
 
-                return $this->createOrder($request, 1);
+                $this->createOrder($request, 1);
+                return response()->json(['message' => "Thanh toán thành công ", 'vnp_ResponseCode' => $request->query('vnp_ResponseCode')]);
+            } else {
+                return response()->json(['message' => "Thanh toán không thành công", 'vnp_ResponseCode' => $request->query('vnp_ResponseCode')]);
             }
         } else {
             return response()->json(['message' => "mã bảo mật không hợp lệ"]); // Hiển thị thông báo lỗi nếu mã bảo mật không hợp lệ
