@@ -18,7 +18,10 @@ use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+
 use App\Http\Controllers\api\Client\VNPayController;
+use App\Http\Controllers\Api\Client\CommentController;
+
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -136,6 +139,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
     Route::patch('/coupons/{id}', [CouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
+});
+
+
+//Route bình luận
+Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+Route::middleware('auth:api')->group(function () {
+    Route::post('products/{productId}/comments', [CommentController::class, 'store']);
 });
 
 
