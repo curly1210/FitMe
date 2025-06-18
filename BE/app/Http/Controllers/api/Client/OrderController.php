@@ -127,32 +127,9 @@ class OrderController extends Controller
         try {
             $user = auth('api')->user();
 
-            $query = Order::with(['statusOrder', 'orderDetails'])
-                ->where('user_id', $user->id);
-
-            // Lọc theo status_order_id
-            $statusOrderId = $request->input('status_order_id');
-            if ($statusOrderId && in_array($statusOrderId, [1, 2, 3, 4, 5, 6, 7])) {
-                $query->where('status_order_id', $statusOrderId);
-            }
-
-            // Lọc theo khoảng ngày (date_from và date_to)
-            $dateFrom = $request->input('date_from');
-            $dateTo = $request->input('date_to');
-            if ($dateFrom) {
-                $query->where('created_at', '>=', $dateFrom . ' 00:00:00');
-            }
-            if ($dateTo) {
-                $query->where('created_at', '<=', $dateTo . ' 23:59:59');
-            }
-
-            // Tìm kiếm tương đối theo orders_code hoặc tên sản phẩm
-            $search = $request->input('search');
-            if ($search) {
-                $query->where('orders_code', 'like', "%{$search}%");
-            }
-            // Lấy danh sách và định dạng
-            $orders = $query->orderBy('id', 'desc')
+            $orders = Order::with(['statusOrder', 'orderDetails'])
+                ->where('user_id', $user->id)
+                ->orderBy('id', 'desc')
                 ->get()
                 ->map(function ($order) {
                     // Tính tổng quantity từ order_details
@@ -196,7 +173,7 @@ class OrderController extends Controller
                 $order->update(['status_order_id' => 7]);
                 $message = 'Đơn hàng đã được hủy thành công.';
             } elseif ($currentStatus == 4) {
-                // Chuyển từ "Đã giao hàng" (4) sang "Giao hàng thành công" (5)
+                // Chuyển từ "Đang giao hàng" (3) sang "Giao hàng thành công" (4)
                 $order->update(['status_order_id' => 5]);
                 $message = 'Đơn hàng đã được xác nhận nhận hàng thành công.';
             } else {
