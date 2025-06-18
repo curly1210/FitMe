@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
-    use ApiResponse, CreateOrderTrait;
+    use ApiResponse;
+    use CreateOrderTrait;
     public function redem(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -121,14 +122,39 @@ class OrderController extends Controller
         return $this->createOrder($request);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = auth('api')->user();
 
-            $orders = Order::with(['statusOrder', 'orderDetails'])
-                ->where('user_id', $user->id)
-                ->orderBy('id', 'desc')
+            // Khởi tạo query builder
+            $query = Order::with(['statusOrder', 'orderDetails'])
+                ->where('user_id', $user->id);
+
+            // Lọc theo status_order_id (dựa trên request)
+            $statusOrderId = $request->input('status_order_id');
+            if ($statusOrderId && in_array($statusOrderId, [1, 2, 3, 4, 5, 6, 7])) {
+                $query->where('status_order_id', $statusOrderId);
+            }
+
+            // Lọc theo khoảng ngày (date_from và date_to)
+            $dateFrom = $request->input('date_from');
+            $dateTo = $request->input('date_to');
+            if ($dateFrom) {
+                $query->where('created_at', '>=', $dateFrom . ' 00:00:00');
+            }
+            if ($dateTo) {
+                $query->where('created_at', '<=', $dateTo . ' 23:59:59');
+            }
+
+            // Tìm kiếm tương đối chỉ theo orders_code
+            $search = $request->input('search');
+            if ($search) {
+                $query->where('orders_code', 'like', "%{$search}%");
+            }
+
+            // Lấy danh sách và định dạng
+            $orders = $query->orderBy('id', 'desc')
                 ->get()
                 ->map(function ($order) {
                     // Tính tổng quantity từ order_details
@@ -168,13 +194,13 @@ class OrderController extends Controller
 
             // Xử lý logic cập nhật trạng thái
             if ($currentStatus == 1) {
-                // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (6)
+                // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (7)
                 $order->update(['status_order_id' => 7]);
                 $message = 'Đơn hàng đã được hủy thành công.';
             } elseif ($currentStatus == 4) {
-                // Chuyển từ "Đang giao hàng" (3) sang "Giao hàng thành công" (4)
-                $order->update(['status_order_id' => 5]);
-                $message = 'Đơn hàng đã được xác nhận nhận hàng thành công.';
+                // Chuyển từ "Đã giao hàng" (4) sang "Hoàn thành" (6)
+                $order->update(['status_order_id' => 6]);
+                $message = 'Đơn hàng đã được hoàn thành.';
             } else {
                 return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
             }
