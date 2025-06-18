@@ -18,18 +18,24 @@ class OrdersDetailFactory extends Factory
         $sizeName = Size::where('id', $productItem->size_id)->value('name');
         $productName = $productItem->product->name;
 
+        $salePercent = $this->faker->numberBetween(5, 30);
+        $salePrice = (int) ($productItem->price - ($productItem->price * $salePercent / 100));
+        $image = $productItem->image ?? $this->faker->imageUrl(300, 300, 'product', true);
 
         return [
             'order_id' => null,
             'product_item_id' => $productItem->id,
             'quantity' => $this->faker->numberBetween(1, 5),
-            'price' => $productItem->sale_price,
+            'price' => $productItem->price,
+            'sale_price' => $salePrice,
+            'sale_percent' => $salePercent,
+            'image_product' => $image,
             'color' => $colorName,
             'size' => $sizeName,
             'name_product' => $productName,
             'created_at' => now(),
             'updated_at' => now(),
         ];
-
     }
+
 }
