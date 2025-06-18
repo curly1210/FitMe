@@ -65,19 +65,22 @@ const CheckOut = () => {
         },
       },
       {
-        onSuccess: (response) => {
+          onSuccess: (response) => {
           const res = response?.data;
-          if (res?.discount) {
+          if (res?.discount > 0) {
             setDiscount(res.discount);
-            setAppliedCoupon(res.coupon_code);
-            message.success("Áp dụng mã giảm giá thành công!");
+            setAppliedCoupon(res.coupon); 
+            message.success(res.message); // dùng message BE
           } else {
-            message.error("Mã không hợp lệ hoặc không áp dụng được.");
+           
+            message.error(res.message || "Mã không hợp lệ hoặc không áp dụng được.");
           }
         },
-        onError: () => {
-          message.error("Mã giảm giá không hợp lệ.");
-        },
+        onError: (error) => {
+          const msg = error?.response?.data?.message;
+          message.error(msg || "Mã giảm giá không hợp lệ.");
+        }
+
       }
     );
   };
@@ -140,7 +143,7 @@ const CheckOut = () => {
       );
     }
   };
-
+console.log("selectedAddress", selectedAddress);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50">
@@ -178,20 +181,19 @@ const CheckOut = () => {
                 </div>
               ) : (
                 <>
-                  <p>
-                    <span className="font-bold">
-                      {selectedAddress.name_receive}
+                <div className="flex items-center gap-2">
+                  <p className="font-bold m-0">{selectedAddress.name_receive}</p>
+                  {selectedAddress.is_default ===1 && (
+                    <span className="px-2 py-0.5 text-xs bg-gray-200 rounded">
+                      Mặc định
                     </span>
-                    {selectedAddress.is_default && (
-                      <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 rounded">
-                        Mặc định
-                      </span>
-                    )}
-                  </p>
-                  <p>{selectedAddress.phone}</p>
-                  <p>{selectedAddress.email}</p>
-                  <p className="font-medium">{selectedAddress.full_address}</p>
-                </>
+                  )}
+                </div>
+                <p className="m-0">{selectedAddress.phone}</p>
+                {selectedAddress.email && <p className="m-0">{selectedAddress.email}</p>}
+                <p className="font-medium m-0">{selectedAddress.full_address}</p>
+              </>
+
               )}
             </div>
           </div>

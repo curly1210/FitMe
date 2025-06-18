@@ -124,6 +124,7 @@ const AddressList = ({
             refetch();
             setIsModalOpen(false);
           }}
+           totalAddresses={addresses.length}
         />
       </Modal>
     </div>
