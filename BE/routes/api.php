@@ -18,7 +18,6 @@ use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-
 use App\Http\Controllers\api\Client\VNPayController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
@@ -72,6 +71,7 @@ Route::post('/orders/checkout', [OrderController::class, 'store']);
 Route::get('/orders', [OrderController::class, 'index']);
 Route::post('/orders/{id}', [OrderController::class, 'update']);
 Route::patch('/orders/{id}', [OrderController::class, 'update']);
+Route::get('/orders/{id}', [OrderController::class, 'show']);
 
 
 
@@ -125,10 +125,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::patch('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->name('products.show');
-    Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    // Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/trash', [AdminProductController::class, 'trash'])->name('products.trash');
     Route::post('/products/restore/{id}', [AdminProductController::class, 'restore'])->name('products.restore');
-    Route::delete('/products/{id}', [AdminProductController::class, 'delete'])->name('products.delete');
+    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
 });
 
 

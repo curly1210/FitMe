@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration {
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,6 +13,7 @@ return new class() extends Migration {
         Schema::table('product_items', function (Blueprint $table) {
             $table->unsignedBigInteger('color_id')->after('is_active');
             $table->unsignedBigInteger('size_id')->after('color_id');
+            $table->softDeletes()->after('updated_at');
 
             $table->foreign('color_id')->references('id')->on('colors')->onDelete('cascade');
             $table->foreign('size_id')->references('id')->on('sizes')->onDelete('cascade');
@@ -31,6 +32,7 @@ return new class() extends Migration {
 
             // Sau đó mới xóa cột
             $table->dropColumn(['color_id', 'size_id']);
+            $table->dropSoftDeletes();
         });
     }
 };
