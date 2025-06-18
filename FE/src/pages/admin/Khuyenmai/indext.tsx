@@ -15,11 +15,11 @@ import { useList, useDelete } from "@refinedev/core";
 import AddKhuyenMai from "./AddCoupon";
 import EditCoupon from "./EditCoupon";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+// ✅ Định dạng thời gian đơn giản, không chuyển timezone
+const formatDateTimeVN = (value: any) => {
+  return dayjs(value).format("DD/MM/YYYY HH:mm:ss");
+};
 
 const CouponsList = () => {
   const [visible, setVisible] = useState(false);
@@ -105,8 +105,10 @@ const CouponsList = () => {
     setCacheBuster((prev) => prev + 1);
   };
 
-  const formatDateTimeVN = (value: any) => {
-    return dayjs(value).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss");
+  // ✅ Khi thêm thành công → tự động load lại danh sách + đóng drawer
+  const handleSuccessCreate = () => {
+    setCacheBuster((prev) => prev + 1);
+    setVisible(false);
   };
 
   const columns = [
@@ -193,9 +195,9 @@ const CouponsList = () => {
 
   const menu = (record: any) => (
     <Menu>
-      {record.is_active ? (
+      {record.is_active && (
         <Menu.Item onClick={() => handleEdit(record)}>Sửa</Menu.Item>
-      ) : null}
+      )}
       <Menu.Item onClick={() => showDeleteConfirm(record.id)}>Xóa</Menu.Item>
     </Menu>
   );
@@ -250,7 +252,11 @@ const CouponsList = () => {
       </div>
 
       {/* Add & Edit */}
-      <AddKhuyenMai visible={visible} onClose={() => setVisible(false)} />
+      <AddKhuyenMai
+        visible={visible}
+        onClose={() => setVisible(false)}
+        onSuccessCreate={handleSuccessCreate}
+      />
       <EditCoupon
         visible={editVisible}
         onClose={handleCloseEditDrawer}

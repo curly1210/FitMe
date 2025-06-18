@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Tabs, Radio, Button, Tooltip } from "antd";
-import { useOne } from "@refinedev/core";
+import { Tabs, Radio, Button, Tooltip, Input, Space, notification } from "antd";
+import { useCreate, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { RightOutlined } from "@ant-design/icons";
@@ -13,6 +13,7 @@ import { AiOutlineMinus } from "react-icons/ai";
 
 import { IoAdd } from "react-icons/io5";
 import { useCart } from "../../../hooks/useCart";
+import TextArea from "antd/es/input/TextArea";
 
 const { TabPane } = Tabs;
 
@@ -99,6 +100,7 @@ const ProductDetail = () => {
   const { openModal } = useModal();
 
   const [quantity, setQuantity] = useState(1);
+  const [comment, setComment] = useState("");
   const { addToCartHandler, isLoadingAddtoCart } = useCart();
 
   const onHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +115,7 @@ const ProductDetail = () => {
     setQuantity(newQuantity);
   };
 
-  const { data, isLoading, error } = useOne<Product>({
+  const { data, isLoading, error, refetch } = useOne<Product>({
     resource: "products",
     id: slug,
     queryOptions: { enabled: !!slug },
@@ -259,7 +261,34 @@ const ProductDetail = () => {
   // Ảnh nhỏ theo màu
   const images = colors.find((c) => c.id === selectedColorId)?.images || [];
 
-  // console.log("Colors:", colors);
+  /* Comment */
+  const { mutate: createComment, isLoading:loadingCreateComment } = useCreate();
+  const handleSubmitComment = () => {
+    /* Chưa có comment nào */
+    if (comment === "") {
+      notification.error({ message: "Vui lòng nhập comment" });
+      return;
+    }
+
+    createComment(
+      {
+        resource: `products/${product?.id}/comments`,
+        values: {
+          content: comment,
+        },
+      },
+      {
+        onSuccess: () => {
+          notification.success({ message: "Bình luận thành công" });
+          refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thêm thành công
+          setComment("");
+        },
+        onError: (error) => {
+          notification.error({ message: `${error?.response?.data?.message}` });
+        },
+      }
+    );
+  };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -452,26 +481,49 @@ const ProductDetail = () => {
             </p>
           </TabPane>
 
-          <TabPane
-            tab="Bình luận"
-            key="2"
-            className="border border-gray-200 p-4"
+          <TabPane tab="Bình luận" key="2" className="border border-gray-200 p-4">
+  <div className="max-h-[300px] overflow-y-auto pr-3 mb-4 space-y-4 rounded-md bg-gray-50 p-4 shadow-inner">
+    {product.comments?.filter((c) => c.is_active === 1).length > 0 ? (
+      product.comments
+        .filter((c) => c.is_active === 1)
+        .map((c) => (
+          <div
+            key={c.id}
+            className="bg-white border border-gray-200 p-3 rounded shadow-sm"
           >
-            {product.comments?.filter((c) => c.is_active === 1).length > 0 ? (
-              product.comments
-                .filter((c) => c.is_active === 1)
-                .map((c) => (
-                  <div key={c.id} className="mb-2">
-                    <p className="font-semibold">
-                      {c.user.name} - {c.created_at}
-                    </p>
-                    <p className="text-gray-700 text-sm">{c.content}</p>
-                  </div>
-                ))
-            ) : (
-              <p>Chưa có bình luận nào.</p>
-            )}
-          </TabPane>
+            <p className="font-semibold text-sm text-gray-800 mb-1">
+              {c.user.name} -{" "}
+              <span className="text-xs text-gray-500">{c.created_at}</span>
+            </p>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {c.content}
+            </p>
+          </div>
+        ))
+    ) : (
+      <p className="text-gray-500 italic">Chưa có bình luận nào.</p>
+    )}
+  </div>
+
+  <Space.Compact style={{ width: "100%" }}>
+    <TextArea
+      rows={4}
+      placeholder="Bình luận ..."
+      value={comment}
+      onChange={(e) => setComment(e.target.value)}
+      className="rounded-l-md"
+    />
+    <Button
+      type="primary"
+      className="rounded-r-md"
+      onClick={handleSubmitComment}
+      loading={loadingCreateComment}
+    >
+      Bình luận
+    </Button>
+  </Space.Compact>
+</TabPane>
+
           <TabPane
             tab="Đánh giá"
             key="3"
