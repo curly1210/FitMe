@@ -18,12 +18,14 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\OrderConfirmationMail;
 use App\Http\Controllers\Controller;
+use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
     use ApiResponse;
     use CreateOrderTrait;
+    use CloudinaryTrait;
     public function redem(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -99,10 +101,6 @@ class OrderController extends Controller
             'message' => 'Áp dụng mã giảm giá thành công.',
         ]);
     }
-
-
-
-
     public function store(Request $request)
     {
         $request->validate([
@@ -127,9 +125,34 @@ class OrderController extends Controller
         try {
             $user = auth('api')->user();
 
-            $orders = Order::with(['statusOrder', 'orderDetails'])
-                ->where('user_id', $user->id)
-                ->orderBy('id', 'desc')
+            // Khởi tạo query builder
+            $query = Order::with(['statusOrder', 'orderDetails'])
+                ->where('user_id', $user->id);
+
+            // Lọc theo status_order_id (dựa trên request)
+            $statusOrderId = $request->input('status_order_id');
+            if ($statusOrderId && in_array($statusOrderId, [1, 2, 3, 4, 5, 6, 7])) {
+                $query->where('status_order_id', $statusOrderId);
+            }
+
+            // Lọc theo khoảng ngày (date_from và date_to)
+            $dateFrom = $request->input('date_from');
+            $dateTo = $request->input('date_to');
+            if ($dateFrom) {
+                $query->where('created_at', '>=', $dateFrom . ' 00:00:00');
+            }
+            if ($dateTo) {
+                $query->where('created_at', '<=', $dateTo . ' 23:59:59');
+            }
+
+            // Tìm kiếm tương đối chỉ theo orders_code
+            $search = $request->input('search');
+            if ($search) {
+                $query->where('orders_code', 'like', "%{$search}%");
+            }
+
+            // Lấy danh sách và định dạng
+            $orders = $query->orderBy('id', 'desc')
                 ->get()
                 ->map(function ($order) {
                     // Tính tổng quantity từ order_details
@@ -173,9 +196,9 @@ class OrderController extends Controller
                 $order->update(['status_order_id' => 7]);
                 $message = 'Đơn hàng đã được hủy thành công.';
             } elseif ($currentStatus == 4) {
-                // Chuyển từ "Đang giao hàng" (3) sang "Giao hàng thành công" (4)
-                $order->update(['status_order_id' => 5]);
-                $message = 'Đơn hàng đã được xác nhận nhận hàng thành công.';
+                // Chuyển từ "Đã giao hàng" (4) sang "Hoàn thành" (6)
+                $order->update(['status_order_id' => 6]);
+                $message = 'Đơn hàng đã được hoàn thành.';
             } else {
                 return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
             }
@@ -185,6 +208,67 @@ class OrderController extends Controller
             ], $message, 200);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi cập nhật trạng thái đơn hàng', [$th->getMessage()], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $user = auth('api')->user();
+            $order = Order::with([
+                'orderDetails' => function ($query) {
+                    $query->with([
+                        'productItem' => function ($q) {
+                            $q->with(['product', 'color', 'size']);
+                        },
+                        'productItem.product.productImages'
+                    ]);
+                }
+            ])->where('user_id', $user->id)
+                ->findOrFail($id);
+
+            // Định dạng order_items
+            $orderItems = $order->orderDetails->map(function ($detail) {
+                $productItem = $detail->productItem;
+                $product = $productItem->product;
+                $color = $productItem->color;
+                $size = $productItem->size;
+                // Lấy ảnh đầu tiên khớp với color_id của productItem
+                $image = $product->productImages->where('color_id', $productItem->color_id)->first()?->url;
+                $image = $this->buildImageUrl($image) ?? null;
+
+                return [
+                    'id' => $detail->id,
+                    'idProduct_item' => $productItem->id,
+                    'name' => $product->name,
+                    'quantity' => $detail->quantity,
+                    'price' => $detail->price,
+                    'sale_percent' => $detail->sale_percent,
+                    'sale_price' => $detail->sale_price,
+                    'sku' => $productItem->sku,
+                    'image' => $image,
+                    'subtotal' => $detail->quantity * $detail->sale_price,
+                    'color' => $color->name ?? null,
+                    'size' => $size->name ?? null,
+                ];
+            })->values();
+
+            // Định dạng response
+            $response = [
+                'orderItems' => $orderItems,
+                'payment_method' => $order->payment_method,
+                'receiving_address' => $order->receiving_address,
+                'total_price_item' => $order->total_price_item,
+                'shipping_price' => $order->shipping_price,
+                'discount' => $order->discount,
+                'total_amount' => $order->total_amount,
+                'status_payment' => $order->status_payment,
+                'status_order_id' => $order->status_order_id,
+            ];
+
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi lấy chi tiết đơn hàng', [$th->getMessage()], 403);
         }
     }
 }
