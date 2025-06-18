@@ -31,7 +31,7 @@
                             @if($item['size'])<br><small>Size: {{ $item['size'] }}</small>@endif
                         </td>
                         <td style="text-align: center; padding: 8px;">{{ $item['quantity'] }}</td>
-                        <td style="text-align: right; padding: 8px;">{{ number_format($item['price']) }}đ</td>
+                        <td style="text-align: right; padding: 8px;">{{ number_format($item['sale_price']) }}đ</td>
                     </tr>
                 @endforeach
             </tbody>
