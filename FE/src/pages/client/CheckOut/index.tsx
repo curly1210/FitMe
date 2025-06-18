@@ -91,8 +91,10 @@ const CheckOut = () => {
         idProduct_item: item.idProduct_item,
         quantity: item.quantity,
         idItem: item.id,
-        Image: item.image,
-        salePrice: item.sale_price,
+        price: item.price,
+        sale_price: item.sale_price,          
+        sale_percent: item.sale_percent,      
+        image_product: item.image,
       })),
       payment_method: selectedMethod,
       shipping_address_id: selectedAddress.id,
@@ -327,11 +329,10 @@ const CheckOut = () => {
           <button
             disabled={!selectedAddress}
             onClick={handleCheckout}
-            className={`w-full py-2 rounded text-sm font-semibold cursor-pointer ${
-              selectedAddress
+            className={`w-full py-2 rounded text-sm font-semibold cursor-pointer ${selectedAddress
                 ? "bg-black text-white"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+              }`}
           >
             Thanh toán
           </button>
