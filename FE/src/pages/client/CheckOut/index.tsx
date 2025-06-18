@@ -88,9 +88,10 @@ const CheckOut = () => {
 
     const values = {
       cartItems: orderItems.map((item: any) => ({
-        idProduct_item: item.id,
+        idProduct_item: item.idProduct_item,
         quantity: item.quantity,
         idItem: item.id,
+        Image: item.image,
         salePrice: item.sale_price,
       })),
       payment_method: selectedMethod,
