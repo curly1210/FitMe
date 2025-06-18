@@ -39,17 +39,17 @@ trait CreateOrderTrait
             $orderItems[] = [
                 'product_item_id' => $productItem->id,
                 'quantity' => $item['quantity'],
-                'price' => $item['price'],                     
-                'sale_price' => $item['sale_price'],          
-                'sale_percent' => $item['sale_percent'],       
-                'image_product' => $item['image_product'],             
+                'price' => $item['price'],
+                'sale_price' => $item['sale_price'],
+                'sale_percent' => $item['sale_percent'],
+                'image_product' => $item['image_product'],
                 'subtotal' => $item['sale_price'] * $item['quantity'], // Tổng phụ theo giá sale
                 'name_product' => $productItem->product->name,
                 'color' => optional($productItem->color)->name,
                 'size' => optional($productItem->size)->name,
             ];
         }
-        
+
 
         // Xử lý mã giảm giá (nếu có)
         $coupon = null;
@@ -71,7 +71,7 @@ trait CreateOrderTrait
                 ], 400);
             }
         }
-        
+
 
         $address = $user->addresses()->find($request->shipping_address_id);
         if (!$address) {
@@ -93,7 +93,7 @@ trait CreateOrderTrait
                 'shipping_price' => $request->shipping_price,
                 'discount' => $request->discount ?? 0,
                 'total_amount' => $request->total_amount,
-                'status_payment' => 1,
+                'status_payment' => $payment_status,
                 'payment_method' => $request->payment_method,
                 'status_order_id' => 1,
                 'user_id' => $user->id,
@@ -102,7 +102,7 @@ trait CreateOrderTrait
                 'recipient_phone' => $address->phone,
             ]);
 
-            
+
 
             foreach ($orderItems as $item) {
                 OrdersDetail::create(array_merge(['order_id' => $order->id], $item));

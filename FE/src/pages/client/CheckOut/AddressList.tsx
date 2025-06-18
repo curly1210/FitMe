@@ -1,14 +1,6 @@
-import {
-  Button,
-  Modal,
-  Radio,
-  Typography,
-  Spin,
-} from "antd";
-import {
-  EditOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button, Modal, Radio, Typography, Spin } from "antd";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import ModalAddress from "../../../components/Modal/ModalAddress";
 import { useList } from "@refinedev/core";
@@ -24,7 +16,11 @@ interface AddressListProps {
   defaultMode?: "create" | "list";
 }
 
-const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListProps) => {
+const AddressList = ({
+  onSelect,
+  selectedAddressId,
+  defaultMode,
+}: AddressListProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [currentRecord, setCurrentRecord] = useState<any>(null);
@@ -33,7 +29,6 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
     resource: "addresses",
     pagination: { mode: "off" },
   });
-  
 
   const addresses = data?.data || [];
 
@@ -42,12 +37,12 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
     setCurrentRecord(record || null);
     setIsModalOpen(true);
   };
-  
+
   useEffect(() => {
-  if (defaultMode === "create") {
-    openModal("create");
-  }
-}, [defaultMode]);
+    if (defaultMode === "create") {
+      openModal("create");
+    }
+  }, [defaultMode]);
 
   return (
     <div className="p-4 pr-5">
@@ -60,7 +55,9 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
       ) : (
         <Radio.Group
           onChange={(e) => {
-            const selected = addresses.find((a: any) => a.id === e.target.value);
+            const selected = addresses.find(
+              (a: any) => a.id === e.target.value
+            );
             if (selected) {
               onSelect(selected);
             }
@@ -69,31 +66,34 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
           className="flex flex-col gap-3"
         >
           {addresses.map((addr: any) => (
-            <div key={addr.id} className="p-3 relative rounded-sm bg-white w-full">
+            <div
+              key={addr.id}
+              className="p-3 relative rounded-sm bg-white w-full"
+            >
               <div className="flex justify-between items-start gap-4 w-full">
                 <Radio value={addr.id} />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Text>
-                      {addr.name_receive} | {addr.phone} 
+                      {addr.name_receive} | {addr.phone}
                     </Text>
                     {addr.is_default && (
-                      <span className="bg-black text-white text-xs px-2 py-1">Mặc định</span>
+                      <span className="bg-black text-white text-xs px-2 py-1">
+                        Mặc định
+                      </span>
                     )}
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
                     {addr.full_address}
                   </div>
                 </div>
-
-             
-                </div>
-                   <div className="absolute top-3 left-150">
-                  <Button
-                    icon={<EditOutlined />}
-                    size="small"
-                    onClick={() => openModal("edit", addr)}
-                  />
+              </div>
+              <div className="absolute top-3 left-150">
+                <Button
+                  icon={<EditOutlined />}
+                  size="small"
+                  onClick={() => openModal("edit", addr)}
+                />
               </div>
             </div>
           ))}
@@ -101,7 +101,11 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
       )}
 
       <div className="mt-4">
-        <Button type="link" icon={<PlusOutlined />} onClick={() => openModal("create")}>
+        <Button
+          type="link"
+          icon={<PlusOutlined />}
+          onClick={() => openModal("create")}
+        >
           Thêm địa chỉ
         </Button>
       </div>
@@ -111,10 +115,9 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
         onCancel={() => setIsModalOpen(false)}
         footer={null}
         destroyOnClose
-     
       >
         <ModalAddress
-         showCloseIcon={false}
+          showCloseIcon={false}
           mode={modalMode}
           record={currentRecord}
           refetch={() => {
