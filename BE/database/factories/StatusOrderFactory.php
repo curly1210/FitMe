@@ -22,9 +22,9 @@ class StatusOrderFactory extends Factory
             'Chờ xác nhận' => "#6c757d",
             'Đang chuẩn bị hàng' => '#0d6efd',
             'Đang giao hàng' => '#ffc107',
-            'Đã giao' => '#ffc107',
-            'Giao hàng thành công' => '#198754',
-            'Giao hàng thất bại' => '#0dcaf0',
+            'Đã giao hàng' => '#ffc107',
+            'Giao hàng thất bại' => '#198754',
+            'Hoàn thành' => '#0dcaf0',
             'Đã hủy' => '#dc3545'
         ];
         // Chuyển associative array thành indexed array
