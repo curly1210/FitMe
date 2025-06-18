@@ -20,6 +20,7 @@ interface ModalAddressProps {
   mode: "create" | "edit";
   record?: any;
   showCloseIcon?: boolean;
+  totalAddresses?: number;
 }
 
 const ModalAddress = ({
@@ -27,6 +28,7 @@ const ModalAddress = ({
   mode,
   record,
   showCloseIcon = true,
+  totalAddresses = 0,
 }: ModalAddressProps) => {
   const [isLoading, setIsLoading] = useState(true); // loading data dữ liệu các tỉnh thành
   const [data, setData] = useState<any>([]);
@@ -301,9 +303,10 @@ const ModalAddress = ({
             valuePropName="checked"
             className="!mb-0"
           >
-            <Checkbox className="!rounded-none" />
+            <Checkbox className="!rounded-none"
+             disabled={totalAddresses === 1} />
           </Form.Item>
-          <p>Đặt làm địa chỉ mặc định</p>
+          <p className={`${totalAddresses === 1 ? "text-gray-400" : ""}`}>Đặt làm địa chỉ mặc định</p>
         </div>
         <div className="flex justify-end">
           <Button

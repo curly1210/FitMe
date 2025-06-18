@@ -74,6 +74,7 @@ foreach ($this->productImages as $image) {
                     'import_price' => $item->import_price,
                     'price' => $item->price,
                     'sale_price' => $item->sale_price,
+                    'sale_percent'=> $item->sale_percent,
                     'stock' => $item->stock,
                     'sku' => $item->sku,
                     'color_id' => $item->color->id,

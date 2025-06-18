@@ -121,6 +121,7 @@ const AddressList = ({ onSelect, selectedAddressId ,defaultMode}: AddressListPro
             refetch();
             setIsModalOpen(false);
           }}
+           totalAddresses={addresses.length}
         />
       </Modal>
     </div>

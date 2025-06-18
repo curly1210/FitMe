@@ -128,17 +128,17 @@ export default function Detail({ open, onClose, record }: DetailProps) {
               <h2 className="text-lg font-semibold mb-4">Thông tin chung</h2>
               <Form layout="vertical" form={form}>
                 <div className="grid grid-cols-2 gap-4">
-                  <Form.Item label="Tên người dùng" name="name">
-                    <Input  />
+                  <Form.Item label="Tên người dùng" name="name" >
+                    <Input disabled />
                   </Form.Item>
                   <Form.Item label="Email" name="email">
-                    <Input  />
+                    <Input disabled />
                   </Form.Item>
                   <Form.Item label="Số điện thoại" name="phone">
-                    <Input  />
+                    <Input disabled />
                   </Form.Item>
                   <Form.Item label="Ngày sinh" name="birthday">
-                    <DatePicker className="w-full"  />
+                    <DatePicker className="w-full" disabled />
                   </Form.Item>
                   <Form.Item label="Trạng thái hoạt động" name="is_ban">
                      <span style={{ color: user.is_ban === 0 ? "green" : "red" }}>
