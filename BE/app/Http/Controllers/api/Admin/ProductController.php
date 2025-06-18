@@ -408,7 +408,7 @@ class ProductController extends Controller
             }
             DB::beginTransaction();
 
-            $product->update(['is_active' => 0]);
+            $product->update(['is_active' => 0]);   
 
             $product->delete();
 

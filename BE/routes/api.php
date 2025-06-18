@@ -125,10 +125,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::patch('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->name('products.show');
-    Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    // Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/trash', [AdminProductController::class, 'trash'])->name('products.trash');
     Route::post('/products/restore/{id}', [AdminProductController::class, 'restore'])->name('products.restore');
-    Route::delete('/products/{id}', [AdminProductController::class, 'delete'])->name('products.delete');
+    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
 });
 
 
