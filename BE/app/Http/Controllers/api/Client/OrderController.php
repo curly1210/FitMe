@@ -112,11 +112,16 @@ class OrderController extends Controller
             'cartItems.*.idProduct_item' => 'required|exists:product_items,id',
             'cartItems.*.quantity' => 'required|integer|min:1',
             'cartItems.*.idItem' => 'required|exists:cart_items,id',
-            'cartItems.*.salePrice' => 'required|numeric|min:0',
+            'cartItems.*.price' => 'required|numeric|min:0',
+
+            'cartItems.*.sale_price' => 'required|numeric|min:0',
+            'cartItems.*.sale_percent' => 'required|numeric|min:0',
+            'cartItems.*.image_product' => 'required|string',
             'total_price_cart' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
         ]);
+
         return $this->createOrder($request);
     }
 
