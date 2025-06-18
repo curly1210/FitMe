@@ -18,12 +18,14 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\OrderConfirmationMail;
 use App\Http\Controllers\Controller;
+use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
     use ApiResponse;
     use CreateOrderTrait;
+    use CloudinaryTrait;
     public function redem(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -99,10 +101,6 @@ class OrderController extends Controller
             'message' => 'Áp dụng mã giảm giá thành công.',
         ]);
     }
-
-
-
-
     public function store(Request $request)
     {
         $request->validate([
@@ -210,6 +208,67 @@ class OrderController extends Controller
             ], $message, 200);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi cập nhật trạng thái đơn hàng', [$th->getMessage()], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $user = auth('api')->user();
+            $order = Order::with([
+                'orderDetails' => function ($query) {
+                    $query->with([
+                        'productItem' => function ($q) {
+                            $q->with(['product', 'color', 'size']);
+                        },
+                        'productItem.product.productImages'
+                    ]);
+                }
+            ])->where('user_id', $user->id)
+                ->findOrFail($id);
+
+            // Định dạng order_items
+            $orderItems = $order->orderDetails->map(function ($detail) {
+                $productItem = $detail->productItem;
+                $product = $productItem->product;
+                $color = $productItem->color;
+                $size = $productItem->size;
+                // Lấy ảnh đầu tiên khớp với color_id của productItem
+                $image = $product->productImages->where('color_id', $productItem->color_id)->first()?->url;
+                $image = $this->buildImageUrl($image) ?? null;
+
+                return [
+                    'id' => $detail->id,
+                    'idProduct_item' => $productItem->id,
+                    'name' => $product->name,
+                    'quantity' => $detail->quantity,
+                    'price' => $detail->price,
+                    'sale_percent' => $detail->sale_percent,
+                    'sale_price' => $detail->sale_price,
+                    'sku' => $productItem->sku,
+                    'image' => $image,
+                    'subtotal' => $detail->quantity * $detail->sale_price,
+                    'color' => $color->name ?? null,
+                    'size' => $size->name ?? null,
+                ];
+            })->values();
+
+            // Định dạng response
+            $response = [
+                'orderItems' => $orderItems,
+                'payment_method' => $order->payment_method,
+                'receiving_address' => $order->receiving_address,
+                'total_price_item' => $order->total_price_item,
+                'shipping_price' => $order->shipping_price,
+                'discount' => $order->discount,
+                'total_amount' => $order->total_amount,
+                'status_payment' => $order->status_payment,
+                'status_order_id' => $order->status_order_id,
+            ];
+
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi lấy chi tiết đơn hàng', [$th->getMessage()], 403);
         }
     }
 }
