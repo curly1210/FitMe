@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryControll
 use App\Http\Controllers\api\Client\VNPayController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
+use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -74,7 +75,16 @@ Route::patch('/orders/{id}', [OrderController::class, 'update']);
 Route::get('/orders/{id}', [OrderController::class, 'show']);
 
 
+Route::prefix('admin')->group(function () {
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
 
+    Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+
+    Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+
+
+
+});
 
 
 
