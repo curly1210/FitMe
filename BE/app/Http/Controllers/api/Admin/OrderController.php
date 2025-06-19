@@ -1,0 +1,92 @@
+<?php
+namespace App\Http\Controllers\api\Admin;
+
+use App\Models\User;
+use App\Models\Order;
+
+use App\Models\OrdersDetail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\AdminOrderResource;
+use App\Http\Resources\Admin\AdminOrderDetailResource;
+
+class OrderController extends Controller
+{
+    private $statusMap = [
+        0 => ['label' => 'Chờ xác nhận', 'color' => '#6c757d'],
+        1 => ['label' => 'Đang chuẩn bị hàng', 'color' => '#0d6efd'],
+        2 => ['label' => 'Đang giao hàng', 'color' => '#ffc107'],
+        3 => ['label' => 'Đã giao hàng', 'color' => '#ffc107'],
+        4 => ['label' => 'Giao hàng thất bại', 'color' => '#198754'],
+        5 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
+        6 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
+    ];
+
+    public function index(Request $request)
+    {
+        $query = Order::with('user')
+            ->when($request->has('search'), function ($q) use ($request) {
+                $q->where(function ($query) use ($request) {
+                    $query->whereHas('user', function ($uq) use ($request) {
+                        $uq->where('name', 'like', '%' . $request->search . '%');
+                    })->orWhere('orders_code', 'like', '%' . $request->search . '%');
+                });
+            })
+            ->when($request->filled('status_order_id'), function ($q) use ($request) {
+                $q->where('status_order_id', $request->status_order_id);
+            })
+            ->when($request->filled('status_payment'), function ($q) use ($request) {
+                $q->where('status_payment', $request->status_payment);
+            })
+            ->when($request->filled('from') && $request->filled('to'), function ($q) use ($request) {
+                $q->whereBetween('created_at', [
+                    $request->from . ' 00:00:00',
+                    $request->to . ' 23:59:59'
+                ]);
+            })
+            ->when($request->filled('date'), function ($q) use ($request) {
+                $q->whereDate('created_at', $request->date);
+            });
+
+        $orders = $query->get();
+
+        return AdminOrderResource::collection($orders);
+    }
+
+    public function show($id)
+    {
+        $order = Order::with(['user', 'statusOrder', 'orderDetails'])->findOrFail($id);
+
+        return response()->json([
+            'order_code' => $order->orders_code,
+            'customer_name' => $order->user->name,
+            'status' => $order->statusOrder->name,
+            'created_at' => $order->created_at->format('d/m/Y H:i'),
+            'receiving_address' => $order->receiving_address,
+            'recipient_phone' => $order->recipient_phone,
+            'payment_method' => $order->payment_method,
+            'payment_status' => $order->status_payment ? 'Đã thanh toán' : 'Chưa thanh toán',
+            'total_price_item' => $order->total_price_item,
+            'shipping_price' => $order->shipping_price,
+            'discount' => $order->discount,
+            'total_amount' => $order->total_amount,
+            'order_details' => AdminOrderDetailResource::collection($order->orderDetails)
+        ]);
+    }
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status_order_id' => 'required|integer|min:0|max:6',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->status_order_id = $request->status_order_id;
+        $order->save();
+
+        return response()->json(['message' => 'Cập nhật trạng thái đơn hàng thành công.']);
+    }
+}
