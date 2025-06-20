@@ -61,7 +61,7 @@ const itemsNavigate: MenuItem[] = [
     "6",
     <ProductOutlined />
   ),
-  getItem(<Link to="/admin">Quản lý đơn hàng</Link>, "7", <ShoppingOutlined />),
+  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "7", <ShoppingOutlined />),
   getItem(
     <Link to="/admin">Quản lý khuyến mãi</Link>,
     "8",

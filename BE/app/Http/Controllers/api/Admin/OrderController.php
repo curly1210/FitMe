@@ -15,13 +15,13 @@ use App\Http\Resources\Admin\AdminOrderDetailResource;
 class OrderController extends Controller
 {
     private $statusMap = [
-        0 => ['label' => 'Chờ xác nhận', 'color' => '#6c757d'],
-        1 => ['label' => 'Đang chuẩn bị hàng', 'color' => '#0d6efd'],
-        2 => ['label' => 'Đang giao hàng', 'color' => '#ffc107'],
-        3 => ['label' => 'Đã giao hàng', 'color' => '#ffc107'],
-        4 => ['label' => 'Giao hàng thất bại', 'color' => '#198754'],
-        5 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
-        6 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
+        1 => ['label' => 'Chờ xác nhận', 'color' => '#6c757d'],
+        2 => ['label' => 'Đang chuẩn bị hàng', 'color' => '#0d6efd'],
+        3 => ['label' => 'Đang giao hàng', 'color' => '#ffc107'],
+        4 => ['label' => 'Đã giao hàng', 'color' => '#ffc107'],
+        5 => ['label' => 'Giao hàng thất bại', 'color' => '#198754'],
+        6 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
+        7 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
     ];
 
     public function index(Request $request)
@@ -80,7 +80,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status_order_id' => 'required|integer|min:0|max:6',
+            'status_order_id' => 'required|integer|min:1|max:7',
         ]);
 
         $order = Order::findOrFail($id);

@@ -10,6 +10,7 @@ import User from "../pages/admin/User/indext";
 import ListProducts from "../pages/admin/Product";
 import TrashProducts from "../pages/admin/Product/TrashProducts";
 import CouponsList from "../pages/admin/Khuyenmai/indext";
+import Oder from "../pages/admin/Oder/indext";
 
 
 export const adminRoutes = [
@@ -51,6 +52,10 @@ export const adminRoutes = [
                {
             path: "coupons",
             element: <CouponsList />,
+          },
+                  {
+            path: "oders",
+            element: <Oder />,
           },
       
         ],
