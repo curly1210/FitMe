@@ -176,8 +176,15 @@ const handleUpdateStatus = (
       title: "Thanh toán",
       dataIndex: "status_payment",
       key: "status_payment",
-      render: (value: number) =>
-        value === 1 ? "Đã thanh toán" : "Chưa thanh toán",
+          render: (value: any) => {
+        if (value === 1 || value === "Đã thanh toán") {
+          return <span style={{ color: "green" }}>Đã thanh toán</span>;
+        }
+        if (value === 0 || value === "Chưa thanh toán") {
+          return <span style={{ color: "red" }}>Chưa thanh toán</span>;
+        }
+        return <span>{String(value)}</span>;
+      },
     },
     {
       title: "Trạng thái",
