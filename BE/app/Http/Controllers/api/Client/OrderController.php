@@ -144,10 +144,12 @@ class OrderController extends Controller
             $dateFrom = $request->input('date_from');
             $dateTo = $request->input('date_to');
             if ($dateFrom) {
-                $query->where('created_at', '>=', $dateFrom . ' 00:00:00');
+                // $query->where('created_at', '>=', $from . ' 00:00:00');
+                $query->whereDate('created_at', '>=', $dateFrom);
             }
             if ($dateTo) {
-                $query->where('created_at', '<=', $dateTo . ' 23:59:59');
+                // $query->where('created_at', '<', $to . ' 23:59:59');
+                $query->whereDate('created_at', '<=', $dateTo);
             }
 
             // Tìm kiếm tương đối chỉ theo orders_code
@@ -269,6 +271,10 @@ class OrderController extends Controller
                 'total_amount' => $order->total_amount,
                 'status_payment' => $order->status_payment,
                 'status_order_id' => $order->status_order_id,
+                "created_at" => $order->created_at,
+                "order_code" => $order->orders_code,
+                "recipient_name" => $order->recipient_name,
+                "recipient_phone" => $order->recipient_phone
             ];
 
             return response()->json($response);

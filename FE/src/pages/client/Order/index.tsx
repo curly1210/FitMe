@@ -1,15 +1,57 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { RightOutlined } from "@ant-design/icons";
+import { RightOutlined, SwapRightOutlined } from "@ant-design/icons";
 import { useList, useUpdate } from "@refinedev/core";
-import { notification, Popconfirm } from "antd";
+import { WiDirectionRight } from "react-icons/wi";
+
+import {
+  ConfigProvider,
+  DatePicker,
+  Input,
+  notification,
+  Popconfirm,
+  Spin,
+} from "antd";
+import dayjs from "dayjs";
+import { useState } from "react";
 import { Link } from "react-router";
+import viVN from "antd/locale/vi_VN";
+import "dayjs/locale/vi";
+dayjs.locale("vi");
+
+const { Search } = Input;
 
 const Order = () => {
-  const { data: ordersResponse, refetch } = useList({ resource: "orders" });
+  const [idOrderStatus, setIdOrderStatus] = useState(0);
+  const [searchText, setSearchText] = useState<any>(undefined);
+
+  const [fromDate, setFromDate] = useState<dayjs.Dayjs | undefined>(undefined);
+  const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
+
+  const {
+    data: ordersResponse,
+    isLoading,
+    refetch,
+  } = useList({
+    resource: "orders",
+    filters: [
+      { field: "status_order_id", operator: "eq", value: idOrderStatus },
+      { field: "search", operator: "eq", value: searchText },
+      {
+        field: "date_from",
+        operator: "eq",
+        value: fromDate?.format("YYYY-MM-DD"),
+      },
+      { field: "date_to", operator: "eq", value: toDate?.format("YYYY-MM-DD") },
+    ],
+  });
+
+  // console.log("ngay bat dau:", fromDate);
 
   const orders = ordersResponse?.data || [];
 
-  console.log(orders);
+  const handleSearchText = (value: any) => {
+    setSearchText(value || undefined);
+  };
 
   const { mutate } = useUpdate({
     resource: "orders",
@@ -34,7 +76,7 @@ const Order = () => {
   };
 
   return (
-    <>
+    <div className="list-order-client">
       <div className="flex gap-3 border border-gray-400 items-center py-5 px-4 mb-5">
         <Link to={"/"}>Trang chủ</Link>
         <RightOutlined />
@@ -50,15 +92,186 @@ const Order = () => {
         </div>
         <div className="col-span-8">
           <h1 className="font-semibold mb-8 text-2xl">Đơn hàng</h1>
-          <div className="flex items-center gap-3 mb-5">
-            <p className="pr-3 py-1 border-b-2 font-semibold border-black">
-              Đơn hàng
+          <div className="flex items-center gap-3 mb-5 border-b-1 border-gray-300 pb-3">
+            <p
+              onClick={() => setIdOrderStatus(0)}
+              className={`pr-3 py-1 cursor-pointer border-b-2  ${
+                !idOrderStatus
+                  ? " font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Tất cả
             </p>
-            <p className="pr-3 py-1   border-black">Thành công</p>
-            <p className="pr-3 py-1   border-black">Đã hủy</p>
+            <p
+              onClick={() => setIdOrderStatus(1)}
+              className={`pr-3 py-1 cursor-pointer border-b-2 ${
+                idOrderStatus === 1
+                  ? "font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Chờ xác nhận
+            </p>
+            <p
+              onClick={() => setIdOrderStatus(2)}
+              className={`pr-3 py-1 cursor-pointer border-b-2 ${
+                idOrderStatus === 2
+                  ? "font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Chuẩn bị hàng
+            </p>
+            <p
+              onClick={() => setIdOrderStatus(3)}
+              className={`pr-3 py-1 cursor-pointer border-b-2 ${
+                idOrderStatus === 3
+                  ? "font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Đang giao hàng
+            </p>
+            <p
+              onClick={() => setIdOrderStatus(4)}
+              className={`pr-3 py-1 cursor-pointer border-b-2 ${
+                idOrderStatus === 4
+                  ? "font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Đã giao hàng
+            </p>
+            <p
+              onClick={() => setIdOrderStatus(6)}
+              className={`pr-3 py-1 cursor-pointer border-b-2 ${
+                idOrderStatus === 6
+                  ? "font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Hoàn thành
+            </p>
+            <p
+              onClick={() => setIdOrderStatus(7)}
+              className={`pr-3 py-1 cursor-pointer border-b-2 ${
+                idOrderStatus === 7
+                  ? "font-semibold border-black"
+                  : "border-transparent"
+              } `}
+            >
+              Đã hủy
+            </p>
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-12 mb-4 gap-x-3">
+            <div className="col-span-4">
+              <Search
+                placeholder="Tìm kiếm mã đơn hàng"
+                onChange={(e: any) => handleSearchText(e.target.value)}
+                // style={{ width: 300 }}
+                allowClear
+              />
+            </div>
+
+            <div className="flex gap-2 col-span-8 !w-full">
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  placeholder="Từ ngày"
+                  value={fromDate}
+                  onChange={(date) => setFromDate(date)}
+                  allowClear
+                  className="!w-full"
+                />
+              </ConfigProvider>
+
+              <SwapRightOutlined className="text-2xl !text-gray-500" />
+
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  placeholder="Đến ngày"
+                  value={toDate}
+                  onChange={(date) => setToDate(date)}
+                  className="!w-full"
+                  allowClear
+                />
+              </ConfigProvider>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <Spin
+              className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+              style={{ textAlign: "center" }}
+              size="large"
+            />
+          ) : (
+            <div className="flex flex-col gap-5">
+              {orders?.map((order: any) => (
+                <div
+                  key={order.id}
+                  className="py-3 px-4 text-sm border border-gray-300 flex flex-col gap-4"
+                >
+                  <div className="flex items-center gap-20">
+                    <p className="font-semibold">
+                      Mã đơn hàng:{" "}
+                      <span className="font-normal">#{order?.orders_code}</span>
+                    </p>
+                    <p>
+                      Ngày đặt:{" "}
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </p>
+                    <p>
+                      {order.total_amount_items} sản phẩm (
+                      {order?.total_amount.toLocaleString()} đ)
+                    </p>
+                  </div>
+                  <div>Giao đến: {order?.receiving_address}</div>
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold">{order?.status_name}</p>
+                    <div className="flex gap-3">
+                      <Link to={`/order/${order?.id}`}>
+                        <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
+                          XEM CHI TIẾT
+                        </button>
+                      </Link>
+                      {order.status_name == "Chờ xác nhận" && (
+                        <Popconfirm
+                          title="Cập nhật trạng thái"
+                          onConfirm={() => onHandleChangeStatus(order.id)}
+                          description="Bạn có chắc chắn muốn hủy đơn hàng không?"
+                          okText="Có"
+                          cancelText="Không"
+                        >
+                          <button className="text-white bg-black py-2 px-3 cursor-pointer">
+                            HỦY ĐƠN
+                          </button>
+                        </Popconfirm>
+                      )}
+                      {order.status_name == "Đã giao" && (
+                        <Popconfirm
+                          title="Cập nhật trạng thái"
+                          onConfirm={() => onHandleChangeStatus(order.id)}
+                          description="Xác nhận nhận hàng thành công?"
+                          okText="Có"
+                          cancelText="Không"
+                        >
+                          <button className="text-white bg-black py-2 px-3 cursor-pointer">
+                            ĐÃ NHẬN HÀNG
+                          </button>
+                        </Popconfirm>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* <div className="flex flex-col gap-5">
             {orders?.map((order: any) => (
               <div
                 key={order.id}
@@ -81,9 +294,11 @@ const Order = () => {
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{order?.status_name}</p>
                   <div className="flex gap-3">
-                    <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
-                      XEM CHI TIẾT
-                    </button>
+                    <Link to={`/order/${order?.id}`}>
+                      <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
+                        XEM CHI TIẾT
+                      </button>
+                    </Link>
                     {order.status_name == "Chờ xác nhận" && (
                       <Popconfirm
                         title="Cập nhật trạng thái"
@@ -114,33 +329,10 @@ const Order = () => {
                 </div>
               </div>
             ))}
-            {/* <div className="py-3 px-4 text-sm border border-gray-300 flex flex-col gap-4">
-              <div className="flex items-center gap-20">
-                <p className="font-semibold">
-                  Mã đơn hàng: <span className="font-normal">#ADASDAS</span>
-                </p>
-                <p>Ngày đặt: 12/10/2000</p>
-                <p>2 sản phẩm (1.244.000đ)</p>
-              </div>
-              <div>
-                Giao đến: 234 Phạm Văn Đồng, Phường 3, Quận Gò Vấp, TP.HCM
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="font-semibold">Đã xác nhận</p>
-                <div className="flex gap-3">
-                  <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
-                    XEM CHI TIẾT
-                  </button>
-                  <button className="text-white bg-black py-2 px-3 cursor-pointer">
-                    HỦY ĐƠN
-                  </button>
-                </div>
-              </div>
-            </div> */}
-          </div>
+          </div> */}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 export default Order;
