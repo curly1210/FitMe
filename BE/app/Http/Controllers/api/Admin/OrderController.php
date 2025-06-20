@@ -85,8 +85,26 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($id);
         $order->status_order_id = $request->status_order_id;
+
+        if ((int) $request->status_order_id === 4) {
+            $order->status_payment = 1;
+        }
+
         $order->save();
 
-        return response()->json(['message' => 'Cập nhật trạng thái đơn hàng thành công.']);
+        $message = match ((int) $request->status_order_id) {
+            1 => 'Đơn hàng đã được chuyển sang trạng thái: Chờ xác nhận.',
+            2 => 'Đơn hàng đang được chuẩn bị.',
+            3 => 'Đơn hàng đang được giao.',
+            4 => 'Đơn hàng đã được giao.',
+            5 => 'Giao hàng thất bại.',
+            6 => 'Đơn hàng đã hoàn thành.',
+            7 => 'Đơn hàng đã bị hủy.',
+            default => 'Cập nhật trạng thái đơn hàng thành công.',
+        };
+
+        return response()->json(['message' => $message]);
     }
+
+
 }

@@ -362,27 +362,28 @@ const ProductDetail = () => {
               <p className="text-sm text-gray-500">
                 SKU: {selectedItem?.sku || "Đang cập nhật"}
               </p>
-              <p className="text-xl text-black-600 font-semibold">
-                {selectedItem ? (
-                  selectedItem.sale_price > 0 ? (
-                    <>
-                      <span className="text-red-500">
-                        {selectedItem.sale_price.toLocaleString()} ₫
-                      </span>
-                      <span className="line-through text-gray-400 ml-2">
-                        {selectedItem.price.toLocaleString()} ₫
-                      </span>
-                      <span className="ml-2 text-green-600 text-sm">
-                        -{selectedItem.sale_percent}%
-                      </span>
-                    </>
-                  ) : (
-                    <span>{selectedItem.price.toLocaleString()} ₫</span>
-                  )
-                ) : null}
-              </p>
 
-              <p>{selectedItem?.sale_percent}</p>
+             <p className="text-xl text-black-600 font-semibold">
+                  {selectedItem ? (
+                    selectedItem.sale_price > 0 ? (
+                      <>
+                        <span className="text-red-500">
+                          {selectedItem.sale_price.toLocaleString()} ₫
+                        </span>
+                        <span className="line-through text-gray-400 ml-2">
+                          {selectedItem.price.toLocaleString()} ₫
+                        </span>
+                        <span className="ml-2 text-green-600 text-sm">
+                          -{selectedItem.sale_percent}%
+                        </span>
+                      </>
+                    ) : (
+                      <span>{selectedItem.price.toLocaleString()} ₫</span>
+                    )
+                  ) : null}
+             </p>
+
+            {/* <p>{selectedItem?.sale_percent}</p> */}
               <div className="text-sm flex items-center gap-2 mb-3">
                 {/* Số lượng còn */}
                 <p>Số lượng còn:</p>
