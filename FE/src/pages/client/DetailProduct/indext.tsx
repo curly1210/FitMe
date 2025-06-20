@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Tabs, Radio, Button, Tooltip, Input, Space, notification } from "antd";
+import { Tabs, Radio, Button, Tooltip, Space, notification } from "antd";
 import { useCreate, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
@@ -38,7 +38,7 @@ interface ProductItem {
   id: number;
   import_price: number;
   price: number;
-  sale_percent:number;
+  sale_percent: number;
   sale_price: number;
   stock: number;
   sku: string;
@@ -263,7 +263,8 @@ const ProductDetail = () => {
   const images = colors.find((c) => c.id === selectedColorId)?.images || [];
 
   /* Comment */
-  const { mutate: createComment, isLoading:loadingCreateComment } = useCreate();
+  const { mutate: createComment, isLoading: loadingCreateComment } =
+    useCreate();
   const handleSubmitComment = () => {
     /* Chưa có comment nào */
     if (comment === "") {
@@ -361,27 +362,27 @@ const ProductDetail = () => {
               <p className="text-sm text-gray-500">
                 SKU: {selectedItem?.sku || "Đang cập nhật"}
               </p>
-             <p className="text-xl text-black-600 font-semibold">
-                  {selectedItem ? (
-                    selectedItem.sale_price > 0 ? (
-                      <>
-                        <span className="text-red-500">
-                          {selectedItem.sale_price.toLocaleString()} ₫
-                        </span>
-                        <span className="line-through text-gray-400 ml-2">
-                          {selectedItem.price.toLocaleString()} ₫
-                        </span>
-                        <span className="ml-2 text-green-600 text-sm">
-                          -{selectedItem.sale_percent}%
-                        </span>
-                      </>
-                    ) : (
-                      <span>{selectedItem.price.toLocaleString()} ₫</span>
-                    )
-                  ) : null}
-             </p>
+              <p className="text-xl text-black-600 font-semibold">
+                {selectedItem ? (
+                  selectedItem.sale_price > 0 ? (
+                    <>
+                      <span className="text-red-500">
+                        {selectedItem.sale_price.toLocaleString()} ₫
+                      </span>
+                      <span className="line-through text-gray-400 ml-2">
+                        {selectedItem.price.toLocaleString()} ₫
+                      </span>
+                      <span className="ml-2 text-green-600 text-sm">
+                        -{selectedItem.sale_percent}%
+                      </span>
+                    </>
+                  ) : (
+                    <span>{selectedItem.price.toLocaleString()} ₫</span>
+                  )
+                ) : null}
+              </p>
 
-            <p>{selectedItem?.sale_percent}</p>
+              <p>{selectedItem?.sale_percent}</p>
               <div className="text-sm flex items-center gap-2 mb-3">
                 {/* Số lượng còn */}
                 <p>Số lượng còn:</p>
@@ -494,48 +495,54 @@ const ProductDetail = () => {
             </p>
           </TabPane>
 
-          <TabPane tab="Bình luận" key="2" className="border border-gray-200 p-4">
-  <div className="max-h-[300px] overflow-y-auto pr-3 mb-4 space-y-4 rounded-md bg-gray-50 p-4 shadow-inner">
-    {product.comments?.filter((c) => c.is_active === 1).length > 0 ? (
-      product.comments
-        .filter((c) => c.is_active === 1)
-        .map((c) => (
-          <div
-            key={c.id}
-            className="bg-white border border-gray-200 p-3 rounded shadow-sm"
+          <TabPane
+            tab="Bình luận"
+            key="2"
+            className="border border-gray-200 p-4"
           >
-            <p className="font-semibold text-sm text-gray-800 mb-1">
-              {c.user.name} -{" "}
-              <span className="text-xs text-gray-500">{c.created_at}</span>
-            </p>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {c.content}
-            </p>
-          </div>
-        ))
-    ) : (
-      <p className="text-gray-500 italic">Chưa có bình luận nào.</p>
-    )}
-  </div>
+            <div className="max-h-[300px] overflow-y-auto pr-3 mb-4 space-y-4 rounded-md bg-gray-50 p-4 shadow-inner">
+              {product.comments?.filter((c) => c.is_active === 1).length > 0 ? (
+                product.comments
+                  .filter((c) => c.is_active === 1)
+                  .map((c) => (
+                    <div
+                      key={c.id}
+                      className="bg-white border border-gray-200 p-3 rounded shadow-sm"
+                    >
+                      <p className="font-semibold text-sm text-gray-800 mb-1">
+                        {c.user.name} -{" "}
+                        <span className="text-xs text-gray-500">
+                          {c.created_at}
+                        </span>
+                      </p>
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {c.content}
+                      </p>
+                    </div>
+                  ))
+              ) : (
+                <p className="text-gray-500 italic">Chưa có bình luận nào.</p>
+              )}
+            </div>
 
-  <Space.Compact style={{ width: "100%" }}>
-    <TextArea
-      rows={4}
-      placeholder="Bình luận ..."
-      value={comment}
-      onChange={(e) => setComment(e.target.value)}
-      className="rounded-l-md"
-    />
-    <Button
-      type="primary"
-      className="rounded-r-md"
-      onClick={handleSubmitComment}
-      loading={loadingCreateComment}
-    >
-      Bình luận
-    </Button>
-  </Space.Compact>
-</TabPane>
+            <Space.Compact style={{ width: "100%" }}>
+              <TextArea
+                rows={4}
+                placeholder="Bình luận ..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="rounded-l-md"
+              />
+              <Button
+                type="primary"
+                className="rounded-r-md"
+                onClick={handleSubmitComment}
+                loading={loadingCreateComment}
+              >
+                Bình luận
+              </Button>
+            </Space.Compact>
+          </TabPane>
 
           <TabPane
             tab="Đánh giá"

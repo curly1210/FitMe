@@ -159,3 +159,23 @@ body {
   color: red !important;
   border-color: red !important;
 }
+
+.ant-steps-item-content {
+  margin-top: 0px !important;
+}
+
+.ant-steps-item-title {
+  font-size: 14px !important;
+}
+
+.list-order-client .ant-input-affix-wrapper {
+  border-radius: 0px !important;
+}
+
+.list-order-client .ant-btn {
+  border-radius: 0px !important;
+}
+
+.list-order-client .ant-picker {
+  border-radius: 0px !important;
+}
