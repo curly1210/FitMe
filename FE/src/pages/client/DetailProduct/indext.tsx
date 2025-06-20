@@ -381,7 +381,7 @@ const ProductDetail = () => {
                   ) : null}
              </p>
 
-            <p>{selectedItem?.sale_percent}</p>
+            {/* <p>{selectedItem?.sale_percent}</p> */}
               <div className="text-sm flex items-center gap-2 mb-3">
                 {/* Số lượng còn */}
                 <p>Số lượng còn:</p>
