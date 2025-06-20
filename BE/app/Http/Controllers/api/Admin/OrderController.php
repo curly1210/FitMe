@@ -86,7 +86,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->status_order_id = $request->status_order_id;
 
-        if ((int) $request->status_order_id === 6) {
+        if ((int) $request->status_order_id === 4) {
             $order->status_payment = 1;
         }
 
