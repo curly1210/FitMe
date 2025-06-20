@@ -1,8 +1,4 @@
-import {
-  CrudFilters,
-  useList,
-  useUpdate,
-} from "@refinedev/core";
+import { CrudFilters, useList, useUpdate } from "@refinedev/core";
 import {
   Button,
   Col,
@@ -15,6 +11,7 @@ import {
   Table,
   DatePicker,
   notification,
+  Popconfirm,
 } from "antd";
 import { useState } from "react";
 import OrderDetailDrawer from "./oderDetail";
@@ -55,7 +52,11 @@ const Oder = () => {
   }
   // trạng thái đơn hàng
   if (statusFilter !== undefined) {
-    filters.push({ field: "status_order_id", operator: "eq", value: statusFilter });
+    filters.push({
+      field: "status_order_id",
+      operator: "eq",
+      value: statusFilter,
+    });
   }
   // lọc trạng thái thanh toán
   if (statusPay !== undefined) {
@@ -78,72 +79,174 @@ const Oder = () => {
   const renderAdminActionButtons = (record: any) => {
     const status = record.status_order?.label;
     const orderId = record.id;
-const handleUpdateStatus = (
-  newStatus: number,
-  successMessage: string,
-  type: "success" | "error"
-) => {
-  mutate(
-    {
-      resource: "admin/orders/update",
-      id: orderId,
-      values: { status_order_id: newStatus },
-      meta: { method: "post" },
-    },
-    {
-      onSuccess: (response: any) => {
-        refetch();
-        //  lấy message từ BE nếu có
-        const beMessage = response?.data?.message || `Đơn hàng chuyển sang: ${successMessage}`;
-     
-        notification[type]({
-          message: beMessage,
-        });
-      },
-      onError: (error: any) => {
-        const errorMessage = error?.response?.data?.message || "Cập nhật trạng thái thất bại";
-        notification.error({
-          message: errorMessage,
-        });
-      },
-    }
-  );
-};
+    const handleUpdateStatus = (
+      newStatus: number,
+      successMessage: string,
+      type: "success" | "error"
+    ) => {
+      mutate(
+        {
+          resource: "admin/orders/update",
+          id: orderId,
+          values: { status_order_id: newStatus },
+          meta: { method: "post" },
+        },
+        {
+          onSuccess: (response: any) => {
+            refetch();
+            //  lấy message từ BE nếu có
+            const beMessage =
+              response?.data?.message ||
+              `Đơn hàng chuyển sang: ${successMessage}`;
 
+            notification[type]({
+              message: beMessage,
+            });
+          },
+          onError: (error: any) => {
+            const errorMessage =
+              error?.response?.data?.message || "Cập nhật trạng thái thất bại";
+            notification.error({
+              message: errorMessage,
+            });
+          },
+        }
+      );
+    };
 
     switch (status) {
       case "Chờ xác nhận":
         return (
-          <Button type="primary" onClick={() => handleUpdateStatus(STATUS_MAP["Đang chuẩn bị hàng"], "Đang chuẩn bị hàng", "success")}>
-            Xác nhận
-          </Button>
+          <Popconfirm
+           
+               onConfirm={() =>
+                handleUpdateStatus(
+                  STATUS_MAP["Đang chuẩn bị hàng"],
+                  "Đang chuẩn bị hàng",
+                  "success"
+                )
+              }
+            title="Cập nhật trạng thái"
+            description="Bạn có muốn xác nhận không?"
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button
+              type="primary"
+          
+            >
+              Xác nhận
+            </Button>
+          </Popconfirm>
         );
       case "Đang chuẩn bị hàng":
         return (
-          <Button type="primary" onClick={() => handleUpdateStatus(STATUS_MAP["Đang giao hàng"], "Đang giao hàng", "success")}>
-            Đang giao hàng
-          </Button>
+          <Popconfirm
+              onConfirm={() =>
+                handleUpdateStatus(
+                  STATUS_MAP["Đang giao hàng"],
+                  "Đang giao hàng",
+                  "success"
+                )
+              }
+            title="Cập nhật trạng thái"
+            description="Bạn có muốn xác nhận không?"
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button
+              type="primary"
+          
+            >
+              Đang giao hàng
+            </Button>
+          </Popconfirm>
         );
       case "Đang giao hàng":
         return (
           <Space>
-            <Button type="primary" onClick={() => handleUpdateStatus(STATUS_MAP["Đã giao"], "Đã giao", "success")}>
-              Đã giao
-            </Button>
-            <Button danger onClick={() => handleUpdateStatus(STATUS_MAP["Giao hàng thất bại"], "Giao hàng thất bại", "error")}>
-              Giao hàng thất bại
-            </Button>
+            <Popconfirm
+                onConfirm={() =>
+                  handleUpdateStatus(
+                    STATUS_MAP["Đã giao"],
+                    "Đã giao",
+                    "success"
+                  )
+                }
+              title="Cập nhật trạng thái"
+              description="Bạn có muốn xác nhận không?"
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button
+                type="primary"
+            
+              >
+                Đã giao
+              </Button>
+            </Popconfirm>
+
+            <Popconfirm
+               onConfirm={() =>
+                  handleUpdateStatus(
+                    STATUS_MAP["Giao hàng thất bại"],
+                    "Giao hàng thất bại",
+                    "error"
+                  )
+                }
+              title="Cập nhật trạng thái"
+              description="Bạn có muốn xác nhận không?"
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button
+                danger
+             
+              >
+                Giao hàng thất bại
+              </Button>
+            </Popconfirm>
           </Space>
         );
       case "Giao hàng thất bại":
         return (
           <Space>
-            <Button type="primary" onClick={() => handleUpdateStatus(STATUS_MAP["Đang giao hàng"], "Đang giao lại", "success")}>
-              Đang giao
-            </Button>
-            <Button danger onClick={() => handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success")}>
-              Hủy đơn hàng
-            </Button>
+            <Popconfirm
+                onConfirm={() =>
+                  handleUpdateStatus(
+                    STATUS_MAP["Đang giao hàng"],
+                    "Đang giao lại",
+                    "success"
+                  )
+                }
+              title="Cập nhật trạng thái"
+              description="Bạn có muốn xác nhận không?"
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button
+                type="primary"
+            
+              >
+                Đang giao
+              </Button>
+            </Popconfirm>
+            <Popconfirm
+               onConfirm={() =>
+                  handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success")
+                }
+              title="Cập nhật trạng thái"
+              description="Bạn có muốn xác nhận không?"
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button
+                danger
+             
+              >
+                Hủy đơn hàng
+              </Button>
+            </Popconfirm>
           </Space>
         );
       default:
@@ -176,7 +279,7 @@ const handleUpdateStatus = (
       title: "Thanh toán",
       dataIndex: "status_payment",
       key: "status_payment",
-          render: (value: any) => {
+      render: (value: any) => {
         if (value === 1 || value === "Đã thanh toán") {
           return <span style={{ color: "green" }}>Đã thanh toán</span>;
         }
@@ -217,71 +320,70 @@ const handleUpdateStatus = (
 
   return (
     <>
-    <div className="flex gap-3 mb-4 flex-wrap">
-    <Search
-      size="middle"
-      className="!h-8"
-      placeholder="Tìm theo mã đơn hàng và tên"
-      allowClear
-      value={searchName}
-      onChange={(e) => setSearchName(e.target.value)}
-      style={{ width: 270 }}
-    />
+      <div className="flex gap-3 mb-4 flex-wrap">
+        <Search
+          size="middle"
+          className="!h-8"
+          placeholder="Tìm theo mã đơn hàng và tên"
+          allowClear
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          style={{ width: 270 }}
+        />
 
-    <RangePicker
-      size="middle"
-      className="!h-8 [&_.ant-picker]:!h-8 [&_.ant-picker-input>input]:!h-8"
-      format="YYYY-MM-DD"
-      onChange={(dates, dateStrings) => {
-        if (dateStrings[0] && dateStrings[1]) {
-          setDateRange([dateStrings[0], dateStrings[1]]);
-          setCurrent(1);
-        } else {
-          setDateRange(null);
-        }
-      }}
-      style={{ width: 200 }}
-    />
+        <RangePicker
+          size="middle"
+          className="!h-8 [&_.ant-picker]:!h-8 [&_.ant-picker-input>input]:!h-8"
+          format="YYYY-MM-DD"
+          onChange={(dates, dateStrings) => {
+            if (dateStrings[0] && dateStrings[1]) {
+              setDateRange([dateStrings[0], dateStrings[1]]);
+              setCurrent(1);
+            } else {
+              setDateRange(null);
+            }
+          }}
+          style={{ width: 200 }}
+        />
 
-    <Select
-      size="middle"
-      className="!h-8 [&_.ant-select-selector]:!h-8"
-      placeholder="Lọc theo trạng thái thanh toán"
-      allowClear
-      value={statusPay}
-      onChange={(value) => {
-        setStatusPay(value);
-        setCurrent(1);
-      }}
-      style={{ width: 220 }}
-      options={[
-        { value: undefined, label: "Tất cả" },
-        { value: 0, label: "Chưa thanh toán" },
-        { value: 1, label: "Đã thanh toán" },
-      ]}
-  />
+        <Select
+          size="middle"
+          className="!h-8 [&_.ant-select-selector]:!h-8"
+          placeholder="Lọc theo trạng thái thanh toán"
+          allowClear
+          value={statusPay}
+          onChange={(value) => {
+            setStatusPay(value);
+            setCurrent(1);
+          }}
+          style={{ width: 220 }}
+          options={[
+            { value: undefined, label: "Tất cả" },
+            { value: 0, label: "Chưa thanh toán" },
+            { value: 1, label: "Đã thanh toán" },
+          ]}
+        />
 
-    <Select
-      size="middle"
-      className="!h-8 [&_.ant-select-selector]:!h-8"
-      placeholder="Lọc theo trạng thái đơn hàng"
-      allowClear
-      value={statusFilter}
-      onChange={(value) => {
-        setStatusFilter(value);
-        setCurrent(1);
-      }}
-      style={{ width: 220 }}
-    >
-      <Select.Option value={undefined}>Tất cả</Select.Option>
-      {Object.entries(STATUS_MAP).map(([label, val]) => (
-        <Select.Option key={val} value={val}>
-          {label}
-        </Select.Option>
-      ))}
-    </Select>
-  </div>
-
+        <Select
+          size="middle"
+          className="!h-8 [&_.ant-select-selector]:!h-8"
+          placeholder="Lọc theo trạng thái đơn hàng"
+          allowClear
+          value={statusFilter}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setCurrent(1);
+          }}
+          style={{ width: 220 }}
+        >
+          <Select.Option value={undefined}>Tất cả</Select.Option>
+          {Object.entries(STATUS_MAP).map(([label, val]) => (
+            <Select.Option key={val} value={val}>
+              {label}
+            </Select.Option>
+          ))}
+        </Select>
+      </div>
 
       <Table
         className="border-gray rounded-2xl"
