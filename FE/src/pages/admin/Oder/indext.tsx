@@ -14,6 +14,7 @@ import {
   Space,
   Table,
   DatePicker,
+  notification,
 } from "antd";
 import { useState } from "react";
 import OrderDetailDrawer from "./oderDetail";
@@ -77,31 +78,38 @@ const Oder = () => {
   const renderAdminActionButtons = (record: any) => {
     const status = record.status_order?.label;
     const orderId = record.id;
+const handleUpdateStatus = (
+  newStatus: number,
+  successMessage: string,
+  type: "success" | "error"
+) => {
+  mutate(
+    {
+      resource: "admin/orders/update",
+      id: orderId,
+      values: { status_order_id: newStatus },
+      meta: { method: "post" },
+    },
+    {
+      onSuccess: (response: any) => {
+        refetch();
+        //  lấy message từ BE nếu có
+        const beMessage = response?.data?.message || `Đơn hàng chuyển sang: ${successMessage}`;
+     
+        notification[type]({
+          message: beMessage,
+        });
+      },
+      onError: (error: any) => {
+        const errorMessage = error?.response?.data?.message || "Cập nhật trạng thái thất bại";
+        notification.error({
+          message: errorMessage,
+        });
+      },
+    }
+  );
+};
 
-    const handleUpdateStatus = (
-      newStatus: number,
-      successMessage: string,
-      type: "success" | "error"
-    ) => {
-      mutate(
-        {
-          resource: "admin/orders/update",
-          id: orderId,
-          values: { status_order_id: newStatus },
-          meta: { method: "post" },
-          successNotification: () => ({
-            message: "Cập nhật trạng thái thành công",
-            description: `Đơn hàng chuyển sang: ${successMessage}`,
-            type,
-          }),
-        },
-        {
-          onSuccess: () => {
-            refetch();
-          },
-        }
-      );
-    };
 
     switch (status) {
       case "Chờ xác nhận":
