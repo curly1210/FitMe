@@ -7,6 +7,7 @@ use App\Models\Coupon;
 use App\Models\ProductItem;
 use Illuminate\Support\Str;
 use App\Models\OrdersDetail;
+use App\Mail\NotifyAdminOrderMail;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\OrderConfirmationMail;
@@ -116,6 +117,8 @@ trait CreateOrderTrait
             $user->cart_items()->whereIn('id', $cartItemIds)->delete();
 
             Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderItems));
+            Mail::to(config('mail.admin_email'))->send(new NotifyAdminOrderMail($order, $orderItems));
+
 
             DB::commit();
 
