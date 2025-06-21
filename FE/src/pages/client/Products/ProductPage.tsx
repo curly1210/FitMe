@@ -96,7 +96,7 @@ function ProductPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {listProduct.map((product) => {
                 const item = product.product_items || [];
-                const imgUrl = item?.image?.[0]?.url || "";
+                const imgUrl = item[0]?.color?.images[0]?.url || "";
                 const productImage = item.flatMap(
                   (value) => value.color.images
                 );
