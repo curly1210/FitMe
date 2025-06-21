@@ -159,9 +159,8 @@ Route::middleware('auth:api')->group(function () {
 });
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products/{id}/comments', [AdminCommentController::class, 'show'])->name('comments.show');
-    Route::delete('comments/{id}/delete', [AdminCommentController::class, 'delete'])->name('comments.delte');
-    Route::post('comments/{id}/toggle',   [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
-    // Route::patch('comments/{id}/toggle',  [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
+    Route::delete('comments/{id}/delete', [AdminCommentController::class, 'delete'])->name('comments.delete');
+    Route::patch('comments/{id}/toggle',  [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
 });
 
 

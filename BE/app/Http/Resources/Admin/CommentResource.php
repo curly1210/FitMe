@@ -28,6 +28,7 @@ class CommentResource extends JsonResource
                 'id' => $comment->id,
                 'content' => $comment->content,
                 'created_at' => $comment->created_at->toDateTimeString(),
+                'is_active' => $comment->is_active,
                 'user' => [
                     'id' => $comment->user_id,
                     'name' => $comment->user->name ?? 'Unknown', 

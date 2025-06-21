@@ -16,14 +16,7 @@ class CommentController extends Controller
     use ApiResponse;
     public function show($id)
     {
-        $product = Product::with([
-            'comments' => function ($query) {
-                $query->where('is_active', 1)->with('user');
-            },
-            'productItems',
-            'productImages'
-        ])->findOrFail($id);
-
+        $product = Product::with(['comments.user', 'productItems', 'productImages'])->findOrFail($id);
         return response()->json(new CommentResource($product));
     }
 
@@ -44,7 +37,8 @@ class CommentController extends Controller
 
             return response()->json([
                 'message' => 'Bình luận đã được xóa'
-            ], 200);
+            ],200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Có lỗi xảy ra khi xóa bình luận'
@@ -71,6 +65,7 @@ class CommentController extends Controller
                 'message' => $comment->is_active ? 'Bình luận đã được hiển thị' : 'Bình luận đã được ẩn',
                 'is_active' => $comment->is_active
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Có lỗi xảy ra khi thay đổi trạng thái bình luận'
