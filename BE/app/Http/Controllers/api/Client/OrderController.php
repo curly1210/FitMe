@@ -199,8 +199,18 @@ class OrderController extends Controller
 
             // Xử lý logic cập nhật trạng thái
             if ($currentStatus == 1) {
-                // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (7)
-                $order->update(['status_order_id' => 7]);
+                DB::transaction(function () use ($order) {
+                    // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (7)
+                    $order->update(['status_order_id' => 7]);
+
+                    foreach ($order->orderDetails as $orderDetail) {
+                        $productItem = $orderDetail->productItem;
+                        if ($productItem) {
+                            // Restore stock biến thể của sản phẩm
+                            $productItem->increment('stock', $orderDetail->quantity);
+                        };
+                    };
+                });
                 $message = 'Đơn hàng đã được hủy thành công.';
             } elseif ($currentStatus == 4) {
                 // Chuyển từ "Đã giao hàng" (4) sang "Hoàn thành" (6)
