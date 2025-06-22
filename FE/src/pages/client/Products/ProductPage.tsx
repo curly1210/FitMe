@@ -95,22 +95,35 @@ function ProductPage() {
           {listProduct.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {listProduct.map((product) => {
-                const item = product.product_items || [];
-                const imgUrl = item[0]?.color?.images[0]?.url || "";
-                const productImage = item.flatMap(
-                  (value) => value.color.images
-                );
+                // console.log(product);
+
+                const productItems = product.colors.flatMap(itemV => itemV.product_items) || [];
+                // lấy ảnh đầu tiên 
+                const imgFirst = product.colors[0]?.images[0]?.url;
+                const thumbnals = product.colors.flatMap(itemV => itemV.images[0]) || [];
+                const minPrice = Math.min(...product.colors.flatMap(item => item.min_sale_price));
+                const percent = product.colors[0]?.product_items[0]?.sale_percent as number;
+                // console.log({ products });
+
+                // const imgUrl = item?.image?.[0]?.url || "";
+                // const productImage = item.flatMap(
+                //   (value) => value.color.images
+                // );
+
                 return (
                   <div
                     key={product.id}
                     className="group border border-gray-100 relative"
                   >
                     <div className="relative">
-                      <img
-                        src={imgUrl}
-                        alt={product.name}
-                        className="w-full h-[400px] object-contain object-center bg-white"
-                      />
+                      <Link to={`/products/${product.slug}`}>
+  <img
+    src={imgFirst}
+    className="w-full h-[400px] object-contain object-center bg-white hover:opacity-90 transition duration-200"
+    alt={product.name}
+  />
+</Link>
+
                       <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition bg-white">
                         <div className="flex border-t border-gray-200 divide-x divide-gray-200">
                           <button className="flex-1 text-xs py-2 bg-black text-white hover:opacity-90 cursor-pointer">
@@ -129,14 +142,20 @@ function ProductPage() {
                       <p className="text-sm font-semibold text-black">
                         {product.name}
                       </p>
-                      <p className="text-lg font-semibold text-gray-800">
-                        {item[0]?.sale_price
-                          ?.toString()
-                          ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                        ₫
-                      </p>
+                  <p className="text-lg font-semibold text-gray-800">
+  {minPrice
+    ?.toString()
+    ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+  ₫ - 
+  <span className="text-green-600">
+    {percent
+      ?.toString()
+      ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+    %
+  </span>
+</p>
                       <div className="flex gap-1 mt-2">
-                        {productImage.slice(0, 5).map((modelImg, key) => (
+                        {thumbnals.map((modelImg, key) => (
                           <img
                             key={modelImg.id + key}
                             src={modelImg.url}
