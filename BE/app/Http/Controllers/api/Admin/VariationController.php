@@ -92,13 +92,20 @@ class VariationController extends Controller
     {
         $color = Color::find($id);
 
+      
         if (!$color) {
-            return $this->error('Màu sắc không tồn tại', [], 404);
+            return $this->error('Màu sắc chưa được xóa mềm', [], 404);
         }
 
-        $color->delete();
+        // Xét màu sắc có sản phẩm hay không nếu có thì báo lỗi
+        if ($color->productItems()->exists()) {
+            return $this->error('Không thể xóa màu sắc vì đang có màu sắc', [], 400);
+        }
 
-        return $this->success(null, 'Xóa màu sắc thành công');
+        //Sau khi màu sắc không có sản phẩm tiến hành xóa vĩnh viễn
+        $color->forceDelete();
+
+        return $this->success(null, 'Đã xóa vĩnh viễn màu sắc');
     }
 
     // Khôi phục lại màu sắc đã xóa mềm
@@ -207,15 +214,18 @@ class VariationController extends Controller
         $size = Size::find($id);
 
         if (!$size) {
-            return $this->error('Kích thước không tồn tại', [], 404);
+            return $this->error('Không tìm thấy kích thước', [], 404);
         }
 
-        $size->delete();
+        if ($size->productItems()->exists()) {
+            return $this->error('Không thể xóa kích thước vì đang Sản phẩm', [], 400);
+        }
 
-        return $this->success(null, 'Xóa kích thước thành công');
+        $size->forceDelete();
+
+        return $this->success(null, 'Đã xóa vĩnh viễn kích thước');
     }
 
-    // Khôi phục lại biến thể đã xóa mềm
     public function restoreSize($id)
     {
         $size = Size::onlyTrashed()->find($id);
@@ -228,7 +238,6 @@ class VariationController extends Controller
         return $this->success(new SizeResource($size), 'Khôi phục kích thước thành công');
     }
 
-    // Xóa viễn viễn kích thước
     public function ForceDeleteSize($id)
     {
         $size = Size::onlyTrashed()->find($id);
@@ -236,12 +245,10 @@ class VariationController extends Controller
             return $this->error('Kích thước chưa được xóa mềm', [], 404);
         }
 
-        // Xét kích thước có sản phẩm hay không nếu có thì báo lỗi
         if ($size->productItems()->exists()) {
             return $this->error('Không thể xóa kích thước vì đang có biến thể', [], 400);
         }
 
-        //Sau khi kích thước không có sản phẩm tiến hành xóa vĩnh viễn
         $size->forceDelete();
 
         return $this->success(null, 'Đã xóa vĩnh viễn kích thước');
