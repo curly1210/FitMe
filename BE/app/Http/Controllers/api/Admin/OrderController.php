@@ -48,7 +48,8 @@ class OrderController extends Controller
             })
             ->when($request->filled('date'), function ($q) use ($request) {
                 $q->whereDate('created_at', $request->date);
-            });
+            })
+            ->orderBy('created_at', 'desc'); // 👉 Sắp xếp mới nhất lên đầu
 
         $orders = $query->get();
 
@@ -83,28 +84,37 @@ class OrderController extends Controller
             'status_order_id' => 'required|integer|min:1|max:7',
         ]);
 
-        $order = Order::findOrFail($id);
-        $order->status_order_id = $request->status_order_id;
+        $order = Order::with('orderDetails')->findOrFail($id);
+        $newStatus = (int) $request->status_order_id;
 
-        if ((int) $request->status_order_id === 4) {
+        if ($newStatus === 4) {
             $order->status_payment = 1;
         }
 
+        if ($newStatus === 7 && $order->status_order_id != 7) {
+            foreach ($order->orderDetails as $detail) {
+                \App\Models\ProductItem::where('id', $detail->product_item_id)
+                    ->increment('stock', $detail->quantity);
+            }
+        }
+
+        $order->status_order_id = $newStatus;
         $order->save();
 
-        $message = match ((int) $request->status_order_id) {
+        $message = match ($newStatus) {
             1 => 'Đơn hàng đã được chuyển sang trạng thái: Chờ xác nhận.',
             2 => 'Đơn hàng đang được chuẩn bị.',
             3 => 'Đơn hàng đang được giao.',
             4 => 'Đơn hàng đã được giao.',
             5 => 'Giao hàng thất bại.',
             6 => 'Đơn hàng đã hoàn thành.',
-            7 => 'Đơn hàng đã bị hủy.',
+            7 => 'Đơn hàng đã bị hủy và số lượng đã được hoàn lại kho.',
             default => 'Cập nhật trạng thái đơn hàng thành công.',
         };
 
         return response()->json(['message' => $message]);
     }
+
 
 
 }

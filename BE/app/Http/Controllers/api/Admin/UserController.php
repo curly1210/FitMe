@@ -30,10 +30,11 @@ class UserController extends Controller
             $query->where('is_ban', $request->is_ban);
         }
 
-        $users = $query->get();
+        $users = $query->orderBy('created_at', 'desc')->get(); // 👈 Sắp xếp mới nhất lên đầu
 
         return UserResource::collection($users);
     }
+
 
     public function show($id)
     {

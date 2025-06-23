@@ -21,7 +21,9 @@ class StatisticsController extends Controller
     {
         $totalOrders = Order::count();
 
-        $totalSellingProducts = ProductItem::where('stock', '>', 0)->count();
+        $totalSellingProducts = ProductItem::where('stock', '>', 0)
+            ->where('is_active', 1)
+            ->count();
 
         $totalCustomers = User::where('role', 'Customer')->count();
 
@@ -33,60 +35,56 @@ class StatisticsController extends Controller
             return [$status => $ordersByStatus[$status] ?? 0];
         });
 
+        $totalRevenue = Order::where('status_order_id', 6)->sum('total_amount');
+
         $data = [
             'total_orders' => $totalOrders,
             'total_selling_products' => $totalSellingProducts,
             'total_customers' => $totalCustomers,
-            'orders_by_status' => Order::selectRaw('status_order_id, COUNT(*) as count')
-                ->groupBy('status_order_id')
-                ->pluck('count', 'status_order_id'),
+            'total_sold' => $totalRevenue,
+            'orders_by_status' => $allStatuses,
         ];
 
         return new OverviewStatisticResource($data);
     }
 
+
     public function statistics(Request $request)
     {
         $now = now();
-        if ($request->year == null) {
-            $year = $now->year;
-        } else {
-            $year = $request->year;
-        }
+        $year = $request->year ?? $now->year;
+        $month = $request->month ?? $now->month;
 
-        if ($request->month == null) {
-            $month = $now->month;
-        } else {
-            $month = $request->month;
-        }
-
-
+        // Doanh thu theo 12 tháng
         $yearly = collect(range(1, 12))->mapWithKeys(function ($m) use ($year) {
             $start = now()->setDate($year, $m, 1)->startOfMonth();
             $end = now()->setDate($year, $m, 1)->endOfMonth();
 
-            $total = Order::where('status_order_id', 7)
+            $total = Order::where('status_order_id', 6)
                 ->whereBetween('created_at', [$start, $end])
                 ->sum('total_amount');
 
             return [$m => $total];
         });
 
+        // Doanh thu theo ngày của tháng
         $daysInMonth = now()->setDate($year, $month, 1)->daysInMonth;
 
         $monthly = collect(range(1, $daysInMonth))->mapWithKeys(function ($d) use ($year, $month) {
             $start = now()->setDate($year, $month, $d)->startOfDay();
             $end = now()->setDate($year, $month, $d)->endOfDay();
 
-            $total = Order::where('status_order_id', 7)
+            $total = Order::where('status_order_id', 6)
                 ->whereBetween('created_at', [$start, $end])
                 ->sum('total_amount');
 
             return [$d => $total];
         });
 
+        // Doanh thu gần đây
         $recentDays = [7, 14, 30];
         $recent = [];
+
         foreach ($recentDays as $dayCount) {
             $from = now()->copy()->subDays($dayCount - 1)->startOfDay();
 
@@ -100,11 +98,57 @@ class StatisticsController extends Controller
             });
         }
 
-        return new RevenueStatisticsResource([
-            'yearly' => $yearly,
-            'monthly' => $monthly,
-            'recent' => $recent,
+        return response()->json([
+            'yearly' => [
+                'data' => $yearly,
+                'total' => $yearly->sum(),
+            ],
+            'monthly' => [
+                'data' => $monthly,
+                'total' => $monthly->sum(),
+            ],
+            'recent' => collect($recent)->map(function ($data) {
+                return [
+                    'data' => $data,
+                    'total' => collect($data)->sum(),
+                ];
+            }),
         ]);
     }
+
+
+    public function topSellingProducts(Request $request)
+    {
+        $request->validate([
+            'filter_by' => 'nullable|in:quantity,revenue', // lọc theo số lượng hoặc doanh thu
+            'from' => 'nullable|date',
+            'to' => 'nullable|date|after_or_equal:from',
+        ]);
+
+        $filterBy = $request->input('filter_by', 'quantity'); // mặc định theo số lượng
+        $from = $request->input('from', '2000-01-01');
+        $to = $request->input('to', now()->toDateString());
+
+        $query = OrdersDetail::select([
+            'product_item_id',
+            'name_product',
+            'image_product',
+            DB::raw('SUM(quantity) as total_quantity'),
+            DB::raw('SUM(sale_price * quantity) as total_revenue')
+        ])
+            ->whereHas('order', function ($q) use ($from, $to) {
+                $q->where('status_order_id', 6) // Chỉ lấy đơn đã hoàn thành
+                    ->whereBetween('created_at', [$from, $to]);
+            })
+            ->groupBy('product_item_id', 'name_product', 'image_product')
+            ->orderBy($filterBy === 'revenue' ? 'total_revenue' : 'total_quantity', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'data' => $query
+        ]);
+    }
+
 
 }
