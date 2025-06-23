@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\Admin;
 use App\Models\User;
 use App\Models\Order;
 
+use App\Models\ProductItem;
 use App\Models\OrdersDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -49,7 +50,7 @@ class OrderController extends Controller
             ->when($request->filled('date'), function ($q) use ($request) {
                 $q->whereDate('created_at', $request->date);
             })
-            ->orderBy('created_at', 'desc'); // 👉 Sắp xếp mới nhất lên đầu
+            ->orderBy('created_at', 'desc'); 
 
         $orders = $query->get();
 
@@ -93,7 +94,7 @@ class OrderController extends Controller
 
         if ($newStatus === 7 && $order->status_order_id != 7) {
             foreach ($order->orderDetails as $detail) {
-                \App\Models\ProductItem::where('id', $detail->product_item_id)
+                ProductItem::where('id', $detail->product_item_id)
                     ->increment('stock', $detail->quantity);
             }
         }
