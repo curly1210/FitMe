@@ -32,12 +32,12 @@ class WishlistController extends Controller
 
             // lấy danh sách wishlists
             $wishlist = Wishlist::where('user_id', $user->id)->with(['product' => function ($query) {
-                    $query->where('is_active', 1)->with(['category', 'productItems' => function ($query) {
-                        $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
-                            $query->where('is_active', 1);
-                        }]);
-                    }]);
-                }])->paginate(10);
+                $query->where('is_active', 1)->with(['category', 'productItems' => function ($query) {
+                    $query->where('is_active', 1)->with(['color', 'size']);
+                },'productImages' => function ($query) {
+                    $query->where('is_active', 1)->with('color');
+                }]);
+            }])->paginate(10);
 
            return $this->success(WishlistResource::collection($wishlist), 'Lấy danh sách sản phẩm yêu thích thành công');
         } catch (ValidationException $e) {
@@ -87,9 +87,9 @@ class WishlistController extends Controller
             // sản phẩm liên quan
             $wishlist->load(['product' => function ($query) {
                 $query->where('is_active', 1)->with(['category', 'productItems' => function ($query) {
-                    $query->where('is_active', 1)->with(['color', 'size', 'productImages' => function ($query) {
-                        $query->where('is_active', 1);
-                    }]);
+                    $query->where('is_active', 1)->with(['color', 'size']);
+                }, 'productImages' => function ($query) {
+                    $query->where('is_active', 1)->with('color');
                 }]);
             }]);
 

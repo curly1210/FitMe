@@ -8,20 +8,21 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
+use App\Http\Controllers\api\Client\VNPayController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
+use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
 use App\Http\Controllers\Api\Client\WishlistController;
+use App\Http\Controllers\Api\Admin\StatisticsController;
+use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
+use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-use App\Http\Controllers\api\Client\VNPayController;
-use App\Http\Controllers\Api\Client\CommentController;
-use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
-use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -43,9 +44,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/variations/color/{id}', [VariationController::class, 'showColor']);
     Route::patch('/variations/color/{id}', [VariationController::class, 'updateColor']);
     Route::delete('/variations/color/{id}', [VariationController::class, 'deleteColor']);
-    Route::post('/variations/color/{id}/restore', [VariationController::class, 'restoreColor']);
-    Route::delete('/variations/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
-    Route::get('/variations/color/trashed', [VariationController::class, 'trashedColor']);
+    // Route::post('/variations/color/{id}/restore', [VariationController::class, 'restoreColor']);
+    // Route::delete('/variations/color/{id}/delete', [VariationController::class, 'ForceDeleteColor']);
+    // Route::get('/variations/color/trashed', [VariationController::class, 'trashedColor']);
 
     // kích th`ước
     Route::get('/variations/size', [VariationController::class, 'listSize']);
@@ -53,9 +54,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/variations/size/{id}', [VariationController::class, 'showSize']);
     Route::patch('/variations/size/{id}', [VariationController::class, 'updateSize']);
     Route::delete('/variations/size/{id}', [VariationController::class, 'deleteSize']);
-    Route::post('/variations/size/{id}/restore', [VariationController::class, 'restoreSize']);
-    Route::delete('/variations/size/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
-    Route::get('/variations/size/trashed', [VariationController::class, 'trashedSize']);
+    // Route::post('/variations/size/{id}/restore', [VariationController::class, 'restoreSize']);
+    // Route::delete('/variations/size/{id}/delete', [VariationController::class, 'ForceDeleteSize']);
+    // Route::get('/variations/size/trashed', [VariationController::class, 'trashedSize']);
 });
 
 Route::prefix('admin')->group(function () {
@@ -86,6 +87,9 @@ Route::prefix('admin')->group(function () {
 
 });
 
+Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
+Route::get('/admin/statistics', [StatisticsController::class, 'statistics']);
+Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topSellingProducts']);
 
 
 

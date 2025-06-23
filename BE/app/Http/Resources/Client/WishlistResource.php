@@ -24,8 +24,8 @@ class WishlistResource extends JsonResource
                     'name' => $this->product->category->name,
                     'image' => $this->buildImageUrl($this->product->category->image),
                 ],
-                'product_items' => $this->whenLoaded('productItems', function () {
-                    return $this->product->productItems->map(function ($item) {
+                'product_items' => $this->whenLoaded('product', function () {
+                    return $this->product->productItems->isEmpty() ? [] : $this->product->productItems->map(function ($item) {
                         return [
                             'id' => $item->id,
                             'price' => $item->price,
@@ -41,16 +41,22 @@ class WishlistResource extends JsonResource
                                 'id' => $item->size->id,
                                 'name' => $item->size->name,
                             ] : null,
-                            'images' => $item->productImages->map(function ($image) {
-                                return [
-                                    'id' => $image->id,
-                                    'url' => $this->buildImageUrl($image->url),
-                                    'is_active' => $image->is_active,
-                                ];
-                            })->toArray(),
                         ];
                     })->toArray();
-                }),
+                }, []),
+                'product_images' => $this->whenLoaded('product', function () {
+                    return $this->product->productImages->isEmpty() ? [] : $this->product->productImages->map(function ($image) {
+                        return [
+                            'id' => $image->id,
+                            'url' => $this->buildImageUrl($image->url),
+                            'is_active' => $image->is_active,
+                            'color' => $image->color ? [
+                                'id' => $image->color->id,
+                                'name' => $image->color->name,
+                            ] : null,
+                        ];
+                    })->toArray();
+                }, []),
             ],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
