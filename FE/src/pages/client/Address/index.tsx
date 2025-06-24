@@ -74,6 +74,7 @@ const Address = () => {
           <Link to={""}>Tài khoản</Link>
           <Link to={"/order"}>Đơn hàng</Link>
           <p className="font-bold cursor-pointer">Địa chỉ</p>
+          <Link to={"/product-like"}>Sản phẩm yêu thích</Link>
           <Link to={""}>Đổi mật khẩu</Link>
         </div>
         <div className="col-span-8">

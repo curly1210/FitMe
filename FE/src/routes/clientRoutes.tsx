@@ -14,6 +14,7 @@ import CheckoutSuccess from "../pages/client/CheckOut/success";
 import Order from "../pages/client/Order";
 import CheckPayment from "../pages/client/Checkpayment";
 import DetailOrder from "../pages/client/Order/DetailOrder";
+import ProductLike from "../pages/client/ProductLike";
 
 export const clientRoutes = [
   {
@@ -53,6 +54,10 @@ export const clientRoutes = [
               {
                 path: "address",
                 element: <Address />,
+              },
+              {
+                path: "product-like",
+                element: <ProductLike />,
               },
               {
                 path: "carts",
