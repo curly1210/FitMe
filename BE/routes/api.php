@@ -132,17 +132,19 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 
-//Route quản lý sản phẩm
+//Route quản lý sản phẩmD
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
     // Route::patch('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->name('products.show');
-    // Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/trash', [AdminProductController::class, 'trash'])->name('products.trash');
     Route::post('/products/restore/{id}', [AdminProductController::class, 'restore'])->name('products.restore');
-    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    // xóa mềm
+    Route::delete('/products/{id}', [AdminProductController::class, 'delete'])->name('products.delete');
+    // xóa vĩnh viễn
+    Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
 });
 
 
@@ -164,7 +166,7 @@ Route::middleware('auth:api')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products/{id}/comments', [AdminCommentController::class, 'show'])->name('comments.show');
     Route::delete('comments/{id}/delete', [AdminCommentController::class, 'delete'])->name('comments.delete');
-    Route::patch('comments/{id}/toggle',  [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
+    Route::patch('comments/{id}/toggle', [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
 });
 
 
