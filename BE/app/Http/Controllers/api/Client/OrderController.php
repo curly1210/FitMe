@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\OrderConfirmationMail;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Client\OrderResource;
+use App\Models\User;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 
@@ -128,6 +130,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         try {
+            /** @var User $user */
             $user = auth('api')->user();
 
             // Khởi tạo query builder
@@ -144,11 +147,9 @@ class OrderController extends Controller
             $dateFrom = $request->input('date_from');
             $dateTo = $request->input('date_to');
             if ($dateFrom) {
-                // $query->where('created_at', '>=', $from . ' 00:00:00');
                 $query->whereDate('created_at', '>=', $dateFrom);
             }
             if ($dateTo) {
-                // $query->where('created_at', '<', $to . ' 23:59:59');
                 $query->whereDate('created_at', '<=', $dateTo);
             }
 
@@ -158,24 +159,15 @@ class OrderController extends Controller
                 $query->where('orders_code', 'like', "%{$search}%");
             }
 
-            // Lấy danh sách và định dạng
+            // Phân trang
+            $perPage = $request->input('per_page', 10); // Số mục trên mỗi trang, mặc định 10
             $orders = $query->orderBy('id', 'desc')
-                ->get()
-                ->map(function ($order) {
-                    // Tính tổng quantity từ order_details
-                    $totalAmountItems = $order->orderDetails->sum('quantity');
+                ->paginate($perPage);
 
-                    return [
-                        'id' => $order->id,
-                        'orders_code' => $order->orders_code,
-                        'created_at' => $order->created_at,
-                        'total_amount_items' => $totalAmountItems, // Tổng số lượng sản phẩm
-                        'total_amount' => $order->total_amount,
-                        'receiving_address' => $order->receiving_address,
-                        'status_order_id' => $order->status_order_id,
-                        'status_name' => $order->statusOrder->name ?? 'Không xác định', // Lấy name từ status_orders
-                    ];
-                });
+            // Chuyển đổi dữ liệu sang OrderResource
+            $orders->getCollection()->transform(function ($order) {
+                return new OrderResource($order);
+            });
 
             return response()->json($orders);
         } catch (\Throwable $th) {
