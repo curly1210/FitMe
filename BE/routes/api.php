@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\api\Client\UserController as ClientUserController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -203,7 +204,12 @@ Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 
 
 
-
+// info acc client
+Route::get('profile', [ClientUserController::class, 'showInfo']);
+Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
+Route::patch('profile', [ClientUserController::class, 'updateInfoBasic']);
+Route::post('change-password', [ClientUserController::class, 'updatePassword']);
+Route::patch('change-password', [ClientUserController::class, 'updatePassword']);
 
 
 
