@@ -169,15 +169,7 @@ class OrderController extends Controller
                 return new OrderResource($order);
             });
 
-            return response()->json([
-                'data' => $orders->items(),
-                'pagination' => [
-                    'current_page' => $orders->currentPage(),
-                    'last_page' => $orders->lastPage(),
-                    'per_page' => $orders->perPage(),
-                    'total' => $orders->total(),
-                ],
-            ],200);
+            return response()->json($orders);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy danh sách đơn hàng', [$th->getMessage()], 403);
         }
