@@ -11,6 +11,7 @@ import ListProducts from "../pages/admin/Product";
 import TrashProducts from "../pages/admin/Product/TrashProducts";
 import CouponsList from "../pages/admin/Khuyenmai/indext";
 import Oder from "../pages/admin/Oder/indext";
+import PostList from "../pages/admin/Tintuc";
 
 
 export const adminRoutes = [
@@ -56,6 +57,10 @@ export const adminRoutes = [
                   {
             path: "oders",
             element: <Oder />,
+          },
+                  {
+            path: "posts",
+            element: <PostList />,
           },
       
         ],
