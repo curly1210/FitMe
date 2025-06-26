@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->integer('rate'); // Đánh giá (1-5)
+            $table->decimal('rate', 2, 1); // Đánh giá (1-5)
             $table->string('content', 200);
             // $table->string('updated_content', 200)->nullable();
             $table->tinyInteger('is_update')->default(0); // Mặc định là chưa được cập nhật
