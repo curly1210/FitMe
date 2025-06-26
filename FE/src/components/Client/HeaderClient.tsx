@@ -65,11 +65,11 @@ const HeaderClient = () => {
 
   const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
     if (key === "2") {
-      navigate("/address");
+      navigate("/account/address");
     }
 
     if (key === "3") {
-      navigate("/order");
+      navigate("/account/order");
     }
 
     if (key === "4") {

@@ -115,7 +115,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (cartResponse?.data) {
       setCart(cartResponse?.data);
-      console.log("Cart items:", cartResponse?.data);
+      // console.log("Cart items:", cartResponse?.data);
     }
     // console.log("Cart items dấdsa:", cartResponse?.data);
   }, [cartResponse?.data]);

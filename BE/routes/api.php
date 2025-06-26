@@ -83,9 +83,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
 
     Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
-
-
-
 });
 
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
@@ -217,9 +214,9 @@ Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 // info acc client
 Route::get('profile', [ClientUserController::class, 'showInfo']);
 Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
-Route::patch('profile', [ClientUserController::class, 'updateInfoBasic']);
+Route::patch('profil', [ClientUserController::class, 'updateInfoBasic']);
 Route::post('change-password', [ClientUserController::class, 'updatePassword']);
-Route::patch('change-password', [ClientUserController::class, 'updatePassword']);
+Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
 
 
 
