@@ -87,6 +87,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (response?.data?.data) {
       setListProduct(response.data.data);
+      console.log(response.data.data);
       setMetaLink(response.data.meta);
     } else {
       setListProduct([]);

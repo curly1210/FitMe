@@ -169,7 +169,7 @@ const ModalAddress = ({
   // if (isLoading) return null;
 
   return (
-    <div className="w-[500px]  p-6">
+    <div className="w-[500px] modal-address p-6">
       <div className="flex justify-between items-center mb-8">
         <div className="font-bold text-xl">
           {mode === "edit" ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ"}
@@ -303,10 +303,14 @@ const ModalAddress = ({
             valuePropName="checked"
             className="!mb-0"
           >
-            <Checkbox className="!rounded-none"
-             disabled={totalAddresses === 1} />
+            <Checkbox
+              className="!rounded-none"
+              disabled={totalAddresses === 1}
+            />
           </Form.Item>
-          <p className={`${totalAddresses === 1 ? "text-gray-400" : ""}`}>Đặt làm địa chỉ mặc định</p>
+          <p className={`${totalAddresses === 1 ? "text-gray-400" : ""}`}>
+            Đặt làm địa chỉ mặc định
+          </p>
         </div>
         <div className="flex justify-end">
           <Button

@@ -56,11 +56,9 @@ body {
 }
 
 /*  */
-.ant-select-selector {
+.modal-address .ant-select-selector {
   border-radius: 0px !important;
   height: 48px !important;
-  /* padding: 12px !important; */
-  /* @apply px-4 py-2; */
 }
 
 .ant-checkbox-inner {
@@ -179,3 +177,6 @@ body {
 .list-order-client .ant-picker {
   border-radius: 0px !important;
 }
+
+/* .trash-products .ant-select-selector {
+} */

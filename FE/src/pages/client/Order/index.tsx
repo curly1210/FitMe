@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined, SwapRightOutlined } from "@ant-design/icons";
-import { useList, useUpdate } from "@refinedev/core";
-import { WiDirectionRight } from "react-icons/wi";
+import { useCustom, useUpdate } from "@refinedev/core";
 
 import {
   ConfigProvider,
   DatePicker,
   Input,
   notification,
+  Pagination,
   Popconfirm,
   Spin,
 } from "antd";
@@ -24,6 +24,9 @@ const Order = () => {
   const [idOrderStatus, setIdOrderStatus] = useState(0);
   const [searchText, setSearchText] = useState<any>(undefined);
 
+  const [currentPage, setCurrentPage] = useState(1); // trang hiện tại
+  const [pageSize, setPageSize] = useState(2); // số item mỗi trang
+
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | undefined>(undefined);
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
 
@@ -31,23 +34,36 @@ const Order = () => {
     data: ordersResponse,
     isLoading,
     refetch,
-  } = useList({
-    resource: "orders",
-    filters: [
-      { field: "status_order_id", operator: "eq", value: idOrderStatus },
-      { field: "search", operator: "eq", value: searchText },
-      {
-        field: "date_from",
-        operator: "eq",
-        value: fromDate?.format("YYYY-MM-DD"),
+  } = useCustom({
+    method: "get",
+    url: "orders",
+    config: {
+      query: {
+        page: currentPage,
+        per_page: pageSize,
+        status_order_id: idOrderStatus,
+        search: searchText,
+        date_from: fromDate?.format("YYYY-MM-DD"),
+        date_to: toDate?.format("YYYY-MM-DD"),
       },
-      { field: "date_to", operator: "eq", value: toDate?.format("YYYY-MM-DD") },
-    ],
+    },
+    // queryOptions: {
+    //   keepPreviousData: true, // không nháy dữ liệu khi load lại
+    // },
   });
 
   // console.log("ngay bat dau:", fromDate);
 
-  const orders = ordersResponse?.data || [];
+  const orders = ordersResponse?.data?.data || [];
+
+  const total = ordersResponse?.data?.total ?? 0;
+
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+    if (pageSize) setPageSize(pageSize);
+  };
+
+  // console.log(ordersResponse?.data);
 
   const handleSearchText = (value: any) => {
     setSearchText(value || undefined);
@@ -268,68 +284,18 @@ const Order = () => {
                   </div>
                 </div>
               ))}
+              <div className="flex justify-center">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={total}
+                  // showSizeChanger
+                  onChange={handlePageChange}
+                  style={{ marginTop: 16, textAlign: "right" }}
+                />
+              </div>
             </div>
           )}
-
-          {/* <div className="flex flex-col gap-5">
-            {orders?.map((order: any) => (
-              <div
-                key={order.id}
-                className="py-3 px-4 text-sm border border-gray-300 flex flex-col gap-4"
-              >
-                <div className="flex items-center gap-20">
-                  <p className="font-semibold">
-                    Mã đơn hàng:{" "}
-                    <span className="font-normal">#{order?.orders_code}</span>
-                  </p>
-                  <p>
-                    Ngày đặt: {new Date(order.created_at).toLocaleDateString()}
-                  </p>
-                  <p>
-                    {order.total_amount_items} sản phẩm (
-                    {order?.total_amount.toLocaleString()} đ)
-                  </p>
-                </div>
-                <div>Giao đến: {order?.receiving_address}</div>
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold">{order?.status_name}</p>
-                  <div className="flex gap-3">
-                    <Link to={`/order/${order?.id}`}>
-                      <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
-                        XEM CHI TIẾT
-                      </button>
-                    </Link>
-                    {order.status_name == "Chờ xác nhận" && (
-                      <Popconfirm
-                        title="Cập nhật trạng thái"
-                        onConfirm={() => onHandleChangeStatus(order.id)}
-                        description="Bạn có chắc chắn muốn hủy đơn hàng không?"
-                        okText="Có"
-                        cancelText="Không"
-                      >
-                        <button className="text-white bg-black py-2 px-3 cursor-pointer">
-                          HỦY ĐƠN
-                        </button>
-                      </Popconfirm>
-                    )}
-                    {order.status_name == "Đã giao" && (
-                      <Popconfirm
-                        title="Cập nhật trạng thái"
-                        onConfirm={() => onHandleChangeStatus(order.id)}
-                        description="Xác nhận nhận hàng thành công?"
-                        okText="Có"
-                        cancelText="Không"
-                      >
-                        <button className="text-white bg-black py-2 px-3 cursor-pointer">
-                          ĐÃ NHẬN HÀNG
-                        </button>
-                      </Popconfirm>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div> */}
         </div>
       </div>
     </div>
