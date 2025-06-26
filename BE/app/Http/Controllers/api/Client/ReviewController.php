@@ -23,9 +23,11 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         $rate = $request->query('rate');
+
         $productId = $request->query('product_id');
         // dd($productItemId);
         $product = Product::query()->with('productItems')->where('id', $productId)->first();
+        $perPage = $request->input('per_page', 10);
         if (!$product) {
             return $this->error("Không tìm thấy sản phẩm", ['Sản phẩm không tồn tại'], 404);
         } else {
@@ -55,9 +57,13 @@ class ReviewController extends Controller
                 $query = Review::with(['productItem', 'reviewImages', 'user'])->whereIn('product_item_id', $productItemId)->where('is_active', 1)
                     ->orderBy("created_at", "desc");
             }
-            $reviews = $query->paginate(10);
+
             $reviewRate = min(round($product->reviews()->withoutGlobalScopes()->avg('rate'), 1), 5);
             $roundedRate = round($reviewRate * 2) / 2;
+
+
+            $reviews = $query->paginate($perPage);
+
             return  ReviewResource::collection($reviews)->additional([
                 'review_rate' => $roundedRate,
                 'total_review' => $product->reviews()->count(),

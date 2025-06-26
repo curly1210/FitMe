@@ -64,7 +64,7 @@ const Order = () => {
     if (pageSize) setPageSize(pageSize);
   };
 
-  // console.log(ordersResponse?.data);
+  console.log(orders);
 
   const handleSearchText = (value: any) => {
     setSearchText(value || undefined);
