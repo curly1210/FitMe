@@ -31,16 +31,16 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:150',
-            'content' => 'required',
-            'thumbnail' => 'nullable|image',
-        ], [
-            'title.required' => 'Tiêu đề tin tức là bắt buộc.',
-            'title.string' => 'Tiêu đề tin tức là là chuỗi kí tự.',
-            'title.max' => 'Tiêu đề tin tức tối đa 150 từ',
-            'content.required' => 'Nội dung của tin tức là bắt buộc.',
-        ]);
+        // $request->validate([
+        //     'title' => 'required|string|max:150',
+        //     'content' => 'required',
+        //     'thumbnail' => 'nullable|image',
+        // ], [
+        //     'title.required' => 'Tiêu đề tin tức là bắt buộc.',
+        //     'title.string' => 'Tiêu đề tin tức là là chuỗi kí tự.',
+        //     'title.max' => 'Tiêu đề tin tức tối đa 150 từ',
+        //     'content.required' => 'Nội dung của tin tức là bắt buộc.',
+        // ]);
 
         //Kiểm tra slug
         $slug = Str::slug($request->title);
@@ -84,11 +84,11 @@ class PostController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string|max:150',
-            'content' => 'required',
-            'thumbnail' => 'nullable|image',
-        ]);
+        // $request->validate([
+        //     'title' => 'required|string|max:150',
+        //     'content' => 'required',
+        //     'thumbnail' => 'nullable|image',
+        // ]);
 
         $post = Post::findOrFail($id);
 
@@ -141,9 +141,9 @@ class PostController extends Controller
     public function uploadCkeditorImage(Request $request)
     {
         try {
-            $request->validate([
-                'upload' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            ]);
+            // $request->validate([
+            //     'upload' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            // ]);
 
             //Lưu hình ảnh vào Cloudinary và tối ảnh content nhẹ nhất
             $uploadResult = $this->uploadImageToCloudinary($request->file('upload'), [
