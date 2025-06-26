@@ -31,6 +31,7 @@ class ReviewResource extends JsonResource
                 "size" => optional($this->productItem->size)->name ?? null,
                 "color" =>  optional($this->productItem->color)->name ?? null,
 
+
             ],
 
             "review_images" => $this->reviewImages->map(function ($image) {
