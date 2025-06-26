@@ -1,6 +1,5 @@
 <?php
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -17,6 +16,7 @@ use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
+use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
@@ -156,6 +156,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
     Route::patch('/coupons/{id}', [CouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
+});
+
+//Route quản lí tin tức
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
+    Route::post('/posts/upload-image', [PostController::class, 'uploadImage'])->name('posts.uploadImage');
 });
 
 
