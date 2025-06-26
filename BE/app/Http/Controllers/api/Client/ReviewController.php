@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\Client;
 
 use App\Models\Order;
 use App\Models\Review;
+use App\Models\Product;
 use App\Models\ReviewImage;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -22,13 +23,16 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         $rate = $request->query('rate');
-        $productItemId = $request->input('product_item_id');
+        $productId = $request->query('product_id');
         // dd($productItemId);
-        if (!$productItemId) {
-            return $this->error("Lỗi đánh giá", ['product_id' => 'Trường product_id là bắt buộc'], 400);
+        $product = Product::query()->with('productItems')->where('id', $productId)->first();
+        if (!$product) {
+            return $this->error("Không tìm thấy sản phẩm", ['Sản phẩm không tồn tại'], 404);
         } else {
+
+            $productItemId = $product->productItems->pluck('id')->toArray();
             if ((int) $rate == 1) {
-                $query = Review::with(['productItem', 'reviewImages', 'user'])->whereIn('product_item_id', $productItemId)
+                $query = Review::with(['productItem', 'reviewImages', 'user'])->where('product_item_id', $productItemId)
                     ->where('rate', 1)->where('is_active', 1)
                     ->orderBy("created_at", "desc");
             } else if ((int) $rate == 2) {
