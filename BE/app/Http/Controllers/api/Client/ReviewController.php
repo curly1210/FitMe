@@ -22,7 +22,7 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         $rate = $request->query('rate');
-        $productItemId = $request->input('product_item_id');
+        $productItemId = $request->query('product_item_id');
         // dd($productItemId);
         if (!$productItemId) {
             return $this->error("Lỗi đánh giá", ['product_id' => 'Trường product_id là bắt buộc'], 400);

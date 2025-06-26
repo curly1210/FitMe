@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Tabs, Radio, Button, Tooltip, Space, notification } from "antd";
-import { useCreate, useOne } from "@refinedev/core";
+import { useCreate, useList, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { RightOutlined } from "@ant-design/icons";
@@ -14,6 +14,8 @@ import { AiOutlineMinus } from "react-icons/ai";
 import { IoAdd } from "react-icons/io5";
 import { useCart } from "../../../hooks/useCart";
 import TextArea from "antd/es/input/TextArea";
+
+import { GoStarFill } from "react-icons/go";
 
 const { TabPane } = Tabs;
 
@@ -95,10 +97,20 @@ interface Product {
   related_products: RelatedProduct[];
 }
 
+const ratingOptions = [
+  { label: "Tất Cả", value: null },
+  { label: "5 Sao", value: 5 },
+  { label: "4 Sao", value: 4 },
+  { label: "3 Sao", value: 3 },
+  { label: "2 Sao", value: 2 },
+  { label: "1 Sao", value: 1 },
+];
+
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { accessToken, user } = useAuthen();
   const { openModal } = useModal();
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
   const [quantity, setQuantity] = useState(1);
   const [comment, setComment] = useState("");
@@ -125,6 +137,8 @@ const ProductDetail = () => {
   const nav = useNavigate();
 
   const product = data?.data;
+
+  // console.log(product);
   const productItems: ProductItem[] = product?.product_items || [];
   const allSizes: Size[] = product?.sizes || [];
   const colors: ColorImage[] = product?.color_images || [];
@@ -133,6 +147,19 @@ const ProductDetail = () => {
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const { data: responseReviews } = useList({
+    resource: "reviews",
+    filters: [
+      { field: "product_id", operator: "eq", value: product?.id },
+      ...(selectedRating
+        ? [{ field: "rate", operator: "eq" as const, value: selectedRating }]
+        : []),
+    ],
+    queryOptions: { enabled: !!product?.id },
+  });
+
+  console.log(responseReviews?.data);
 
   const handleAddToCart = () => {
     if (!accessToken || !user) {
@@ -363,27 +390,27 @@ const ProductDetail = () => {
                 SKU: {selectedItem?.sku || "Đang cập nhật"}
               </p>
 
-             <p className="text-xl text-black-600 font-semibold">
-                  {selectedItem ? (
-                    selectedItem.sale_price > 0 ? (
-                      <>
-                        <span className="text-red-500">
-                          {selectedItem.sale_price.toLocaleString()} ₫
-                        </span>
-                        <span className="line-through text-gray-400 ml-2">
-                          {selectedItem.price.toLocaleString()} ₫
-                        </span>
-                        <span className="ml-2 text-green-600 text-sm">
-                          -{selectedItem.sale_percent}%
-                        </span>
-                      </>
-                    ) : (
-                      <span>{selectedItem.price.toLocaleString()} ₫</span>
-                    )
-                  ) : null}
-             </p>
+              <p className="text-xl text-black-600 font-semibold">
+                {selectedItem ? (
+                  selectedItem.sale_price > 0 ? (
+                    <>
+                      <span className="text-red-500">
+                        {selectedItem.sale_price.toLocaleString()} ₫
+                      </span>
+                      <span className="line-through text-gray-400 ml-2">
+                        {selectedItem.price.toLocaleString()} ₫
+                      </span>
+                      <span className="ml-2 text-green-600 text-sm">
+                        -{selectedItem.sale_percent}%
+                      </span>
+                    </>
+                  ) : (
+                    <span>{selectedItem.price.toLocaleString()} ₫</span>
+                  )
+                ) : null}
+              </p>
 
-            {/* <p>{selectedItem?.sale_percent}</p> */}
+              {/* <p>{selectedItem?.sale_percent}</p> */}
               <div className="text-sm flex items-center gap-2 mb-3">
                 {/* Số lượng còn */}
                 <p>Số lượng còn:</p>
@@ -550,7 +577,40 @@ const ProductDetail = () => {
             key="3"
             className="border border-gray-200 p-4"
           >
-            <p>Chưa có đánh giá nào.</p>
+            <h1 className="text-xl mb-5">ĐÁNH GIÁ SẢN PHẨM</h1>
+
+            <div className="p-5 grid grid-cols-12 border bg-gray-100 border-gray-300">
+              <div className="col-span-2">
+                <div>
+                  <p className="text-red-500 text-xl mb-1">
+                    <span className="text-3xl">4.8</span> trên 5
+                  </p>
+                  <div className="flex  ">
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-10 flex gap-2 items-center">
+                {ratingOptions.map((rate) => (
+                  <button
+                    key={rate.label}
+                    onClick={() => setSelectedRating(rate.value)}
+                    className={`px-5 py-1 border cursor-pointer ${
+                      selectedRating === rate.value ||
+                      (rate.value === null && selectedRating === null)
+                        ? "border-red-500 text-red-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {rate.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </TabPane>
         </Tabs>
       </div>
