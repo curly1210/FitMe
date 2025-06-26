@@ -9,7 +9,7 @@ import {
   notification,
   Pagination,
 } from "antd";
-import { useCreate, useCustom, useList, useOne } from "@refinedev/core";
+import { useCreate, useCustom, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { RightOutlined } from "@ant-design/icons";
@@ -121,8 +121,9 @@ const ProductDetail = () => {
   const { openModal } = useModal();
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
+  // Paginate review
   const [currentPageReview, setCurrentPageReview] = useState(1);
-  const [pageSizeReviews, setPageSizeReviews] = useState(1);
+  const [pageSizeReviews, setPageSizeReviews] = useState(10);
 
   const [quantity, setQuantity] = useState(1);
   const [comment, setComment] = useState("");
@@ -183,6 +184,8 @@ const ProductDetail = () => {
     setCurrentPageReview(page);
     if (pageSize) setPageSizeReviews(pageSize);
   };
+
+  console.log(responseReviews?.data);
 
   const reviews = responseReviews?.data?.data || [];
   const totalReviews = responseReviews?.data?.meta?.total || 0;
@@ -605,11 +608,14 @@ const ProductDetail = () => {
           >
             <h1 className="text-xl mb-5">ĐÁNH GIÁ SẢN PHẨM</h1>
 
-            <div className="p-5 grid grid-cols-12 border bg-gray-100 border-gray-300 mb-8">
+            <div className="p-5 grid grid-cols-12 gap-x-10 border bg-gray-100 border-gray-300 mb-8">
               <div className="col-span-2">
-                <div>
+                <div className="flex w-[70%] flex-col justify-center items-center">
                   <p className="text-red-500 text-xl mb-1">
-                    <span className="text-3xl">4.8</span> trên 5
+                    <span className="text-3xl">
+                      {responseReviews?.data?.review_rate}
+                    </span>{" "}
+                    trên 5
                   </p>
                   <div className="flex  ">
                     <GoStarFill className="text-red-500 text-xl" />
@@ -632,7 +638,13 @@ const ProductDetail = () => {
                         : "border-gray-300"
                     }`}
                   >
-                    {rate.label}
+                    {rate.label} (
+                    {
+                      responseReviews?.data?.[
+                        `total_review${rate.value ? `_${rate?.value}` : ""}`
+                      ]
+                    }
+                    )
                   </button>
                 ))}
               </div>
@@ -640,8 +652,11 @@ const ProductDetail = () => {
 
             <div>
               {reviews?.map((review: any) => (
-                <div className="border-b-[1px] border-gray-300 ">
-                  <div key={review?.id} className="flex gap-4 px-5 mb-8 mt-8">
+                <div
+                  key={review?.id}
+                  className="border-b-[1px] border-gray-300 "
+                >
+                  <div className="flex gap-4 px-5 mb-8 mt-8">
                     <div>
                       <img src="" className="w-8 h-8 rounded-full" alt="" />
                     </div>

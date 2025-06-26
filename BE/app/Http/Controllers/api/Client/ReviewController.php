@@ -68,7 +68,6 @@ class ReviewController extends Controller
                 'total_review_4' => $product->reviews()->where('rate', 4)->count(),
                 'total_review_5' => $product->reviews()->where('rate', 5)->count(),
             ]);
-
         }
     }
     public function listOrderNeedReview(Request $request)
