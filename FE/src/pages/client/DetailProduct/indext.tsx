@@ -1,7 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Tabs, Radio, Button, Tooltip, Space, notification } from "antd";
-import { useCreate, useList, useOne } from "@refinedev/core";
+import {
+  Tabs,
+  Radio,
+  Button,
+  Tooltip,
+  Space,
+  notification,
+  Pagination,
+} from "antd";
+import { useCreate, useCustom, useList, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { RightOutlined } from "@ant-design/icons";
@@ -16,6 +24,7 @@ import { useCart } from "../../../hooks/useCart";
 import TextArea from "antd/es/input/TextArea";
 
 import { GoStarFill } from "react-icons/go";
+import StarRating from "../../../utils/StarRating";
 
 const { TabPane } = Tabs;
 
@@ -112,6 +121,9 @@ const ProductDetail = () => {
   const { openModal } = useModal();
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
+  const [currentPageReview, setCurrentPageReview] = useState(1);
+  const [pageSizeReviews, setPageSizeReviews] = useState(1);
+
   const [quantity, setQuantity] = useState(1);
   const [comment, setComment] = useState("");
   const { addToCartHandler, isLoadingAddtoCart } = useCart();
@@ -148,18 +160,32 @@ const ProductDetail = () => {
   const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const { data: responseReviews } = useList({
-    resource: "reviews",
-    filters: [
-      { field: "product_id", operator: "eq", value: product?.id },
-      ...(selectedRating
-        ? [{ field: "rate", operator: "eq" as const, value: selectedRating }]
-        : []),
-    ],
+  const {
+    data: responseReviews,
+    // isLoading,
+    // refetch,
+  } = useCustom({
+    method: "get",
+    url: "reviews",
+    config: {
+      query: {
+        page: currentPageReview,
+        per_page: pageSizeReviews,
+        ...(product?.id && { product_id: product.id }),
+        ...(selectedRating && { rate: selectedRating }),
+      },
+    },
+
     queryOptions: { enabled: !!product?.id },
   });
 
-  console.log(responseReviews?.data);
+  const handlePageReviewsChange = (page: number, pageSize?: number) => {
+    setCurrentPageReview(page);
+    if (pageSize) setPageSizeReviews(pageSize);
+  };
+
+  const reviews = responseReviews?.data?.data || [];
+  const totalReviews = responseReviews?.data?.meta?.total || 0;
 
   const handleAddToCart = () => {
     if (!accessToken || !user) {
@@ -579,7 +605,7 @@ const ProductDetail = () => {
           >
             <h1 className="text-xl mb-5">ĐÁNH GIÁ SẢN PHẨM</h1>
 
-            <div className="p-5 grid grid-cols-12 border bg-gray-100 border-gray-300">
+            <div className="p-5 grid grid-cols-12 border bg-gray-100 border-gray-300 mb-8">
               <div className="col-span-2">
                 <div>
                   <p className="text-red-500 text-xl mb-1">
@@ -610,6 +636,49 @@ const ProductDetail = () => {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div>
+              {reviews?.map((review: any) => (
+                <div className="border-b-[1px] border-gray-300 ">
+                  <div key={review?.id} className="flex gap-4 px-5 mb-8 mt-8">
+                    <div>
+                      <img src="" className="w-8 h-8 rounded-full" alt="" />
+                    </div>
+                    <div className="flex flex-col gap-5">
+                      <div className="flex flex-col gap-[2px]">
+                        <p>{review?.user?.name}</p>
+                        <div className="flex">
+                          <StarRating rating={review?.rate} />
+                          {/* <StarRating rating={review.rate} /> */}
+                        </div>
+                        <p className="text-gray-500">{review?.updated_at}</p>
+                      </div>
+                      <p className="text-justify">{review?.content}</p>
+                      <div className="flex gap-3">
+                        {review?.review_images?.map((image: any) => (
+                          <img
+                            key={image?.id}
+                            src={image?.url}
+                            className="block w-[80px] h-[80px]"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center ">
+              <Pagination
+                current={currentPageReview}
+                pageSize={pageSizeReviews}
+                total={totalReviews}
+                // showSizeChanger
+                onChange={handlePageReviewsChange}
+                style={{ marginTop: 16, textAlign: "right" }}
+              />
             </div>
           </TabPane>
         </Tabs>
