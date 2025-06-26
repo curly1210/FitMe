@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\OverviewStatisticResource;
 use App\Http\Resources\Admin\RevenueStatisticsResource;
+use App\Http\Resources\Admin\CustomerStatisticsResource;
 
 class StatisticsController extends Controller
 {
@@ -149,6 +150,93 @@ class StatisticsController extends Controller
             'data' => $query
         ]);
     }
+
+    public function customerStatistics(Request $request)
+    {
+        $now = now();
+        $year = $request->year ?? $now->year;
+        $month = $request->month ?? $now->month;
+
+        $daysInMonth = now()->setDate($year, $month, 1)->daysInMonth;
+        $monthly = collect(range(1, $daysInMonth))->mapWithKeys(function ($d) use ($year, $month) {
+            $date = now()->setDate($year, $month, $d)->format('Y-m-d');
+
+            $count = User::where('role', 'Customer')
+                ->whereDate('created_at', $date)
+                ->count();
+
+            return [$d => $count];
+        });
+
+        $recentDays = [7, 14, 30];
+        $recent = [];
+        foreach ($recentDays as $days) {
+            $from = now()->copy()->subDays($days - 1)->startOfDay();
+
+            $recent[$days] = collect(range(0, $days - 1))->mapWithKeys(function ($offset) use ($from) {
+                $date = $from->copy()->addDays($offset);
+                $count = User::where('role', 'Customer')
+                    ->whereDate('created_at', $date)
+                    ->count();
+
+                return [$date->format('Y-m-d') => $count];
+            });
+        }
+
+
+        $topBySpendingQuery = Order::select('user_id', DB::raw('SUM(total_amount) as total_spent'))
+            ->where('status_order_id', 6)
+            ->whereHas('user', function ($q) {
+                $q->where('role', 'Customer');
+            })
+            ->groupBy('user_id')
+            ->orderByDesc('total_spent')
+            ->with('user:id,name,email');
+
+        if ($request->has('year')) {
+            $topBySpendingQuery->whereYear('created_at', $request->year);
+        }
+        if ($request->has('month')) {
+            $topBySpendingQuery->whereMonth('created_at', $request->month);
+        }
+
+        $topBySpending = $topBySpendingQuery->take(5)->get();
+
+        $bannedAccounts = User::where('role', 'Customer')->where('is_ban', 1)->count();
+        $activeAccounts = User::where('role', 'Customer')->where('is_ban', 0)->count();
+        $customersWithOrders = Order::whereHas('user', function ($q) {
+            $q->where('role', 'Customer');
+        })
+            ->select('user_id')
+            ->groupBy('user_id')
+            ->get()
+            ->count();
+
+        $returningCustomers = Order::whereHas('user', function ($q) {
+            $q->where('role', 'Customer');
+        })
+            ->select('user_id', DB::raw('COUNT(*) as total_orders'))
+            ->groupBy('user_id')
+            ->having('total_orders', '>=', 2)
+            ->get()
+            ->count();
+
+        $repeatRate = $customersWithOrders > 0
+            ? round(($returningCustomers / $customersWithOrders) * 100, 2)
+            : 0;
+
+        return new CustomerStatisticsResource([
+            'monthly' => $monthly,
+            'recent' => $recent,
+            'top_customers_by_spending' => $topBySpending,
+            'active_accounts' => $activeAccounts,
+            'banned_accounts' => $bannedAccounts,
+            'returning_rate_percent' => $repeatRate,
+        ]);
+    }
+
+
+
 
 
 }
