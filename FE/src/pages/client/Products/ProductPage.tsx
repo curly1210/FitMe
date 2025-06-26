@@ -39,6 +39,8 @@ function ProductPage() {
   });
   const dataLike = wishlistData?.data?.data || [];
 
+  // console.log(listProduct);
+
   const handleLikeProduct = (productId: any, unlike: boolean) => {
     if (unlike) {
       unLike(productId);
@@ -83,9 +85,17 @@ function ProductPage() {
           <div className="border border-gray-200 rounded-sm mb-4">
             <div className="flex justify-between items-center px-6 py-4 relative">
               <div className="text-sm text-gray-500 space-x-2">
-                <span className="hover:underline cursor-pointer">Trang chủ</span> /
-                <span className="hover:underline cursor-pointer">Thời trang</span> /
-                <span className="font-semibold text-black">{categoryData.name}</span>
+                <span className="hover:underline cursor-pointer">
+                  Trang chủ
+                </span>{" "}
+                /
+                <span className="hover:underline cursor-pointer">
+                  Thời trang
+                </span>{" "}
+                /
+                <span className="font-semibold text-black">
+                  {categoryData.name}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 {/* Filter Button */}
@@ -109,7 +119,9 @@ function ProductPage() {
                   </button>
                   {showSort && (
                     <div className="absolute right-0 z-10 mt-2 w-52 bg-white border border-gray-200 rounded-md shadow-lg">
-                      <div className="p-3 border-b font-semibold">Sắp xếp theo</div>
+                      <div className="p-3 border-b font-semibold">
+                        Sắp xếp theo
+                      </div>
                       <div
                         className="flex items-center px-4 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
@@ -139,28 +151,40 @@ function ProductPage() {
           {listProduct.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {listProduct.map((product) => {
-                const productItems = product.colors.flatMap((itemV) => itemV.product_items) || [];
+                const productItems =
+                  product.colors.flatMap((itemV) => itemV.product_items) || [];
                 // lấy ảnh đầu tiên
                 const imgFirst = product.colors[0]?.images[0]?.url;
-                const thumbnals = product.colors.flatMap((itemV) => itemV.images[0]) || [];
-                const minPrice = Math.min(...product.colors.flatMap((item) => item.min_sale_price));
-                const percent = product.colors[0]?.product_items[0]?.sale_percent as number;
+                const thumbnals =
+                  product.colors.flatMap((itemV) => itemV.images[0]) || [];
+                const minPrice = Math.min(
+                  ...product.colors.flatMap((item) => item.min_sale_price)
+                );
+                const percent = product.colors[0]?.product_items[0]
+                  ?.sale_percent as number;
 
                 return (
-                  <div key={product.id} className="group border border-gray-100 relative">
+                  <div
+                    key={product.id}
+                    className="group border border-gray-100 relative"
+                  >
                     {/* Like */}
                     <div
                       className="group/group-like absolute right-0 top-0 z-10 p-2 cursor-pointer"
                       onClick={() =>
                         handleLikeProduct(
                           product.id,
-                          dataLike.some((item) => item?.product?.id === product.id)
+                          dataLike.some(
+                            (item) => item?.product?.id === product.id
+                          )
                         )
                       }
                     >
                       <HeartOutlined
                         className={`text-2xl group-hover/group-like:!text-red-400 ${
-                          dataLike.some((item) => item?.product?.id === product.id) && "!text-red-400"
+                          dataLike.some(
+                            (item) => item?.product?.id === product.id
+                          ) && "!text-red-400"
                         }`}
                       />
                     </div>
@@ -189,11 +213,19 @@ function ProductPage() {
                       </div>
                     </div>
                     <div className="px-2 pt-2 pb-3 space-y-1">
-                      <p className="text-sm font-semibold text-black">{product.name}</p>
+                      <p className="text-sm font-semibold text-black">
+                        {product.name}
+                      </p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {minPrice?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}₫ -
+                        {minPrice
+                          ?.toString()
+                          ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                        ₫ -
                         <span className="text-green-600">
-                          {percent?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}%
+                          {percent
+                            ?.toString()
+                            ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                          %
                         </span>
                       </p>
                       <div className="flex gap-1 mt-2">
@@ -212,7 +244,9 @@ function ProductPage() {
               })}
             </div>
           ) : (
-            <div className="text-center text-gray-500 text-base py-10">Không có sản phẩm nào phù hợp với bộ lọc</div>
+            <div className="text-center text-gray-500 text-base py-10">
+              Không có sản phẩm nào phù hợp với bộ lọc
+            </div>
           )}
 
           {/* Pagination */}
@@ -224,7 +258,7 @@ function ProductPage() {
                 current={metaLink.current_page}
                 pageSize={metaLink.per_page}
                 total={metaLink.last_page}
-                onChange={(e) => { 
+                onChange={(e) => {
                   setCurrentPage(e);
                   handleSearch();
                 }}

@@ -27,10 +27,10 @@ class CartItemController extends Controller
                 'productItem' => function ($query) {
                     $query->where('is_active', 1)
                         ->with([
-                            'product' => fn ($q) => $q->where('is_active', 1),
-                            'color' => fn ($q) => $q->where('is_active', 1),
-                            'size' => fn ($q) => $q->where('is_active', 1),
-                            'product.productImages' => fn ($q) => $q->where('is_active', 1)
+                            'product' => fn($q) => $q->where('is_active', 1),
+                            'color' => fn($q) => $q->where('is_active', 1),
+                            'size' => fn($q) => $q->where('is_active', 1),
+                            'product.productImages' => fn($q) => $q->where('is_active', 1)
                         ]);
                 }
             ])
@@ -61,6 +61,7 @@ class CartItemController extends Controller
                     'price' => $productItem->price,
                     'sale_percent' => $productItem->sale_percent,
                     'sale_price' => $productItem->sale_price,
+                    'slug' => $product->slug,
                     'sku' => $productItem->sku,
                     'image' => $image,
                     'subtotal' => $cartItem->quantity * $productItem->sale_price,

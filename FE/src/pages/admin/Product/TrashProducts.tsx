@@ -179,7 +179,7 @@ const TrashProducts = () => {
   ];
 
   return (
-    <div>
+    <div className="trash-products">
       <h1 className="text-2xl font-semibold mb-3">Thùng rác sản phẩm</h1>
       <div className="flex items-center justify-between mb-5">
         <div className="flex gap-3">
