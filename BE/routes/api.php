@@ -157,12 +157,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 //Route quản lí tin tức
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']);
     Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
     Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
-    Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']); //Xử lí upload hình ảnh từ content
+    // Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']); //Xử lí upload hình ảnh từ content
 });
 
 
