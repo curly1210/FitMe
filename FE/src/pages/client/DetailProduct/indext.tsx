@@ -1,7 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Tabs, Radio, Button, Tooltip, Space, notification } from "antd";
-import { useCreate, useOne } from "@refinedev/core";
+import {
+  Tabs,
+  Radio,
+  Button,
+  Tooltip,
+  Space,
+  notification,
+  Pagination,
+} from "antd";
+import { useCreate, useCustom, useList, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { RightOutlined } from "@ant-design/icons";
@@ -14,6 +22,9 @@ import { AiOutlineMinus } from "react-icons/ai";
 import { IoAdd } from "react-icons/io5";
 import { useCart } from "../../../hooks/useCart";
 import TextArea from "antd/es/input/TextArea";
+
+import { GoStarFill } from "react-icons/go";
+import StarRating from "../../../utils/StarRating";
 
 const { TabPane } = Tabs;
 
@@ -95,10 +106,23 @@ interface Product {
   related_products: RelatedProduct[];
 }
 
+const ratingOptions = [
+  { label: "Tất Cả", value: null },
+  { label: "5 Sao", value: 5 },
+  { label: "4 Sao", value: 4 },
+  { label: "3 Sao", value: 3 },
+  { label: "2 Sao", value: 2 },
+  { label: "1 Sao", value: 1 },
+];
+
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { accessToken, user } = useAuthen();
   const { openModal } = useModal();
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+
+  const [currentPageReview, setCurrentPageReview] = useState(1);
+  const [pageSizeReviews, setPageSizeReviews] = useState(1);
 
   const [quantity, setQuantity] = useState(1);
   const [comment, setComment] = useState("");
@@ -125,6 +149,8 @@ const ProductDetail = () => {
   const nav = useNavigate();
 
   const product = data?.data;
+
+  // console.log(product);
   const productItems: ProductItem[] = product?.product_items || [];
   const allSizes: Size[] = product?.sizes || [];
   const colors: ColorImage[] = product?.color_images || [];
@@ -133,6 +159,33 @@ const ProductDetail = () => {
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const {
+    data: responseReviews,
+    // isLoading,
+    // refetch,
+  } = useCustom({
+    method: "get",
+    url: "reviews",
+    config: {
+      query: {
+        page: currentPageReview,
+        per_page: pageSizeReviews,
+        ...(product?.id && { product_id: product.id }),
+        ...(selectedRating && { rate: selectedRating }),
+      },
+    },
+
+    queryOptions: { enabled: !!product?.id },
+  });
+
+  const handlePageReviewsChange = (page: number, pageSize?: number) => {
+    setCurrentPageReview(page);
+    if (pageSize) setPageSizeReviews(pageSize);
+  };
+
+  const reviews = responseReviews?.data?.data || [];
+  const totalReviews = responseReviews?.data?.meta?.total || 0;
 
   const handleAddToCart = () => {
     if (!accessToken || !user) {
@@ -363,27 +416,27 @@ const ProductDetail = () => {
                 SKU: {selectedItem?.sku || "Đang cập nhật"}
               </p>
 
-             <p className="text-xl text-black-600 font-semibold">
-                  {selectedItem ? (
-                    selectedItem.sale_price > 0 ? (
-                      <>
-                        <span className="text-red-500">
-                          {selectedItem.sale_price.toLocaleString()} ₫
-                        </span>
-                        <span className="line-through text-gray-400 ml-2">
-                          {selectedItem.price.toLocaleString()} ₫
-                        </span>
-                        <span className="ml-2 text-green-600 text-sm">
-                          -{selectedItem.sale_percent}%
-                        </span>
-                      </>
-                    ) : (
-                      <span>{selectedItem.price.toLocaleString()} ₫</span>
-                    )
-                  ) : null}
-             </p>
+              <p className="text-xl text-black-600 font-semibold">
+                {selectedItem ? (
+                  selectedItem.sale_price > 0 ? (
+                    <>
+                      <span className="text-red-500">
+                        {selectedItem.sale_price.toLocaleString()} ₫
+                      </span>
+                      <span className="line-through text-gray-400 ml-2">
+                        {selectedItem.price.toLocaleString()} ₫
+                      </span>
+                      <span className="ml-2 text-green-600 text-sm">
+                        -{selectedItem.sale_percent}%
+                      </span>
+                    </>
+                  ) : (
+                    <span>{selectedItem.price.toLocaleString()} ₫</span>
+                  )
+                ) : null}
+              </p>
 
-            {/* <p>{selectedItem?.sale_percent}</p> */}
+              {/* <p>{selectedItem?.sale_percent}</p> */}
               <div className="text-sm flex items-center gap-2 mb-3">
                 {/* Số lượng còn */}
                 <p>Số lượng còn:</p>
@@ -550,7 +603,83 @@ const ProductDetail = () => {
             key="3"
             className="border border-gray-200 p-4"
           >
-            <p>Chưa có đánh giá nào.</p>
+            <h1 className="text-xl mb-5">ĐÁNH GIÁ SẢN PHẨM</h1>
+
+            <div className="p-5 grid grid-cols-12 border bg-gray-100 border-gray-300 mb-8">
+              <div className="col-span-2">
+                <div>
+                  <p className="text-red-500 text-xl mb-1">
+                    <span className="text-3xl">4.8</span> trên 5
+                  </p>
+                  <div className="flex  ">
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                    <GoStarFill className="text-red-500 text-xl" />
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-10 flex gap-2 items-center">
+                {ratingOptions.map((rate) => (
+                  <button
+                    key={rate.label}
+                    onClick={() => setSelectedRating(rate.value)}
+                    className={`px-5 py-1 border cursor-pointer ${
+                      selectedRating === rate.value ||
+                      (rate.value === null && selectedRating === null)
+                        ? "border-red-500 text-red-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {rate.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              {reviews?.map((review: any) => (
+                <div className="border-b-[1px] border-gray-300 ">
+                  <div key={review?.id} className="flex gap-4 px-5 mb-8 mt-8">
+                    <div>
+                      <img src="" className="w-8 h-8 rounded-full" alt="" />
+                    </div>
+                    <div className="flex flex-col gap-5">
+                      <div className="flex flex-col gap-[2px]">
+                        <p>{review?.user?.name}</p>
+                        <div className="flex">
+                          <StarRating rating={review?.rate} />
+                          {/* <StarRating rating={review.rate} /> */}
+                        </div>
+                        <p className="text-gray-500">{review?.updated_at}</p>
+                      </div>
+                      <p className="text-justify">{review?.content}</p>
+                      <div className="flex gap-3">
+                        {review?.review_images?.map((image: any) => (
+                          <img
+                            key={image?.id}
+                            src={image?.url}
+                            className="block w-[80px] h-[80px]"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center ">
+              <Pagination
+                current={currentPageReview}
+                pageSize={pageSizeReviews}
+                total={totalReviews}
+                // showSizeChanger
+                onChange={handlePageReviewsChange}
+                style={{ marginTop: 16, textAlign: "right" }}
+              />
+            </div>
           </TabPane>
         </Tabs>
       </div>

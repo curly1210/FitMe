@@ -27,9 +27,10 @@ class ReviewResource extends JsonResource
                 "price" => $this->productItem->price,
                 "sale_price" => $this->productItem->sale_price,
                 "sale_percent" => $this->productItem->sale_percent,
-                "size" => optional($this->productItem->size)->name ?? null,
                 "product_image" => $this->productItem->color->productImages->first()->url,
-                "color" => optional($this->productItem->color)->name ?? null,
+                "size" => optional($this->productItem->size)->name ?? null,
+                "color" =>  optional($this->productItem->color)->name ?? null,
+
 
             ],
 
