@@ -88,6 +88,7 @@ Route::prefix('admin')->group(function () {
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
 Route::get('/admin/statistics', [StatisticsController::class, 'statistics']);
 Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topSellingProducts']);
+Route::get('/admin/statistics/customers', [StatisticsController::class, 'customerStatistics']);
 
 
 
