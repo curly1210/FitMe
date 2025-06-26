@@ -15,7 +15,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import PostDrawerAdd from "./PostDrawerAdd"; // 🔁 import component Drawer Add
+import PostDrawerAdd from "./PostDrawerAdd";
 
 // 1. Interface
 interface Post {
@@ -31,16 +31,26 @@ interface Post {
 
 // 2. Component
 const PostList = () => {
-  const [openDrawer, setOpenDrawer] = useState(false); // 👈 trạng thái mở/đóng Drawer
+  const [openDrawer, setOpenDrawer] = useState(false);
 
-  const { data, isLoading } = useList<Post>({ resource: "posts" });
+  // ✨ Thêm quản lý phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+
+  const { data, isLoading } = useList<Post>({
+    resource: "admin/posts",
+    pagination: {
+      current: currentPage,
+      pageSize: pageSize,
+    },
+  });
 
   const { mutate: deletePost } = useDelete();
 
   const handleDelete = (id: number) => {
     deletePost(
       {
-        resource: "posts",
+        resource: "admin/posts",
         id,
       },
       {
@@ -59,32 +69,32 @@ const PostList = () => {
     {
       title: "STT",
       dataIndex: "id",
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
     },
     {
       title: "Tiêu đề",
       dataIndex: "title",
       render: (text) => <span className="font-semibold">{text}</span>,
     },
-  {
-  title: "Ảnh",
-  dataIndex: "thumbnails",
-  render: (thumbnails?: string[]) => (
-    <div className="flex gap-2">
-      {(thumbnails ?? []).map((src, idx) => (
-        <Image
-          key={idx}
-          src={src}
-          width={60}
-          height={60}
-          alt={`thumb-${idx}`}
-          className="rounded-md border"
-          preview={false}
-        />
-      ))}
-    </div>
-  ),
-},
+    {
+      title: "Ảnh",
+      dataIndex: "thumbnails",
+      render: (thumbnails?: string[]) => (
+        <div className="flex gap-2">
+          {(thumbnails ?? []).map((src, idx) => (
+            <Image
+              key={idx}
+              src={src}
+              width={60}
+              height={60}
+              alt={`thumb-${idx}`}
+              className="rounded-md border"
+              preview={false}
+            />
+          ))}
+        </div>
+      ),
+    },
     {
       title: "Nội dung",
       dataIndex: "content",
@@ -164,15 +174,17 @@ const PostList = () => {
         dataSource={data?.data ?? []}
         rowKey="id"
         loading={isLoading}
-        pagination={{ pageSize: 5 }}
+        pagination={{
+          pageSize,
+          current: currentPage,
+          onChange: (page) => setCurrentPage(page),
+          total: data?.total ?? 0,
+        }}
         scroll={{ x: true }}
       />
 
       {/* Drawer Add */}
-      <PostDrawerAdd
-        open={openDrawer}
-        onClose={() => setOpenDrawer(false)}
-      />
+      <PostDrawerAdd open={openDrawer} onClose={() => setOpenDrawer(false)} />
     </div>
   );
 };

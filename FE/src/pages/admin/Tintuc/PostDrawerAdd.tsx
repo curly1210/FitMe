@@ -54,7 +54,7 @@ const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
 
     createPost(
       {
-        resource: "posts",
+        resource: "admin/posts",
         values: formData,
         meta: {
           headers: {
