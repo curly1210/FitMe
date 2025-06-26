@@ -10,5 +10,5 @@ class Post extends Model
     /** @use HasFactory<\Database\Factories\PostFactory> */
     use HasFactory;
 
-    protected $fillable = ['title', 'content', 'thumbnail', 'is_active', 'img', 'slug'];
+    protected $fillable = ['title', 'content', 'thumbnail', 'is_active', 'slug'];
 }

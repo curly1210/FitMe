@@ -9,6 +9,8 @@ use App\Traits\CloudinaryTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use DOMDocument;
 
 class PostController extends Controller
 {
@@ -33,7 +35,6 @@ class PostController extends Controller
             'title' => 'required|string|max:150',
             'content' => 'required',
             'thumbnail' => 'nullable|image',
-            'img' => 'nullable|image',
         ], [
             'title.required' => 'Tiêu đề tin tức là bắt buộc.',
             'title.string' => 'Tiêu đề tin tức là là chuỗi kí tự.',
@@ -58,13 +59,6 @@ class PostController extends Controller
                 'folder' => 'posts/thumbnails',
             ]);
             $data['thumbnail'] = $uploadResult['public_id'];
-        }
-
-        if ($request->hasFile('img')) {
-            $uploadResult = $this->uploadImageToCloudinary($request->file('img'), [
-                'folder' => 'posts/images',
-            ]);
-            $data['img'] = $uploadResult['public_id'];
         }
 
         $post = Post::create($data);
@@ -94,7 +88,6 @@ class PostController extends Controller
             'title' => 'required|string|max:150',
             'content' => 'required',
             'thumbnail' => 'nullable|image',
-            'img' => 'nullable|image',
         ]);
 
         $post = Post::findOrFail($id);
@@ -121,16 +114,6 @@ class PostController extends Controller
             $data['thumbnail'] = $uploadResult['public_id'];
         }
 
-        if ($request->hasFile('img')) {
-            if ($post->img) {
-                $this->deleteImageFromCloudinary($post->img);
-            }
-            $uploadResult = $this->uploadImageToCloudinary($request->file('img'), [
-                'folder' => 'posts/images',
-            ]);
-            $data['img'] = $uploadResult['public_id'];
-        }
-
         $post->update($data);
         return response()->json([
             'success' => true,
@@ -146,9 +129,6 @@ class PostController extends Controller
         if ($post->thumbnail) {
             $this->deleteImageFromCloudinary($post->thumbnail);
         }
-        if ($post->img) {
-            $this->deleteImageFromCloudinary($post->img);
-        }
         $post->delete();
 
         return response()->json([
@@ -158,25 +138,96 @@ class PostController extends Controller
     }
 
     //Tải hình ảnh lên tử CKEditor (chỉ dành cho chỉnh sửa hình ảnh)
-    public function uploadImage(Request $request)
+    public function uploadCkeditorImage(Request $request)
     {
         try {
-            if ($request->hasFile('upload')) {
-                $file = $request->file('upload');
-                $uploadResult = $this->uploadImageToCloudinary($file, [
-                    'folder' => 'posts/editor',
-                ]);
+            $request->validate([
+                'upload' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            ]);
 
-                $imageUrl = $this->buildImageUrl($uploadResult['public_id']);
-                return response()->json([
-                    'url' => $imageUrl,
-                ]);
-            }
+            //Lưu hình ảnh vào Cloudinary và tối ảnh content nhẹ nhất
+            $uploadResult = $this->uploadImageToCloudinary($request->file('upload'), [
+                'folder' => 'posts/content',
+                'width' => 1200,
+                'height' => null,
+                'quality' => 80
+            ]);
 
-            return response()->json(['error' => 'Không có hình ảnh nào được tải lên'], 400);
+            return response()->json([
+                'url' => $this->buildImageUrl($uploadResult['public_id'])
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => $e->errors()['upload'][0]
+                ]
+            ], 422);
         } catch (\Exception $e) {
-            Log::error('Image upload failed: ' . $e->getMessage());
-            return response()->json(['error' => 'Upload hình ảnh thất bại'], 500);
+            return response()->json([
+                'error' => [
+                    'message' => 'Thất bại khi upload ảnh'
+                ]
+            ], 500);
+        }
+    }
+
+    //Check ảnh của content từ phía HTML gửi về 
+    protected function processContentImages($content, $oldContent = null)
+    {
+        if (!$content) {
+            return $content;
+        }
+
+
+        $dom = new DOMDocument(); // tạo đối tượng để phân tích nội dụng HTML
+        
+        //Chuyển định dạng từ HTML sao cho chuẩn DOMDocument
+        @$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        //Tạo mảng để lưu ảnh từ content
+        $images = $dom->getElementsByTagName('img');
+        $cloudinaryUrls = [];
+
+
+        //Kiểm tra hình ảnh lưu ở Cloudinary hay không
+        foreach ($images as $img) {
+            $src = $img->getAttribute('src');
+            // Only track Cloudinary URLs
+            if (filter_var($src, FILTER_VALIDATE_URL) && strpos($src, 'res.cloudinary.com') !== false) {
+                $cloudinaryUrls[] = $src;
+            }
+        }
+
+        // xóa những ảnh Cloudinary trong nội dung cũ mà không còn xuất hiện trong nội dung mới
+        if ($oldContent) {
+            $this->deleteContentImages($oldContent, $cloudinaryUrls);
+        }
+
+        return $dom->saveHTML();
+    }
+
+    
+    protected function deleteContentImages($content, $keepUrls = [])
+    {
+        if (!$content) {
+            return;
+        }
+
+        $dom = new DOMDocument();
+        @$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $images = $dom->getElementsByTagName('img');
+        // Tạo prefix URL của ảnh Cloudinary để đối chiếu
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $cloudinaryPrefix = "https://res.cloudinary.com/{$cloudName}/image/upload/";
+
+        foreach ($images as $img) {
+            $src = $img->getAttribute('src');
+            if (strpos($src, $cloudinaryPrefix) === 0 && !in_array($src, $keepUrls)) {
+                //Cắt bỏ phần đầu URL Cloudinary để lấy `public_id`
+                $publicId = str_replace($cloudinaryPrefix, '', $src);
+                $this->deleteImageFromCloudinary($publicId);
+            }
         }
     }
 }

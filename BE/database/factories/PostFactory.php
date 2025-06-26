@@ -24,7 +24,7 @@ class PostFactory extends Factory
             'content' => $this->faker->paragraphs(3, true), // 3 đoạn văn
             'thumbnail' => $this->faker->imageUrl(640, 480, 'news'), // URL hình ảnh ngẫu nhiên
             'is_active' => $this->faker->boolean(90), // 90% là active
-            'img' => $this->faker->imageUrl(640, 480, 'news'), // URL hình ảnh ngẫu nhiên
+            // 'img' => $this->faker->imageUrl(640, 480, 'news'), // URL hình ảnh ngẫu nhiên
             'created_at' => now(),
             'updated_at' => now(),
         ];
