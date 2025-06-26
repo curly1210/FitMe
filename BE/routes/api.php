@@ -1,6 +1,5 @@
 <?php
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -18,12 +17,14 @@ use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
+use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\api\Client\UserController as ClientUserController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -88,6 +89,7 @@ Route::prefix('admin')->group(function () {
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
 Route::get('/admin/statistics', [StatisticsController::class, 'statistics']);
 Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topSellingProducts']);
+Route::get('/admin/statistics/customers', [StatisticsController::class, 'customerStatistics']);
 
 
 
@@ -130,17 +132,19 @@ Route::prefix('admin')->name('admin')->group(function () {
 
 
 
-//Route quản lý sản phẩm
+//Route quản lý sản phẩmD
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
     // Route::patch('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::post('/products/{id}', [AdminProductController::class, 'update'])->name('products.update');
     Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->name('products.show');
-    // Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/trash', [AdminProductController::class, 'trash'])->name('products.trash');
     Route::post('/products/restore/{id}', [AdminProductController::class, 'restore'])->name('products.restore');
-    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    // xóa mềm
+    Route::delete('/products/{id}', [AdminProductController::class, 'delete'])->name('products.delete');
+    // xóa vĩnh viễn
+    Route::delete('/products/destroy/{id}', [AdminProductController::class, 'destroy'])->name('products.destroy');
 });
 
 
@@ -153,6 +157,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/coupons/{id}', [CouponController::class, 'delete'])->name('coupons.delete');
 });
 
+//Route quản lí tin tức
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']);
+    Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
+    // Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']); //Xử lí upload hình ảnh từ content
+});
+
 
 //Route bình luận
 Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
@@ -162,7 +177,7 @@ Route::middleware('auth:api')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/products/{id}/comments', [AdminCommentController::class, 'show'])->name('comments.show');
     Route::delete('comments/{id}/delete', [AdminCommentController::class, 'delete'])->name('comments.delete');
-    Route::patch('comments/{id}/toggle',  [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
+    Route::patch('comments/{id}/toggle', [AdminCommentController::class, 'toggleVisibility'])->name('comments.toggleVisibility');
 });
 
 
@@ -205,7 +220,12 @@ Route::post('/reviews', [ClientReviewController::class, 'create'])->name('review
 
 
 
-
+// info acc client
+Route::get('profile', [ClientUserController::class, 'showInfo']);
+Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
+Route::patch('profil', [ClientUserController::class, 'updateInfoBasic']);
+Route::post('change-password', [ClientUserController::class, 'updatePassword']);
+Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
 
 
 

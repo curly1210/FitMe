@@ -116,6 +116,8 @@ class AddressController extends Controller
 
             $address = ShippingAddress::where('user_id', $user->id)->findOrFail($id);
 
+            $countAddress = ShippingAddress::where('user_id', $user->id)->count();
+
             $validatedData = $request->validate([
                 'name_receive' => 'required|string|max:50',
                 // 'phone' => 'required|string|min:10|max:10|unique:shipping_address,phone',
@@ -151,7 +153,7 @@ class AddressController extends Controller
 
             $data = $validatedData;
 
-            if (isset($validatedData['is_default']) && $validatedData['is_default']) {
+            if ((isset($validatedData['is_default']) && $validatedData['is_default']) || $countAddress == 1) {
                 ShippingAddress::where('user_id', $user->id)
                     ->where('id', '!=', $id)
                     ->update(['is_default' => false]);
@@ -160,6 +162,17 @@ class AddressController extends Controller
                 // Giữ nguyên is_default nếu không thay đổi
             } else {
                 $data['is_default'] = $validatedData['is_default'] ?? false;
+
+                if ($address->is_default && !$data['is_default']) {
+                    // Tìm địa chỉ khác (mới nhất hoặc bất kỳ) để set mặc định
+                    $otherDefault = ShippingAddress::where('user_id', $user->id)
+                        ->where('id', '!=', $id)
+                        ->first();
+
+                    if ($otherDefault) {
+                        $otherDefault->update(['is_default' => true]);
+                    }
+                }
             }
 
             $address->update($data);

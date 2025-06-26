@@ -14,6 +14,10 @@ import CheckoutSuccess from "../pages/client/CheckOut/success";
 import Order from "../pages/client/Order";
 import CheckPayment from "../pages/client/Checkpayment";
 import DetailOrder from "../pages/client/Order/DetailOrder";
+import ProductLike from "../pages/client/ProductLike";
+import LayoutInforUser from "../components/Client/LayoutInforUser";
+import InformationUser from "../pages/client/InformationUser";
+import ChangePassword from "../pages/client/ChangePassword";
 
 export const clientRoutes = [
   {
@@ -51,9 +55,33 @@ export const clientRoutes = [
             element: <ProtectClient role="client" />,
             children: [
               {
-                path: "address",
-                element: <Address />,
+                // path: "address",
+                path: "account",
+                element: <LayoutInforUser />,
+                children: [
+                  {
+                    path: "user-info",
+                    element: <InformationUser />,
+                  },
+                  {
+                    path: "order",
+                    element: <Order />,
+                  },
+                  {
+                    path: "address",
+                    element: <Address />,
+                  },
+                  {
+                    path: "product-like",
+                    element: <ProductLike />,
+                  },
+                  {
+                    path: "change-password",
+                    element: <ChangePassword />,
+                  },
+                ],
               },
+
               {
                 path: "carts",
                 element: <Carts />,
@@ -66,10 +94,7 @@ export const clientRoutes = [
                 path: "checkout/success",
                 element: <CheckoutSuccess />,
               },
-              {
-                path: "order",
-                element: <Order />,
-              },
+
               {
                 path: "order/:id",
                 element: <DetailOrder />,

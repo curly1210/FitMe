@@ -5,6 +5,7 @@ import { IoAdd } from "react-icons/io5";
 import { LuTrash } from "react-icons/lu";
 import { useCart } from "../../../hooks/useCart";
 import { Button, Popconfirm } from "antd";
+import { Link } from "react-router";
 
 const CartItem = ({ item }: any) => {
   const [quantity, setQuantity] = useState(item.quantity);
@@ -30,9 +31,11 @@ const CartItem = ({ item }: any) => {
       <div className="flex items-stretch gap-3">
         <img width={80} height={100} src={item?.image} alt="" />
         <div className="flex flex-col justify-between">
-          <p className="text-sm font-semibold">
-            {item?.name} - {item?.sku}
-          </p>
+          <Link className="hover:underline" to={`/products/${item?.slug}`}>
+            <p className="text-sm font-semibold">
+              {item?.name} - {item?.sku}
+            </p>
+          </Link>
           <div className="flex items-center gap-4">
             <p className="text-sm text-gray-400">
               {item?.color}/{item?.size}

@@ -150,8 +150,8 @@ const ModalRegister = () => {
                   message: "Vui lòng nhập mật khẩu",
                 },
                 {
-                  min: 3,
-                  message: "Tên phải có ít nhất 3 ký tự!",
+                  min: 6,
+                  message: "Tên phải có ít nhất 6 ký tự!",
                 },
               ]}
               name="password"

@@ -400,7 +400,7 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
         try {
             $product = Product::whereNull('deleted_at')->find($id);
@@ -486,6 +486,24 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error('Lỗi khi khôi phục sản phẩm.', $e->getMessage(), 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $product = Product::onlyTrashed()->findOrFail($id);
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
+            }
+            DB::beginTransaction();
+            $product->forceDelete();
+            DB::commit();
+
+            return $this->success(null, 'Xóa vĩnh viễn sản phẩm thành công.', 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->error('Lỗi khi xóa vĩnh viễn sản phẩm', $th->getMessage(), 403);
         }
     }
 }
