@@ -21,6 +21,7 @@ class ReviewResource extends JsonResource
             "rate" => $this->rate,
             "content" => $this->content,
             "is_active" => $this->is_active,
+            "is_update" => $this->is_update,
             "productItem" => [
                 "id" => $this->productItem->id,
                 "name" => $this->productItem->product->name,
@@ -46,6 +47,7 @@ class ReviewResource extends JsonResource
                 "name" => $this->user->name,
                 "avatar" => $this->buildImageUrl($this->user->avatar),
             ],
+
             "created_at" => $this->created_at->format('Y-m-d H:i:s'),
             "updated_at" => $this->updated_at->format('Y-m-d H:i:s'),
         ];

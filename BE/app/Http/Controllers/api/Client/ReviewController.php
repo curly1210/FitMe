@@ -57,8 +57,18 @@ class ReviewController extends Controller
                 $query = Review::with(['productItem', 'reviewImages', 'user'])->whereIn('product_item_id', $productItemId)->where('is_active', 1)
                     ->orderBy("created_at", "desc");
             }
+
             $reviews = $query->paginate($perPage);
-            return  ReviewResource::collection($reviews);
+            return  ReviewResource::collection($reviews)->additional([
+                'review_rate' =>  min(round($product->reviews()->withoutGlobalScopes()->avg('rate'), 0), 5),
+                'total_review' => $product->reviews()->count(),
+                'total_review_1' => $product->reviews()->where('rate', 1)->count(),
+                'total_review_2' => $product->reviews()->where('rate', 2)->count(),
+                'total_review_3' => $product->reviews()->where('rate', 3)->count(),
+                'total_review_4' => $product->reviews()->where('rate', 4)->count(),
+                'total_review_5' => $product->reviews()->where('rate', 5)->count(),
+            ]);
+
         }
     }
     public function listOrderNeedReview(Request $request)
@@ -181,6 +191,7 @@ class ReviewController extends Controller
 
                 $review->update([
                     'content' => $request->input('content') ?? null,
+                    'is_update' => 1,
                 ]);
 
 

@@ -468,7 +468,6 @@ class ProductController extends Controller
             'comments.user',
             'productImages',
         ])->where('slug', $slug)->firstOrFail();
-        $reviewRate = $product->reviews->avg('rate');
 
         return new ProductDetailResource($product);
     }
