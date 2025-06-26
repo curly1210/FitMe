@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Client\OrderResource;
 use App\Http\Resources\Client\ReviewResource;
+use App\Http\Resources\Client\OrderReviewResource;
 
 class ReviewController extends Controller
 {
@@ -66,7 +67,7 @@ class ReviewController extends Controller
             ->orderBy('success_at', 'desc')
             ->paginate(10);
 
-        return OrderResource::collection($orders);
+        return OrderReviewResource::collection($orders);
     }
     public function create(Request $request)
     {
