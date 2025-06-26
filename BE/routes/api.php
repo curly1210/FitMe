@@ -8,6 +8,7 @@ use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
+use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\CommentController;
@@ -200,6 +201,12 @@ Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 Route::post('/vnpay/payment', [VNPayController::class, 'handle']);
 Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 
+
+#review
+Route::get('/orders-need-review', [ClientReviewController::class, 'listOrderNeedReview'])->name('reviews.listOrderNeedReview');
+Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index');
+Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create');
+// Route::post('/reviews', [ClientReviewController::class, 'update'])->name('reviews.update');
 
 
 
