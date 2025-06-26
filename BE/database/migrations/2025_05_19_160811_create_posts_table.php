@@ -18,7 +18,7 @@ return new class extends Migration
             $table->longText('content'); // longtext
             $table->string('thumbnail', 255); // varchar(255)
             $table->tinyInteger('is_active')->default(1); // tinyint(1)
-            $table->string('img', 255); // varchar(255)
+            // $table->string('img', 255); //varchar(255)
             $table->timestamps();
         });
     }
