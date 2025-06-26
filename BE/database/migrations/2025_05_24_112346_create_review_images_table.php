@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('url', 255);
             $table->unsignedBigInteger('review_id');
             $table->timestamps();
-            $table->softDeletes();
 
             $table->foreign('review_id')->references('id')->on('reviews')->onDelete('cascade');
         });
@@ -27,7 +26,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('review_images', function (Blueprint $table) {
+        Schema::table('review_images', function (Blueprint $table) {
             $table->dropForeign(['review_id']);
         });
         Schema::dropIfExists('review_images');

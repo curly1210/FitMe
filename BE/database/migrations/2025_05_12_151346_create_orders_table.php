@@ -21,11 +21,12 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('shipping_address_id');
             $table->timestamps();
-
+            $table->timestamp('success_at')->nullable(); # thời gian chuyển trạng thái hoàn thành
             // Foreign keys (nếu muốn ràng buộc luôn)
             $table->foreign('status_order_id')->references('id')->on('status_orders');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('shipping_address_id')->references('id')->on('shipping_address');        });
+            $table->foreign('shipping_address_id')->references('id')->on('shipping_address');
+        });
     }
 
     /**
@@ -33,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table) {
             $table->dropForeign(['status_order_id']);
             $table->dropForeign(['user_id']);
             $table->dropForeign(['shipping_address_id']);

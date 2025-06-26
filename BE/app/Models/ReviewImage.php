@@ -9,15 +9,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ReviewImage extends Model
 {
     //
-       use HasFactory, SoftDeletes;
+    use HasFactory;
 
-    
+
     protected $fillable = [
         'url',
         'review_id',
     ];
 
-    
+
     public function review()
     {
         return $this->belongsTo(Review::class);
