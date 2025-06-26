@@ -207,6 +207,7 @@ class OrderController extends Controller
             } elseif ($currentStatus == 4) {
                 // Chuyển từ "Đã giao hàng" (4) sang "Hoàn thành" (6)
                 $order->update(['status_order_id' => 6]);
+
                 $message = 'Đơn hàng đã được hoàn thành.';
             } else {
                 return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
