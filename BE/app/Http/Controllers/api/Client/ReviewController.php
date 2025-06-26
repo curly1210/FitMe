@@ -56,8 +56,10 @@ class ReviewController extends Controller
                     ->orderBy("created_at", "desc");
             }
             $reviews = $query->paginate(10);
+            $reviewRate = min(round($product->reviews()->withoutGlobalScopes()->avg('rate'), 1), 5);
+            $roundedRate = round($reviewRate * 2) / 2;
             return  ReviewResource::collection($reviews)->additional([
-                'review_rate' =>  min(round($product->reviews()->withoutGlobalScopes()->avg('rate'), 0), 5),
+                'review_rate' => $roundedRate,
                 'total_review' => $product->reviews()->count(),
                 'total_review_1' => $product->reviews()->where('rate', 1)->count(),
                 'total_review_2' => $product->reviews()->where('rate', 2)->count(),
