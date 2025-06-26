@@ -165,7 +165,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
-    Route::post('/posts/upload-image', [PostController::class, 'uploadImage'])->name('posts.uploadImage');
+    Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']); //Xử lí upload hình ảnh từ content
 });
 
 
