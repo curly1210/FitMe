@@ -61,4 +61,9 @@ class ProductItem extends Model
     {
         return $this->hasMany(Review::class);
     }
+    public function imageByColor()
+    {
+        return $this->hasOne(ProductImage::class, 'product_id', 'product_id')
+            ->whereColumn('color_id', 'color_id');
+    }
 }
