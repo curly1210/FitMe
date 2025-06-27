@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   Form,
@@ -19,15 +19,25 @@ import { API_URL } from "../../../utils/constant";
 interface PostDrawerAddProps {
   open: boolean;
   onClose: () => void;
+  post: object;
 }
 
-const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
+const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) => {
   const [form] = Form.useForm();
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
   const [uploadImgCkeditor, setUploadImgCkeditor] = useState<boolean>(false);
   const SafeEditor = ClassicEditor as any;
   const { mutate: createPost, isLoading } = useCreate();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      title: post?.title,
+      content: post?.content,
+    });
+    setPreviewImage(post?.thumbnail);
+    setPreviewImage(post?.thumbnail);
+  }, [post])
 
 
 
@@ -46,20 +56,23 @@ const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
   };
   /* SUBMIT form */
   const onFinish = async (values: any) => {
-    if (!thumbnailFile) {
-      message.error("Vui lòng chọn ảnh thumbnail!");
-      return;
-    }
+    // if (!thumbnailFile) {
+    //   message.error("Vui lòng chọn ảnh thumbnail!");
+    //   return;
+    // }
 
     const formData = new FormData();
+    // formData.append("_method", 'PUT');
     formData.append("title", values.title);
     formData.append("content", values.content);
     formData.append("is_active", values.is_active ? "1" : "0");
-    formData.append("thumbnail", thumbnailFile);
+    if (thumbnailFile) {
+      formData.append("thumbnail", thumbnailFile);
+    }
 
     createPost(
       {
-        resource: "admin/posts",
+        resource: `admin/posts/${post.id}`,
         values: formData,
         meta: {
           headers: {
@@ -69,14 +82,14 @@ const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
       },
       {
         onSuccess: () => {
-          message.success("Thêm bài viết thành công!");
+          message.success("Sửa bài viết thành công!");
           form.resetFields();
           setThumbnailFile(null);
           setPreviewImage("");
           onClose();
         },
         onError: () => {
-          message.error("Thêm bài viết thất bại!");
+          message.error("Sửa bài viết thất bại!");
         },
       }
     );
@@ -117,7 +130,7 @@ const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
   return (
 
     <Drawer
-      title="Thêm bài viết mới"
+      title='Sửa bài viết'
       open={open}
       onClose={onClose}
       destroyOnClose
@@ -192,7 +205,7 @@ const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
 
             <CKEditor
               editor={SafeEditor}
-              data=""
+              data={form.getFieldValue('content')}
               config={config}
               onChange={(_, editor) => {
                 const content = editor.getData();
@@ -216,4 +229,4 @@ const PostDrawerAdd: React.FC<PostDrawerAddProps> = ({ open, onClose }) => {
   );
 };
 
-export default PostDrawerAdd;
+export default PostDrawerEdit;
