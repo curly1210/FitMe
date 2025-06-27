@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Product;
 use Carbon\CarbonPeriod;
 use App\Models\ProductItem;
 use App\Models\OrdersDetail;
@@ -12,8 +13,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\OverviewStatisticResource;
-use App\Http\Resources\Admin\RevenueStatisticsResource;
 use App\Http\Resources\Admin\CustomerStatisticsResource;
+use App\Http\Resources\Admin\ProductStatisticsResource as AdminProductStatisticsResource;
+use App\Http\Resourcesư\Admin\ProductStatisticsResource;
 
 class StatisticsController extends Controller
 {
@@ -234,6 +236,77 @@ class StatisticsController extends Controller
             'returning_rate_percent' => $repeatRate,
         ]);
     }
+
+    public function productStatistics(Request $request)
+    {
+        $filterBy = $request->input('filter_by', 'quantity'); // 'quantity' or 'revenue'
+        $now = now();
+        $year = $request->filled('year') ? (int) $request->year : null;
+        $month = $request->filled('month') ? (int) $request->month : null;
+        $recent = $request->filled('recent') ? (int) $request->recent : null;
+
+        $topQuery = OrdersDetail::with('productItem.product.images')
+            ->whereHas('order', function ($q) {
+                $q->where('status_order_id', 6);
+            });
+
+        if ($year && $month) {
+            $start = now()->setDate($year, $month, 1)->startOfMonth();
+            $end = now()->setDate($year, $month, 1)->endOfMonth();
+            $topQuery->whereHas('order', fn($q) => $q->whereBetween('created_at', [$start, $end]));
+        } elseif (in_array($recent, [7, 14, 30])) {
+            $start = now()->subDays($recent - 1)->startOfDay();
+            $end = now()->endOfDay();
+            $topQuery->whereHas('order', fn($q) => $q->whereBetween('created_at', [$start, $end]));
+        }
+
+        $topProducts = $topQuery->select(
+            'product_item_id',
+            DB::raw('SUM(quantity) as total_quantity'),
+            DB::raw('SUM(sale_price * quantity) as total_revenue')
+        )
+            ->groupBy('product_item_id')
+            ->orderByDesc($filterBy === 'revenue' ? 'total_revenue' : 'total_quantity')
+            ->take(20)
+            ->get();
+
+        $lowStock = ProductItem::with(['product', 'imageByColor'])
+            ->where('stock', '<=', 5)
+            ->orderBy('stock')
+            ->take(10)
+            ->get();
+
+        $highStock = ProductItem::with(['product', 'imageByColor'])
+            ->where('stock', '>', 50)
+            ->orderByDesc('stock')
+            ->take(10)
+            ->get();
+
+        // // === PHÂN LOẠI ===
+        // $byCategory = Product::select('category_id', DB::raw('COUNT(*) as total'))
+        //     ->groupBy('category_id')->with('category:id,name')->get();
+
+        // $byColor = ProductItem::select('color_id', DB::raw('COUNT(*) as total'))
+        //     ->groupBy('color_id')->with('color:id,name')->get();
+
+        // $bySize = ProductItem::select('size_id', DB::raw('COUNT(*) as total'))
+        //     ->groupBy('size_id')->with('size:id,name')->get();
+
+        return new AdminProductStatisticsResource([
+            'top_selling_products' => $topProducts,
+            'stock' => [
+                'low' => $lowStock,
+                'high' => $highStock,
+            ],
+            // 'classification' => [
+            //     'by_category' => $byCategory,
+            //     'by_color' => $byColor,
+            //     'by_size' => $bySize,
+            // ],
+        ]);
+    }
+
+
 
 
 

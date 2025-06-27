@@ -45,11 +45,15 @@ class Product extends Model
         return $this->hasManyThrough(
             Review::class,
             ProductItem::class,
-            'product_id',      
-            'product_item_id', 
-            'id',              
-            'id'               
+            'product_id',
+            'product_item_id',
+            'id',
+            'id'
         );
+    }
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, 'product_id');
     }
 
 }
