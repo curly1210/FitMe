@@ -1,3 +1,4 @@
+// PostList.tsx
 import React, { useState } from "react";
 import {
   Table,
@@ -14,34 +15,40 @@ import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
-import PostDrawerAdd from "./PostDrawerAdd";
 
-// 1. Interface
+import PostDrawerAdd from "./PostDrawerAdd";
+import PostDrawerEdit from "./PostDrawerEdit";
+import DetailPostDrawer from "./DetailPostDrawer";
+
 interface Post {
   id: number;
   title: string;
   content: string;
   slug: string;
-  thumbnails: string[];
+  thumbnail: string;
+  thumbnails?: string[];
   is_active: number;
   created_at: string;
   updated_at: string;
 }
 
-// 2. Component
 const PostList = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [openDrawerEdit, setOpenDrawerEdit] = useState(false);
+  const [openDrawerDetail, setOpenDrawerDetail] = useState(false);
+  const [actionPost, setActionPost] = useState<null | Post>(null);
+  const [detailPostId, setDetailPostId] = useState<number | null>(null);
 
-  // ✨ Thêm quản lý phân trang
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 9;
 
-  const { data, isLoading } = useList<Post>({
+  const { data, isLoading, refetch } = useList<Post>({
     resource: "admin/posts",
     pagination: {
       current: currentPage,
-      pageSize: pageSize,
+      pageSize,
     },
   });
 
@@ -56,6 +63,7 @@ const PostList = () => {
       {
         onSuccess: () => {
           message.success("Đã xoá bài viết");
+          refetch();
         },
         onError: () => {
           message.error("Lỗi khi xoá bài viết");
@@ -64,11 +72,9 @@ const PostList = () => {
     );
   };
 
-  // 3. Cột bảng
   const columns: ColumnsType<Post> = [
     {
       title: "STT",
-      dataIndex: "id",
       render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
     },
     {
@@ -98,11 +104,32 @@ const PostList = () => {
     {
       title: "Nội dung",
       dataIndex: "content",
-      render: (text: string) => (
-        <Tooltip title={text}>
-          <div className="max-w-[250px] truncate text-gray-700">{text}</div>
-        </Tooltip>
-      ),
+      render: (html: string) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        const text = doc.body.textContent?.trim().slice(0, 100) || "";
+        const imgEl = doc.querySelector("img");
+        const imgSrc = imgEl?.getAttribute("src");
+
+        return (
+          <div className="flex gap-2 items-center max-w-[250px]">
+            {imgSrc && (
+              <Image
+                src={imgSrc}
+                width={60}
+                height={60}
+                alt="content-img"
+                className="rounded-md border"
+                preview={false}
+              />
+            )}
+            <Tooltip title={text}>
+              <span className="truncate text-gray-700">{text}</span>
+            </Tooltip>
+          </div>
+        );
+      },
     },
     {
       title: "Slug",
@@ -136,10 +163,27 @@ const PostList = () => {
       key: "action",
       render: (_, record) => (
         <div className="flex gap-2">
-          <Button icon={<EditOutlined />} type="primary" size="small">
+          <Button
+            icon={<EyeOutlined />}
+            size="small"
+            onClick={() => {
+              setDetailPostId(record.id);
+              setOpenDrawerDetail(true);
+            }}
+          >
+            Xem
+          </Button>
+          <Button
+            icon={<EditOutlined />}
+            type="primary"
+            size="small"
+            onClick={() => {
+              setActionPost(record);
+              setOpenDrawerEdit(true);
+            }}
+          >
             Sửa
           </Button>
-
           <Popconfirm
             title="Bạn có chắc muốn xoá bài viết này?"
             onConfirm={() => handleDelete(record.id)}
@@ -155,7 +199,6 @@ const PostList = () => {
     },
   ];
 
-  // 4. Render
   return (
     <div className="p-6 bg-white rounded-xl shadow">
       <div className="flex justify-between items-center mb-4">
@@ -171,20 +214,44 @@ const PostList = () => {
 
       <Table
         columns={columns}
-        dataSource={data?.data ?? []}
+        dataSource={
+          (data?.data?.data ?? []).map((item) => ({
+            ...item,
+            thumbnails: item.thumbnail ? [item.thumbnail] : [],
+          }))
+        }
         rowKey="id"
         loading={isLoading}
-        pagination={{
-          pageSize,
-          current: currentPage,
-          onChange: (page) => setCurrentPage(page),
-          total: data?.total ?? 0,
-        }}
         scroll={{ x: true }}
+        pagination={{
+          current: currentPage,
+          pageSize,
+          total: data?.data?.total ?? 0,
+          onChange: (page) => setCurrentPage(page),
+          showSizeChanger: false,
+        }}
       />
 
-      {/* Drawer Add */}
-      <PostDrawerAdd open={openDrawer} onClose={() => setOpenDrawer(false)} />
+      <PostDrawerAdd
+        open={openDrawer}
+        onClose={() => {
+          setOpenDrawer(false);
+          refetch();
+        }}
+      />
+      <PostDrawerEdit
+        open={openDrawerEdit}
+        onClose={() => {
+          setOpenDrawerEdit(false);
+          refetch();
+        }}
+        post={actionPost}
+      />
+      <DetailPostDrawer
+        open={openDrawerDetail}
+        onClose={() => setOpenDrawerDetail(false)}
+        postId={detailPostId}
+      />
     </div>
   );
 };
