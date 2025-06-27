@@ -8,6 +8,7 @@ use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
+use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\CommentController;
@@ -83,9 +84,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
 
     Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
-
-
-
 });
 
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
@@ -162,12 +160,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 //Route quản lí tin tức
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']);
     Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
     Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
-    Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']); //Xử lí upload hình ảnh từ content
+    // Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']); //Xử lí upload hình ảnh từ content
 });
 
 
@@ -204,6 +203,12 @@ Route::post('/vnpay/payment', [VNPayController::class, 'handle']);
 Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 
 
+#review
+Route::get('/orders-need-review', [ClientReviewController::class, 'listOrderNeedReview'])->name('reviews.listOrderNeedReview');
+Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index');
+Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create');
+// Route::post('/reviews', [ClientReviewController::class, 'update'])->name('reviews.update');
+
 
 
 
@@ -219,9 +224,9 @@ Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
 // info acc client
 Route::get('profile', [ClientUserController::class, 'showInfo']);
 Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
-Route::patch('profile', [ClientUserController::class, 'updateInfoBasic']);
+Route::patch('profil', [ClientUserController::class, 'updateInfoBasic']);
 Route::post('change-password', [ClientUserController::class, 'updatePassword']);
-Route::patch('change-password', [ClientUserController::class, 'updatePassword']);
+Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
 
 
 

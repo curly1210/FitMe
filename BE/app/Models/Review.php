@@ -13,7 +13,7 @@ class Review extends Model
     protected $fillable = [
         'rate',
         'content',
-        'updated_content',
+        // 'updated_content',
         'is_update',
         'user_id',
         'product_item_id',
@@ -27,13 +27,12 @@ class Review extends Model
     }
 
     // Quan hệ với bảng Product
-public function productItem()
-{
-    return $this->belongsTo(ProductItem::class);
-}
-public function reviewImages()
+    public function productItem()
+    {
+        return $this->belongsTo(ProductItem::class);
+    }
+    public function reviewImages()
     {
         return $this->hasMany(ReviewImage::class, 'review_id', 'id');
     }
-    
 }

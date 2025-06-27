@@ -162,6 +162,17 @@ class AddressController extends Controller
                 // Giữ nguyên is_default nếu không thay đổi
             } else {
                 $data['is_default'] = $validatedData['is_default'] ?? false;
+
+                if ($address->is_default && !$data['is_default']) {
+                    // Tìm địa chỉ khác (mới nhất hoặc bất kỳ) để set mặc định
+                    $otherDefault = ShippingAddress::where('user_id', $user->id)
+                        ->where('id', '!=', $id)
+                        ->first();
+
+                    if ($otherDefault) {
+                        $otherDefault->update(['is_default' => true]);
+                    }
+                }
             }
 
             $address->update($data);

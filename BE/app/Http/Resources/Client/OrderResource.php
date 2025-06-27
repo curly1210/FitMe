@@ -3,6 +3,9 @@
 namespace App\Http\Resources\Client;
 
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Carbon;
+
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderResource extends JsonResource
@@ -14,6 +17,7 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         return [
             'id' => $this->id,
             'orders_code' => $this->orders_code,
@@ -23,6 +27,9 @@ class OrderResource extends JsonResource
             'receiving_address' => $this->receiving_address,
             'status_order_id' => $this->status_order_id,
             'status_name' => $this->statusOrder->name ?? 'Không xác định', // Lấy name từ status_orders
+
+            "success_at" =>   Carbon::parse($this->updated_at)->format('Y-m-d H:i:s') ?? null,
+
         ];
     }
 }

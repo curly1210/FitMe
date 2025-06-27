@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->integer('rate'); // Đánh giá (1-5)
+            $table->decimal('rate', 2, 1); // Đánh giá (1-5)
             $table->string('content', 200);
-            $table->string('updated_content', 200)->nullable();
+            // $table->string('updated_content', 200)->nullable();
             $table->tinyInteger('is_update')->default(0); // Mặc định là chưa được cập nhật
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('order_id');
+            $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
 
             // Khóa ngoại
@@ -34,7 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('reviews', function (Blueprint $table) {
+        Schema::table('reviews', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->dropForeign(['product_id']);
             $table->dropForeign(['order_id']);

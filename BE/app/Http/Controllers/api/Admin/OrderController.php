@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\api\Admin;
 
 use App\Models\User;
@@ -50,7 +51,7 @@ class OrderController extends Controller
             ->when($request->filled('date'), function ($q) use ($request) {
                 $q->whereDate('created_at', $request->date);
             })
-            ->orderBy('created_at', 'desc'); 
+            ->orderBy('created_at', 'desc');
 
         $orders = $query->get();
 
@@ -91,7 +92,11 @@ class OrderController extends Controller
         if ($newStatus === 4) {
             $order->status_payment = 1;
         }
-
+        if ($newStatus === 6) {
+            $order->success_at = Carbon::now();
+        } elseif ($newStatus === 7) {
+            $order->success_at = null;
+        }
         if ($newStatus === 7 && $order->status_order_id != 7) {
             foreach ($order->orderDetails as $detail) {
                 ProductItem::where('id', $detail->product_item_id)
@@ -115,7 +120,4 @@ class OrderController extends Controller
 
         return response()->json(['message' => $message]);
     }
-
-
-
 }

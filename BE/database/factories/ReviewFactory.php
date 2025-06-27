@@ -21,10 +21,10 @@ class ReviewFactory extends Factory
      */
     public function definition(): array
     {
-         return [
-            'rate' => $this->faker->numberBetween(1, 5),
+        return [
+            'rate' => $this->faker->randomElement([1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]),
             'content' => $this->faker->sentence,
-            'updated_content' => $this->faker->sentence(),
+            // 'updated_content' => $this->faker->sentence(),
             'is_update' => $this->faker->boolean(),
             'user_id' => User::inRandomOrder()->value('id'),
             'product_item_id' => ProductItem::inRandomOrder()->value('id'),

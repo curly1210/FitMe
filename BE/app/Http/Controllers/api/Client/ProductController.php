@@ -469,7 +469,6 @@ class ProductController extends Controller
             'productImages',
         ])->where('slug', $slug)->firstOrFail();
 
-
         return new ProductDetailResource($product);
     }
 }

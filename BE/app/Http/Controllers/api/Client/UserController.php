@@ -43,7 +43,12 @@ class UserController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'name' => 'nullable|string|max:255',
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+                'avatar' => [
+                    'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
+                    fn($att, $val, $fail) =>
+                    !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
+                        && $fail("The $att must be a file or string.")
+                ],
                 'birthday' => 'nullable|date|before:today',
                 'phone' => ['nullable', 'string', 'regex:/^([0-9]{10,11})$/', 'unique:users,phone,' . $user->id],
                 'gender' => 'nullable',
@@ -74,11 +79,10 @@ class UserController extends Controller
                     $this->deleteImageFromCloudinary($user->avatar);
                 }
                 $uploadResult = $this->uploadImageToCloudinary($request->file('avatar'), [
-                    'width' => 300,
-                    'height' => 300,
                     'quality' => 80,
                     'folder' => 'avatars',
                 ]);
+                // return response()->json($uploadResult);
                 $data['avatar'] = $uploadResult['public_id'];
             }
 
@@ -108,7 +112,7 @@ class UserController extends Controller
             // Validate dữ liệu đầu vào
             $validator = Validator::make($request->all(), [
                 'old_password' => 'required|string',
-                'new_password' => 'required|string|min:8|confirmed',
+                'new_password' => 'required|string|min:6|confirmed',
             ], [
                 'old_password.required' => 'Mật khẩu cũ là bắt buộc.',
                 'new_password.required' => 'Mật khẩu mới là bắt buộc.',

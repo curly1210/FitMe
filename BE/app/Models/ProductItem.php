@@ -31,18 +31,12 @@ class ProductItem extends Model
     {
         return $this->hasMany(CartItem::class);
     }
-    // public function productConfigurations()
-    // {
-    //     return $this->hasMany(ProductConfiguration::class);
-    // }
+
     public function ordersDetail()
     {
         return $this->hasMany(OrdersDetail::class);
     }
-    // public function productImages()
-    // {
-    //     return $this->hasMany(ProductImage::class);
-    // }
+
     public function color()
     {
         return $this->belongsTo(Color::class);
@@ -52,11 +46,7 @@ class ProductItem extends Model
     {
         return $this->belongsTo(Size::class);
     }
-    // // Quan hệ ảnh
-    // public function images()
-    // {
-    //     return $this->hasMany(ProductImage::class, 'product_item_id');
-    // }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);

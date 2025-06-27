@@ -217,7 +217,7 @@ class ProductController extends Controller
 
                 'images.*.url' => [
                     'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
-                    fn ($att, $val, $fail) =>
+                    fn($att, $val, $fail) =>
                     !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
                         && $fail("The $att must be a file or string.")
                 ],
@@ -319,6 +319,7 @@ class ProductController extends Controller
             // Lấy tất cả URL từ mảng API gửi lên
             foreach ($validatedData['images'] as $img) {
                 // Nếu là UploadedFile thì lấy URL từ Cloudinary
+                // dd(1);
                 if (is_string($img['url'])) {
                     $inputUrls[] = $img['url'];
                 }
