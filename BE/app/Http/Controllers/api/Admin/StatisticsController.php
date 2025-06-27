@@ -123,12 +123,12 @@ class StatisticsController extends Controller
     public function topSellingProducts(Request $request)
     {
         $request->validate([
-            'filter_by' => 'nullable|in:quantity,revenue', // lọc theo số lượng hoặc doanh thu
+            'filter_by' => 'nullable|in:quantity,revenue',
             'from' => 'nullable|date',
             'to' => 'nullable|date|after_or_equal:from',
         ]);
 
-        $filterBy = $request->input('filter_by', 'quantity'); // mặc định theo số lượng
+        $filterBy = $request->input('filter_by', 'quantity');
         $from = $request->input('from', '2000-01-01');
         $to = $request->input('to', now()->toDateString());
 
@@ -239,7 +239,7 @@ class StatisticsController extends Controller
 
     public function productStatistics(Request $request)
     {
-        $filterBy = $request->input('filter_by', 'quantity'); // 'quantity' or 'revenue'
+        $filterBy = $request->input('filter_by', 'quantity');
         $now = now();
         $year = $request->filled('year') ? (int) $request->year : null;
         $month = $request->filled('month') ? (int) $request->month : null;
@@ -303,6 +303,49 @@ class StatisticsController extends Controller
             //     'by_color' => $byColor,
             //     'by_size' => $bySize,
             // ],
+        ]);
+    }
+
+    public function orderByLocation(Request $request)
+    {
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $statusId = $request->input('status_order_id');
+
+        $orders = Order::query()
+            ->when($from && $to, function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [
+                    Carbon::parse($from)->startOfDay(),
+                    Carbon::parse($to)->endOfDay()
+                ]);
+            })
+            ->when($statusId !== null, function ($query) use ($statusId) {
+                $query->where('status_order_id', $statusId);
+            })
+            ->select('receiving_address', 'total_amount')
+            ->get();
+
+        $cityStats = [];
+
+        foreach ($orders as $order) {
+            $address = $order->receiving_address;
+            $parts = explode(',', $address);
+            $city = trim(end($parts));
+
+            if (!isset($cityStats[$city])) {
+                $cityStats[$city] = [
+                    'order_count' => 0,
+                    
+                ];
+            }
+
+            $cityStats[$city]['order_count']++;
+        }
+
+        uasort($cityStats, fn($a, $b) => $b['order_count'] <=> $a['order_count']);
+
+        return response()->json([
+            'data' => $cityStats,
         ]);
     }
 
