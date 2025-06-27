@@ -18,7 +18,7 @@ class PostController extends Controller
 
     public function index()
     {
-        $posts = Post::latest()->paginate(10);
+        $posts = Post::all();
         return $this->success(PostResource::collection($posts));
     }
 
@@ -36,7 +36,7 @@ class PostController extends Controller
             $data = $validated;
             $data['slug'] = Str::slug($request->title);
 
-            $data['content'] = $this->processContentImages($request->input('content'));
+            // $data['content'] = $this->processContentImages($request->input('content'));
 
             if ($request->hasFile('thumbnail')) {
                 $uploadResult = $this->uploadImageToCloudinary($request->file('thumbnail'), [
@@ -83,7 +83,7 @@ class PostController extends Controller
             $data = $validated;
             $data['slug'] = Str::slug($request->title);
 
-            $data['content'] = $this->processContentImages($request->input('content'), $post->content);
+            // $data['content'] = $this->processContentImages($request->input('content'), $post->content);
 
             if ($request->hasFile('thumbnail')) {
                 if ($post->thumbnail) {
@@ -111,9 +111,11 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function delete(Post $post)
+    public function delete($id)
     {
         try {
+            $post = Post::findOrFail($id);
+            
             if ($post->thumbnail) {
                 $this->deleteImageFromCloudinary($post->thumbnail);
             }
@@ -163,31 +165,31 @@ class PostController extends Controller
     }
 
     //Check ảnh bên content
-    protected function processContentImages($content, $oldContent = null)
-    {
-        if (!$content) {
-            return $content;
-        }
+    // protected function processContentImages($content, $oldContent = null)
+    // {
+    //     if (!$content) {
+    //         return $content;
+    //     }
 
-        $dom = new DOMDocument();
-        @$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    //     $dom = new DOMDocument();
+    //     @$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
-        $images = $dom->getElementsByTagName('img');
-        $cloudinaryUrls = [];
+    //     $images = $dom->getElementsByTagName('img');
+    //     $cloudinaryUrls = [];
 
-        foreach ($images as $img) {
-            $src = $img->getAttribute('src');
-            if (filter_var($src, FILTER_VALIDATE_URL) && strpos($src, 'res.cloudinary.com') !== false) {
-                $cloudinaryUrls[] = $src;
-            }
-        }
+    //     foreach ($images as $img) {
+    //         $src = $img->getAttribute('src');
+    //         if (filter_var($src, FILTER_VALIDATE_URL) && strpos($src, 'res.cloudinary.com') !== false) {
+    //             $cloudinaryUrls[] = $src;
+    //         }
+    //     }
 
-        if ($oldContent) {
-            $this->deleteContentImages($oldContent, $cloudinaryUrls);
-        }
+    //     if ($oldContent) {
+    //         $this->deleteContentImages($oldContent, $cloudinaryUrls);
+    //     }
 
-        return $dom->saveHTML();
-    }
+    //     return $dom->saveHTML();
+    // }
 
 
     protected function deleteContentImages($content, $keepUrls = [])
