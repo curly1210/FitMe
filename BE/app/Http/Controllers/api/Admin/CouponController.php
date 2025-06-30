@@ -27,7 +27,8 @@ class CouponController extends Controller
             $keyword = trim($request->input('keyword'));
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
-                    $q->where('name', 'like', "%{$keyword}%")->orWhere('code', 'like', "%{$keyword}%");
+                    $q->where('name', 'like', "%{$keyword}%")->orWhere('code', 'like', "%{$keyword}%")
+                      ->orWhere('type', 'like', "%{$keyword}%");
                 });
             }
         }
@@ -42,9 +43,10 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         try {
-            $validate = Validator::make($request->only(['name', 'code', 'value', 'time_start', 'time_end', 'min_price_order', 'max_price_discount', 'limit_use']), [
+            $validate = Validator::make($request->only(['name', 'type' ,'code', 'value', 'time_start', 'time_end', 'min_price_order', 'max_price_discount', 'limit_use']), [
                 'name' => 'required|string|max:50',
                 'code' => 'required|string|max:50|unique:coupons,code',
+                'type' => 'required|string|in:percentage,fixed,free_shipping', // Loại mã: phần trăm hoặc cố định
                 'value' => 'required|integer|min:0',
                 'time_start' => 'required|date|after:now',
                 'time_end' => 'nullable|date|after:time_start',
@@ -58,6 +60,8 @@ class CouponController extends Controller
                 'code.required' => 'Phiếu giảm giá là bắt buộc.',
                 'code.max' => 'Phiếu giảm giá không được vượt quá 50 ký tự.',
                 'code.unique' => 'Phiếu giảm giá đã tồn tại.',
+                'type.required' => 'Loại phiếu giảm giá là bắt buộc.',
+                'type.in' => 'Loại phiếu giảm giá phải là percentage hoặc fixed hoặc free_shipping.',
                 'value.required' => 'Giá trị giảm giá là bắt buộc.',
                 'value.integer' => 'Giá trị giảm giá phải là số nguyên.',
                 'value.min' => 'Giá trị giảm giá không được nhỏ hơn 0.',
@@ -85,6 +89,7 @@ class CouponController extends Controller
             $coupon = Coupon::create([
                 'name' => $request->name,
                 'code' => $request->code,
+                'type' => $request->type,
                 'value' => $request->value,
                 'time_start' => $request->time_start,
                 'time_end' => $request->time_end,
@@ -111,13 +116,16 @@ class CouponController extends Controller
         try {
             $coupon = Coupon::findOrFail($id);
 
-            $validate = Validator::make($request->only(['name', 'time_start', 'time_end', 'limit_use']), [
+            $validate = Validator::make($request->only(['name', 'type' ,'time_start', 'time_end', 'limit_use']), [
                 'name' => 'required|string|max:50',
+                'type' => 'required|string|in:percentage,fixed,free_shipping',
                 'time_end' => 'nullable|date|after:time_start',
                 'limit_use' => 'required|integer|min:0',
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
+                'type.required' => 'Loại phiếu giảm giá là bắt buộc.',
+                'type.in' => 'Loại phiếu giảm giá phải là percentage hoặc fixed hoặc free_shipping.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
                 'time_end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
 
@@ -144,6 +152,7 @@ class CouponController extends Controller
             }
             $data = [
                 'name' => $request->name,
+                'type' => $request->type,
                 'time_end' => $request->time_end,
                 'limit_use' => $request->limit_use,
             ];
