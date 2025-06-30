@@ -331,6 +331,7 @@ Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('a
 Route::prefix('client')->group(function () {
     Route::get('banners', [ClientBannerController::class, 'index']);
     Route::get('posts', [ClientPostController::class, 'index']);
+    Route::get('posts/{id}', [ClientPostController::class, 'show'])->name('posts.show');
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     Route::get('/categories', [ClientCategoryController::class, 'index']);
