@@ -18,6 +18,7 @@ class PostResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'slug' => $this->slug,
             'content' => $this->content,
             'thumbnail' => $this->buildImageUrl($this->thumbnail),
             'is_active' => $this->is_active,
@@ -33,7 +34,7 @@ class PostResource extends JsonResource
             ->where('id', '!=', $this->id)
             // ->where('title', 'like', '%' . Str::limit($this->title, 0, 10) . '%')
             ->latest()
-            ->take(5)
+            ->take(4)
             ->get();
 
 
