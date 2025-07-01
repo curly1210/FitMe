@@ -105,7 +105,9 @@ class OrderController extends Controller
     }
     public function store(Request $request)
     {
+
         $request->validate([
+
             'payment_method' => 'required|string',
             'shipping_address_id' => 'required|exists:shipping_address,id',
             'shipping_price' => 'required|integer|min:0',
