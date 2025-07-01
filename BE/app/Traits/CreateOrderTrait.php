@@ -17,9 +17,10 @@ trait CreateOrderTrait
 {
     public function createOrder($request, $payment_status = 0)
     {
+        // return response()->json(['vnp_TxnRef' => $request->vnp_TxnRef]);
         $user = JWTAuth::parseToken()->authenticate();
         $items = $request->input('cartItems');
-        $productItemIds = [];
+
         $cartItemIds = [];
         $orderItems = [];
 
@@ -34,7 +35,7 @@ trait CreateOrderTrait
                 return response()->json(['message' => "Sản phẩm {$productItem->sku} không đủ hàng."], 400);
             }
 
-            $productItemIds[] = $productItem->id;
+
             $cartItemIds[] = $item['idItem'];
 
             $orderItems[] = [
@@ -85,11 +86,18 @@ trait CreateOrderTrait
             $address->district,
             $address->city,
         ]));
+        do {
+            $uniqueCode = 'OD' . now()->format('ymd') . strtoupper(Str::random(6));
+        } while (Order::where('orders_code', $uniqueCode)->exists());
+
+
+        // return response()->json(['bank_code' => $request->bank_code, 'transaction_at' => $request->transaction_at]);
+
 
         DB::beginTransaction();
         try {
             $order = Order::create([
-                'orders_code' => now()->format('ymd') . implode('', $productItemIds) . strtoupper(Str::random(5)),
+                'orders_code' => $request->orders_code ?? $uniqueCode,
                 'total_price_item' => $request->total_price_cart,
                 'shipping_price' => $request->shipping_price,
                 'discount' => $request->discount ?? 0,
@@ -101,7 +109,13 @@ trait CreateOrderTrait
                 'receiving_address' => $fullAddress,
                 'recipient_name' => $address->name_receive,
                 'recipient_phone' => $address->phone,
+                'transaction_at' => $request->transaction_at ?? null,
+                "bank_code" => $request->bank_code ?? null,
+
             ]);
+
+
+
 
 
 
@@ -121,6 +135,12 @@ trait CreateOrderTrait
 
 
             DB::commit();
+
+            // return response()->json(['vnp_TxnRef' => $request->vnp_TxnRef, 'orders_code' => $request->orders_code, "db_ordercode" => $order->orders_code, 'bank_code' => $request->bank_code, 'transaction_at' => $request->transaction_at]);
+
+
+            // return response()->json(['order' => $order]);
+
 
             return response()->json([
                 'message' => 'Tạo đơn hàng thành công.',

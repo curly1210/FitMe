@@ -202,13 +202,16 @@ Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 # VNPAY
 Route::post('/vnpay/payment', [VNPayController::class, 'handle']);
 Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
+Route::post('/vnpay/refund', [VNPayController::class, 'vnpayRefund']);
 
 
 #review
-Route::get('/orders-need-review', [ClientReviewController::class, 'listOrderNeedReview'])->name('reviews.listOrderNeedReview');
-Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index');
-Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create');
-// Route::post('/reviews', [ClientReviewController::class, 'update'])->name('reviews.update');
+Route::get('/getProductsNeedReview', [ClientReviewController::class, 'getProductsNeedReview'])->name('reviews.getProductNeedReview');
+Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
+Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create'); #api Tạo review
+Route::get('/reviews/edit', [ClientReviewController::class, 'edit'])->name('reviews.edit'); #api đổ dữ liệu update review
+
+Route::post('/reviews/update', [ClientReviewController::class, 'update'])->name('reviews.update'); #api update dữ liệu review
 
 
 

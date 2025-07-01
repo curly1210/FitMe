@@ -35,4 +35,8 @@ class Review extends Model
     {
         return $this->hasMany(ReviewImage::class, 'review_id', 'id');
     }
+    public function orderDetail()
+    {
+        return $this->belongsTo(OrdersDetail::class, 'order_detail_id');
+    }
 }

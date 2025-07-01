@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ReviewImage;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Http\UploadedFile;
 use App\Http\Controllers\Controller;
@@ -75,23 +76,78 @@ class ReviewController extends Controller
             ]);
         }
     }
-    public function listOrderNeedReview(Request $request)
+    public function getProductsNeedReview(Request $request)
     {
-        if (!$request->user()) {
-            return $this->error("Không có quyền truy cập", ['user_id' => "id người dùng là bắt buộc"], 403);
+        try {
+            $order = Order::with(['orderDetails.productItem.product'])
+                ->where('id', $request->query('order_id'))
+                ->where('status_order_id', 6)
+                ->where('success_at', '>=', Carbon::now()->subDays(7))
+                ->first();
+            if (!$order || !$order->orderDetails || $order->orderDetails->isEmpty()) {
+                return $this->error("Không tìm thấy đơn hàng hoặc đơn hàng không có sản phẩm", [], 404);
+            }
+            $data = $order->orderDetails->map(function ($orderDetail) {
+                if (!$orderDetail) return null;
+                return [
+                    'id' => $orderDetail->id,
+                    "order_id" => $orderDetail->order_id,
+                    'product_item_id' => $orderDetail->product_item_id,
+                    'product_name' => $orderDetail->name_product,
+                    'product_image' => $this->buildImageUrl($orderDetail->image_product),
+                    "price" => $orderDetail->price,
+                    "sale_price" => $orderDetail->sale_price,
+                    "sale_percent" => $orderDetail->sale_percent,
+                    "quantity" => $orderDetail->quantity,
+                    "size" => $orderDetail->size,
+                    "color" => $orderDetail->color,
+                ];
+            })->filter(); // Loại bỏ null nếu có
+            return response()->json($data);
+        } catch (\Throwable $th) {
+            return $this->error("Lỗi khi lấy sản phẩm cần đánh giá", $th->getMessage(), 500);
         }
+    }
+    public function edit(Request $request)
+    {
 
-        $orders = Order::with(['orderDetails.productItem'])->where('user_id', $request->user()->id)
-            ->where('status_order_id', 6) // Trạng thái đã hoàn thành
-            ->where('success_at', ">=", now()->subDays(7)) // chuyển trạng thái hoàn thành trong vòng 7 ngày
-            ->orderBy('success_at', 'desc')
-            ->paginate(10);
+        try {
+            $review = Review::with(['reviewImages'])->find($request->query('review_id'));
 
-        return OrderReviewResource::collection($orders);
+            if (!$review) {
+                return $this->error("Đánh giá không tồn tại", ['id' => 'Đánh giá không tồn tại'], 404);
+            }
+            $data = [
+                "id" => $review->id,
+                "rate" => $review->rate,
+                "content" => $review->content,
+                "is_active" => $review->is_active,
+                "is_update" => $review->is_update,
+                "product" => [
+                    "product_name" => $review->orderDetail->name_product,
+                    "size" => $review->orderDetail->size,
+                    "color" => $review->orderDetail->color,
+                    "image_product" => $this->buildImageUrl($review->orderDetail->image_product),
+                    "price" => $review->orderDetail->price,
+                    "sale_price" => $review->orderDetail->sale_price,
+                    "sale_percent" => $review->orderDetail->sale_percent,
+                    "quantity" => $review->orderDetail->quantity,
+                ],
+                "review_images" => $review->reviewImages ? $review->reviewImages->map(function ($image) {
+                    return [
+
+                        "url" => $this->buildImageUrl($image->url),
+                    ];
+                }) : [],
+            ];
+            return response()->json($data);
+        } catch (\Throwable $th) {
+            return $this->error("Lỗi khi lấy đánh giá",  $th->getMessage(), 500);
+        }
     }
     public function create(Request $request)
     {
-        // dd($request->user()->id);
+
         try {
             $validator = Validator::make(
                 $request->only(['product_item_id', 'order_detail_id', 'rate', 'content', 'review_images']),
@@ -100,8 +156,8 @@ class ReviewController extends Controller
                     "order_detail_id" => 'required|exists:orders_detail,id',
                     'rate' => 'required|integer|min:1|max:5',
                     'content' => 'nullable|string|max:1000',
-                    // 'review_images' => 'nullable|array',
-                    'review_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+
+                    'review_images.*.url' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
 
                 ],
                 [
@@ -114,15 +170,18 @@ class ReviewController extends Controller
                     'rate.min' => 'Rate phải lớn hơn hoặc bằng 1',
                     'rate.max' => 'Rate phải nhỏ hơn hoặc bằng 5',
                     'content.max' => 'Nội dung đánh giá không được vượt quá 1000 ký tự',
-                    'review_images.*.image' => 'Các tệp đánh giá phải là hình ảnh',
-                    'review_images.*.mimes' => 'Các tệp đánh giá phải có định dạng jpeg, png, jpg hoặc webp',
-                    'review_images.*.max' => 'Kích thước tệp đánh giá không được vượt quá 2MB',
+                    'review_images.*.url.image' => 'Các tệp đánh giá phải là hình ảnh',
+                    'review_images.*.url.mimes' => 'Các tệp đánh giá phải có định dạng jpeg, png, jpg hoặc webp',
+                    'review_images.*.url.max' => 'Kích thước tệp đánh giá không được vượt quá 2MB',
 
                 ]
             );
             if ($validator->fails()) {
                 return $this->error("Lỗi xác thực",  $validator->errors(), 422);
+            } else if (!$request->user()) {
+                return $this->error('Bạn chưa đăng nhập', [], 403);
             } else {
+
                 $review = Review::create([
                     'user_id' => $request->user()->id,
                     'product_item_id' => $request->input('product_item_id'),
@@ -130,11 +189,13 @@ class ReviewController extends Controller
                     'rate' => $request->input('rate'),
                     'content' => $request->input('content'),
                 ]);
-                // dd($review);
-                if ($request->hasFile('review_images')) {
-                    $images = $request->file('review_images');
+
+                if ($request->review_images !== []) {
+                    $images = $request->review_images;
+
+
                     foreach ($images as $image) {
-                        $url = $this->uploadImageToCloudinary($image, ['folder' => 'reviews/' . $review->id]);
+                        $url = $this->uploadImageToCloudinary($image['url'], ['folder' => 'reviews/' . $review->id]);
                         $review->reviewImages()->create(['url' => $url['public_id']]);
                     }
                 }
@@ -201,31 +262,39 @@ class ReviewController extends Controller
 
 
                 $inputUrls = [];
-                foreach ($request->review_images as $img) {
-
-
-                    // Nếu là mảng có key url
-                    if (is_array($img) && isset($img['url'])) {
-                        $inputUrls[] = $img['url'];
+                if ($request->review_images && is_array($request->review_images)) {
+                    foreach ($request->review_images as $img) {
+                        if (is_array($img) && isset($img['url'])) {
+                            $inputUrls[] = $img['url'];
+                        }
                     }
-                }
-                if ($inputUrls) {
+
+
                     # Lấy ảnh review đã có trong cơ sở dữ liệu
                     $existingImages  = ReviewImage::query()->where('review_id', $review->id)->get();
-                    if (!$existingImages->isEmpty()) {
-                        // dd($existingImages);
-
+                    if (empty($inputUrls)) {
+                        // Nếu không còn ảnh nào, xóa hết ảnh cũ trong DB và Cloudinary
+                        foreach ($existingImages as $dbImage) {
+                            $this->deleteImageFromCloudinary($dbImage["url"]);
+                            $dbImage->delete();
+                        }
+                        foreach ($existingImages as $dbImage) {
+                            $checkUrl = $this->buildImageUrl($dbImage["url"]);
+                            // if (!in_array($checkUrl, $inputUrls)) {
+                            $this->deleteImageFromCloudinary($dbImage["url"]);
+                            $reviewImageDelete = ReviewImage::find($dbImage->id);
+                            $reviewImageDelete->delete();
+                            // }
+                        }
+                    } else {
+                        // Nếu còn ảnh, xử lý như cũ
                         foreach ($existingImages as $dbImage) {
                             $checkUrl = $this->buildImageUrl($dbImage["url"]);
                             if (!in_array($checkUrl, $inputUrls)) {
                                 $this->deleteImageFromCloudinary($dbImage["url"]);
-                                $reviewImageDelete = ReviewImage::find($dbImage->id);
-                                $reviewImageDelete->delete();
+                                $dbImage->delete();
                             }
                         }
-                        // dd($request->review_images);
-                        // Thêm mới các ảnh từ mảng API gửi lên
-
                     }
                     foreach ($request->review_images as $imageData) {
 
@@ -247,21 +316,23 @@ class ReviewController extends Controller
                         }
                     }
                 }
-                $review->fresh();
-                $data = [
-                    "id" => $review->id,
-                    "rate" => $review->rate,
-                    "content" => $review->content,
-                    "is_active" => $review->is_active,
-                    "review_images" => $review->reviewImages ? $review->reviewImages->map(function ($image) {
-                        return [
-                            "id" => $image->id,
-                            "url" => $this->buildImageUrl($image->url),
-                        ];
-                    }) : [],
-                ];
-                return $this->success($data, "Cập nhật đánh giá thành công", 201);
             }
+
+
+            $review->fresh();
+            $data = [
+                "id" => $review->id,
+                "rate" => $review->rate,
+                "content" => $review->content,
+                "is_active" => $review->is_active,
+                "review_images" => $review->reviewImages ? $review->reviewImages->map(function ($image) {
+                    return [
+                        "id" => $image->id,
+                        "url" => $this->buildImageUrl($image->url),
+                    ];
+                }) : [],
+            ];
+            return $this->success($data, "Cập nhật đánh giá thành công", 201);
         } catch (\Throwable $th) {
             return $this->error("Lỗi khi cập nhật đánh giá", $th->getMessage(), 500);
         }
