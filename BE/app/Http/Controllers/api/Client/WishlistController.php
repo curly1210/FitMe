@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\api\Client;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Client\WishlistResource;
-use App\Models\Wishlist;
 use App\Models\Product;
+use App\Models\Wishlist;
 use App\Traits\ApiResponse;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use App\Traits\CloudinaryTrait;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Controller;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\Client\WishlistResource;
 
 class WishlistController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, CloudinaryTrait;
 
     /**
      * Display a listing of the authenticated user's wishlist.
@@ -23,7 +25,7 @@ class WishlistController extends Controller
     public function index(Request $request)
     {
         try {
-           //Xác thực token của user
+            //Xác thực token của user
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
@@ -34,12 +36,12 @@ class WishlistController extends Controller
             $wishlist = Wishlist::where('user_id', $user->id)->with(['product' => function ($query) {
                 $query->where('is_active', 1)->with(['category', 'productItems' => function ($query) {
                     $query->where('is_active', 1)->with(['color', 'size']);
-                },'productImages' => function ($query) {
+                }, 'productImages' => function ($query) {
                     $query->where('is_active', 1)->with('color');
                 }]);
             }])->paginate(10);
 
-           return $this->success(WishlistResource::collection($wishlist), 'Lấy danh sách sản phẩm yêu thích thành công');
+            return $this->success(WishlistResource::collection($wishlist), 'Lấy danh sách sản phẩm yêu thích thành công');
         } catch (ValidationException $e) {
             return $this->error('Thông tin không hợp lệ. Vui lòng kiểm tra lại.', $e->errors(), 422);
         } catch (\Throwable $th) {
@@ -47,11 +49,11 @@ class WishlistController extends Controller
         }
     }
 
-    
+
     public function store(Request $request)
     {
         try {
-           
+
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
@@ -101,18 +103,18 @@ class WishlistController extends Controller
         }
     }
 
-  
+
     public function destroy($product_id)
     {
         try {
-            
+
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
                 return $this->error('Vui lòng đăng nhập để xóa sản phẩm khỏi danh sách yêu thích', [], 401);
             }
 
-            
+
             $request = request()->merge(['product_id' => $product_id]);
             $request->validate([
                 'product_id' => 'required|exists:products,id',
@@ -133,6 +135,42 @@ class WishlistController extends Controller
             return $this->error('Thông tin không hợp lệ. Vui lòng kiểm tra lại.', $e->errors(), 422);
         } catch (\Throwable $th) {
             return $this->error('Có lỗi xảy ra khi xóa sản phẩm khỏi danh sách yêu thích. Vui lòng thử lại sau.', ['error' => $th->getMessage()], 500);
+        }
+    }
+    public function getImages(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                return $this->error('Vui lòng đăng nhập để xem danh sách hình ảnh sản phẩm yêu thích', [], 401);
+            }
+            $product_id = $request->query('product_id');
+            $product = Product::with('productImages', 'productItems')->where('id', $product_id)->where('is_active', 1)->first();
+            if (!$product) {
+                return $this->error('Sản phẩm không tồn tại', [], 404);
+            }
+            $images = $product->productItems
+                ->where('is_active', 1)
+                ->groupBy('color_id')
+                ->map(function ($items) {
+                    $item = $items->first();
+                    $image = ProductImage::query()
+                        ->where('product_id', $item->product_id)
+                        ->where('color_id', $item->color_id)
+                        ->first('url');
+
+                    return [
+                        'name' => $item->color->name,
+                        'code' => $item->color->code,
+                        'min_sale_price' => $items->min('sale_price'),
+                        'image' => $this->buildImageUrl($image->url),
+
+                    ];
+                })->sortBy('min_sale_price')->values();
+
+            return response()->json($images, 200);;
+        } catch (\Throwable $th) {
+            return $this->error('Có lỗi xảy ra khi lấy danh sách hình ảnh sản phẩm yêu thích. Vui lòng thử lại sau.', ['error' => $th->getMessage()], 500);
         }
     }
 }

@@ -224,7 +224,6 @@ Route::post('/reviews/update', [ClientReviewController::class, 'update'])->name(
 
 
 
-
 // info acc client
 Route::get('profile', [ClientUserController::class, 'showInfo']);
 Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
@@ -339,10 +338,11 @@ Route::prefix('client')->group(function () {
     Route::get('/categories', [ClientCategoryController::class, 'index']);
 });
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('jwt.auth')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{product_id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    Route::get("/wishlist/getImages", [WishlistController::class, 'getImages'])->name('wishlist.getImages');
 });
 
 
