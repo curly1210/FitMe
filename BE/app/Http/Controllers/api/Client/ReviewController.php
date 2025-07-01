@@ -59,7 +59,7 @@ class ReviewController extends Controller
                     ->orderBy("created_at", "desc");
             }
 
-            $reviewRate = min(round($product->reviews()->withoutGlobalScopes()->avg('rate'), 1), 5);
+            $reviewRate = min(round($product->reviews()->avg('rate'), 1), 5);
             $roundedRate = round($reviewRate * 2) / 2;
 
 

@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources\Client;
 
-use App\Traits\CloudinaryTrait;
+use App\Models\ReviewReply;
 use Illuminate\Http\Request;
+use App\Traits\CloudinaryTrait;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ReviewResource extends JsonResource
@@ -16,8 +17,21 @@ class ReviewResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $replies = ReviewReply::query()->where('review_id', $this->id)->get();
         return [
             'id' => $this->id,
+            "replies" => $replies->map(function ($reply) {
+                return [
+                    'id' => $reply->id,
+                    'content' => $reply->content,
+                    'user' => [
+                        'name' => $reply->user->name,
+                        'avatar' => $this->buildImageUrl($reply->user->avatar),
+                    ],
+                    'created_at' => $reply->created_at,
+                    'updated_at' => $reply->created_at
+                ];
+            }),
             "rate" => $this->rate,
             "content" => $this->content,
             "is_active" => $this->is_active,

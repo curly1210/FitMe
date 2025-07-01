@@ -3,13 +3,14 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
-use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Client\ProductController;
@@ -17,14 +18,16 @@ use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
-use App\Http\Controllers\Api\Admin\PostController;
+use App\Http\Controllers\api\Admin\ReviewReplyController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
+use App\Http\Controllers\api\Client\UserController as ClientUserController;
+use App\Http\Controllers\api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
+use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-use App\Http\Controllers\api\Client\UserController as ClientUserController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -210,10 +213,16 @@ Route::get('/getProductsNeedReview', [ClientReviewController::class, 'getProduct
 Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
 Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create'); #api Tạo review
 Route::get('/reviews/edit', [ClientReviewController::class, 'edit'])->name('reviews.edit'); #api đổ dữ liệu update review
-
 Route::post('/reviews/update', [ClientReviewController::class, 'update'])->name('reviews.update'); #api update dữ liệu review
 
-
+Route::prefix('/admin')->group(function () {
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
+    Route::post('/reviews/hidden', [AdminReviewController::class, 'hidden'])->name('reviews.hidden'); #api list review trang chi tiết sản phẩm
+    Route::get("/reviews/reply", [ReviewReplyController::class, "edit"]);
+    Route::post("/reviews/reply/create", [ReviewReplyController::class, "create"]);
+    Route::post("/reviews/reply/update", [ReviewReplyController::class, "update"]);
+    Route::post("/reviews/reply/delete", [ReviewReplyController::class, "delete"]);
+});
 
 
 
