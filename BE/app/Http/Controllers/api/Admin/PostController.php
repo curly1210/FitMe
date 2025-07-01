@@ -73,7 +73,7 @@ class PostController extends Controller
             $validated = $request->validate([
                 'title' => 'required|string|max:150|unique:posts,title,' . $post->id,
                 'content' => 'required|string',
-                'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'is_active' => 'boolean',
             ]);
 
@@ -94,7 +94,9 @@ class PostController extends Controller
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
             }
-
+else{
+                return $this->error('Thumbnail không được để trống', [], 422);
+            }
             $post->update($data);
             return $this->success(new PostResource($post), 'Bài viết đã được cập nhật');
         } catch (ValidationException $e) {
