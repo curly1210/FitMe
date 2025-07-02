@@ -96,6 +96,7 @@ Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topS
 Route::get('/admin/statistics/customers', [StatisticsController::class, 'customerStatistics']);
 Route::get('/admin/statistics/products', [StatisticsController::class, 'productStatistics']);
 Route::get('/admin/statistics/orderLocation', [StatisticsController::class, 'orderByLocation']);
+Route::get('admin/statistics/inventory', [StatisticsController::class, 'inventoryStatistics']);
 
 
 
