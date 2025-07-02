@@ -29,6 +29,7 @@ use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\api\Client\ReplicateController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -368,3 +369,7 @@ Route::prefix('cart-items')->group(function () {
     Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
     Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
 });
+
+
+Route::post('/replicate/run', [ReplicateController::class, 'run']);
+Route::get('/replicate/status/{id}', [ReplicateController::class, 'status']);
