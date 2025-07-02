@@ -23,6 +23,8 @@ class Order extends Model
         'receiving_address',
         'recipient_name',
         'recipient_phone',
+        'transaction_at',
+        'bank_code',
     ];
 
     // Quan hệ với User

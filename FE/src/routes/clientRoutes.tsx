@@ -18,6 +18,8 @@ import ProductLike from "../pages/client/ProductLike";
 import LayoutInforUser from "../components/Client/LayoutInforUser";
 import InformationUser from "../pages/client/InformationUser";
 import ChangePassword from "../pages/client/ChangePassword";
+import PostDetail from "../pages/client/Tintuc";
+import ListPost from "../pages/client/Tintuc/ListPost";
 
 export const clientRoutes = [
   {
@@ -52,6 +54,14 @@ export const clientRoutes = [
             element: <ProductDetail />,
           },
           {
+            path: "post/:slug",
+            element: <PostDetail />,
+          },
+          {
+            path: "post",
+            element: <ListPost />,
+          },
+          {
             element: <ProtectClient role="client" />,
             children: [
               {
@@ -79,6 +89,7 @@ export const clientRoutes = [
                     path: "change-password",
                     element: <ChangePassword />,
                   },
+               
                 ],
               },
 

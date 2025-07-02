@@ -1,15 +1,17 @@
 <?php
 
+use App\Http\Controllers\api\Client\ChatbotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
-use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Client\ProductController;
@@ -17,14 +19,16 @@ use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
-use App\Http\Controllers\Api\Admin\PostController;
+use App\Http\Controllers\api\Admin\ReviewReplyController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
+use App\Http\Controllers\api\Client\UserController as ClientUserController;
+use App\Http\Controllers\api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
+use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-use App\Http\Controllers\api\Client\UserController as ClientUserController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -163,8 +167,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //Route quản lí tin tức
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']);
-    Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
-    Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
+    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{id}', [PostController::class, 'show'])->name('posts.show');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
@@ -203,16 +207,24 @@ Route::get("/get-sizes", [ProductController::class, "getSizes"]);
 # VNPAY
 Route::post('/vnpay/payment', [VNPayController::class, 'handle']);
 Route::post('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
+Route::post('/vnpay/refund', [VNPayController::class, 'vnpayRefund']);
 
 
 #review
-Route::get('/orders-need-review', [ClientReviewController::class, 'listOrderNeedReview'])->name('reviews.listOrderNeedReview');
-Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index');
-Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create');
-// Route::post('/reviews', [ClientReviewController::class, 'update'])->name('reviews.update');
+Route::get('/getProductsNeedReview', [ClientReviewController::class, 'getProductsNeedReview'])->name('reviews.getProductNeedReview');
+Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
+Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create'); #api Tạo review
+Route::get('/reviews/edit', [ClientReviewController::class, 'edit'])->name('reviews.edit'); #api đổ dữ liệu update review
+Route::post('/reviews/update', [ClientReviewController::class, 'update'])->name('reviews.update'); #api update dữ liệu review
 
-
-
+Route::prefix('/admin')->group(function () {
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
+    Route::post('/reviews/hidden', [AdminReviewController::class, 'hidden'])->name('reviews.hidden'); #api list review trang chi tiết sản phẩm
+    Route::get("/reviews/reply", [ReviewReplyController::class, "edit"]);
+    Route::post("/reviews/reply/create", [ReviewReplyController::class, "create"]);
+    Route::post("/reviews/reply/update", [ReviewReplyController::class, "update"]);
+    Route::post("/reviews/reply/delete", [ReviewReplyController::class, "delete"]);
+});
 
 
 
@@ -229,6 +241,10 @@ Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
 Route::patch('profil', [ClientUserController::class, 'updateInfoBasic']);
 Route::post('change-password', [ClientUserController::class, 'updatePassword']);
 Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
+
+// chatbot
+Route::post('/chatbot', [ChatbotController::class, 'chat']);
+Route::post('/chatbot/reset', [ChatbotController::class, 'reset']);
 
 
 
@@ -338,10 +354,11 @@ Route::prefix('client')->group(function () {
     Route::get('/categories', [ClientCategoryController::class, 'index']);
 });
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('jwt.auth')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{product_id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    Route::get("/wishlist/getImages", [WishlistController::class, 'getImages'])->name('wishlist.getImages');
 });
 
 

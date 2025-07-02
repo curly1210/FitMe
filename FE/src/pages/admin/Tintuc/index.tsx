@@ -1,4 +1,3 @@
-// PostList.tsx
 import React, { useState } from "react";
 import {
   Table,
@@ -8,6 +7,7 @@ import {
   Tooltip,
   Popconfirm,
   message,
+  Spin,
 } from "antd";
 import { useList, useDelete } from "@refinedev/core";
 import type { ColumnsType } from "antd/es/table";
@@ -44,6 +44,8 @@ const PostList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 9;
 
+  const [isDeleting, setIsDeleting] = useState(false); // ⭐️ trạng thái loading toàn màn hình
+
   const { data, isLoading, refetch } = useList<Post>({
     resource: "admin/posts",
     pagination: {
@@ -55,6 +57,7 @@ const PostList = () => {
   const { mutate: deletePost } = useDelete();
 
   const handleDelete = (id: number) => {
+    setIsDeleting(true); // 👉 Bắt đầu loading toàn màn hình
     deletePost(
       {
         resource: "admin/posts",
@@ -67,6 +70,9 @@ const PostList = () => {
         },
         onError: () => {
           message.error("Lỗi khi xoá bài viết");
+        },
+        onSettled: () => {
+          setIsDeleting(false); // 👉 Tắt loading sau khi xoá
         },
       }
     );
@@ -200,59 +206,61 @@ const PostList = () => {
   ];
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Danh sách bài viết</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setOpenDrawer(true)}
-        >
-          Thêm mới
-        </Button>
+    <Spin spinning={isDeleting} tip="Đang xoá bài viết...">
+      <div className="p-6 bg-white rounded-xl shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Danh sách bài viết</h2>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setOpenDrawer(true)}
+          >
+            Thêm mới
+          </Button>
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={
+            (data?.data?.data ?? []).map((item) => ({
+              ...item,
+              thumbnails: item.thumbnail ? [item.thumbnail] : [],
+            }))
+          }
+          rowKey="id"
+          loading={isLoading}
+          scroll={{ x: true }}
+          pagination={{
+            current: currentPage,
+            pageSize,
+            total: data?.data?.total ?? 0,
+            onChange: (page) => setCurrentPage(page),
+            showSizeChanger: false,
+          }}
+        />
+
+        <PostDrawerAdd
+          open={openDrawer}
+          onClose={() => {
+            setOpenDrawer(false);
+            refetch();
+          }}
+        />
+        <PostDrawerEdit
+          open={openDrawerEdit}
+          onClose={() => {
+            setOpenDrawerEdit(false);
+            refetch();
+          }}
+          post={actionPost}
+        />
+        <DetailPostDrawer
+          open={openDrawerDetail}
+          onClose={() => setOpenDrawerDetail(false)}
+          postId={detailPostId}
+        />
       </div>
-
-      <Table
-        columns={columns}
-        dataSource={
-          (data?.data?.data ?? []).map((item) => ({
-            ...item,
-            thumbnails: item.thumbnail ? [item.thumbnail] : [],
-          }))
-        }
-        rowKey="id"
-        loading={isLoading}
-        scroll={{ x: true }}
-        pagination={{
-          current: currentPage,
-          pageSize,
-          total: data?.data?.total ?? 0,
-          onChange: (page) => setCurrentPage(page),
-          showSizeChanger: false,
-        }}
-      />
-
-      <PostDrawerAdd
-        open={openDrawer}
-        onClose={() => {
-          setOpenDrawer(false);
-          refetch();
-        }}
-      />
-      <PostDrawerEdit
-        open={openDrawerEdit}
-        onClose={() => {
-          setOpenDrawerEdit(false);
-          refetch();
-        }}
-        post={actionPost}
-      />
-      <DetailPostDrawer
-        open={openDrawerDetail}
-        onClose={() => setOpenDrawerDetail(false)}
-        postId={detailPostId}
-      />
-    </div>
+    </Spin>
   );
 };
 
