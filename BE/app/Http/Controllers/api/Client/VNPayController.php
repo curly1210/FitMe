@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Traits\CreateOrderTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -79,16 +80,17 @@ class VNPayController extends Controller
                 // $vnp_IpAddr = $_SERVER['REMOTE_ADDR']; 
                 $startTime = date("YmdHis");
                 $expire = date('YmdHis', strtotime('+15 minutes', strtotime($startTime)));
+                $vnp_CreateDate =  date("YmdHis");
                 $inputData = array(
                     "vnp_Version" => "2.1.0",
                     "vnp_TmnCode" => env('VNP_TMNCODE'), //Mã định danh của merchant
                     "vnp_Amount" => $vnp_Amount * 100,
                     "vnp_Command" => "pay",
-                    "vnp_CreateDate" => date('YmdHis'),
+                    "vnp_CreateDate" => $vnp_CreateDate,
                     "vnp_CurrCode" => "VND",
                     "vnp_IpAddr" => $vnp_IpAddr,
                     "vnp_Locale" => $vnp_Locale,
-                    "vnp_OrderInfo" => "Thanh toan GD:" . $vnp_TxnRef,
+                    "vnp_OrderInfo" => "Thanh toan GD:" . $vnp_TxnRef . '-' . $vnp_CreateDate,
                     "vnp_OrderType" => "other",
                     "vnp_ReturnUrl" => env('VNP_RETURN_URL'),
                     "vnp_TxnRef" => $vnp_TxnRef,
@@ -158,11 +160,15 @@ class VNPayController extends Controller
             if ($request->query('vnp_ResponseCode') == '00') {
                 $vnp_TxnRef = $request->input("vnp_TxnRef"); // Lấy mã tham chiếu giao dịch của bạn
                 $vnp_TransactionNo =  $request->vnp_TransactionNo; // Lấy mã giao dịch của VNPay
+                $order_info = $request->query('vnp_OrderInfo');
+                $vnp_TransactionDate = explode('-', $order_info)[1];
+                // return response()->json($request->all());
                 $request->merge([
                     'orders_code' => $vnp_TxnRef,
                     'bank_code' => $vnp_TransactionNo,
-                    'transaction_at' => now()->format('Y-m-d H:i:s')
+                    'transaction_at' => $vnp_TransactionDate
                 ]);
+                // return response()->json($request->all());
                 $this->createOrder($request, 1,); // 1 - đã thanh toán , 2 - Chờ hoàn tiền , 3 - Đã hoàn tiền   
                 // return response()->json($order);
                 return response()->json(['message' => "Thanh toán thành công ", 'vnp_ResponseCode' => $request->query('vnp_ResponseCode')]);
@@ -260,23 +266,34 @@ class VNPayController extends Controller
     public function vnpayRefund(Request $request)
     {
         if (request()->isMethod('post')) {
+
             do {
                 $uniqueCode =  now()->format('ymd') . strtoupper(Str::random(6));
             } while (Order::where('orders_code', $uniqueCode)->exists());
+            $vnp_TxnRef = $request->order_code; // Mã tham chiếu của giao dịch
+            $order = Order::query()->where('orders_code', $vnp_TxnRef)->first();
+            if (!$order || $vnp_TxnRef == null) {
+                return $this->error("Không tìm thấy đơn hàng", [], 404);
+            }
+            if ($order->payment_method == 'cod') {
+                return $this->error("Yêu cầu hoàn tiền chỉ áp dụng với đơn hàng thanh toán online", 422);
+            }
+
+            if ($order->status_order_id != 7 || $order->status_payment == 0 || !$order->bank_code || !$order->transaction_at) {
+                return $this->error("Đơn hàng không đủ điều kiện hoàn tiền", ["status_order" => "Đơn hàng không ở trạng thái hủy", "bank_code" => "mã đơn thanh toán là bắt buộc", "transaction_at" => "Thời gian thanh toán là bắt buộc"], 422);
+            }
             $vnp_RequestId = $uniqueCode; // Mã truy vấn
             $vnp_Command = "refund"; // Mã api
-            $vnp_TransactionType = 02; // 02 hoàn trả toàn phần - 03 hoàn trả một phần
-            $vnp_TxnRef = $request->vnp_TxnRef; // Mã tham chiếu của giao dịch
-            $order = Order::query()->where('orders_code', $vnp_TxnRef)->first('total_amount');
-            if (!$order) {
-                return response()->json(['message' => 'Mã giao dịch không hợp lệ'], 422);
-            }
+            $vnp_TransactionType = '02'; // 02 hoàn trả toàn phần - 03 hoàn trả một phần
+
             $vnp_Amount = $order->total_amount * 100; // Số tiền hoàn trả
             $vnp_OrderInfo = "Hoan Tien Giao Dich"; // Mô tả thông tin
-            $vnp_TransactionNo = "0"; // Tuỳ chọn, "0": giả sử merchant không ghi nhận được mã GD do VNPAY phản hồi.
-            $vnp_TransactionDate = $order->transaction_at; // Thời gian ghi nhận giao dịch
+            $vnp_TransactionNo = $order->bank_code; // Tuỳ chọn, "0": giả sử merchant không ghi nhận được mã GD do VNPAY phản hồi.
+            $vnp_TransactionDate = date('YmdHis', strtotime($order->transaction_at));
+            // dd($vnp_TransactionDate);
+
             $vnp_CreateDate = date('YmdHis'); // Thời gian phát sinh request
-            $vnp_CreateBy = auth()->user->name ?? 'system';
+            $vnp_CreateBy = $request->user()->name ?? 'system';
             $vnp_IpAddr =  request()->ip();
 
             $ispTxnRequest = array(
@@ -294,6 +311,7 @@ class VNPayController extends Controller
                 "vnp_CreateBy" => $vnp_CreateBy,
                 "vnp_IpAddr" => $vnp_IpAddr
             );
+            // dd($ispTxnRequest);
 
             $format = '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s';
 
@@ -319,7 +337,14 @@ class VNPayController extends Controller
             $txnData = $this->callAPI_auth("POST", env("API_URL"), json_encode($ispTxnRequest));
             $ispTxn = json_decode($txnData, true);
 
-            return response()->json($ispTxn);
+
+            if ($ispTxn["vnp_ResponseCode"] == "00") {
+
+                $order->update(["status_payment" => 3]); # Đã hoàn tiền
+                return response()->json(["message" => "Hoàn tiền thành công"]);
+            } else {
+                return response()->json(["message" => "Hoàn tiền thất bại", "response_code" => $ispTxn["vnp_ResponseCode"]], 400);
+            }
         }
     }
 }
