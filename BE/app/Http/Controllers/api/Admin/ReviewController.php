@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\Admin;
 
 use App\Models\Review;
 use App\Models\Product;
+use App\Models\ReviewReply;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,11 @@ use App\Http\Resources\Client\ReviewResource;
 class ReviewController extends Controller
 {
     use ApiResponse;
+    /*
+        request:
+        product_id
+        rate  1|2|3|4|5|null(lấy hết)
+    */
     public function index(Request $request)
     {
         $rate = $request->query('rate');
@@ -60,19 +66,24 @@ class ReviewController extends Controller
             ]);
         }
     }
+    /*
+    request:
+        review_id
+        is_active 0|1
+    */
+    # Ẩn đánh giá của client
     public function hidden(Request $request)
     {
-        $reviewId = $request->input("review_id");
-        if (!$reviewId) {
-            return $this->error("Lỗi chưa có review_id", ['review_id' => "không có trường review_id"], 400);
-        } else {
-            $review = Review::find($reviewId);
+        try {
+            $review = Review::find($request->review_id);
             if (!$review) {
                 return $this->error("Không tìm thấy đánh giá", ['review_id' => "Đánh giá không tồn tại"], 404);
             }
-            $review->is_active = 0;
+            $review->is_active = $request->is_active;
             $review->save();
             return $this->success("Đánh giá đã được ẩn thành công", new ReviewResource($review));
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage(), 500);
         }
     }
 }

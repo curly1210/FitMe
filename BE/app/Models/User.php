@@ -82,9 +82,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function addresses()
-{
-    return $this->hasMany(ShippingAddress::class);
-}
+    {
+        return $this->hasMany(ShippingAddress::class);
+    }
     public function shipping_address()
     {
         return $this->hasMany(ShippingAddress::class);
@@ -93,5 +93,9 @@ class User extends Authenticatable implements JWTSubject
     public function cart_items()
     {
         return $this->hasMany(CartItem::class);
+    }
+    public function reviewReplies()
+    {
+        return $this->hasMany(ReviewReply::class);
     }
 }
