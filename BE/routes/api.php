@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\api\Client\ChatbotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -165,8 +166,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //Route quản lí tin tức
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']);
-    Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
-    Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
+    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{id}', [PostController::class, 'show'])->name('posts.show');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
@@ -239,6 +240,10 @@ Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
 Route::patch('profil', [ClientUserController::class, 'updateInfoBasic']);
 Route::post('change-password', [ClientUserController::class, 'updatePassword']);
 Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
+
+// chatbot
+Route::post('/chatbot', [ChatbotController::class, 'chat']);
+Route::post('/chatbot/reset', [ChatbotController::class, 'reset']);
 
 
 
