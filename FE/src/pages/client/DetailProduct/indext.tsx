@@ -583,13 +583,21 @@ const ProductDetail = () => {
             </div>
 
             <Space.Compact style={{ width: "100%" }}>
-              <TextArea
-                rows={4}
-                placeholder="Bình luận ..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="rounded-l-md"
-              />
+          <TextArea
+  rows={4}
+  placeholder="Bình luận ..."
+  value={comment}
+  onChange={(e) => {
+    if (!accessToken || !user) return;
+    setComment(e.target.value);
+  }}
+  onFocus={() => {
+    if (!accessToken || !user) {
+      openModal(<ModalLogin />); 
+    }
+  }}
+  className="rounded-l-md cursor-pointer"
+/>
               <Button
                 type="primary"
                 className="rounded-r-md"

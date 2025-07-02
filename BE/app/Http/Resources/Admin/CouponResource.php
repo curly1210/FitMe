@@ -19,6 +19,7 @@ class CouponResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
+            'type' => $this->type, //thêm trường type
             'value' => $this->value,
             'time_start' => $this->time_start,
             'time_end' => $this->time_end,

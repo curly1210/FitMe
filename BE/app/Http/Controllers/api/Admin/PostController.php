@@ -29,7 +29,7 @@ class PostController extends Controller
             $validated = $request->validate([
                 'title' => 'required|string|max:150|unique:posts',
                 'content' => 'required|string',
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'is_active' => 'boolean',
             ]);
 
@@ -41,8 +41,6 @@ class PostController extends Controller
             if ($request->hasFile('thumbnail')) {
                 $uploadResult = $this->uploadImageToCloudinary($request->file('thumbnail'), [
                     'folder' => 'posts',
-                    'width' => 800,
-                    'height' => 600,
                     'quality' => 80
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
@@ -92,13 +90,13 @@ class PostController extends Controller
                 
                 $uploadResult = $this->uploadImageToCloudinary($request->file('thumbnail'), [
                     'folder' => 'posts',
-                    'width' => 800,
-                    'height' => 600,
                     'quality' => 80
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
             }
-
+else{
+                return $this->error('Thumbnail không được để trống', [], 422);
+            }
             $post->update($data);
             return $this->success(new PostResource($post), 'Bài viết đã được cập nhật');
         } catch (ValidationException $e) {

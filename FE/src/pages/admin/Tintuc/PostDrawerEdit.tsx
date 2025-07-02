@@ -19,7 +19,7 @@ import { API_URL } from "../../../utils/constant";
 interface PostDrawerAddProps {
   open: boolean;
   onClose: () => void;
-  post: object;
+  post: any;
 }
 
 const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) => {
@@ -34,15 +34,12 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
     form.setFieldsValue({
       title: post?.title,
       content: post?.content,
+      is_active: post?.is_active === 1, 
     });
-    setPreviewImage(post?.thumbnail);
-    setPreviewImage(post?.thumbnail);
-  }, [post])
+    setPreviewImage(post?.thumbnail || "");
+    setThumbnailFile(null);
+  }, [post, form]);
 
-
-
-
-  // Xử lý khi chọn ảnh
   const handleBeforeUpload = (file: File) => {
     setThumbnailFile(file);
     setPreviewImage(URL.createObjectURL(file));
@@ -54,20 +51,17 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
     setPreviewImage("");
     message.info("Đã xoá ảnh thumbnail.");
   };
-  /* SUBMIT form */
-  const onFinish = async (values: any) => {
-    // if (!thumbnailFile) {
-    //   message.error("Vui lòng chọn ảnh thumbnail!");
-    //   return;
-    // }
 
+  const onFinish = async (values: any) => {
     const formData = new FormData();
-    // formData.append("_method", 'PUT');
     formData.append("title", values.title);
     formData.append("content", values.content);
     formData.append("is_active", values.is_active ? "1" : "0");
+
     if (thumbnailFile) {
       formData.append("thumbnail", thumbnailFile);
+    } else if (!previewImage) {
+      formData.append("thumbnail_remove", "1"); 
     }
 
     createPost(
@@ -95,14 +89,13 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
     );
   };
 
-  /* Xử lý up ảnh ckeditor */
   function customUploadAdapterPlugin(editor: any) {
     editor.plugins.get("FileRepository").createUploadAdapter = (loader: any) => {
       return {
         upload: async () => {
           const file = await loader.file;
           const data = new FormData();
-          data.append('upload', file);
+          data.append("upload", file);
           setUploadImgCkeditor(true);
           return fetch(API_URL + "/admin/posts/ckeditor-upload", {
             method: "POST",
@@ -118,19 +111,19 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
             })
             .finally(() => setUploadImgCkeditor(false));
         },
-        abort: () => { },
+        abort: () => {},
       };
     };
   }
+
   const config = {
     language: "vi",
-    extraPlugins: [customUploadAdapterPlugin]
+    extraPlugins: [customUploadAdapterPlugin],
   };
 
   return (
-
     <Drawer
-      title='Sửa bài viết'
+      title="Sửa bài viết"
       open={open}
       onClose={onClose}
       destroyOnClose
@@ -202,10 +195,9 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
           rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
         >
           <Spin tip="Đang tải ảnh" spinning={uploadImgCkeditor}>
-
             <CKEditor
               editor={SafeEditor}
-              data={form.getFieldValue('content')}
+              data={form.getFieldValue("content")}
               config={config}
               onChange={(_, editor) => {
                 const content = editor.getData();
@@ -213,7 +205,6 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
               }}
             />
           </Spin>
-
         </Form.Item>
 
         <Form.Item
@@ -224,8 +215,7 @@ const PostDrawerEdit: React.FC<PostDrawerAddProps> = ({ open, onClose, post }) =
           <Switch checkedChildren="Hiển thị" unCheckedChildren="Ẩn" />
         </Form.Item>
       </Form>
-
-    </Drawer >
+    </Drawer>
   );
 };
 

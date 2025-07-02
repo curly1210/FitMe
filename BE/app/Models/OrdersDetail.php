@@ -43,6 +43,6 @@ class OrdersDetail extends Model
     }
     public function review()
     {
-        return $this->belongsTo(OrdersDetail::class);
+        return $this->hasOne(Review::class);
     }
 }

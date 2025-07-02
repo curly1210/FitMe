@@ -34,47 +34,57 @@ function getItem(
 }
 
 const itemsNavigate: MenuItem[] = [
-  getItem(<Link to="/admin">Dashboard</Link>, "1", <PieChartOutlined />),
+  getItem(
+    "Dashboard",
+    "sub1",
+    <InboxOutlined/>,
+    [
+         getItem(<Link to="/admin">Tổng quan</Link>, "1", <PieChartOutlined />),
+         getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "2", <UserOutlined />),
+    ]
+  ),
+ 
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
-    "2",
+    "3",
     <PictureOutlined />
   ),
   getItem(
     <Link to="/admin/category">Quản lý danh mục</Link>,
-    "3",
+    "4",
     <UnorderedListOutlined />
   ),
   getItem(
     "Quản lý sản phẩm",
-    "sub1",
+    "sub2",
     <InboxOutlined />,
     [
-      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "4"),
-      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "5"),
+      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "5"),
+      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "6"),
     ]
 
     // <InboxOutlined />
   ),
   getItem(
     <Link to="/admin/bienthe">Quản lý biến thể</Link>,
-    "6",
+    "7",
     <ProductOutlined />
   ),
-  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "7", <ShoppingOutlined />),
+  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "8", <ShoppingOutlined />),
+  
   getItem(
     <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
-    "8",
+    "9",
     <PercentageOutlined />
   ),
   getItem(
     <Link to="/admin/users">Quản lý khách hàng</Link>,
-    "9",
+    "10",
     <UserOutlined />
   ),
   getItem(
     <Link to="/admin/posts">Quản lý tin tức</Link>,
-    "10",
+    "11",
     <UserOutlined />
   ),
 
