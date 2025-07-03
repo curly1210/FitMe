@@ -245,7 +245,12 @@ class StatisticsController extends Controller
         $month = $request->filled('month') ? (int) $request->month : null;
         $recent = $request->filled('recent') ? (int) $request->recent : null;
 
-        $topQuery = OrdersDetail::with('productItem.product.images')
+        $topQuery = OrdersDetail::with([
+            'productItem.product.images',
+            'productItem.color:id,code',
+            'productItem.size:id,name'
+        ])
+
             ->whereHas('order', function ($q) {
                 $q->where('status_order_id', 6);
             });
@@ -270,13 +275,15 @@ class StatisticsController extends Controller
             ->take(20)
             ->get();
 
-        $lowStock = ProductItem::with(['product', 'imageByColor'])
+        $lowStock = ProductItem::with(['product', 'imageByColor', 'color:id,code', 'size:id,name'])
+
             ->where('stock', '<=', 5)
             ->orderBy('stock')
             ->take(10)
             ->get();
 
-        $highStock = ProductItem::with(['product', 'imageByColor'])
+        $highStock = ProductItem::with(['product', 'imageByColor', 'color:id,code', 'size:id,name'])
+
             ->where('stock', '>', 50)
             ->orderByDesc('stock')
             ->take(10)
@@ -351,11 +358,11 @@ class StatisticsController extends Controller
 
     public function inventoryStatistics(Request $request)
     {
-        $sortStock = $request->input('sort_stock', 'desc'); 
-        $byItem = $request->boolean('product_item', false); 
+        $sortStock = $request->input('sort_stock', 'desc');
+        $byItem = $request->boolean('product_item', false);
 
         if ($byItem) {
-            $items = ProductItem::with(['product', 'imageByColor'])
+            $items = ProductItem::with(['product', 'imageByColor', 'color:id,code', 'size:id,name'])
                 ->whereHas('product', fn($q) => $q->where('is_active', 1))
                 ->get()
                 ->map(function ($item) {
@@ -371,8 +378,8 @@ class StatisticsController extends Controller
                         'sell_rate_percent' => $item->stock > 0
                             ? round($sold / $item->stock * 100, 2)
                             : null,
-                        'color_id' => $item->color_id,
-                        'size_id' => $item->size_id,
+                        'color' => $item->color?->code,
+                        'size' => $item->size?->name,
                         'image' => $item->imageByColor?->url,
                         'product' => [
                             'id' => $item->product->id,
@@ -391,7 +398,11 @@ class StatisticsController extends Controller
             ]);
         }
 
-        $products = Product::with(['productItems.imageByColor'])
+        $products = Product::with([
+            'productItems.imageByColor',
+            'productItems.color:id,code',
+            'productItems.size:id,name'
+        ])
             ->select('id', 'name')
             ->where('is_active', 1)
             ->get()
@@ -423,8 +434,8 @@ class StatisticsController extends Controller
                         return [
                             'id' => $item->id,
                             'sku' => $item->sku,
-                            'color_id' => $item->color_id,
-                            'size_id' => $item->size_id,
+                            'color' => $item->color->code,
+                            'size' => $item->size->name,
                             'stock' => $item->stock,
                             'total_sold' => $sold,
                             'sell_rate_percent' => $item->stock > 0
@@ -435,6 +446,7 @@ class StatisticsController extends Controller
                     }),
                 ];
             });
+
 
         // Tổng toàn shop
         $totalStockAll = $products->sum('total_stock');
