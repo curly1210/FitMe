@@ -98,6 +98,7 @@ Route::get('/admin/statistics/customers', [StatisticsController::class, 'custome
 Route::get('/admin/statistics/products', [StatisticsController::class, 'productStatistics']);
 Route::get('/admin/statistics/orderLocation', [StatisticsController::class, 'orderByLocation']);
 Route::get('admin/statistics/inventory', [StatisticsController::class, 'inventoryStatistics']);
+Route::get('admin/statistics/reviews', [StatisticsController::class, 'reviewStatistics']);
 
 
 
