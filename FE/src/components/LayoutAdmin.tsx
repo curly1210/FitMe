@@ -34,23 +34,27 @@ function getItem(
 }
 
 const itemsNavigate: MenuItem[] = [
-  getItem("Dashboard", "sub1", <InboxOutlined />, [
-    getItem(<Link to="/admin">Tổng quan</Link>, "1", <PieChartOutlined />),
-    getItem(
-      <Link to="/admin/dashboard/user">Thống kê khách hàng</Link>,
-      "2",
-      <UserOutlined />
-    ),
-  ]),
+
+  getItem(
+    "Dashboard",
+    "sub1",
+   <PieChartOutlined />,
+    [
+         getItem(<Link to="/admin">Tổng quan</Link>, "1" ),
+         getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "2"),
+          getItem(<Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>, "3"),
+    ]
+  ),
+ 
 
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
-    "3",
+    "4",
     <PictureOutlined />
   ),
   getItem(
     <Link to="/admin/category">Quản lý danh mục</Link>,
-    "4",
+    "5",
     <UnorderedListOutlined />
   ),
   getItem(
@@ -58,36 +62,34 @@ const itemsNavigate: MenuItem[] = [
     "sub2",
     <InboxOutlined />,
     [
-      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "5"),
-      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "6"),
+      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "6"),
+      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "7"),
     ]
 
     // <InboxOutlined />
   ),
   getItem(
     <Link to="/admin/bienthe">Quản lý biến thể</Link>,
-    "7",
+    "8",
     <ProductOutlined />
   ),
-  getItem(
-    <Link to="/admin/oders">Quản lý đơn hàng</Link>,
-    "8",
-    <ShoppingOutlined />
-  ),
+
+  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "9", <ShoppingOutlined />),
+  
 
   getItem(
     <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
-    "9",
+    "10",
     <PercentageOutlined />
   ),
   getItem(
     <Link to="/admin/users">Quản lý khách hàng</Link>,
-    "10",
+    "11",
     <UserOutlined />
   ),
   getItem(
     <Link to="/admin/posts">Quản lý tin tức</Link>,
-    "11",
+    "12",
     <UserOutlined />
   ),
 
