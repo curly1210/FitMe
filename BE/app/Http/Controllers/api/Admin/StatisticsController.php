@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\Product;
 use Carbon\CarbonPeriod;
 use App\Models\ProductItem;
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\OverviewStatisticResource;
 use App\Http\Resources\Admin\CustomerStatisticsResource;
-use App\Http\Resources\Admin\ProductStatisticsResource as AdminProductStatisticsResource;
 use App\Http\Resourcesư\Admin\ProductStatisticsResource;
+use App\Http\Resources\Admin\ProductStatisticsResource as AdminProductStatisticsResource;
 
 class StatisticsController extends Controller
 {
@@ -466,6 +467,72 @@ class StatisticsController extends Controller
             'inventory_by_product' => $products,
         ]);
     }
+
+
+    public function reviewStatistics(Request $request)
+    {
+        $sortBy = $request->input('sort_by', 'count'); 
+        $star = $request->input('rating'); 
+
+        $ratingCounts = Review::select(
+            DB::raw('FLOOR(rate) as rounded_rate'),
+            DB::raw('COUNT(*) as count')
+        )
+            ->groupBy('rounded_rate')
+            ->pluck('count', 'rounded_rate')
+            ->toArray();
+
+        $totalReviews = array_sum($ratingCounts);
+        $ratingPercentages = [];
+
+        foreach (range(5, 1) as $s) {
+            $count = $ratingCounts[$s] ?? 0;
+            $ratingPercentages[$s] = $totalReviews > 0
+                ? round(($count / $totalReviews) * 100, 2)
+                : 0;
+        }
+
+        $products = Product::with(['productItems.reviews.reviewImages'])
+            ->get()
+            ->map(function ($product) {
+                $allReviews = $product->productItems->flatMap->reviews;
+                $avgRating = $allReviews->count() > 0 ? round($allReviews->avg('rate'), 2) : null;
+                $firstImage = $allReviews->flatMap->reviewImages->pluck('url')->first();
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'reviews_count' => $allReviews->count(),
+                    'average_rating' => $avgRating,
+                    'review_image' => $firstImage,
+                ];
+            })
+            ->filter(function ($product) use ($star) {
+                if ($star === null)
+                    return true;
+
+                $rating = (int) $star;
+                return $product['average_rating'] !== null
+                    && $product['average_rating'] >= $rating
+                    && $product['average_rating'] < $rating + 1;
+            })
+            ->values();
+
+        if ($sortBy === 'rate') {
+            $products = $products->sortByDesc('average_rating')->values();
+        } else {
+            $products = $products->sortByDesc('reviews_count')->values();
+        }
+
+        return response()->json([
+            'rating_percent' => $ratingPercentages,
+            'filter_products' => $products,
+        ]);
+    }
+
+
+
+
 
 
 
