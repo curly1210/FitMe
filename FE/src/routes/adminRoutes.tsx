@@ -14,6 +14,7 @@ import Oder from "../pages/admin/Oder/indext";
 import PostList from "../pages/admin/Tintuc";
 import DashboardUser from "../pages/admin/Dashboard/thongKeKhachHang";
 import DashboardProduct from "../pages/admin/Dashboard/thongKeSanPhamDonHang";
+import { InventoryPage } from "../pages/admin/Dashboard/thongKeTonKho";
 
 
 export const adminRoutes = [
@@ -35,6 +36,10 @@ export const adminRoutes = [
           {
             path: "dashboard/product",
             element: <DashboardProduct />,
+          },
+          {
+            path: "dashboard/tonkho",
+            element: <InventoryPage />,
           },
           {
             path: "banner",
