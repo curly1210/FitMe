@@ -13,6 +13,7 @@ import CouponsList from "../pages/admin/Khuyenmai/indext";
 import Oder from "../pages/admin/Oder/indext";
 import PostList from "../pages/admin/Tintuc";
 import DashboardUser from "../pages/admin/Dashboard/thongKeKhachHang";
+import DashboardProduct from "../pages/admin/Dashboard/thongKeSanPhamDonHang";
 
 
 export const adminRoutes = [
@@ -30,6 +31,10 @@ export const adminRoutes = [
           {
             path: "dashboard/user",
             element: <DashboardUser />,
+          },
+          {
+            path: "dashboard/product",
+            element: <DashboardProduct />,
           },
           {
             path: "banner",
