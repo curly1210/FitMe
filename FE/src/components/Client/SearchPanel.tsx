@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseOutlined } from "@ant-design/icons";
 
-import { Spin } from "antd";
+import { Spin, Tooltip } from "antd";
 import HeaderClient from "./HeaderClient";
 import { useSearchPanel } from "../../hooks/useSearchPanel";
 import { useList } from "@refinedev/core";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { GiClothes } from "react-icons/gi";
+import ModalLogin from "../Modal/ModalLogin";
+import { useAuthen } from "../../hooks/useAuthen";
+import { useModal } from "../../hooks/useModal";
 
 const stripHtml = (html: string) => {
   const div = document.createElement("div");
@@ -20,6 +24,20 @@ const SearchPanel = () => {
   const { data, isLoading } = useList({
     resource: "client/posts",
   });
+
+  const navigate = useNavigate();
+  const { accessToken } = useAuthen();
+  const { openModal } = useModal();
+
+  const handleClickToTryClothesPage = () => {
+    if (!accessToken) {
+      openModal(<ModalLogin />);
+      return;
+    }
+    if (location.pathname === "/try-clothes") return;
+
+    navigate("/try-clothes");
+  };
 
   const newsList = data?.data?.slice(0, 4) ?? [];
 
@@ -61,7 +79,9 @@ const SearchPanel = () => {
               </div>
 
               <div className="mt-6 pb-8 border-b border-gray-200">
-                <h2 className="text-xl font-bold mb-5">Các bộ sưu tập của Fitme</h2>
+                <h2 className="text-xl font-bold mb-5">
+                  Các bộ sưu tập của Fitme
+                </h2>
                 <div className="flex items-start gap-[22px]">
                   <div className="overflow-hidden">
                     <div className="cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
@@ -107,33 +127,33 @@ const SearchPanel = () => {
                 {isLoading ? (
                   <Spin size="large" />
                 ) : (
-           <div className="flex flex-nowrap gap-[22px] overflow-x-auto">
-                 {newsList.map((item: any) => (
-  <Link
-    to={`/post/${item.slug}`}
-    key={item.id}
-    className="overflow-hidden w-[298px]"
-  >
-    <div className="flex flex-col gap-[9px] cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
-      <div className="h-[198px]">
-        <img
-          src={item.thumbnail}
-          alt={item.title}
-          className="object-cover block h-full w-full"
-        />
-      </div>
-      <p className="font-semibold text-sm text-[#8C8C8C]">
-        {item.created_at}
-      </p>
-      <p className="line-clamp-2 font-semibold text-ellipsis text-justify leading-5">
-        {item.title}
-      </p>
-      <p className="line-clamp-2 text-[#8C8C8C] text-sm text-ellipsis text-justify leading-5">
-        {stripHtml(item.content)}
-      </p>
-    </div>
-  </Link>
-))}
+                  <div className="flex flex-nowrap gap-[22px] overflow-x-auto">
+                    {newsList.map((item: any) => (
+                      <Link
+                        to={`/post/${item.slug}`}
+                        key={item.id}
+                        className="overflow-hidden w-[298px]"
+                      >
+                        <div className="flex flex-col gap-[9px] cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
+                          <div className="h-[198px]">
+                            <img
+                              src={item.thumbnail}
+                              alt={item.title}
+                              className="object-cover block h-full w-full"
+                            />
+                          </div>
+                          <p className="font-semibold text-sm text-[#8C8C8C]">
+                            {item.created_at}
+                          </p>
+                          <p className="line-clamp-2 font-semibold text-ellipsis text-justify leading-5">
+                            {item.title}
+                          </p>
+                          <p className="line-clamp-2 text-[#8C8C8C] text-sm text-ellipsis text-justify leading-5">
+                            {stripHtml(item.content)}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
@@ -198,11 +218,19 @@ const SearchPanel = () => {
               />
               <button
                 onClick={() => setIsOpenSearchPanel(false)}
-                className="bg-black text-white rounded-full w-10 h-10 flex items-center justify-center mb-3"
+                className="bg-black cursor-pointer text-white rounded-full w-10 h-10 flex items-center justify-center mb-3"
               >
                 <CloseOutlined />
               </button>
             </footer>
+            <Tooltip placement="top" title={"Phòng thử đồ"}>
+              <button
+                onClick={() => handleClickToTryClothesPage()}
+                className="fixed cursor-pointer bottom-6 right-5 z-30 bg-white border border-gray-400 shadow-lg rounded-full w-12 h-12 flex items-center justify-center"
+              >
+                <GiClothes className="text-3xl" />
+              </button>
+            </Tooltip>
           </>
         )}
       </div>
