@@ -34,16 +34,15 @@ function getItem(
 }
 
 const itemsNavigate: MenuItem[] = [
-  getItem(
-    "Dashboard",
-    "sub1",
-    <InboxOutlined/>,
-    [
-         getItem(<Link to="/admin">Tổng quan</Link>, "1", <PieChartOutlined />),
-         getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "2", <UserOutlined />),
-    ]
-  ),
- 
+  getItem("Dashboard", "sub1", <InboxOutlined />, [
+    getItem(<Link to="/admin">Tổng quan</Link>, "1", <PieChartOutlined />),
+    getItem(
+      <Link to="/admin/dashboard/user">Thống kê khách hàng</Link>,
+      "2",
+      <UserOutlined />
+    ),
+  ]),
+
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
     "3",
@@ -70,8 +69,12 @@ const itemsNavigate: MenuItem[] = [
     "7",
     <ProductOutlined />
   ),
-  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "8", <ShoppingOutlined />),
-  
+  getItem(
+    <Link to="/admin/oders">Quản lý đơn hàng</Link>,
+    "8",
+    <ShoppingOutlined />
+  ),
+
   getItem(
     <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
     "9",
@@ -87,7 +90,6 @@ const itemsNavigate: MenuItem[] = [
     "11",
     <UserOutlined />
   ),
-
 
   // getItem("Team", "sub2", <TeamOutlined />, [
   //   getItem("Team 1", "6"),
@@ -116,18 +118,26 @@ const LayoutAdmin = () => {
     switch (path) {
       case "/admin":
         return "1";
-      case "/admin/banner":
+      case "/admin/dashboard/user":
         return "2";
-      case "/admin/category":
+      case "/admin/banner":
         return "3";
-      case "/admin/products":
+      case "/admin/category":
         return "4";
-      case "/admin/products/trash":
+      case "/admin/products":
         return "5";
-      case "/admin/bienthe":
+      case "/admin/products/trash":
         return "6";
-      case "/admin/users":
+      case "/admin/bienthe":
+        return "7";
+      case "/admin/oders":
+        return "8";
+      case "/admin/coupons":
         return "9";
+      case "/admin/users":
+        return "10";
+      case "/admin/posts":
+        return "11";
       default:
         return "";
     }
