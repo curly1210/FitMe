@@ -98,6 +98,9 @@ class OrderController extends Controller
             $order->success_at = null;
         }
         if ($newStatus === 7 && $order->status_order_id != 7) {
+            if ($order->payment_method == "vnpay") {
+                $order->update(['status_payment' => 2]); # Chờ hoàn tiền
+            }
             foreach ($order->orderDetails as $detail) {
                 ProductItem::where('id', $detail->product_item_id)
                     ->increment('stock', $detail->quantity);

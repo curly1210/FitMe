@@ -34,6 +34,7 @@ function getItem(
 }
 
 const itemsNavigate: MenuItem[] = [
+
   getItem(
     "Dashboard",
     "sub1",
@@ -45,6 +46,7 @@ const itemsNavigate: MenuItem[] = [
     ]
   ),
  
+
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
     "4",
@@ -71,8 +73,10 @@ const itemsNavigate: MenuItem[] = [
     "8",
     <ProductOutlined />
   ),
+
   getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "9", <ShoppingOutlined />),
   
+
   getItem(
     <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
     "10",
@@ -88,7 +92,6 @@ const itemsNavigate: MenuItem[] = [
     "12",
     <UserOutlined />
   ),
-
 
   // getItem("Team", "sub2", <TeamOutlined />, [
   //   getItem("Team 1", "6"),
@@ -117,18 +120,26 @@ const LayoutAdmin = () => {
     switch (path) {
       case "/admin":
         return "1";
-      case "/admin/banner":
+      case "/admin/dashboard/user":
         return "2";
-      case "/admin/category":
+      case "/admin/banner":
         return "3";
-      case "/admin/products":
+      case "/admin/category":
         return "4";
-      case "/admin/products/trash":
+      case "/admin/products":
         return "5";
-      case "/admin/bienthe":
+      case "/admin/products/trash":
         return "6";
-      case "/admin/users":
+      case "/admin/bienthe":
+        return "7";
+      case "/admin/oders":
+        return "8";
+      case "/admin/coupons":
         return "9";
+      case "/admin/users":
+        return "10";
+      case "/admin/posts":
+        return "11";
       default:
         return "";
     }
