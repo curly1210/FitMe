@@ -196,7 +196,9 @@ class OrderController extends Controller
                 DB::transaction(function () use ($order) {
                     // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (7)
                     $order->update(['status_order_id' => 7]);
-
+                    if ($order->payment_method == "vnpay") {
+                        $order->update(['status_payment' => 2]); # Chờ hoàn tiền
+                    }
                     foreach ($order->orderDetails as $orderDetail) {
                         $productItem = $orderDetail->productItem;
                         if ($productItem) {
