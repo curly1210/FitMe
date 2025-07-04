@@ -46,7 +46,7 @@ class CouponController extends Controller
             $validate = Validator::make($request->only(['name', 'type' ,'code', 'value', 'time_start', 'time_end', 'min_price_order', 'max_price_discount', 'limit_use']), [
                 'name' => 'required|string|max:50',
                 'code' => 'required|string|max:50|unique:coupons,code',
-                'type' => 'required|string|in:percentage,fixed,free_shipping', // Loại mã: phần trăm hoặc cố định
+                'type' => 'required|string|in:percentage,fixed', // Loại mã: phần trăm hoặc cố định
                 'value' => 'required|integer|min:0',
                 'time_start' => 'required|date|after:now',
                 'time_end' => 'nullable|date|after:time_start',
@@ -61,7 +61,7 @@ class CouponController extends Controller
                 'code.max' => 'Phiếu giảm giá không được vượt quá 50 ký tự.',
                 'code.unique' => 'Phiếu giảm giá đã tồn tại.',
                 'type.required' => 'Loại phiếu giảm giá là bắt buộc.',
-                'type.in' => 'Loại phiếu giảm giá phải là percentage hoặc fixed hoặc free_shipping.',
+                'type.in' => 'Loại phiếu giảm giá phải là percentage hoặc fixed.',
                 'value.required' => 'Giá trị giảm giá là bắt buộc.',
                 'value.integer' => 'Giá trị giảm giá phải là số nguyên.',
                 'value.min' => 'Giá trị giảm giá không được nhỏ hơn 0.',
@@ -118,14 +118,14 @@ class CouponController extends Controller
 
             $validate = Validator::make($request->only(['name', 'type' ,'time_start', 'time_end', 'limit_use']), [
                 'name' => 'required|string|max:50',
-                'type' => 'required|string|in:percentage,fixed,free_shipping',
+                'type' => 'required|string|in:percentage,fixed',
                 'time_end' => 'nullable|date|after:time_start',
                 'limit_use' => 'required|integer|min:0',
             ], [
                 'name.required' => 'Tên phiếu giảm giá là bắt buộc.',
                 'name.max' => 'Tên phiếu giảm giá không được vượt quá 50 ký tự.',
                 'type.required' => 'Loại phiếu giảm giá là bắt buộc.',
-                'type.in' => 'Loại phiếu giảm giá phải là percentage hoặc fixed hoặc free_shipping.',
+                'type.in' => 'Loại phiếu giảm giá phải là percentage hoặc fixed.',
                 'time_end.date' => 'Thời gian kết thúc không hợp lệ.',
                 'time_end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
 
