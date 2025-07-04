@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Drawer,
@@ -7,18 +7,23 @@ import {
   DatePicker,
   notification,
   Form,
-  // Switch,
+  Select,
 } from "antd";
 import { useCreate } from "@refinedev/core";
 
 interface AddCouponProps {
   visible: boolean;
   onClose: () => void;
-  onSuccessCreate?: () => void; // ✅ callback từ component cha để reload danh sách
+  onSuccessCreate?: () => void;
 }
 
-const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate }) => {
+const AddCoupon: React.FC<AddCouponProps> = ({
+  visible,
+  onClose,
+  onSuccessCreate,
+}) => {
   const [form] = Form.useForm();
+  const [type, setType] = useState("percentage");
   const { mutate: createCoupon } = useCreate();
 
   const handleAdd = (values: any) => {
@@ -29,6 +34,7 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate
           name: values.name,
           code: values.code,
           value: values.value,
+          type: values.type,
           time_start: values.time_start?.format("YYYY-MM-DD HH:mm:ss"),
           time_end: values.time_end?.format("YYYY-MM-DD HH:mm:ss") || null,
           min_price_order: values.min_price_order,
@@ -45,7 +51,7 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate
           });
           form.resetFields();
           onClose();
-          onSuccessCreate?.(); // ✅ gọi callback để reload danh sách ở component cha
+          onSuccessCreate?.();
         },
         onError: (error: any) => {
           const response = error?.response?.data;
@@ -75,7 +81,12 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate
       open={visible}
       destroyOnClose
     >
-      <Form form={form} onFinish={handleAdd} layout="vertical">
+      <Form
+        form={form}
+        onFinish={handleAdd}
+        layout="vertical"
+        initialValues={{ type }}
+      >
         <Form.Item
           label="Tên chương trình"
           name="name"
@@ -93,15 +104,33 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate
         </Form.Item>
 
         <Form.Item
-          label="Giá trị (%)"
+          label="Loại giảm"
+          name="type"
+          rules={[{ required: true, message: "Vui lòng chọn loại giảm!" }]}
+        >
+          <Select
+            options={[
+              { label: "Phần trăm (%)", value: "percentage" },
+              { label: "Số tiền (VND)", value: "fixed" },
+             
+            ]}
+            onChange={(val) => setType(val)}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Giá trị giảm"
           name="value"
-          rules={[{ required: true, message: "Vui lòng nhập giá trị khuyến mãi!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập giá trị!" }]}
         >
           <InputNumber
             style={{ width: "100%" }}
             min={0}
-            max={100}
-            placeholder="Nhập giá trị (%)"
+            max={type === "percentage" ? 100 : undefined}
+            addonAfter={type === "percentage" ? "%" : "VND"}
+            placeholder={
+              type === "percentage" ? "Nhập phần trăm giảm" : "Nhập số tiền giảm"
+            }
           />
         </Form.Item>
 
@@ -162,12 +191,6 @@ const AddCoupon: React.FC<AddCouponProps> = ({ visible, onClose, onSuccessCreate
             placeholder="Nhập số lần sử dụng"
           />
         </Form.Item>
-
-        {/* 
-        <Form.Item label="Trạng thái" name="is_active" valuePropName="checked">
-          <Switch checkedChildren="Đang hoạt động" unCheckedChildren="Tạm ngừng" />
-        </Form.Item>
-        */}
 
         <div className="mt-4">
           <Button onClick={onClose} style={{ marginRight: 8 }}>
