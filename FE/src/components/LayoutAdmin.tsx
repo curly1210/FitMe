@@ -44,6 +44,7 @@ const itemsNavigate: MenuItem[] = [
          getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "2"),
           getItem(<Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>, "3"),
            getItem(<Link to="/admin/dashboard/tonkho">Thống kê tồn kho</Link>, "13"),
+            getItem(<Link to="/admin/dashboard/danhgia">Thống kê đánh giá</Link>, "14"),
     ]
   ),
  
