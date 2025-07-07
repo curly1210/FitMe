@@ -179,14 +179,21 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
+        // return response()->json([
+        //     'id' => $id
+        // ], 501);
         try {
             $order = Order::findOrFail($id);
             $user = auth('api')->user();
+            // return response()->json([
+            //     'user' => $user
+            // ], 501);
 
             // Kiểm tra quyền sở hữu đơn hàng
             if ($order->user_id !== $user->id) {
                 return $this->error('Bạn không có quyền chỉnh sửa đơn hàng này.', [], 403);
             }
+
 
             $currentStatus = $order->status_order_id;
             // $newStatus = $request->input('status_order_id');
@@ -229,6 +236,7 @@ class OrderController extends Controller
     {
         try {
             $user = auth('api')->user();
+
             $order = Order::with([
                 'orderDetails' => function ($query) {
                     $query->with([

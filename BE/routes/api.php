@@ -78,7 +78,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::post('/orders/redem', [OrderController::class, 'redem']);
 Route::post('/orders/checkout', [OrderController::class, 'store']);
 Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders/{id}', [OrderController::class, 'update']);
+// Route::post('/orders/{id}', [OrderController::class, 'update']);
 Route::patch('/orders/{id}', [OrderController::class, 'update']);
 Route::get('/orders/{id}', [OrderController::class, 'show']);
 

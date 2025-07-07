@@ -1,17 +1,17 @@
-import { CrudFilters, useList, useUpdate } from "@refinedev/core";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { CrudFilters, useCreate, useList, useUpdate } from "@refinedev/core";
 import {
   Button,
-  Col,
   Dropdown,
-  Input,
   Menu,
-  Row,
   Select,
   Space,
   Table,
   DatePicker,
   notification,
   Popconfirm,
+  Spin,
 } from "antd";
 import { useState } from "react";
 import OrderDetailDrawer from "./oderDetail";
@@ -76,8 +76,46 @@ const Oder = () => {
     meta: { _start, _end },
   });
 
+  const { mutate: mutateRefund, isLoading: isLoadingRefund } = useCreate();
+
+  const onHandleRefund = (order_code: any) => {
+    // console.log(order_code);
+    mutateRefund(
+      {
+        resource: "vnpay/refund",
+        values: { order_code },
+      },
+      {
+        onSuccess: (_response: any) => {
+          refetch();
+          console.log("Thành công");
+          notification.success({
+            message: "Hoàn tiền thành công",
+          });
+        },
+        onError: (_error: any) => {
+          console.log("Thất bại");
+          const errorMessage = "Hoàn tiền thất bại";
+          notification.error({
+            message: errorMessage,
+          });
+        },
+      }
+    );
+    // if (!selectedOrderId) return;
+  };
+
   const renderAdminActionButtons = (record: any) => {
-    const status = record.status_order?.label;
+    // const statusPayment = record?.status_payment === 2 ? "Chờ hoàn tiền" : "";
+    // console.log(statusPayment);
+
+    // console.log(record);
+    // console.log("sdsds");
+    const status =
+      record?.status_payment === 2
+        ? "Chờ hoàn tiền"
+        : record.status_order?.label;
+
     const orderId = record.id;
     const handleUpdateStatus = (
       newStatus: number,
@@ -118,93 +156,68 @@ const Oder = () => {
       case "Chờ xác nhận":
         return (
           <Popconfirm
-           
-               onConfirm={() =>
-                handleUpdateStatus(
-                  STATUS_MAP["Đang chuẩn bị hàng"],
-                  "Đang chuẩn bị hàng",
-                  "success"
-                )
-              }
+            onConfirm={() =>
+              handleUpdateStatus(
+                STATUS_MAP["Đang chuẩn bị hàng"],
+                "Đang chuẩn bị hàng",
+                "success"
+              )
+            }
             title="Cập nhật trạng thái"
             description="Bạn có muốn xác nhận không?"
             okText="Có"
             cancelText="Không"
           >
-            <Button
-              type="primary"
-          
-            >
-              Xác nhận
-            </Button>
+            <Button type="primary">Xác nhận</Button>
           </Popconfirm>
         );
       case "Đang chuẩn bị hàng":
         return (
           <Popconfirm
-              onConfirm={() =>
-                handleUpdateStatus(
-                  STATUS_MAP["Đang giao hàng"],
-                  "Đang giao hàng",
-                  "success"
-                )
-              }
+            onConfirm={() =>
+              handleUpdateStatus(
+                STATUS_MAP["Đang giao hàng"],
+                "Đang giao hàng",
+                "success"
+              )
+            }
             title="Cập nhật trạng thái"
             description="Bạn có muốn xác nhận không?"
             okText="Có"
             cancelText="Không"
           >
-            <Button
-              type="primary"
-          
-            >
-              Đang giao hàng
-            </Button>
+            <Button type="primary">Đang giao hàng</Button>
           </Popconfirm>
         );
       case "Đang giao hàng":
         return (
           <Space>
             <Popconfirm
-                onConfirm={() =>
-                  handleUpdateStatus(
-                    STATUS_MAP["Đã giao"],
-                    "Đã giao",
-                    "success"
-                  )
-                }
+              onConfirm={() =>
+                handleUpdateStatus(STATUS_MAP["Đã giao"], "Đã giao", "success")
+              }
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
               okText="Có"
               cancelText="Không"
             >
-              <Button
-                type="primary"
-            
-              >
-                Đã giao
-              </Button>
+              <Button type="primary">Đã giao</Button>
             </Popconfirm>
 
             <Popconfirm
-               onConfirm={() =>
-                  handleUpdateStatus(
-                    STATUS_MAP["Giao hàng thất bại"],
-                    "Giao hàng thất bại",
-                    "error"
-                  )
-                }
+              onConfirm={() =>
+                handleUpdateStatus(
+                  STATUS_MAP["Giao hàng thất bại"],
+                  "Giao hàng thất bại",
+                  "error"
+                )
+              }
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
               okText="Có"
               cancelText="Không"
             >
-              <Button
-                danger
-             
-              >
-                Giao hàng thất bại
-              </Button>
+              <Button danger>Giao hàng thất bại</Button>
             </Popconfirm>
           </Space>
         );
@@ -212,42 +225,44 @@ const Oder = () => {
         return (
           <Space>
             <Popconfirm
-                onConfirm={() =>
-                  handleUpdateStatus(
-                    STATUS_MAP["Đang giao hàng"],
-                    "Đang giao lại",
-                    "success"
-                  )
-                }
+              onConfirm={() =>
+                handleUpdateStatus(
+                  STATUS_MAP["Đang giao hàng"],
+                  "Đang giao lại",
+                  "success"
+                )
+              }
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
               okText="Có"
               cancelText="Không"
             >
-              <Button
-                type="primary"
-            
-              >
-                Đang giao
-              </Button>
+              <Button type="primary">Đang giao</Button>
             </Popconfirm>
             <Popconfirm
-               onConfirm={() =>
-                  handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success")
-                }
+              onConfirm={() =>
+                handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success")
+              }
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
               okText="Có"
               cancelText="Không"
             >
-              <Button
-                danger
-             
-              >
-                Hủy đơn hàng
-              </Button>
+              <Button danger>Hủy đơn hàng</Button>
             </Popconfirm>
           </Space>
+        );
+      case "Chờ hoàn tiền":
+        return (
+          <Popconfirm
+            onConfirm={() => onHandleRefund(record?.orders_code)}
+            title="Cập nhật trạng thái"
+            description="Bạn có muốn xác nhận hoàn tiền không?"
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button type="primary">Hoàn tiền</Button>
+          </Popconfirm>
         );
       default:
         return null;
@@ -280,6 +295,12 @@ const Oder = () => {
       dataIndex: "status_payment",
       key: "status_payment",
       render: (value: any) => {
+        if (value === 3 || value === "Đã hoàn tiền") {
+          return <span style={{ color: "green" }}>Đã hoàn tiền</span>;
+        }
+        if (value === 2 || value === "Chờ hoàn tiền") {
+          return <span style={{ color: "orange" }}>Chờ hoàn tiền</span>;
+        }
         if (value === 1 || value === "Đã thanh toán") {
           return <span style={{ color: "green" }}>Đã thanh toán</span>;
         }
@@ -290,7 +311,7 @@ const Oder = () => {
       },
     },
     {
-      title: "Trạng thái",
+      title: "Cập nhật trạng trạng thái",
       key: "action",
       render: (_: any, record: any) => renderAdminActionButtons(record),
     },
@@ -335,7 +356,7 @@ const Oder = () => {
           size="middle"
           className="!h-8 [&_.ant-picker]:!h-8 [&_.ant-picker-input>input]:!h-8"
           format="YYYY-MM-DD"
-          onChange={(dates, dateStrings) => {
+          onChange={(_dates, dateStrings) => {
             if (dateStrings[0] && dateStrings[1]) {
               setDateRange([dateStrings[0], dateStrings[1]]);
               setCurrent(1);
@@ -411,6 +432,16 @@ const Oder = () => {
         }}
         orderId={selectedOrderId}
       />
+
+      {isLoadingRefund ? (
+        <Spin
+          className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+          style={{ textAlign: "center" }}
+          size="large"
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
