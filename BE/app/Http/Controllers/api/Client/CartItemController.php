@@ -22,6 +22,9 @@ class CartItemController extends Controller
     {
         try {
             $user = auth('api')->user();
+            // return response()->json([
+            //     'user' => $user
+            // ], 501);
             $cartItems = CartItem::with([
                 // Load quan hệ với điều kiện is_active = 1 cho tất cả các bảng
                 'productItem' => function ($query) {

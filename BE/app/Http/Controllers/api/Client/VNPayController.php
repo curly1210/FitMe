@@ -341,6 +341,7 @@ class VNPayController extends Controller
             if ($ispTxn["vnp_ResponseCode"] == "00") {
 
                 $order->update(["status_payment" => 3]); # Đã hoàn tiền
+
                 return response()->json(["message" => "Hoàn tiền thành công"]);
             } else {
                 return response()->json(["message" => "Hoàn tiền thất bại", "response_code" => $ispTxn["vnp_ResponseCode"]], 400);
