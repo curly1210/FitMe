@@ -146,7 +146,7 @@ const DashboardProduct = () => {
               style={{ marginBottom: 24 }}
             >
               <Col>
-                <Title level={4}>Bản đồ thống kê đơn hàng(Chưa lấy được dữ liệu)</Title>
+                <Title level={4}>Bản đồ thống kê đơn hàng</Title>
               </Col>
               <Col>
                 <Space>
@@ -168,9 +168,13 @@ const DashboardProduct = () => {
                     placeholder="Trạng thái đơn hàng"
                     onChange={(value) => setStatusOrderId(value)}
                   >
-                    <Select.Option value={1}>Chờ xử lý</Select.Option>
-                    <Select.Option value={2}>Đã giao</Select.Option>
-                    <Select.Option value={3}>Đã huỷ</Select.Option>
+                    <Select.Option value={1}>Chờ xác nhận</Select.Option>
+                    <Select.Option value={2}>Đang chuẩn bị hàng</Select.Option>
+                    <Select.Option value={3}>Đang giao hàng</Select.Option>
+                    <Select.Option value={4}>Đã giao hàng</Select.Option>
+                    <Select.Option value={5}>Giao hàng thất bại</Select.Option>
+                    <Select.Option value={6}>Hoàn thành</Select.Option>
+                    <Select.Option value={7}>Đã huỷ</Select.Option>
                   </Select>
                 </Space>
               </Col>
