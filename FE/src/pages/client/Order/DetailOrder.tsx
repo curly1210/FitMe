@@ -105,7 +105,31 @@ const DetailOrder = () => {
                   </div>
                 )}
                 <p>
-                  {order?.status_payment ? (
+                  <Tag
+                    className="!font-bold"
+                    color={
+                      order?.status_payment === 0
+                        ? "warning"
+                        : order?.status_payment === 1
+                        ? "success"
+                        : order?.status_payment === 2
+                        ? "processing"
+                        : order?.status_payment === 3
+                        ? "success"
+                        : "default"
+                    }
+                  >
+                    {order?.status_payment === 0
+                      ? "Chưa thanh toán"
+                      : order?.status_payment === 1
+                      ? "Đã thanh toán"
+                      : order?.status_payment === 2
+                      ? "Chờ hoàn tiền"
+                      : order?.status_payment === 3
+                      ? "Đã hoàn tiền"
+                      : "Không xác định"}
+                  </Tag>
+                  {/* {order?.status_payment ? (
                     <Tag className="!font-bold" color="success">
                       Đã thanh toán
                     </Tag>
@@ -113,7 +137,7 @@ const DetailOrder = () => {
                     <Tag className="!font-bold" color="warning">
                       Chưa thanh toán
                     </Tag>
-                  )}
+                  )} */}
                 </p>
               </div>
             </div>

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  AreaChartOutlined,
   DownOutlined,
   InboxOutlined,
   PercentageOutlined,
@@ -34,27 +35,25 @@ function getItem(
 }
 
 const itemsNavigate: MenuItem[] = [
-
-  getItem(
-    "Dashboard",
-    "sub1",
-   <PieChartOutlined />,
-    [
-         getItem(<Link to="/admin">Tổng quan</Link>, "1" ),
-         getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "2"),
-          getItem(<Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>, "3"),
-    ]
-  ),
- 
+  getItem(<Link to="/admin">Tổng quan</Link>, "1", <AreaChartOutlined />),
+  getItem("Thống kê", "sub1", <PieChartOutlined />, [
+    getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "11"),
+    getItem(
+      <Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>,
+      "12"
+    ),
+    getItem(<Link to="/admin/dashboard/tonkho">Thống kê tồn kho</Link>, "13"),
+    getItem(<Link to="/admin/dashboard/danhgia">Thống kê đánh giá</Link>, "14"),
+  ]),
 
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
-    "4",
+    "2",
     <PictureOutlined />
   ),
   getItem(
     <Link to="/admin/category">Quản lý danh mục</Link>,
-    "5",
+    "3",
     <UnorderedListOutlined />
   ),
   getItem(
@@ -62,42 +61,39 @@ const itemsNavigate: MenuItem[] = [
     "sub2",
     <InboxOutlined />,
     [
-      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "6"),
-      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "7"),
+      getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "4"),
+      getItem(<Link to="/admin/products/trash">Thùng rác</Link>, "5"),
     ]
 
     // <InboxOutlined />
   ),
   getItem(
     <Link to="/admin/bienthe">Quản lý biến thể</Link>,
-    "8",
+    "6",
     <ProductOutlined />
   ),
 
-  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "9", <ShoppingOutlined />),
-  
+  getItem(
+    <Link to="/admin/oders">Quản lý đơn hàng</Link>,
+    "7",
+    <ShoppingOutlined />
+  ),
 
   getItem(
     <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
-    "10",
+    "8",
     <PercentageOutlined />
   ),
   getItem(
     <Link to="/admin/users">Quản lý khách hàng</Link>,
-    "11",
+    "9",
     <UserOutlined />
   ),
   getItem(
     <Link to="/admin/posts">Quản lý tin tức</Link>,
-    "12",
+    "10",
     <UserOutlined />
   ),
-
-  // getItem("Team", "sub2", <TeamOutlined />, [
-  //   getItem("Team 1", "6"),
-  //   getItem("Team 2", "8"),
-  // ]),
-  // getItem("Files", "9", <FileOutlined />),
 ];
 
 const siderStyle: React.CSSProperties = {
@@ -120,26 +116,32 @@ const LayoutAdmin = () => {
     switch (path) {
       case "/admin":
         return "1";
-      case "/admin/dashboard/user":
-        return "2";
       case "/admin/banner":
-        return "3";
+        return "2";
       case "/admin/category":
-        return "4";
+        return "3";
       case "/admin/products":
-        return "5";
+        return "4";
       case "/admin/products/trash":
-        return "6";
+        return "5";
       case "/admin/bienthe":
-        return "7";
+        return "6";
       case "/admin/oders":
-        return "8";
+        return "7";
       case "/admin/coupons":
-        return "9";
+        return "8";
       case "/admin/users":
-        return "10";
+        return "9";
       case "/admin/posts":
+        return "10";
+      case "/admin/dashboard/user":
         return "11";
+      case "/admin/dashboard/product":
+        return "12";
+      case "/admin/dashboard/tonkho":
+        return "13";
+      case "/admin/dashboard/danhgia":
+        return "14";
       default:
         return "";
     }

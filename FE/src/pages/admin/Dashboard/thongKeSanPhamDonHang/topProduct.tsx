@@ -75,13 +75,29 @@ const TopSellingProductsTable = ({ products }: { products: ProductItem[] }) => {
     {
       title: "Màu",
       dataIndex: ["product_item", "color"],
-      key: "color_id",
+      key: "color",
       align: "center" as const,
+      render: (colorCode: string) => {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+        <span
+          style={{
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            backgroundColor: colorCode,
+            border: "1px solid #ccc",
+          }}
+        />
+        <span style={{ fontSize: 12, color: "#555" }}>{colorCode}</span>
+      </div>
+    );
+  },
     },
     {
       title: "Size",
       dataIndex: ["product_item", "size"],
-      key: "size_id",
+      key: "size",
       align: "center" as const,
     },
     {

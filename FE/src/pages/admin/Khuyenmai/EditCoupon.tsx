@@ -7,6 +7,7 @@ import {
   DatePicker,
   Button,
   notification,
+  Select,
 } from 'antd';
 import { useUpdate } from '@refinedev/core';
 import dayjs from 'dayjs';
@@ -31,13 +32,16 @@ const EditCoupon: React.FC<EditCouponProps> = ({
 }) => {
   const [form] = Form.useForm();
   const { mutate: updateCoupon } = useUpdate();
+  const [type, setType] = useState<string>('percentage');
 
   useEffect(() => {
     if (couponData) {
+      setType(couponData.type || 'percentage');
       form.setFieldsValue({
         name: couponData.name,
         code: couponData.code,
         value: couponData.value,
+        type: couponData.type,
         time_start: couponData.time_start ? dayjs(couponData.time_start) : null,
         time_end: couponData.time_end ? dayjs(couponData.time_end) : null,
         min_price_order: couponData.min_price_order,
@@ -71,7 +75,6 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         },
         onError: (error: any) => {
           const res = error?.response?.data;
-
           if (res?.errors) {
             const fieldErrors = Object.entries(res.errors).map(
               ([field, messages]) => ({
@@ -81,7 +84,6 @@ const EditCoupon: React.FC<EditCouponProps> = ({
             );
             form.setFields(fieldErrors);
           }
-
           notification.error({
             message: 'Cập nhật thất bại',
             description: res?.message || 'Dữ liệu không hợp lệ!',
@@ -132,11 +134,33 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         </Form.Item>
 
         <Form.Item
-          label="Giá trị (%)"
+          label="Loại giảm"
+          name="type"
+          rules={[{ required: true, message: 'Vui lòng chọn loại giảm!' }]}
+        >
+          <Select
+            disabled
+            options={[
+              { label: 'Phần trăm (%)', value: 'percentage' },
+              { label: 'Số tiền (VND)', value: 'fixed' },
+              { label: 'Miễn phí vận chuyển', value: 'free_shipping' },
+            ]}
+            onChange={(val) => setType(val)}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Giá trị"
           name="value"
           rules={[{ required: true, message: 'Vui lòng nhập giá trị khuyến mãi!' }]}
         >
-          <InputNumber style={{ width: '100%' }} min={0} max={100} disabled />
+          <InputNumber
+            style={{ width: '100%' }}
+            min={0}
+            max={type === 'percentage' ? 100 : undefined}
+            addonAfter={type === 'percentage' ? '%' : type === 'fixed' ? 'VND' : ''}
+            disabled
+          />
         </Form.Item>
 
         <Form.Item
@@ -155,7 +179,6 @@ const EditCoupon: React.FC<EditCouponProps> = ({
         <Form.Item
           label="Thời gian kết thúc"
           name="time_end"
-          rules={[{ required: true, message: 'Vui lòng chọn thời gian kết thúc!' }]}
         >
           <DatePicker
             style={{ width: '100%' }}

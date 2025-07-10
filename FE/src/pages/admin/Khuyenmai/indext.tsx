@@ -16,7 +16,7 @@ import AddKhuyenMai from "./AddCoupon";
 import EditCoupon from "./EditCoupon";
 import dayjs from "dayjs";
 
-// ✅ Định dạng thời gian đơn giản, không chuyển timezone
+// ✅ Định dạng thời gian
 const formatDateTimeVN = (value: any) => {
   return dayjs(value).format("DD/MM/YYYY HH:mm:ss");
 };
@@ -32,7 +32,9 @@ const CouponsList = () => {
   const pageSize = 10;
 
   const { data, isLoading } = useList({
-    resource: `admin/coupons?page=${currentPage}&keyword=${encodeURIComponent(searchTrigger)}&t=${cacheBuster}`,
+    resource: `admin/coupons?page=${currentPage}&keyword=${encodeURIComponent(
+      searchTrigger
+    )}&t=${cacheBuster}`,
     config: { hasPagination: false },
     queryOptions: {
       keepPreviousData: true,
@@ -105,7 +107,6 @@ const CouponsList = () => {
     setCacheBuster((prev) => prev + 1);
   };
 
-  // ✅ Khi thêm thành công → tự động load lại danh sách + đóng drawer
   const handleSuccessCreate = () => {
     setCacheBuster((prev) => prev + 1);
     setVisible(false);
@@ -130,9 +131,17 @@ const CouponsList = () => {
     },
     {
       title: "Giá trị",
-      dataIndex: "value",
       key: "value",
-      render: (value: any) => `${value}%`,
+      render: (_: any, record: any) => {
+        const { value, type } = record;
+        if (type === "percentage") {
+          return ` ${value}%`;
+        }
+        if (type === "fixed") {
+          return ` ${value.toLocaleString("vi-VN")} VND`;
+        }
+        return value;
+      },
     },
     {
       title: "Thời gian bắt đầu",

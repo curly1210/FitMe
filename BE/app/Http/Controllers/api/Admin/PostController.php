@@ -22,7 +22,7 @@ class PostController extends Controller
         return $this->success(PostResource::collection($posts));
     }
 
-    
+
     public function store(Request $request)
     {
         try {
@@ -84,17 +84,16 @@ class PostController extends Controller
             // $data['content'] = $this->processContentImages($request->input('content'), $post->content);
 
             if ($request->hasFile('thumbnail')) {
-                if ($post->thumbnail) {
-                    $this->deleteImageFromCloudinary($post->thumbnail);
-                }
-                
+                // if ($post->thumbnail) {
+                //     $this->deleteImageFromCloudinary($post->thumbnail);
+                // }
+
                 $uploadResult = $this->uploadImageToCloudinary($request->file('thumbnail'), [
                     'folder' => 'posts',
                     'quality' => 80
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
-            }
-else{
+            } else {
                 return $this->error('Thumbnail không được để trống', [], 422);
             }
             $post->update($data);
@@ -113,7 +112,7 @@ else{
     {
         try {
             $post = Post::findOrFail($id);
-            
+
             if ($post->thumbnail) {
                 $this->deleteImageFromCloudinary($post->thumbnail);
             }
@@ -137,15 +136,15 @@ else{
 
             $uploadResult = $this->uploadImageToCloudinary($request->file('upload'), [
                 'folder' => 'posts/content',
-                'width' => 1200,
-                'height' => null,
+                // 'width' => 1200,
+                // 'height' => null,
                 'quality' => 80
             ]);
 
             return response()->json([
                 'url' => $this->buildImageUrl($uploadResult['public_id'])
             ]);
-        } 
+        }
         // catch (ValidationException $e) {
         //     return response()->json([
         //         'error' => [
@@ -153,7 +152,7 @@ else{
         //         ]
         //     ], 422);
         // }
-         catch (\Exception $e) {
+        catch (\Exception $e) {
             return response()->json([
                 'error' => [
                     'message' => 'Upload ảnh thất bại'
