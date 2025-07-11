@@ -89,12 +89,15 @@ class ReviewController extends Controller
             }
             $data = $order->orderDetails->map(function ($orderDetail) {
                 if (!$orderDetail) return null;
+                // dd($orderDetail->review);
                 return [
                     'id' => $orderDetail->id,
                     "order_id" => $orderDetail->order_id,
                     'product_item_id' => $orderDetail->product_item_id,
                     'product_name' => $orderDetail->name_product,
                     'product_image' => $this->buildImageUrl($orderDetail->image_product),
+                    "is_review" => $orderDetail->review ? 1 : 0,
+                    "is_updated_review" => $orderDetail->review ? $orderDetail->review->is_update : 0,
                     "price" => $orderDetail->price,
                     "sale_price" => $orderDetail->sale_price,
                     "sale_percent" => $orderDetail->sale_percent,
@@ -110,19 +113,27 @@ class ReviewController extends Controller
     }
     public function edit(Request $request)
     {
-
+        // dd($request->user());
         try {
             $review = Review::with(['reviewImages'])->find($request->query('review_id'));
 
             if (!$review) {
                 return $this->error("Đánh giá không tồn tại", ['id' => 'Đánh giá không tồn tại'], 404);
             }
+            if (!$request->user()) {
+                return $this->error("Người dùng chưa đăng nhập", [], 403);
+            }
+
             $data = [
                 "id" => $review->id,
                 "rate" => $review->rate,
                 "content" => $review->content,
                 "is_active" => $review->is_active,
                 "is_update" => $review->is_update,
+                "user" => [
+                    "name" => $request->user()->name,
+                    "avatar" => $this->buildImageUrl($request->user()->avatar),
+                ],
                 "product" => [
                     "product_name" => $review->orderDetail->name_product,
                     "size" => $review->orderDetail->size,
@@ -139,6 +150,8 @@ class ReviewController extends Controller
                         "url" => $this->buildImageUrl($image->url),
                     ];
                 }) : [],
+                "created_at" => $review->created_at ?? null,
+                "updated_at" => $review->updated_at ?? null
             ];
             return response()->json($data);
         } catch (\Throwable $th) {
