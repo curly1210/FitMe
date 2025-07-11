@@ -2,7 +2,7 @@ import LayoutAdmin from "../components/LayoutAdmin";
 import Category from "../pages/admin/Category";
 
 import Bienthe from "../pages/admin/BienThe/indext";
-import Dashboard from "../pages/admin/Dashboard";
+import Dashboard from "../pages/admin/Dashboard/tongQuan";
 
 import BannerList from "../pages/admin/Banner";
 import ProtectAdmin from "../components/ProtectAdmin";
@@ -12,6 +12,10 @@ import TrashProducts from "../pages/admin/Product/TrashProducts";
 import CouponsList from "../pages/admin/Khuyenmai/indext";
 import Oder from "../pages/admin/Oder/indext";
 import PostList from "../pages/admin/Tintuc";
+import DashboardUser from "../pages/admin/Dashboard/thongKeKhachHang";
+import DashboardProduct from "../pages/admin/Dashboard/thongKeSanPhamDonHang";
+import { InventoryPage } from "../pages/admin/Dashboard/thongKeTonKho";
+import ReviewPage from "../pages/admin/Dashboard/thongKeDanhGia/idext";
 
 
 export const adminRoutes = [
@@ -25,6 +29,22 @@ export const adminRoutes = [
           {
             index: true,
             element: <Dashboard />,
+          },
+          {
+            path: "dashboard/user",
+            element: <DashboardUser />,
+          },
+          {
+            path: "dashboard/product",
+            element: <DashboardProduct />,
+          },
+          {
+            path: "dashboard/tonkho",
+            element: <InventoryPage />,
+          },
+          {
+            path: "dashboard/danhgia",
+            element: <ReviewPage />,
           },
           {
             path: "banner",

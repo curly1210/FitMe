@@ -16,6 +16,7 @@ class CouponFactory extends Factory
         return [
             'name' => 'Giảm giá ' . $this->faker->word(),
             'code' => strtoupper(Str::random(8)),
+            'type' => $this->faker->randomElement(['percentage','fixed']), //thêm trường type
             'value' => $this->faker->numberBetween(1, 5) * 10,
             'time_start' => Carbon::parse($start)->timezone('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s'),
             'time_end' => Carbon::parse($end)->timezone('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s'),

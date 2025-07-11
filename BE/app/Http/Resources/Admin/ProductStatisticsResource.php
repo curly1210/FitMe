@@ -30,8 +30,8 @@ class ProductStatisticsResource extends JsonResource
                         'price' => $item->productItem->price,
                         'sale_price' => $item->productItem->sale_price,
                         'sale_percent' => $item->productItem->sale_percent,
-                        'color_id' => $item->productItem->color_id,
-                        'size_id' => $item->productItem->size_id,
+                        'color' => $item->productItem->color->code,
+                        'size' => $item->productItem->size->name,
                         'thumbnail' => $product?->images->first()?->url,
                         'product' => $item->productItem->product ? [
                             'id' => $item->productItem->product->id,
@@ -51,8 +51,8 @@ class ProductStatisticsResource extends JsonResource
                         'price' => $item->price,
                         'sale_price' => $item->sale_price,
                         'is_active' => $item->is_active,
-                        'color_id' => $item->color_id,
-                        'size_id' => $item->size_id,
+                        'color' => $item->color?->code,
+                        'size' => $item->size?->name,
                         'product' => $item->product ? [
                             'id' => $item->product->id,
                             'name' => $item->product->name,
@@ -70,8 +70,8 @@ class ProductStatisticsResource extends JsonResource
                         'price' => $item->price,
                         'sale_price' => $item->sale_price,
                         'is_active' => $item->is_active,
-                        'color_id' => $item->color_id,
-                        'size_id' => $item->size_id,
+                        'color' => $item->color?->code,
+                        'size' => $item->size?->name,
                         'product' => $item->product ? [
                             'id' => $item->product->id,
                             'name' => $item->product->name,

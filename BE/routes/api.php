@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\api\Client\ChatbotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
+use App\Http\Controllers\api\Client\ReplicateController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -77,7 +79,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::post('/orders/redem', [OrderController::class, 'redem']);
 Route::post('/orders/checkout', [OrderController::class, 'store']);
 Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders/{id}', [OrderController::class, 'update']);
+// Route::post('/orders/{id}', [OrderController::class, 'update']);
 Route::patch('/orders/{id}', [OrderController::class, 'update']);
 Route::get('/orders/{id}', [OrderController::class, 'show']);
 
@@ -96,6 +98,8 @@ Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topS
 Route::get('/admin/statistics/customers', [StatisticsController::class, 'customerStatistics']);
 Route::get('/admin/statistics/products', [StatisticsController::class, 'productStatistics']);
 Route::get('/admin/statistics/orderLocation', [StatisticsController::class, 'orderByLocation']);
+Route::get('admin/statistics/inventory', [StatisticsController::class, 'inventoryStatistics']);
+Route::get('admin/statistics/reviews', [StatisticsController::class, 'reviewStatistics']);
 
 
 
@@ -166,8 +170,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //Route quản lí tin tức
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('posts/ckeditor-upload', [PostController::class, 'uploadCkeditorImage']);
-    Route::get('/posts',  [PostController::class, 'index'])->name('posts.index');
-    Route::get('/posts/{id}',  [PostController::class, 'show'])->name('posts.show');
+    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{id}', [PostController::class, 'show'])->name('posts.show');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::post('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
@@ -253,6 +257,10 @@ Route::post('profile', [ClientUserController::class, 'updateInfoBasic']);
 Route::patch('profil', [ClientUserController::class, 'updateInfoBasic']);
 Route::post('change-password', [ClientUserController::class, 'updatePassword']);
 Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
+
+// chatbot
+Route::post('/chatbot', [ChatbotController::class, 'chat']);
+Route::post('/chatbot/reset', [ChatbotController::class, 'reset']);
 
 
 
@@ -356,6 +364,7 @@ Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('a
 Route::prefix('client')->group(function () {
     Route::get('banners', [ClientBannerController::class, 'index']);
     Route::get('posts', [ClientPostController::class, 'index']);
+    Route::get('posts/{slug}', [ClientPostController::class, 'show'])->name('posts.show');
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     Route::get('/categories', [ClientCategoryController::class, 'index']);
@@ -376,3 +385,7 @@ Route::prefix('cart-items')->group(function () {
     Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
     Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
 });
+
+
+Route::post('/replicate/run', [ReplicateController::class, 'run']);
+Route::get('/replicate/status/{id}', [ReplicateController::class, 'status']);

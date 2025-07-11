@@ -18,6 +18,9 @@ import ProductLike from "../pages/client/ProductLike";
 import LayoutInforUser from "../components/Client/LayoutInforUser";
 import InformationUser from "../pages/client/InformationUser";
 import ChangePassword from "../pages/client/ChangePassword";
+import PostDetail from "../pages/client/Tintuc";
+import ListPost from "../pages/client/Tintuc/ListPost";
+import TryClothes from "../pages/client/TryClothes";
 
 export const clientRoutes = [
   {
@@ -52,6 +55,14 @@ export const clientRoutes = [
             element: <ProductDetail />,
           },
           {
+            path: "post/:slug",
+            element: <PostDetail />,
+          },
+          {
+            path: "post",
+            element: <ListPost />,
+          },
+          {
             element: <ProtectClient role="client" />,
             children: [
               {
@@ -81,7 +92,10 @@ export const clientRoutes = [
                   },
                 ],
               },
-
+              {
+                path: "try-clothes",
+                element: <TryClothes />,
+              },
               {
                 path: "carts",
                 element: <Carts />,
@@ -109,50 +123,4 @@ export const clientRoutes = [
       },
     ],
   },
-
-  // {
-  //   path: "/",
-  //   element: <HomePage />,
-  //   index: true,
-  // },
-  // {
-  //   path: "/",
-  //   element: (
-  //     <CartProvider>
-  //       <LayoutClient />
-  //     </CartProvider>
-  //   ),
-  //   children: [
-  //     {
-  //       path: "contact",
-  //       element: <Contact />,
-  //     },
-  //     {
-  //       path: "category/:categorySlug",
-  //       element: <ListProducts />,
-  //     },
-  //     {
-  //       path: "products/:slug",
-  //       element: <ProductDetail />,
-  //     },
-  //     {
-  //       path: "checkout",
-  //       element: <CheckOut />,
-  //     },
-
-  //     {
-  //       element: <ProtectClient role="client" />,
-  //       children: [
-  //         {
-  //           path: "address",
-  //           element: <Address />,
-  //         },
-  //         {
-  //           path: "carts",
-  //           element: <Carts />,
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
 ];
