@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useModal } from "../../../hooks/useModal";
 import ModalAddReview from "./ModalAddReview";
+// import ModalAddReview from "./ModalAddReview";
 import ShowReview from "./ShowReview";
 
 type Review = {
@@ -8,6 +10,8 @@ type Review = {
   product_name: string;
   color?: string;
   size?: string;
+  is_review?: any; // Thêm trường này để xác định đã đánh giá hay chưa
+  order_id?: any; // Thêm order_id nếu cần
 };
 
 interface ReviewEachProductProps {
@@ -36,15 +40,31 @@ const ReviewEachProduct = ({ review }: ReviewEachProductProps) => {
             </div>
           </div>
           <div>
-            <button
-              onClick={() => {
-                // openModal(<ModalAddReview review={review} />);
-                openModal(<ShowReview />);
-              }}
-              className="text-white bg-black py-2 px-3 cursor-pointer"
-            >
-              ĐÁNH GIÁ
-            </button>
+            {review?.is_review ? (
+              <button
+                onClick={() => {
+                  openModal(
+                    <ShowReview
+                      review_id={review?.is_review}
+                      order_id={review?.order_id}
+                    />
+                  );
+                }}
+                className="text-white bg-black py-2 px-3 cursor-pointer"
+              >
+                XEM ĐÁNH GIÁ
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  openModal(<ModalAddReview review={review} />);
+                  // openModal(<ShowReview />);
+                }}
+                className="text-white bg-black py-2 px-3 cursor-pointer"
+              >
+                ĐÁNH GIÁ
+              </button>
+            )}
           </div>
         </div>
       </div>

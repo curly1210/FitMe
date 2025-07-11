@@ -17,15 +17,12 @@ import { Link } from "react-router";
 import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
 import "dayjs/locale/vi";
-import { useModal } from "../../../hooks/useModal";
-import ReviewProducts from "./ReviewProducts";
+import RenderReviewButton from "./RenderReviewButton";
 dayjs.locale("vi");
 
 const { Search } = Input;
 
 const Order = () => {
-  const { openModal } = useModal();
-
   const [idOrderStatus, setIdOrderStatus] = useState(0);
   const [searchText, setSearchText] = useState<any>(undefined);
 
@@ -93,31 +90,6 @@ const Order = () => {
       values: {},
     });
   };
-
-  const onHandleShowReview = (orderId: number) => {
-    openModal(<ReviewProducts orderId={orderId} />);
-    // openModal(
-    //   <div className="w-[700px] py-5 px-6">
-    //     <h1 className="text-xl font-semibold mb-3">Đánh giá sản phẩm</h1>
-    //     {isLoadingReviews && orderId ? (
-    //       <Spin
-    //         className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
-    //         style={{ textAlign: "center" }}
-    //         size="large"
-    //       />
-    //     ) : (
-    //       <div className="flex flex-col gap-3">
-    //         {reviewsResponse?.data?.map((review: any) => (
-    //           <ReviewProduct key={review.id} review={review} />
-    //         ))}
-    //       </div>
-    //     )}
-    //   </div>
-    // );
-  };
-
-  // const reviews = reviewsResponse?.data || [];
-  // console.log(reviews);
 
   return (
     <div className="list-order-client">
@@ -268,14 +240,8 @@ const Order = () => {
                         XEM CHI TIẾT
                       </button>
                     </Link>
-                    {order.success_at && (
-                      <button
-                        onClick={() => onHandleShowReview(order?.id)}
-                        className="text-white bg-black py-2 px-3 cursor-pointer"
-                      >
-                        ĐÁNH GIÁ
-                      </button>
-                    )}
+                    <RenderReviewButton order={order} />
+
                     {order.status_name == "Chờ xác nhận" && (
                       <Popconfirm
                         title="Cập nhật trạng thái"

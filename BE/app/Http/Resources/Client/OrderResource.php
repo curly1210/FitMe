@@ -27,6 +27,9 @@ class OrderResource extends JsonResource
             'receiving_address' => $this->receiving_address,
             'status_order_id' => $this->status_order_id,
             'status_name' => $this->statusOrder->name ?? 'Không xác định', // Lấy name từ status_orders
+            "reviewed_count" => $this->orderDetails->filter(function ($detail) {
+                return $detail->review !== null;
+            })->count(),
 
             // "success_at" =>   Carbon::parse($this->updated_at)->format('Y-m-d H:i:s') ?? null,
             "success_at" =>   $this->success_at ? Carbon::parse($this->success_at)->format('Y-m-d H:i:s') : null,

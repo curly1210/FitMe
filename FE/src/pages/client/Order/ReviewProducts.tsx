@@ -2,6 +2,7 @@
 import { useList } from "@refinedev/core";
 import { Spin } from "antd";
 import ReviewEachProduct from "./ReviewEachProduct";
+import dayjs from "dayjs";
 
 // interface ReviewProductProps {
 //   review: {
@@ -46,9 +47,16 @@ const ReviewProducts = ({ orderId }: any) => {
         />
       ) : (
         <div className="flex flex-col gap-5">
-          {reviewsResponse?.data?.map((review: any) => (
-            <ReviewEachProduct key={review?.id} review={review} />
-          ))}
+          {reviewsResponse?.data?.map((review: any) =>
+            review?.is_review ? (
+              <ReviewEachProduct key={review?.id} review={review} />
+            ) : (
+              review?.success_at &&
+              dayjs().diff(dayjs(review?.success_at), "day") <= 7 && (
+                <ReviewEachProduct key={review?.id} review={review} />
+              )
+            )
+          )}
         </div>
       )}
     </div>
