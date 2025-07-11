@@ -76,6 +76,7 @@ class ReviewController extends Controller
             ]);
         }
     }
+
     public function getProductsNeedReview(Request $request)
     {
         try {
@@ -93,6 +94,7 @@ class ReviewController extends Controller
                 return [
                     'id' => $orderDetail->id,
                     "order_id" => $orderDetail->order_id,
+                    "order_detail_id" => $orderDetail->id,
                     'product_item_id' => $orderDetail->product_item_id,
                     'product_name' => $orderDetail->name_product,
                     'product_image' => $this->buildImageUrl($orderDetail->image_product),
@@ -111,6 +113,7 @@ class ReviewController extends Controller
             return $this->error("Lỗi khi lấy sản phẩm cần đánh giá", $th->getMessage(), 500);
         }
     }
+
     public function edit(Request $request)
     {
         // dd($request->user());
