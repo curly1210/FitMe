@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Client\UserController as ClientUserController;
 use App\Http\Controllers\api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
+use App\Http\Controllers\api\Admin\GhnController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
@@ -227,6 +228,19 @@ Route::prefix('/admin')->group(function () {
     Route::post("/reviews/reply/update", [ReviewReplyController::class, "update"]);
     Route::post("/reviews/reply/delete", [ReviewReplyController::class, "delete"]);
 });
+
+// GHN
+Route::get("/ghn/get-province", [GhnController::class, "getProvince"]);
+Route::get("/ghn/get-district", [GhnController::class, "getDistrict"]);
+Route::get("/ghn/get-ward", [GhnController::class, "getWard"]);
+
+Route::get("/ghn/get-store", [GhnController::class, "getStore"]);
+
+Route::get("/ghn/get-service", [GhnController::class, "getService"]);
+Route::post("/ghn/calculate-fee", [GhnController::class, "calculateFee"]);
+
+
+
 
 
 
