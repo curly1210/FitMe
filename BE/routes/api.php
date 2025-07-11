@@ -217,8 +217,8 @@ Route::post('/vnpay/refund', [VNPayController::class, 'vnpayRefund']);
 Route::get('/getProductsNeedReview', [ClientReviewController::class, 'getProductsNeedReview'])->name('reviews.getProductNeedReview');
 Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
 Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create'); #api Tạo review
-Route::get('/reviews/edit', [ClientReviewController::class, 'edit'])->name('reviews.edit'); #api đổ dữ liệu update review
-Route::post('/reviews/update', [ClientReviewController::class, 'update'])->name('reviews.update'); #api update dữ liệu review
+Route::get('/reviews/edit/{id}', [ClientReviewController::class, 'edit'])->name('reviews.edit'); #api đổ dữ liệu update review
+Route::post('/reviews/update/{id}', [ClientReviewController::class, 'update'])->name('reviews.update'); #api update dữ liệu review
 
 Route::prefix('/admin')->group(function () {
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
