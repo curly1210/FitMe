@@ -37,7 +37,7 @@ class Review extends Model
     }
     public function orderDetail()
     {
-        return $this->belongsTo(OrdersDetail::class, 'order_detail_id');
+        return $this->belongsTo(OrdersDetail::class);
     }
     public function reviewReplies()
     {

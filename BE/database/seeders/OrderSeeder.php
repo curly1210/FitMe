@@ -21,7 +21,7 @@ class OrderSeeder extends Seeder
                             'order_id' => $order->id,
                         ];
                     }),
-                'orderDetails' 
+                'orderDetails'
             )
             ->create();
     }
