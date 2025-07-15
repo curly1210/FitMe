@@ -11,7 +11,7 @@ class OrderSeeder extends Seeder
     public function run()
     {
         Order::factory()
-            ->count(3)
+            ->count(6)
             ->has(
                 // Tạo 1-3 OrderDetail cho mỗi Order
                 OrdersDetail::factory()
@@ -21,7 +21,7 @@ class OrderSeeder extends Seeder
                             'order_id' => $order->id,
                         ];
                     }),
-                'orderDetails' 
+                'orderDetails'
             )
             ->create();
     }

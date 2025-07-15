@@ -1,0 +1,381 @@
+<?php
+
+namespace App\Http\Controllers\api\Admin;
+
+use App\Models\Order;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Client\WardResource;
+
+use App\Http\Resources\Client\StoreResource;
+use App\Http\Resources\Client\ServiceResource;
+use App\Http\Resources\Client\DistrictResource;
+use App\Http\Resources\Client\ProvinceResource;
+use App\Http\Resources\Client\DeliverytimeResource;
+
+class GhnController extends Controller
+{
+    use ApiResponse;
+    public function createOrder(Request $request, String $order_code)
+    {
+        $validator = Validator::make($request->all(), [
+            // Thông tin người gửi (shop)
+            'from_name' => 'required|string|max:255',
+            'from_phone' => 'required|string|max:20',
+            'from_address' => 'required|string|max:255',
+            'from_ward_name' => 'required|string|max:255',
+            'from_district_name' => 'required|string|max:255',
+            'from_province_name' => 'required|string|max:255',
+            'from_district_id' => 'required|integer',
+            'from_ward_code' => 'required|string|max:50',
+
+            // Dịch vụ GHN
+            'service_id' => 'required|integer',
+            'service_type_id' => 'required|integer',
+            'coupon' => 'nullable|string|max:255',
+            'pick_shift' => 'required|integer',
+
+            // Items
+            'items' => 'required|array|min:1',
+            'items.*.name_product' => 'required|string|max:255',
+            'items.*.sku' => 'required|string|max:255',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.sale_price' => 'required|numeric|min:0',
+            'items.*.length' => 'nullable|numeric|min:0',
+            'items.*.width' => 'nullable|numeric|min:0',
+            'items.*.height' => 'nullable|numeric|min:0',
+            'items.*.weight' => 'nullable|numeric|min:0',
+            'items.*.category_name' => 'nullable|string|max:255',
+        ], [
+            'from_name.required' => 'Tên người gửi không được bỏ trống.',
+            'from_phone.required' => 'Số điện thoại người gửi không được bỏ trống.',
+            'from_address.required' => 'Địa chỉ người gửi không được bỏ trống.',
+            'from_ward_name.required' => 'Phường/xã người gửi không được bỏ trống.',
+            'from_district_name.required' => 'Quận/huyện người gửi không được bỏ trống.',
+            'from_province_name.required' => 'Tỉnh/thành phố người gửi không được bỏ trống.',
+
+            'from_district_id.required' => 'Quận/huyện trả hàng không được bỏ trống.',
+            'from_district_id.integer' => 'Mã quận/huyện trả hàng phải là số.',
+            'from_ward_code.required' => 'Phường/xã trả hàng không được bỏ trống.',
+
+            'service_id.required' => 'Vui lòng chọn dịch vụ GHN.',
+            'service_type_id.required' => 'Vui lòng chọn loại dịch vụ GHN.',
+            'pick_shift.required' => 'Vui lòng chọn ca lấy hàng.',
+
+            'items.required' => 'Đơn hàng phải có ít nhất 1 sản phẩm.',
+            'items.array' => 'Danh sách sản phẩm không hợp lệ.',
+            'items.*.name_product.required' => 'Tên sản phẩm không được bỏ trống.',
+            'items.*.sku.required' => 'SKU sản phẩm không được bỏ trống.',
+            'items.*.quantity.required' => 'Số lượng sản phẩm không được bỏ trống.',
+            'items.*.quantity.integer' => 'Số lượng sản phẩm phải là số.',
+            'items.*.quantity.min' => 'Số lượng sản phẩm ít nhất là 1.',
+            'items.*.sale_price.required' => 'Giá bán sản phẩm không được bỏ trống.',
+            'items.*.sale_price.numeric' => 'Giá bán sản phẩm phải là số.',
+        ]);
+        if ($validator->fails()) {
+            return $this->error("Thiếu dữ liệu truyền vào", $validator->errors(), 422);
+        }
+        $order = Order::where('orders_code', $order_code)->first();
+        // dd($order_code);
+        if (!$order) {
+            return $this->error("Quá trình đăng đơn thất bại", ["Không tìm thấy đơn hàng"], 404);
+        }
+        dd($order->total_amount);
+        $response = Http::withHeaders([
+            "Content-Type" => "application/json",
+            "ShopId" => env('GHN_SHOP_ID'),
+            "Token" => env('GHN_TOKEN'),
+        ])->post(
+            "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create",
+            [
+                "payment_type_id" => 2, # 1 : người bán thanh toán phí vận chuyển  | 2: người mua thanh toán phí vận chuyển
+                "note" => "Giao hàng đúng thời hạn", # Ghi chú cho shipper
+                "required_note" => "KHONGCHOXEMHANG", # shipper đưa nguyên hộp, khách nhận rồi mới mở được.
+                # Thông tin, địa chỉ shop hay người gủi
+                "from_name" => $request->from_name,
+                "from_phone" => $request->from_phone,
+                "from_address" => $request->from_address,
+                "from_ward_name" => $request->from_ward_name,
+                "from_district_name" => $request->from_district_name,
+                "from_province_name" =>  $request->from_province_name,
+                # Thông tin, địa chỉ trả hàng khi giao thất bại 
+                "return_phone" => $request->from_phone,
+                "return_address" => $request->from_address,
+                "return_district_id" => $request->from_district_id,
+                "return_ward_code" => $request->from_ward_code,
+                # Thông tin, địa chỉ người nhận
+                "client_order_code" => $request->user()->id,
+                "to_name" => $order->recipient_name,
+                "to_phone" => $order->recipient_phone . '2',
+                "to_address" => $request->to_address,
+                "to_ward_code" => $request->to_ward_code,
+                "to_district_id" => $request->to_district_id,
+                "cod_amount" => $order->total_amount +  $order->shipping_price, // Tiền hàng + tiền ship
+                "content" => "Đơn hàng đặt từ hệ thống FITME",
+                # Kích thước gói hàng của đơn hàng 
+                "weight" => 200,
+                "length" => 1,
+                "width" => 19,
+                "height" => 10,
+                // "pick_station_id" => 1444,
+                "deliver_station_id" => null,
+                "insurance_value" => $order->total_amount, # Tiền bồi thường khi hỏng hóc hoặc mất
+                "service_id" => $request->service_id,
+                "service_type_id" => $request->service_type_id,
+                "coupon" => null,
+                "pick_shift" => [$request->pick_shift],
+                #order_detail
+                "items" => $order->orderDetails->map(function ($item) {
+                    return [
+                        "name" => $item->name_product,
+                        "code" => $item->sku,
+                        "quantity" => $item->quantity,
+                        "price" => $item->sale_price,
+                        "length" =>  $item->length,
+                        "width" => $item->width,
+                        "height" => $item->height,
+                        "weight" => $item->weight,
+                        "category" => $item->category_name,
+                    ];
+                    // ---------------------
+                    // "name" => "Áo Polo",
+                    // "code" => "Polo123",
+                    // "quantity" => 1,
+                    // "price" => 200000,
+                    // "length" => 12,
+                    // "width" => 12,
+                    // "height" => 12,
+                    // "weight" => 1200,
+                    // "category" => 'aos',
+                }),
+            ]
+        );
+        return response()->json($response->json());
+    }
+    # Lấy danh sách Tỉnh
+    public function getProvince()
+    {
+        // dd(env('GHN_TOKEN'));
+        $response = Http::withHeaders([
+            "Content-Type" => "application/json",
+            "Token" => env('GHN_TOKEN'),
+        ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province");
+        $data = $response->json();
+        if ($response['code'] == 200) {
+            $filtered = array_filter($data['data'], function ($item) {
+                return isset($item['IsEnable']);
+            });
+            array_shift($filtered);
+            return ProvinceResource::collection($filtered);
+        }
+        return $response->json();
+    }
+    # Lấy danh sách Quận/Huyện
+    public function getDistrict(Request $request)
+    {
+        if ($request->province_id) {
+            $response = Http::withHeaders([
+                "Content-Type" => "application/json",
+                "token" => env('GHN_TOKEN'),
+            ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district", [
+                "province_id" => $request->province_id
+            ]);
+            if ($response['code'] == 200) {
+                return DistrictResource::collection($response['data']);
+            }
+            return $response->json();
+        }
+        return $this->error("Không có mã tỉnh", ["province_id" => "Không có dữ liệu"], 422);
+    }
+    # Lấy danh sách phường 
+    public function getWard(Request $request)
+    {
+        if ($request->district_id) {
+            $response = Http::withHeaders([
+                "Content-Type" => "application/json",
+                "token" => env('GHN_TOKEN'),
+            ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id", [
+                "district_id" => $request->district_id
+            ]);
+            // dd($response->json());
+            if ($response['code'] == 200) {
+                return WardResource::collection($response['data']);
+            };
+            return $response->json();
+        }
+        return $this->error("Không có mã tỉnh", ["province_id" => "Không có dữ liệu"], 422);
+    }
+    public function getStore()
+    {
+        $response = Http::withHeaders([
+            "Content-Type" => "application/json",
+            "token" => env('GHN_TOKEN'),
+        ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shop/all", [
+            "offset" => 0,
+            "limit" => 50,
+            "client_phone" => ""
+        ]);
+        if ($response['code'] == 200) {
+            return StoreResource::collection($response['data']['shops']);
+        };
+        return $response->json();
+    }
+    public function pickShift()
+    {
+        $response = Http::withHeaders([
+            "token" => env('GHN_TOKEN'),
+        ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shift/date");
+
+        return $response->json();
+    }
+    public function getService(Request $request)
+    {
+        if (!$request->from_district || !$request->to_district) {
+            return $this->error("Thiếu dữ liệu giao hàng", ['from_district' => "Mã huyện của kho hoặc cửa hàng là bắt buộc", "to_district" => "Mã huyện nơi nhận hàng là bắt buộc"]);
+        }
+        $response = Http::withHeaders([
+            "Content-Type" => "application/json",
+            "token" => env('GHN_TOKEN'),
+        ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services", [
+            "shop_id" => env("GHN_SHOP_ID"),
+            "from_district" => $request->from_district,
+            "to_district" => $request->to_district
+        ]);
+        // dd($response->json());
+        if ($response['code'] == 200) {
+            return ServiceResource::collection($response['data']);
+        };
+        return $response->json();
+    }
+    public function calculateFee(Request $request)
+    {
+        $validator =  Validator::make(
+            $request->only(["from_district", "from_ward_code", "to_district_id", "to_ward_code", "length", "width", "height", "weight", "total_amount", "items"]),
+            [
+
+
+                "from_ward_code"  => "required|string",
+                "to_district_id"  => "required|integer",
+                "to_ward_code"    => "required|string",
+                "length"          => "nullable|numeric",
+                "width"           => "nullable|numeric",
+                "height"          => "nullable|numeric",
+                "weight"          => "nullable|numeric",
+                "total_amount"    => "required|numeric|min:0",
+                "items"           => "required|array|min:1",
+                "items.*.name"    => "required|string",
+                "items.*.quantity" => "required|integer|min:1",
+            ],
+            [
+                "required" => ":attribute không được để trống.",
+                "numeric"  => ":attribute phải là số.",
+                "integer"  => ":attribute phải là số nguyên.",
+                "array"    => ":attribute phải là mảng.",
+                "min"      => ":attribute tối thiểu :min.",
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->error("Lỗi truyền dữ liệu", $validator->errors(), 422);
+        }
+
+        $response = Http::withHeaders([
+            "Content-Type" => "application/json",
+            "token" => env('GHN_TOKEN'),
+            "ShopId" => env("GHN_SHOP_ID"),
+        ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee", [
+            "service_id" => 100039,
+            "service_type_id" => 5, // 2 : Hàng nhẹ ,  5 : hàng nặng
+            "from_ward_code" => $request->from_ward_code,
+            "to_district_id" => $request->to_district_id,
+            "to_ward_code" => $request->to_ward_code,
+            "length" => $request->length ?? 1, // tổng chiều dài
+            "width" => $request->width ?? 1,  //tổng chiều rộng
+            "height" => $request->height ?? 1, // tổng chiều cao
+            "weight" => $request->weight ?? 1, // Tổng cân nặng
+            "insurance_value" => $request->total_amount, #Phí đền bù khi đóng bảo hiểm
+            "coupon" => null,
+            "items" => collect($request->items)->map(function ($item) use ($request) {
+                return [
+                    "name" => $item['name'],
+                    "quantity" => $item['quantity'],
+                    "length" => $item['length'], // tổng chiều dài
+                    "width" => $item['width'],  //tổng chiều rộng
+                    "height" => $item['height'], // tổng chiều cao
+                    "weight" => $item['weight'], // Tổng cân nặng
+                ];
+            }), // sản phẩm
+
+        ]);
+        // dd($response->json());
+
+        if ($response['code'] == 200) {
+            return ServiceResource::collection($response['data']);
+        };
+        return $response->json();
+    }
+    public function calculateExpectedDeliverytime(Request $request)
+    {
+        $validator = Validator::make($request->only(['from_district_id', "from_ward_code", "to_district_id", "to_ward_code", "service_id"]), [
+            'from_district_id' => 'integer|required|min:0',
+            'from_ward_code'   => 'required|string',
+            'to_district_id'   => 'integer|required|min:0',
+            'to_ward_code'     => 'required|string',
+            'service_id'       => 'integer|required|min:0',
+        ], [
+            'from_district_id.required' => 'Vui lòng nhập quận/huyện lấy hàng.',
+            'from_district_id.integer'  => 'Quận/huyện lấy hàng phải là số.',
+            'from_district_id.min'      => 'Quận/huyện lấy hàng không được nhỏ hơn 0.',
+
+            'from_ward_code.required'   => 'Vui lòng nhập phường/xã lấy hàng.',
+            'from_ward_code.string'     => 'Phường/xã lấy hàng phải là chuỗi.',
+
+            'to_district_id.required'   => 'Vui lòng nhập quận/huyện giao hàng.',
+            'to_district_id.integer'    => 'Quận/huyện giao hàng phải là số.',
+            'to_district_id.min'        => 'Quận/huyện giao hàng không được nhỏ hơn 0.',
+
+            'to_ward_code.required'     => 'Vui lòng nhập phường/xã giao hàng.',
+            'to_ward_code.string'       => 'Phường/xã giao hàng phải là chuỗi.',
+
+            'service_id.required'       => 'Vui lòng chọn dịch vụ.',
+            'service_id.integer'        => 'Mã dịch vụ phải là số.',
+            'service_id.min'            => 'Mã dịch vụ không hợp lệ.',
+        ]);
+        if ($validator->fails()) {
+            return $this->error("Dữ liệu truyền không hợp lệ", $validator->errors(), 422);
+        }
+        $response = Http::withHeaders([
+            "Content-Type" => "application/json",
+            "ShopId" => env('GHN_SHOP_ID'),
+            "token" => env('GHN_TOKEN'),
+        ])->post("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime", [
+            "from_district_id" => $request->from_district_id,
+            "from_ward_code" => $request->from_ward_code,
+            "to_district_id" => $request->to_district_id,
+            "to_ward_code" => $request->to_ward_code,
+            "service_id" => $request->service_id
+        ]);
+        // dd($response->json());
+        if ($response['code'] == 200) {
+
+            return new DeliverytimeResource($response['data']);
+        };
+        return $response->json();
+    }
+    public function getOrderDetail($order_code)
+    {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            "token" => env('GHN_TOKEN'),
+        ])->post("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail", [
+            "order_code" => $order_code,
+        ]);
+        if ($response['code'] == 200) {
+
+            return new DeliverytimeResource($response['data']);
+        };
+        return $response->json();
+    }
+}
