@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 
 trait CreateOrderTrait
 {
+    use ApiResponse;
     public function createOrder($request, $payment_status = 0)
     {
         // return response()->json(['vnp_TxnRef' => $request->vnp_TxnRef]);
@@ -96,6 +97,9 @@ trait CreateOrderTrait
 
         DB::beginTransaction();
         try {
+            if ($request->payment_method == "cod" && $request->total_amount > 10000000) {
+                return $this->error("Đơn hàng vượt quá 10 triệu vui lòng thanh toán online hoặc chia nhỏ đơn hàng", ["payment_method" => 'cod ko hỗ trợ thanh toán đơn hàng trên 10tr', 'total_amount' => "Đơn hàng vượt quá 10 triệu"], 422);
+            }
             $order = Order::create([
                 'orders_code' => $request->orders_code ?? $uniqueCode,
                 'total_price_item' => $request->total_price_cart,

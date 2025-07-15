@@ -59,8 +59,7 @@ class ReviewController extends Controller
                     ->orderBy("created_at", "desc");
             }
 
-            $reviewRate = min(round($product->reviews()->avg('rate'), 1), 5);
-            $roundedRate = round($reviewRate * 2) / 2;
+            $roundedRate  = min(round($product->reviews()->avg('rate'), 1), 5);;
 
 
             $reviews = $query->paginate($perPage);
@@ -82,7 +81,7 @@ class ReviewController extends Controller
             $order = Order::with(['orderDetails.productItem.product'])
                 ->where('id', $request->query('order_id'))
                 ->where('status_order_id', 6)
-                ->where('success_at', '>=', Carbon::now()->subDays(7))
+                // ->where('success_at', '>=', Carbon::now()->subDays(7))
                 ->first();
             if (!$order || !$order->orderDetails || $order->orderDetails->isEmpty()) {
                 return $this->error("Không tìm thấy đơn hàng hoặc đơn hàng không có sản phẩm", [], 404);
@@ -230,15 +229,15 @@ class ReviewController extends Controller
             return $this->error("Lỗi khi tạo đánh giá",  $th->getMessage(), 500);
         }
     }
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
 
         // return response()->json($request->review_images);
         try {
             $validator = Validator::make(
-                $request->only(['content', 'review_images']),
+                $request->only(["rate", 'content', 'review_images']),
                 [
-
+                    "rate" => 'required|integer|min:1|max:5',
                     'content' => 'nullable|string|max:1000',
                     // 'review_images' => 'nullable|array',
                     'review_images.*.url' => [
@@ -249,7 +248,10 @@ class ReviewController extends Controller
                     ],
                 ],
                 [
-
+                    "rate.required" => "Số sao đánh giá là bắt buộc",
+                    "rate.min" => "Số sao đánh giá không được nhỏ hơn 1",
+                    "rate.max" => "Số sao đánh giá không được lớn hơn 5",
+                    "rate.integer" => "Số sao đánh giá phải là số nguyên",
                     'content.max' => 'Nội dung đánh giá không được vượt quá 1000 ký tự',
                     "review_images.array" => 'Trường review_images phải là một mảng',
                     'review_images.*.url.required_with' => 'Trường review_images là bắt buộc nếu có hình ảnh',
@@ -262,18 +264,16 @@ class ReviewController extends Controller
             if ($validator->fails()) {
                 return $this->error("Lỗi xác thực", ['errors' => $validator->errors()], 422);
             } else {
-                $review = Review::find($request->query('review_id'));
+                $review = Review::find($id);
                 if (!$review) {
                     return $this->error("Đánh giá không tồn tại", ['id' => 'Đánh giá không tồn tại'], 404);
                 }
 
                 $review->update([
+                    "rate" => $request->input('rate'),
                     'content' => $request->input('content') ?? null,
                     'is_update' => 1,
                 ]);
-
-
-
                 $inputUrls = [];
                 if ($request->review_images && is_array($request->review_images)) {
                     foreach ($request->review_images as $img) {

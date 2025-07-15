@@ -8,22 +8,23 @@ use App\Models\ReviewReply;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Client\ReviewResource;
+use Illuminate\Database\Eloquent\Builder;
+use App\Http\Resources\Admin\ReviewResource as AdminReviewResource;
+use App\Http\Resources\Client\ReviewResource as ClientReviewResource;
+
 
 class ReviewController extends Controller
 {
     use ApiResponse;
-    /*
-        request:
-        product_id
-        rate  1|2|3|4|5|null(lấy hết)
-    */
-    public function index(Request $request)
+    public function getDetail(Request $request)
     {
         $rate = $request->query('rate');
+
         $productId = $request->query('product_id');
-        // dd($productItemId);
+        // dd($productId)
         $product = Product::query()->with('productItems')->where('id', $productId)->first();
+        // dd($product);
+        $perPage = $request->input('per_page', 10);
         if (!$product) {
             return $this->error("Không tìm thấy sản phẩm", ['Sản phẩm không tồn tại'], 404);
         } else {
@@ -50,13 +51,15 @@ class ReviewController extends Controller
                     ->where('rate', 5)
                     ->orderBy("created_at", "desc");
             } else {
-                $query = Review::with(['productItem', 'reviewImages', 'user'])->whereIn('product_item_id', $productItemId)
+                $query = Review::with(['productItem', 'reviewImages', 'user'])->whereIn('product_item_id', $productItemId)->where('is_active', 1)
                     ->orderBy("created_at", "desc");
             }
-            $reviews = $query->paginate(10);
+            $roundedRate = min(round($product->reviews()->avg('rate'), 1), 5);
 
-            return  ReviewResource::collection($reviews)->additional([
-                'review_rate' =>  min(round($product->reviews()->withoutGlobalScopes()->avg('rate'), 0), 5),
+            $reviews = $query->paginate($perPage);
+
+            return  ClientReviewResource::collection($reviews)->additional([
+                'review_rate' => $roundedRate,
                 'total_review' => $product->reviews()->count(),
                 'total_review_1' => $product->reviews()->where('rate', 1)->count(),
                 'total_review_2' => $product->reviews()->where('rate', 2)->count(),
@@ -66,12 +69,36 @@ class ReviewController extends Controller
             ]);
         }
     }
-    /*
-    request:
-        review_id
-        is_active 0|1
-    */
-    # Ẩn đánh giá của client
+    public function index(Request $request)
+    {
+        $query =  Product::with('productItems', 'productImages')->withCount('reviews')
+            ->withAvg('reviews', 'rate');
+        $perPage = $request->input('per_page', 10);
+        if ($request->search) {
+            $query->where("name", 'like', '%' . $request->search . '%');
+        }
+        if ($request->category) {
+            $query->where("category_id", $request->category);
+        }
+        if ($request->rate) {
+            #low rate<3
+            #high rate>=3
+            #null getAll
+            if ($request->rate == 'low') {
+                $query->having('reviews_avg_rate', '<', 3);
+            } else if ($request->rate == 'high') {
+                $query->having('reviews_avg_rate', '>=', 3);
+            } else if ($request->rate == null) {
+                $query->havingNotNull('reviews_avg_rate');
+            }
+        } else {
+            $query->havingNotNull('reviews_avg_rate');
+        }
+        $data = $query->paginate($perPage);
+        // return response()->json($data);
+        return AdminReviewResource::collection($data);
+    }
+
     public function hidden(Request $request)
     {
         try {
@@ -81,7 +108,7 @@ class ReviewController extends Controller
             }
             $review->is_active = $request->is_active;
             $review->save();
-            return $this->success("Đánh giá đã được ẩn thành công", new ReviewResource($review));
+            return $this->success("Đánh giá đã được ẩn thành công");
         } catch (\Throwable $th) {
             return response()->json($th->getMessage(), 500);
         }
