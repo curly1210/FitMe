@@ -63,6 +63,10 @@ export const clientRoutes = [
             element: <ListPost />,
           },
           {
+            path: "search",
+            element: <ListProducts />,
+          },
+          {
             element: <ProtectClient role="client" />,
             children: [
               {

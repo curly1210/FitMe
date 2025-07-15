@@ -23,6 +23,7 @@ function ProductPage() {
     metaLink,
     setSortData,
     handleSearch,
+    searchValue
   } = useProduct();
   const { accessToken, user } = useAuthen();
   const hasAuth = !!accessToken && !!user;
@@ -90,11 +91,11 @@ function ProductPage() {
                 </span>{" "}
                 /
                 <span className="hover:underline cursor-pointer">
-                  Thời trang
+                  {searchValue ? 'Tìm kiếm' : 'Thời trang'}
                 </span>{" "}
                 /
                 <span className="font-semibold text-black">
-                  {categoryData.name}
+                  {categoryData?.name || searchValue}
                 </span>
               </div>
               <div className="flex items-center gap-2">
