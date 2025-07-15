@@ -53,7 +53,7 @@ class CommentController extends Controller
                 'required',
                 'string',
                 'max:200',
-                'min:5',
+                // 'min:5',
                 //Hàm check bình luận có phải các đường dẫn http,https,...
                 function ($attribute, $value, $fail) {
                     if (preg_match('/http[s]?:\/\//i', $value)) {
@@ -65,7 +65,7 @@ class CommentController extends Controller
                 'content.required' => 'Nội dung bình luận là bắt buộc',
                 'content.string' => 'Nội dung bình luận phải là chuỗi kí tự',
                 'content.max' => 'Nội dung bình luận không vượt quá 200 ký tự',
-                'content.min' => 'Nội dung bình luận tối thiểu 5 ký tự',
+                // 'content.min' => 'Nội dung bình luận tối thiểu 5 ký tự',
             ]);
 
             if($validate->fails()){
