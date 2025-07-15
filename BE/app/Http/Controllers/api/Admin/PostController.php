@@ -22,14 +22,14 @@ class PostController extends Controller
         return $this->success(PostResource::collection($posts));
     }
 
-    
+
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:150|unique:posts',
                 'content' => 'required|string',
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'is_active' => 'boolean',
             ]);
 
@@ -41,8 +41,6 @@ class PostController extends Controller
             if ($request->hasFile('thumbnail')) {
                 $uploadResult = $this->uploadImageToCloudinary($request->file('thumbnail'), [
                     'folder' => 'posts',
-                    'width' => 800,
-                    'height' => 600,
                     'quality' => 80
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
@@ -86,19 +84,18 @@ class PostController extends Controller
             // $data['content'] = $this->processContentImages($request->input('content'), $post->content);
 
             if ($request->hasFile('thumbnail')) {
-                if ($post->thumbnail) {
-                    $this->deleteImageFromCloudinary($post->thumbnail);
-                }
-                
+                // if ($post->thumbnail) {
+                //     $this->deleteImageFromCloudinary($post->thumbnail);
+                // }
+
                 $uploadResult = $this->uploadImageToCloudinary($request->file('thumbnail'), [
                     'folder' => 'posts',
-                    'width' => 800,
-                    'height' => 600,
                     'quality' => 80
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
+            } else {
+                return $this->error('Thumbnail không được để trống', [], 422);
             }
-
             $post->update($data);
             return $this->success(new PostResource($post), 'Bài viết đã được cập nhật');
         } catch (ValidationException $e) {
@@ -115,7 +112,7 @@ class PostController extends Controller
     {
         try {
             $post = Post::findOrFail($id);
-            
+
             if ($post->thumbnail) {
                 $this->deleteImageFromCloudinary($post->thumbnail);
             }
@@ -139,15 +136,15 @@ class PostController extends Controller
 
             $uploadResult = $this->uploadImageToCloudinary($request->file('upload'), [
                 'folder' => 'posts/content',
-                'width' => 1200,
-                'height' => null,
+                // 'width' => 1200,
+                // 'height' => null,
                 'quality' => 80
             ]);
 
             return response()->json([
                 'url' => $this->buildImageUrl($uploadResult['public_id'])
             ]);
-        } 
+        }
         // catch (ValidationException $e) {
         //     return response()->json([
         //         'error' => [
@@ -155,7 +152,7 @@ class PostController extends Controller
         //         ]
         //     ], 422);
         // }
-         catch (\Exception $e) {
+        catch (\Exception $e) {
             return response()->json([
                 'error' => [
                     'message' => 'Upload ảnh thất bại'

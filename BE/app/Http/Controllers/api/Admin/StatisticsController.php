@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\Product;
 use Carbon\CarbonPeriod;
 use App\Models\ProductItem;
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\OverviewStatisticResource;
 use App\Http\Resources\Admin\CustomerStatisticsResource;
-use App\Http\Resources\Admin\ProductStatisticsResource as AdminProductStatisticsResource;
 use App\Http\Resourcesư\Admin\ProductStatisticsResource;
+use App\Http\Resources\Admin\ProductStatisticsResource as AdminProductStatisticsResource;
 
 class StatisticsController extends Controller
 {
@@ -245,7 +246,12 @@ class StatisticsController extends Controller
         $month = $request->filled('month') ? (int) $request->month : null;
         $recent = $request->filled('recent') ? (int) $request->recent : null;
 
-        $topQuery = OrdersDetail::with('productItem.product.images')
+        $topQuery = OrdersDetail::with([
+            'productItem.product.images',
+            'productItem.color:id,code',
+            'productItem.size:id,name'
+        ])
+
             ->whereHas('order', function ($q) {
                 $q->where('status_order_id', 6);
             });
@@ -270,13 +276,15 @@ class StatisticsController extends Controller
             ->take(20)
             ->get();
 
-        $lowStock = ProductItem::with(['product', 'imageByColor'])
+        $lowStock = ProductItem::with(['product', 'imageByColor', 'color:id,code', 'size:id,name'])
+
             ->where('stock', '<=', 5)
             ->orderBy('stock')
             ->take(10)
             ->get();
 
-        $highStock = ProductItem::with(['product', 'imageByColor'])
+        $highStock = ProductItem::with(['product', 'imageByColor', 'color:id,code', 'size:id,name'])
+
             ->where('stock', '>', 50)
             ->orderByDesc('stock')
             ->take(10)
@@ -335,7 +343,7 @@ class StatisticsController extends Controller
             if (!isset($cityStats[$city])) {
                 $cityStats[$city] = [
                     'order_count' => 0,
-                    
+
                 ];
             }
 
@@ -348,6 +356,186 @@ class StatisticsController extends Controller
             'data' => $cityStats,
         ]);
     }
+
+    public function inventoryStatistics(Request $request)
+    {
+        $sortStock = $request->input('sort_stock', 'desc');
+        $byItem = $request->boolean('product_item', false);
+
+        if ($byItem) {
+            $items = ProductItem::with(['product', 'imageByColor', 'color:id,code', 'size:id,name'])
+                ->whereHas('product', fn($q) => $q->where('is_active', 1))
+                ->get()
+                ->map(function ($item) {
+                    $sold = OrdersDetail::where('product_item_id', $item->id)
+                        ->whereHas('order', fn($q) => $q->where('status_order_id', 6))
+                        ->sum('quantity');
+
+                    return [
+                        'id' => $item->id,
+                        'sku' => $item->sku,
+                        'stock' => $item->stock,
+                        'total_sold' => $sold,
+                        'sell_rate_percent' => $item->stock > 0
+                            ? round($sold / $item->stock * 100, 2)
+                            : null,
+                        'color' => $item->color?->code,
+                        'size' => $item->size?->name,
+                        'image' => $item->imageByColor?->url,
+                        'product' => [
+                            'id' => $item->product->id,
+                            'name' => $item->product->name,
+                        ]
+                    ];
+                });
+
+            $items = $sortStock === 'asc'
+                ? $items->sortBy('stock')->values()
+                : $items->sortByDesc('stock')->values();
+
+            return response()->json([
+                'type' => 'product_item',
+                'inventory_by_product_item' => $items,
+            ]);
+        }
+
+        $products = Product::with([
+            'productItems.imageByColor',
+            'productItems.color:id,code',
+            'productItems.size:id,name'
+        ])
+            ->select('id', 'name')
+            ->where('is_active', 1)
+            ->get()
+            ->map(function ($product) {
+                $totalStock = $product->productItems->sum('stock');
+
+                $totalSold = OrdersDetail::whereIn('product_item_id', $product->productItems->pluck('id'))
+                    ->whereHas('order', fn($q) => $q->where('status_order_id', 6))
+                    ->sum('quantity');
+
+                $sellRate = $totalStock > 0
+                    ? round($totalSold / $totalStock * 100, 2)
+                    : null;
+
+                $firstItemImage = $product->productItems->first()?->imageByColor?->url;
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'image' => $firstItemImage,
+                    'total_stock' => $totalStock,
+                    'total_sold' => $totalSold,
+                    'inventory_rate_percent' => $sellRate,
+                    'product_items' => $product->productItems->map(function ($item) {
+                        $sold = OrdersDetail::where('product_item_id', $item->id)
+                            ->whereHas('order', fn($q) => $q->where('status_order_id', 6))
+                            ->sum('quantity');
+
+                        return [
+                            'id' => $item->id,
+                            'sku' => $item->sku,
+                            'color' => $item->color->code,
+                            'size' => $item->size->name,
+                            'stock' => $item->stock,
+                            'total_sold' => $sold,
+                            'sell_rate_percent' => $item->stock > 0
+                                ? round($sold / $item->stock * 100, 2)
+                                : null,
+                            'image' => $item->imageByColor?->url,
+                        ];
+                    }),
+                ];
+            });
+
+
+        // Tổng toàn shop
+        $totalStockAll = $products->sum('total_stock');
+        $totalSoldAll = $products->sum('total_sold');
+
+        $shopSellRate = $totalStockAll > 0
+            ? round($totalSoldAll / $totalStockAll * 100, 2)
+            : null;
+
+        $products = $sortStock === 'asc'
+            ? $products->sortBy('total_stock')->values()
+            : $products->sortByDesc('total_stock')->values();
+
+        return response()->json([
+            'type' => 'product',
+            'shop_sell_rate_percent' => $shopSellRate,
+            'inventory_by_product' => $products,
+        ]);
+    }
+
+
+    public function reviewStatistics(Request $request)
+    {
+        $sortBy = $request->input('sort_by', 'count'); 
+        $star = $request->input('rating'); 
+
+        $ratingCounts = Review::select(
+            DB::raw('FLOOR(rate) as rounded_rate'),
+            DB::raw('COUNT(*) as count')
+        )
+            ->groupBy('rounded_rate')
+            ->pluck('count', 'rounded_rate')
+            ->toArray();
+
+        $totalReviews = array_sum($ratingCounts);
+        $ratingPercentages = [];
+
+        foreach (range(5, 1) as $s) {
+            $count = $ratingCounts[$s] ?? 0;
+            $ratingPercentages[$s] = $totalReviews > 0
+                ? round(($count / $totalReviews) * 100, 2)
+                : 0;
+        }
+
+        $products = Product::with(['productItems.reviews.reviewImages'])
+            ->get()
+            ->map(function ($product) {
+                $allReviews = $product->productItems->flatMap->reviews;
+                $avgRating = $allReviews->count() > 0 ? round($allReviews->avg('rate'), 2) : null;
+                $firstImage = $allReviews->flatMap->reviewImages->pluck('url')->first();
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'reviews_count' => $allReviews->count(),
+                    'average_rating' => $avgRating,
+                    'review_image' => $firstImage,
+                ];
+            })
+            ->filter(function ($product) use ($star) {
+                if ($star === null)
+                    return true;
+
+                $rating = (int) $star;
+                return $product['average_rating'] !== null
+                    && $product['average_rating'] >= $rating
+                    && $product['average_rating'] < $rating + 1;
+            })
+            ->values();
+
+        if ($sortBy === 'rate') {
+            $products = $products->sortByDesc('average_rating')->values();
+        } else {
+            $products = $products->sortByDesc('reviews_count')->values();
+        }
+
+        return response()->json([
+            'rating_percent' => $ratingPercentages,
+            'filter_products' => $products,
+        ]);
+    }
+
+
+
+
+
+
+
 
 
 

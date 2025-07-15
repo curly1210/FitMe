@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  AreaChartOutlined,
   DownOutlined,
   InboxOutlined,
   PercentageOutlined,
@@ -34,7 +35,17 @@ function getItem(
 }
 
 const itemsNavigate: MenuItem[] = [
-  getItem(<Link to="/admin">Dashboard</Link>, "1", <PieChartOutlined />),
+  getItem(<Link to="/admin">Tổng quan</Link>, "1", <AreaChartOutlined />),
+  getItem("Thống kê", "sub1", <PieChartOutlined />, [
+    getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "11"),
+    getItem(
+      <Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>,
+      "12"
+    ),
+    getItem(<Link to="/admin/dashboard/tonkho">Thống kê tồn kho</Link>, "13"),
+    getItem(<Link to="/admin/dashboard/danhgia">Thống kê đánh giá</Link>, "14"),
+  ]),
+
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,
     "2",
@@ -47,7 +58,7 @@ const itemsNavigate: MenuItem[] = [
   ),
   getItem(
     "Quản lý sản phẩm",
-    "sub1",
+    "sub2",
     <InboxOutlined />,
     [
       getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "4"),
@@ -61,7 +72,13 @@ const itemsNavigate: MenuItem[] = [
     "6",
     <ProductOutlined />
   ),
-  getItem(<Link to="/admin/oders">Quản lý đơn hàng</Link>, "7", <ShoppingOutlined />),
+
+  getItem(
+    <Link to="/admin/oders">Quản lý đơn hàng</Link>,
+    "7",
+    <ShoppingOutlined />
+  ),
+
   getItem(
     <Link to="/admin/coupons">Quản lý khuyến mãi</Link>,
     "8",
@@ -77,13 +94,6 @@ const itemsNavigate: MenuItem[] = [
     "10",
     <UserOutlined />
   ),
-
-
-  // getItem("Team", "sub2", <TeamOutlined />, [
-  //   getItem("Team 1", "6"),
-  //   getItem("Team 2", "8"),
-  // ]),
-  // getItem("Files", "9", <FileOutlined />),
 ];
 
 const siderStyle: React.CSSProperties = {
@@ -116,8 +126,22 @@ const LayoutAdmin = () => {
         return "5";
       case "/admin/bienthe":
         return "6";
+      case "/admin/oders":
+        return "7";
+      case "/admin/coupons":
+        return "8";
       case "/admin/users":
         return "9";
+      case "/admin/posts":
+        return "10";
+      case "/admin/dashboard/user":
+        return "11";
+      case "/admin/dashboard/product":
+        return "12";
+      case "/admin/dashboard/tonkho":
+        return "13";
+      case "/admin/dashboard/danhgia":
+        return "14";
       default:
         return "";
     }

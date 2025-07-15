@@ -26,7 +26,8 @@ class AdminOrderResource extends JsonResource
             ],
             'total_amount' => $this->total_amount,
             'payment_method' => $this->payment_method,
-            'status_payment' => $this->status_payment ? 'Đã thanh toán' : 'Chưa thanh toán',
+            // 'status_payment' => $this->status_payment ? 'Đã thanh toán' : 'Chưa thanh toán',
+            'status_payment' => $this->status_payment,
         ];
     }
 }

@@ -29,7 +29,7 @@ class WishlistController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
-                return $this->error('Vui lòng đăng nhập để xem danh sách yêu thích', [], 401);
+                return $this->error('Vui lòng đăng nhập để xem danh sách yêu thích', [], 403);
             }
 
             // lấy danh sách wishlists
@@ -57,7 +57,7 @@ class WishlistController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
-                return $this->error('Vui lòng đăng nhập để thêm sản phẩm vào danh sách yêu thích', [], 401);
+                return $this->error('Vui lòng đăng nhập để thêm sản phẩm vào danh sách yêu thích', [], 403);
             }
 
             // Xét điệu kiện cho product_id 
@@ -111,7 +111,7 @@ class WishlistController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             if (!$user) {
-                return $this->error('Vui lòng đăng nhập để xóa sản phẩm khỏi danh sách yêu thích', [], 401);
+                return $this->error('Vui lòng đăng nhập để xóa sản phẩm khỏi danh sách yêu thích', [], 403);
             }
 
 
@@ -142,7 +142,7 @@ class WishlistController extends Controller
         try {
             $user = JWTAuth::parseToken()->authenticate();
             if (!$user) {
-                return $this->error('Vui lòng đăng nhập để xem danh sách hình ảnh sản phẩm yêu thích', [], 401);
+                return $this->error('Vui lòng đăng nhập để xem danh sách hình ảnh sản phẩm yêu thích', [], 403);
             }
             $product_id = $request->query('product_id');
             $product = Product::with('productImages', 'productItems')->where('id', $product_id)->where('is_active', 1)->first();

@@ -587,8 +587,16 @@ const ProductDetail = () => {
                 rows={4}
                 placeholder="Bình luận ..."
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="rounded-l-md"
+                onChange={(e) => {
+                  if (!accessToken || !user) return;
+                  setComment(e.target.value);
+                }}
+                onFocus={() => {
+                  if (!accessToken || !user) {
+                    openModal(<ModalLogin />);
+                  }
+                }}
+                className="rounded-l-md cursor-pointer"
               />
               <Button
                 type="primary"
@@ -675,7 +683,7 @@ const ProductDetail = () => {
                           <img
                             key={image?.id}
                             src={image?.url}
-                            className="block w-[80px] h-[80px]"
+                            className="block w-[80px] h-[80px] object-cover"
                           />
                         ))}
                       </div>

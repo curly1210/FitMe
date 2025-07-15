@@ -180,3 +180,15 @@ body {
 
 /* .trash-products .ant-select-selector {
 } */
+
+.try-on .ant-image {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.modal-try-clothes .ant-image {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
