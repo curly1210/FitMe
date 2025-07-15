@@ -217,11 +217,14 @@ Route::post('/vnpay/refund', [VNPayController::class, 'vnpayRefund']);
 Route::get('/getProductsNeedReview', [ClientReviewController::class, 'getProductsNeedReview'])->name('reviews.getProductNeedReview');
 Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
 Route::post('/reviews', [ClientReviewController::class, 'create'])->name('reviews.create'); #api Tạo review
+
 Route::get('/reviews/edit/{id}', [ClientReviewController::class, 'edit'])->name('reviews.edit'); #api đổ dữ liệu update review
+
 Route::post('/reviews/update/{id}', [ClientReviewController::class, 'update'])->name('reviews.update'); #api update dữ liệu review
 
 Route::prefix('/admin')->group(function () {
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
+    Route::get('/reviews/get-detail', [AdminReviewController::class, 'getDetail'])->name('reviews.index');
     Route::post('/reviews/hidden', [AdminReviewController::class, 'hidden'])->name('reviews.hidden'); #api list review trang chi tiết sản phẩm
     Route::get("/reviews/reply", [ReviewReplyController::class, "edit"]);
     Route::post("/reviews/reply/create", [ReviewReplyController::class, "create"]);
@@ -235,10 +238,18 @@ Route::get("/ghn/get-district", [GhnController::class, "getDistrict"]);
 Route::get("/ghn/get-ward", [GhnController::class, "getWard"]);
 
 Route::get("/ghn/get-store", [GhnController::class, "getStore"]);
+Route::get("/ghn/pick-shift", [GhnController::class, "pickShift"]);
+
+
 
 Route::get("/ghn/get-service", [GhnController::class, "getService"]);
 Route::post("/ghn/calculate-fee", [GhnController::class, "calculateFee"]);
 
+Route::post("/ghn/calculate-delivery-time", [GhnController::class, "calculateExpectedDeliverytime"]);
+
+
+Route::post("/ghn/order/{order_code}", [GhnController::class, "createOrder"]);
+Route::get("/ghn/order-detail/{order_code}", [GhnController::class, "getOrderDetail"]);
 
 
 
