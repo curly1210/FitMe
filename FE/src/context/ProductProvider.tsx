@@ -21,12 +21,13 @@ interface ProductContextType {
   handleSearch: (clear: boolean) => void;
 }
 
-export const ProductContext = createContext<ProductContextType | undefined>(
-  undefined
-);
+export const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export default function ProductProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const queryParam = new URLSearchParams(location.search);
+  const searchValue = queryParam.get("searchValue");
+
   const { categorySlug } = useParams<{ categorySlug: string }>();
   const { categoryData } = location.state || {};
 
@@ -47,12 +48,13 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   /* Gọi danh sách sản phầm */
+  const urlListProduct = categorySlug ? `${useApiUrl()}/category/${categorySlug}` : `${useApiUrl()}/search`;
   const {
     data: response,
     isLoading,
     isError,
   } = useCustom({
-    url: `${useApiUrl()}/category/${categorySlug}`,
+    url: urlListProduct,
     method: "get",
     queryOptions: {
       enabled: callapiList,
@@ -63,14 +65,11 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
     config: {
       query: {
         page: currentPage,
-        color: fieldFilter.color.length
-          ? `[${fieldFilter.color.join(",")}]`
-          : "",
+        color: fieldFilter.color.length ? `[${fieldFilter.color.join(",")}]` : "",
         size: fieldFilter.size.length ? `[${fieldFilter.size.join(",")}]` : "",
-        price: fieldFilter.price.length
-          ? `[${fieldFilter.price.join(",")}]`
-          : "",
+        price: fieldFilter.price.length ? `[${fieldFilter.price.join(",")}]` : "",
         sort: sortData,
+        keyword: searchValue ? searchValue : "",
       },
     },
   });
@@ -96,7 +95,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   }, [isLoading, response]);
   useEffect(() => {
     setCallapiList(true);
-  }, [categorySlug]);
+  }, [categorySlug,searchValue]);
   useEffect(() => {
     if (showFilter) setShowSort(false);
   }, [showFilter]);
@@ -153,10 +152,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
     if (fieldFilter.size.length) {
       params.set("size", JSON.stringify(fieldFilter.size));
     }
-    navigate(
-      { search: params.toString() },
-      { replace: true, state: { categoryData } }
-    );
+    navigate({ search: params.toString() }, { replace: true, state: { categoryData } });
   };
 
   return (
@@ -182,6 +178,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
         setFieldFilter,
         setSortData,
         sortData,
+        searchValue,
       }}
     >
       {children}

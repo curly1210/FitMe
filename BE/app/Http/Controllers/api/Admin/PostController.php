@@ -93,9 +93,11 @@ class PostController extends Controller
                     'quality' => 80
                 ]);
                 $data['thumbnail'] = $uploadResult['public_id'];
-            } else {
-                return $this->error('Thumbnail không được để trống', [], 422);
-            }
+            } 
+            elseif (!$post->thumbnail) {
+            // Nếu không gửi file thumbnail và bài viết chưa có thumbnail
+            return $this->error('Thumbnail không được để trống', [], 422);
+        }
             $post->update($data);
             return $this->success(new PostResource($post), 'Bài viết đã được cập nhật');
         } catch (ValidationException $e) {
