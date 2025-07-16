@@ -224,12 +224,12 @@ Route::post('/reviews/update/{id}', [ClientReviewController::class, 'update'])->
 
 Route::prefix('/admin')->group(function () {
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
-    Route::get('/reviews/get-detail', [AdminReviewController::class, 'getDetail'])->name('reviews.index');
+    Route::get('/reviews/get-detail/{id}', [AdminReviewController::class, 'getDetail'])->name('reviews.index');
     Route::post('/reviews/hidden', [AdminReviewController::class, 'hidden'])->name('reviews.hidden'); #api list review trang chi tiết sản phẩm
     Route::get("/reviews/reply", [ReviewReplyController::class, "edit"]);
     Route::post("/reviews/reply/create", [ReviewReplyController::class, "create"]);
-    Route::post("/reviews/reply/update", [ReviewReplyController::class, "update"]);
-    Route::post("/reviews/reply/delete", [ReviewReplyController::class, "delete"]);
+    Route::patch("/reviews/reply/update/{id}", [ReviewReplyController::class, "update"]);
+    Route::delete("/reviews/reply/delete/{id}", [ReviewReplyController::class, "delete"]);
 });
 
 // GHN
