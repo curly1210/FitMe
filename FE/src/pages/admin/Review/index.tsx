@@ -16,6 +16,10 @@ const AdminReviewProductList = () => {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null
   );
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
+  const [currentPageProduct, setCurrentPageProduct] = useState(1);
+  const [pageSizeProducts, setPageSizeProducts] = useState(10);
 
   const { data: categories } = useList({
     resource: "client/categories",
@@ -50,19 +54,35 @@ const AdminReviewProductList = () => {
     isLoading,
     // refetch,
   } = useList({
-    resource: "admin/products",
+    resource: "admin/reviews",
+    pagination: {
+      mode: "off",
+    },
     filters: [
       { field: "search", operator: "eq", value: searchText },
-      { field: "category_id", operator: "eq", value: selectCategory },
-      { field: "rating_filter", operator: "eq", value: selecteRate },
+      { field: "category", operator: "eq", value: selectCategory },
+      { field: "rate", operator: "eq", value: selecteRate },
+      { field: "per_page", operator: "eq", value: pageSizeProducts },
+      { field: "page", operator: "eq", value: currentPageProduct },
     ],
+    queryOptions: {
+      enabled: true,
+      keepPreviousData: false, //  khi page thay đổi thì sẽ loading lại
+    },
   });
 
   const products =
-    productsResponse?.data.map((product) => ({
+    productsResponse?.data?.data.map((product: any) => ({
       ...product,
       key: product.id,
     })) || [];
+
+  const totalProducts = productsResponse?.data?.meta?.total || 0;
+
+  const handleTableChange = (pagination: any) => {
+    setCurrentPageProduct(pagination?.current);
+    setPageSizeProducts(pagination?.pageSize);
+  };
 
   const columns = [
     {
@@ -73,7 +93,7 @@ const AdminReviewProductList = () => {
         <div className="flex items-center gap-3">
           <div className="w-[60px] h-[60px]">
             <img
-              src={product?.image}
+              src={product?.product_images}
               className="w-full h-full object-cover"
               alt=""
             />
@@ -84,24 +104,24 @@ const AdminReviewProductList = () => {
     },
     {
       title: "Danh mục",
-      key: "category_name",
-      dataIndex: "category_name",
+      key: "category",
+      dataIndex: "category",
     },
     {
       title: "Số lượt đánh giá",
-      key: "total_inventory",
-      dataIndex: "total_inventory",
+      key: "reviews_count",
+      dataIndex: "reviews_count",
     },
     {
       title: "Trung bình rating",
-      key: "total_inventory",
-      dataIndex: "total_inventory",
+      key: "reviews_avg_rate",
+      dataIndex: "reviews_avg_rate",
       render: (_: any, product: any) => (
         <div className="flex items-center gap-2">
           <GoStarFill
             className={`w-5 h-5 fill-current transition-colors duration-150 text-yellow-400`}
           />
-          <p>{product?.total_inventory}</p>
+          <p>{product?.reviews_avg_rate}</p>
         </div>
       ),
     },
@@ -113,6 +133,7 @@ const AdminReviewProductList = () => {
           onClick={() => {
             setSelectedProductId(product.id);
             setOpenDrawerShowReview(true);
+            setSelectedProduct(product);
           }}
           color="primary"
           variant="solid"
@@ -154,9 +175,20 @@ const AdminReviewProductList = () => {
 
       <div>
         {isLoading ? (
-          <Skeleton active />
+          <div>
+            <Skeleton active />
+          </div>
         ) : (
-          <Table dataSource={products} columns={columns} />
+          <Table
+            dataSource={products}
+            columns={columns}
+            pagination={{
+              pageSize: pageSizeProducts,
+              total: totalProducts,
+              current: currentPageProduct,
+            }}
+            onChange={handleTableChange}
+          />
         )}
       </div>
 
@@ -164,6 +196,7 @@ const AdminReviewProductList = () => {
         open={openDrawerShowReview}
         onClose={() => setOpenDrawerShowReview(false)}
         productId={selectedProductId}
+        product={selectedProduct}
       />
     </div>
   );
