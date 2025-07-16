@@ -19,7 +19,7 @@ const AdminReviewProductList = () => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const [currentPageProduct, setCurrentPageProduct] = useState(1);
-  const [pageSizeProducts, setPageSizeProducts] = useState(1);
+  const [pageSizeProducts, setPageSizeProducts] = useState(10);
 
   const { data: categories } = useList({
     resource: "client/categories",
