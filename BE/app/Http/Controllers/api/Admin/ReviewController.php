@@ -16,11 +16,12 @@ use App\Http\Resources\Client\ReviewResource as ClientReviewResource;
 class ReviewController extends Controller
 {
     use ApiResponse;
-    public function getDetail(Request $request)
+    public function getDetail(Request $request, $id)
     {
         $rate = $request->query('rate');
 
-        $productId = $request->query('product_id');
+        // $productId = $request->query('product_id');
+        $productId = $id;
         // dd($productId)
         $product = Product::query()->with('productItems')->where('id', $productId)->first();
         // dd($product);
@@ -72,7 +73,8 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         $query =  Product::with('productItems', 'productImages')->withCount('reviews')
-            ->withAvg('reviews', 'rate');
+            ->withAvg('reviews', 'rate')->withMax('reviews', 'created_at')
+            ->orderByDesc('reviews_max_created_at');
         $perPage = $request->input('per_page', 10);
         if ($request->search) {
             $query->where("name", 'like', '%' . $request->search . '%');
