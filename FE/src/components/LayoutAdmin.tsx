@@ -94,6 +94,11 @@ const itemsNavigate: MenuItem[] = [
     "10",
     <UserOutlined />
   ),
+  getItem(
+    <Link to="/admin/reviews">Quản lý đánh giá</Link>,
+    "15",
+    <UserOutlined />
+  ),
 ];
 
 const siderStyle: React.CSSProperties = {
@@ -142,6 +147,8 @@ const LayoutAdmin = () => {
         return "13";
       case "/admin/dashboard/danhgia":
         return "14";
+      case "/admin/reviews":
+        return "15";
       default:
         return "";
     }

@@ -17,6 +17,7 @@ import { Link } from "react-router";
 import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
 import "dayjs/locale/vi";
+import RenderReviewButton from "./RenderReviewButton";
 dayjs.locale("vi");
 
 const { Search } = Input;
@@ -26,7 +27,7 @@ const Order = () => {
   const [searchText, setSearchText] = useState<any>(undefined);
 
   const [currentPage, setCurrentPage] = useState(1); // trang hiện tại
-  const [pageSize, setPageSize] = useState(2); // số item mỗi trang
+  const [pageSize, setPageSize] = useState(10); // số item mỗi trang
 
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | undefined>(undefined);
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
@@ -63,8 +64,6 @@ const Order = () => {
     setCurrentPage(page);
     if (pageSize) setPageSize(pageSize);
   };
-
-  console.log(orders);
 
   const handleSearchText = (value: any) => {
     setSearchText(value || undefined);
@@ -241,6 +240,8 @@ const Order = () => {
                         XEM CHI TIẾT
                       </button>
                     </Link>
+                    <RenderReviewButton order={order} />
+
                     {order.status_name == "Chờ xác nhận" && (
                       <Popconfirm
                         title="Cập nhật trạng thái"
