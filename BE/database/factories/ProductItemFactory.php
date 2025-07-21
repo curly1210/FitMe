@@ -30,13 +30,16 @@ class ProductItemFactory extends Factory
         $color = Color::inRandomOrder()->first();
         $year = now()->year;
 
+        $price = fake()->numberBetween(200000, 300000);
+        $sale_price = fake()->numberBetween(100000, 199999);
+        $sale_percent = $price > 0 ? round((($price - $sale_price) / $price) * 100) : 0;
         $sku = $this->generateSKU($categoryName, $product->id, $year, $color->id, $size->id);
 
         return [
             'product_id' => $product->id,
-            'import_price' => fake()->numberBetween(80000, 150000),
-            'price' => fake()->numberBetween(200000, 300000),
-            'sale_price' => fake()->numberBetween(100000, 199999),
+            'price' => $price,
+            'sale_price' => $sale_price,
+            'sale_percent' => $sale_percent,
             'stock' => fake()->numberBetween(5, 50),
             'sku' => $sku,
             'color_id' => $color->id,
@@ -57,13 +60,17 @@ class ProductItemFactory extends Factory
             $color = Color::inRandomOrder()->first();
             $year = now()->year;
 
+            $price = fake()->numberBetween(200000, 300000);
+            $sale_price = fake()->numberBetween(100000, 199999);
+            $sale_percent = $price > 0 ? round((($price - $sale_price) / $price) * 100) : 0;
+
             $sku = $this->generateSKU($categoryName, $productId, $year, $color->id, $size->id);
 
             return [
                 'product_id' => $productId,
-                'import_price' => fake()->numberBetween(80000, 150000),
-                'price' => fake()->numberBetween(200000, 300000),
-                'sale_price' => fake()->numberBetween(100000, 199999),
+                'price' => $price,
+                'sale_price' => $sale_price,
+                'sale_percent' => $sale_percent,
                 'stock' => fake()->numberBetween(5, 50),
                 'sku' => $sku,
                 'color_id' => $color->id,

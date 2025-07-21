@@ -199,9 +199,9 @@ class OrderController extends Controller
             // $newStatus = $request->input('status_order_id');
 
             // Xử lý logic cập nhật trạng thái
-            if ($currentStatus == 1) {
+            if ($currentStatus == 1 || $currentStatus == 2) {
                 DB::transaction(function () use ($order) {
-                    // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (7)
+                    // Chuyển từ "Chưa xác nhận" (1) hoặc "đang chuẩn bị" (2) sang "Đã hủy" (7)
                     $order->update(['status_order_id' => 7]);
                     if ($order->payment_method == "vnpay") {
                         $order->update(['status_payment' => 2]); # Chờ hoàn tiền

@@ -97,10 +97,8 @@ class ProductController extends Controller
                 'variants.*.color_id' => 'required|exists:colors,id',
                 'variants.*.size_id' => 'required|exists:sizes,id',
                 'variants.*.stock' => 'required|integer|min:0',
-                'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
-                'variants.*.sale_price' => 'nullable',
-                'variants.*.sale_percent' => 'nullable|numeric|min:0',
+                'variants.*.sale_price' => 'required|numeric|min:0|lte:variants.*.price',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
@@ -133,11 +131,10 @@ class ProductController extends Controller
             foreach ($validatedData['variants'] as $variant) {
                 $totalInventory += $variant['stock'];
 
-                $salePrice = $variant['price'];
-                if (!empty($variant['sale_percent']) && $variant['sale_percent'] > 0) {
-                    $discount = $variant['price'] * ($variant['sale_percent'] / 100);
-                    $salePrice = $variant['price'] - $discount;
-                }
+                // Tính sale_percent từ price và sale_price
+                $salePercent = $variant['price'] > 0
+                    ? round((($variant['price'] - $variant['sale_price']) / $variant['price']) * 100)
+                    : 0;
 
                 // Tạo SKU
                 $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
@@ -148,10 +145,9 @@ class ProductController extends Controller
                     'size_id' => $variant['size_id'],
                     'sku' => $sku,
                     'stock' => $variant['stock'],
-                    'import_price' => $variant['import_price'],
                     'price' => $variant['price'],
-                    'sale_price' => $salePrice,
-                    'sale_percent' => $variant['sale_percent'],
+                    'sale_price' => $variant['sale_price'],
+                    'sale_percent' => $salePercent,
                 ]);
             }
 
@@ -207,27 +203,24 @@ class ProductController extends Controller
                 'variants.*.color_id' => 'required|exists:colors,id',
                 'variants.*.size_id' => 'required|exists:sizes,id',
                 'variants.*.stock' => 'required|integer|min:0',
-                'variants.*.import_price' => 'required|numeric|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
+                'variants.*.sale_price' => 'required|numeric|min:0|lte:variants.*.price',
                 'variants.*.id' => 'required',
-                'variants.*.sale_price' => 'nullable',
-                'variants.*.sale_percent' => 'nullable|numeric|min:0',
                 'images' => 'required|array|min:1',
                 // 'images.*.url' => 'nullable',
 
                 'images.*.url' => [
                     'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
-                    fn($att, $val, $fail) =>
+                    fn ($att, $val, $fail) =>
                     !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
                         && $fail("The $att must be a file or string.")
                 ],
 
                 'images.*.color_id' => 'required|exists:colors,id',
+                'is_active' => 'nullable|boolean',
             ]);
 
             DB::beginTransaction();
-
-
 
             $slug = Str::slug($validatedData['name']);
 
@@ -250,69 +243,53 @@ class ProductController extends Controller
 
             // Lấy danh sách ID hiện tại trong DB theo product
             $existingIds = ProductItem::where('product_id', $product->id)->pluck('id')->toArray();
+            $inputIds = [];
 
             $totalInventory = 0;
+
             foreach ($validatedData['variants'] as $variant) {
                 $inputIds[] = $variant['id'];
-                // $totalInventory += $variant['stock'];
+                $totalInventory += $variant['stock'];
 
-                // Tính sale_price dựa trên sale_percent nếu có
-                $salePrice = $variant['price']; // Giá mặc định là price
-                $salePercent = $variant['sale_percent'] ?? null;
-                if ($salePercent !== null && $salePercent > 0) {
-                    $discount = $variant['price'] * ($salePercent / 100);
-                    $salePrice = $variant['price'] - $discount;
-                } elseif (!empty($variant['sale_price'])) {
-                    // Nếu sale_price được gửi lên nhưng không có sale_percent, giữ nguyên sale_price
-                    $salePrice = $variant['sale_price'];
-                }
-                // Kiểm tra xem variant đã tồn tại trong DB chưa
+                // Tính sale_percent từ price và sale_price
+                $salePercent = $variant['price'] > 0
+                    ? round((($variant['price'] - $variant['sale_price']) / $variant['price']) * 100)
+                    : 0;
+
                 if (in_array($variant['id'], $existingIds)) {
-                    // Đã tồn tại → cập nhật
+                    // Cập nhật variant hiện có
                     ProductItem::where('id', $variant['id'])->update([
-                        // 'color_id' => $variant['color'],
-                        // 'size' => $variant['size'],
+                        'color_id' => $variant['color_id'],
+                        'size_id' => $variant['size_id'],
                         'stock' => $variant['stock'],
-                        'import_price' => $variant['import_price'],
                         'price' => $variant['price'],
-                        'sale_price' => $salePrice,
+                        'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
                     ]);
-                } else { // Chưa có → tạo mới
-
+                } else {
+                    // Tạo mới variant
                     $categoryName = $product->category ? $product->category->name : 'unknown';
                     $year = date('Y');
-
                     $sku = $this->generateSKU($categoryName, $product->id, $year, $variant['color_id'], $variant['size_id']);
-                    // Chưa có → tạo mới
+
                     ProductItem::create([
-                        // 'id' => $variant['id'], // chỉ dùng nếu bạn cho phép tự set id
                         'product_id' => $product->id,
                         'color_id' => $variant['color_id'],
                         'size_id' => $variant['size_id'],
                         'sku' => $sku,
                         'stock' => $variant['stock'],
-                        'import_price' => $variant['import_price'],
                         'price' => $variant['price'],
-                        'sale_price' => $salePrice,
+                        'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
                     ]);
-                    // $salePrice = null;
-                    // if (!empty($variant['sale_price'])) {
-                    //     $percentage = $variant['sale_price'];
-                    //     $discount = $variant['price'] * ($percentage / 100);
-                    //     $salePrice = $variant['price'] - $discount;
-
                 }
-
-                $totalInventory += $variant['stock'];
             }
-            // Cập nhật lại tổng số lượng tồn kho của sản phẩm
-            $product->update(['total_inventory' => $totalInventory]);
-
             // Xóa các product_item không còn trong danh sách gửi lên
             $idsToDelete = array_diff($existingIds, $inputIds);
             ProductItem::whereIn('id', $idsToDelete)->delete();
+
+            // Cập nhật lại tổng số lượng tồn kho của sản phẩm
+            $product->update(['total_inventory' => $totalInventory]);
 
             $inputUrls = [];
 
@@ -350,17 +327,11 @@ class ProductController extends Controller
                         'folder' => "products/{$product->id}",
                     ]);
 
-
-                    try {
-
-                        ProductImage::create([
-                            'product_id' => $product->id,
-                            'color_id' =>  (int)$imageData['color_id'],
-                            'url' => $uploadResult['public_id'],
-                        ]);
-                    } catch (\Throwable $th) {
-                        return response()->json($th->getMessage());
-                    }
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'color_id' =>  (int)$imageData['color_id'],
+                        'url' => $uploadResult['public_id'],
+                    ]);
                 }
             }
 
