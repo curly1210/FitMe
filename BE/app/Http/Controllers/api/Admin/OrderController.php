@@ -65,8 +65,13 @@ class OrderController extends Controller
         return response()->json([
             'order_code' => $order->orders_code,
             'customer_name' => $order->user->name,
-            'status' => $order->statusOrder->name,
+            'status' => [
+                'id' => $order->statusOrder->id,
+                'label' => $order->statusOrder->name,
+                'color' => $order->statusOrder->color,
+            ],
             'created_at' => $order->created_at->format('d/m/Y H:i'),
+            'receiving_name' => $order->recipient_name,
             'receiving_address' => $order->receiving_address,
             'recipient_phone' => $order->recipient_phone,
             'payment_method' => $order->payment_method,
