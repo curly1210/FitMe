@@ -20,6 +20,16 @@ import ChartByMonth from "./charMonth";
 import ChartByYear from "./charYear";
 import "./chaSetup"
 import TopProducts from "./topProduct";
+import { OrderLocationMap } from "../thongKeSanPhamDonHang/mapDonHang";
+import { useState } from "react";
+import dayjs from "dayjs";
+import { Title } from "chart.js";
+
+type Props = {
+  from: string;
+  to: string;
+  status_order_id?: number;
+};
 
 interface OverviewResponse {
   total_orders: number;
@@ -31,11 +41,22 @@ interface OverviewResponse {
   };
 }
 
+
 const Dashboard = () => {
+   const now = dayjs();
+
+    const [month, setMonth] = useState(now.month() + 1);
+    const [year, setYear] = useState(now.year());
+   const [dateRange, setDateRange] = useState<[string, string]>([
+      now.subtract(30, "day").format("YYYY-MM-DD"),
+      now.format("YYYY-MM-DD"),
+    ]);  const [statusOrderId, setStatusOrderId] = useState<number | undefined>();
+    
   const { data, isLoading } = useCustom<OverviewResponse>({
     url: "admin/statistics/overview",
     method: "get",
   });
+   
 
   const overview = data?.data || {
     total_orders: 0,
@@ -102,6 +123,7 @@ const statusMap: Record<string, { label: string; icon: JSX.Element }> = {
 
   return (
     <div style={{ padding: 24 }}>
+      <h1 className="text-2xl font-bold">Tổng quan</h1><br />
       {isLoading ? (
         <Spin />
       ) : (
@@ -124,27 +146,38 @@ const statusMap: Record<string, { label: string; icon: JSX.Element }> = {
           </Row>
 
           {/* Trạng thái đơn hàng */}
-          <Row style={{ marginTop: 32 }}>
-            <Col span={24}>
-              <Card title="Đơn hàng theo trạng thái" style={{ borderRadius: 10 }}>
-                <Row gutter={[16, 16]}>
-                  {Object.entries(overview.orders_by_status).map(([status, count]) => (
-                    <Col span={6} key={status}>
-                      <Card style={{ borderRadius: 10 }}>
-                        <Row align="middle">
-                          {statusMap[status]?.icon}
-                          <span>
-                            {statusMap[status]?.label || `Trạng thái ${status}`}:{" "}
-                            <strong>{count}</strong>
-                          </span>
-                        </Row>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-              </Card>
-            </Col>
-          </Row>
+       <Row gutter={24} style={{ marginTop: 32 }}>
+  {/* BẢN ĐỒ BÊN TRÁI */}
+  <Col span={16}>
+    <Card title="Bản đồ thống kê đơn hàng" style={{ borderRadius: 10 }}>
+      <OrderLocationMap />
+    </Card>
+  </Col>
+
+  {/* TRẠNG THÁI ĐƠN HÀNG BÊN PHẢI */}
+  <Col span={8}>
+    <Card title="Đơn hàng theo trạng thái" style={{ borderRadius: 10 }}>
+      <Row gutter={[16, 16]}>
+        {Object.entries(overview.orders_by_status).map(([status, count]) => (
+          <Col span={12} key={status}>
+            <Card style={{ borderRadius: 10 }}>
+              <Row align="middle" gutter={8}>
+                <Col>{statusMap[status]?.icon}</Col>
+                <Col>
+                  <span>
+                    {statusMap[status]?.label || `Trạng thái ${status}`}:{" "}
+                    <strong>{count}</strong>
+                  </span>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </Card>
+  </Col>
+</Row>
+
   
           {/*Biểu đồ thống kê*/}
           <div style={{ padding: 24 }}>
@@ -169,7 +202,7 @@ const statusMap: Record<string, { label: string; icon: JSX.Element }> = {
           </div>
            {/*Top sản phẩm*/}
           <Card   size="small">
-            <h1 className="font-bold text-lg">Top sản phẩm bán chạy</h1>
+            <h1 className="font-bold text-lg">Top 10 sản phẩm bán chạy</h1>
           <TopProducts />
         </Card>
         </>

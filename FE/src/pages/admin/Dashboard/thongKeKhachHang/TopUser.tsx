@@ -23,7 +23,7 @@ const TopCustomersTable = ({
 
   return (
     <Card
-      title="Top khách hàng chi tiêu"
+      title="Top 10 khách hàng chi tiêu"
       style={{ marginTop: 24, borderRadius: 10 }}
       bodyStyle={{ padding: 0 }}
     >
