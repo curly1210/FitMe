@@ -65,6 +65,7 @@ class OrderController extends Controller
         return response()->json([
             'order_code' => $order->orders_code,
             'customer_name' => $order->user->name,
+            'customer_email' => $order->user->email,
             'status' => [
                 'id' => $order->statusOrder->id,
                 'label' => $order->statusOrder->name,
