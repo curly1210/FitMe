@@ -36,15 +36,15 @@ function getItem(
 
 const itemsNavigate: MenuItem[] = [
   getItem(<Link to="/admin">Tổng quan</Link>, "1", <AreaChartOutlined />),
-  getItem("Thống kê", "sub1", <PieChartOutlined />, [
-    getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "11"),
-    getItem(
-      <Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>,
-      "12"
-    ),
-    getItem(<Link to="/admin/dashboard/tonkho">Thống kê tồn kho</Link>, "13"),
-    getItem(<Link to="/admin/dashboard/danhgia">Thống kê đánh giá</Link>, "14"),
-  ]),
+  // getItem("Thống kê", "sub1", <PieChartOutlined />, [
+  //  // getItem(<Link to="/admin/dashboard/user">Thống kê khách hàng</Link>, "11"),
+  //  // getItem(
+  //   //   <Link to="/admin/dashboard/product">Thống kê S.Phẩm Đ.Hàng</Link>,
+  //   //   "12"
+  //   // ),
+  //  // getItem(<Link to="/admin/dashboard/tonkho">Thống kê tồn kho</Link>, "13"),
+  //   //getItem(<Link to="/admin/dashboard/danhgia">Thống kê đánh giá</Link>, "14"),
+  // ]),
 
   getItem(
     <Link to="/admin/banner">Quản lý banner</Link>,

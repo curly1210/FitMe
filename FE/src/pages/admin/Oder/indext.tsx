@@ -168,7 +168,7 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary">Xác nhận</Button>
+            <Button onClick={(e) => e.stopPropagation()} type="primary">Xác nhận</Button>
           </Popconfirm>
         );
       case "Đang chuẩn bị hàng":
@@ -186,7 +186,7 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary">Đang giao hàng</Button>
+            <Button onClick={(e) => e.stopPropagation()} type="primary">Đang giao hàng</Button>
           </Popconfirm>
         );
       case "Đang giao hàng":
@@ -201,7 +201,7 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button type="primary">Đã giao</Button>
+              <Button  onClick={(e) => e.stopPropagation()} type="primary">Đã giao</Button>
             </Popconfirm>
 
             <Popconfirm
@@ -217,7 +217,7 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button danger>Giao hàng thất bại</Button>
+              <Button onClick={(e) => e.stopPropagation()} danger>Giao hàng thất bại</Button>
             </Popconfirm>
           </Space>
         );
@@ -237,7 +237,7 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button type="primary">Đang giao</Button>
+              <Button onClick={(e) => e.stopPropagation()} type="primary">Đang giao</Button>
             </Popconfirm>
             <Popconfirm
               onConfirm={() =>
@@ -248,7 +248,7 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button danger>Hủy đơn hàng</Button>
+              <Button onClick={(e) => e.stopPropagation()} danger>Hủy đơn hàng</Button>
             </Popconfirm>
           </Space>
         );
@@ -261,7 +261,7 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary">Hoàn tiền</Button>
+            <Button onClick={(e) => e.stopPropagation()} type="primary">Hoàn tiền</Button>
           </Popconfirm>
         );
       default:
@@ -311,32 +311,32 @@ const Oder = () => {
       },
     },
     {
-      title: "Cập nhật trạng trạng thái",
+      title: "Hành động",
       key: "action",
       render: (_: any, record: any) => renderAdminActionButtons(record),
     },
-    {
-      title: "Hành động",
-      render: (_: any, record: any) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item
-                onClick={() => {
-                  setSelectedOrderId(record.id);
-                  setDrawerOpen(true);
-                }}
-              >
-                Chi tiết
-              </Menu.Item>
-            </Menu>
-          }
-          trigger={["click"]}
-        >
-          <span style={{ cursor: "pointer", fontSize: 20 }}>⋯</span>
-        </Dropdown>
-      ),
-    },
+    // {
+    //   title: "Hành động",
+    //   render: (_: any, record: any) => (
+    //     <Dropdown
+    //       overlay={
+    //         <Menu>
+    //           <Menu.Item
+    //             onClick={() => {
+    //               setSelectedOrderId(record.id);
+    //               setDrawerOpen(true);
+    //             }}
+    //           >
+    //             Chi tiết
+    //           </Menu.Item>
+    //         </Menu>
+    //       }
+    //       trigger={["click"]}
+    //     >
+    //       <span style={{ cursor: "pointer", fontSize: 20 }}>⋯</span>
+    //     </Dropdown>
+    //   ),
+    // },
   ];
 
   return (
@@ -421,7 +421,16 @@ const Oder = () => {
             setCurrent(page);
             setPageSize(size);
           },
+          
         }}
+        onRow={(record)=>({
+          onClick: ()=>{
+            
+            setSelectedOrderId(record.id);
+                  setDrawerOpen(true);
+          },
+            style: { cursor: "pointer" },
+        })}
       />
 
       <OrderDetailDrawer

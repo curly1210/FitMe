@@ -82,10 +82,10 @@ const DashboardUser = () => {
 
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24, width:'100%' }}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
         <Col>
-          <Title level={4}>Tổng quan người dùng</Title>
+          <Title level={4}>Quản lý người dùng</Title>
         </Col>
       </Row>
 
