@@ -2,6 +2,8 @@ import { CrudFilters, useList, useUpdate } from "@refinedev/core";
 import { Button, Col, Dropdown, Input, Menu, Row, Select, Space, Table } from "antd";
 import { useState } from "react";
 import Detail from "./detail";
+import DashboardUser from "../Dashboard/thongKeKhachHang";
+import { Title } from "chart.js";
 
 const User = () => {
   const { mutate } = useUpdate();
@@ -122,10 +124,15 @@ const { data, isLoading } = useList({
 
   return (
     <>
+    <div className="w-full" >
+    <Row className="w-full" >
+      <DashboardUser/>
+    </Row>
       {/* Thanh tìm kiếm & lọc */}
-    <Row gutter={16} className="mb-4">
-      <Col span={8}>
-        <Space.Compact style={{ width: "100%" }}>
+   <div style={{ width: 1310 }} className="ml-4.75">
+    <Row className="flex gap-3 mb-4 flex-wrap">
+     
+        
           <Input
             size="middle"
             placeholder="Tìm theo tên"
@@ -133,10 +140,10 @@ const { data, isLoading } = useList({
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             className="!h-10" // ép height 40px
-            style={{ width: "100%" }}
+            style={{ width: 250 }}
           />
-        </Space.Compact>
-      </Col>
+        
+      
 
       <Col span={8}>
         <Select
@@ -149,7 +156,7 @@ const { data, isLoading } = useList({
           }}
           size="middle"
           className="!h-10 [&_.ant-select-selector]:!h-10"
-          style={{ width: "100%" }}
+          style={{ width: 200 }}
         >
           <Select.Option value={undefined}>Tất cả</Select.Option>
           <Select.Option value={0}>Hoạt động</Select.Option>
@@ -158,9 +165,7 @@ const { data, isLoading } = useList({
       </Col>
     </Row>
 
-
-
-      <Table
+     <Table
         className="border-gray rounded-2xl"
         dataSource={data?.data ?? []}
         columns={columns}
@@ -177,7 +182,8 @@ const { data, isLoading } = useList({
           },
         }}
       />
-
+      </div>
+</div>
       <Detail
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
