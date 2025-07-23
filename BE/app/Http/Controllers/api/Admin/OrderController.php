@@ -66,6 +66,7 @@ class OrderController extends Controller
             'order_code' => $order->orders_code,
             'customer_name' => $order->user->name,
             'customer_email' => $order->user->email,
+            'customer_phone' => $order->user->phone,
             'status' => [
                 'id' => $order->statusOrder->id,
                 'label' => $order->statusOrder->name,
