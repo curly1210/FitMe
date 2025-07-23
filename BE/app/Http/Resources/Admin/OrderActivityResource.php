@@ -19,7 +19,8 @@ class OrderActivityResource extends JsonResource
         return [
             'id' => $this->id,
             'orders_code' => $this->orders_code,
-            'customer_name' => $this->user?->name ?? 'Khách hàng',
+            'receiving_name' => $this->recipient_name,
+            // 'customer_name' => $this->user?->name ?? 'Khách hàng',
             'total_amount' => number_format($this->total_amount, 0, ',', '.') . '₫',
             'created_at' => $this->created_at->diffForHumans(),
             'product_image' => $firstDetail?->image_product,

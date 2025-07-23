@@ -66,6 +66,7 @@ class OrderController extends Controller
             'order_code' => $order->orders_code,
             'customer_name' => $order->user->name,
             'customer_email' => $order->user->email,
+            'customer_phone' => $order->user->phone,
             'status' => [
                 'id' => $order->statusOrder->id,
                 'label' => $order->statusOrder->name,
@@ -76,7 +77,7 @@ class OrderController extends Controller
             'receiving_address' => $order->receiving_address,
             'recipient_phone' => $order->recipient_phone,
             'payment_method' => $order->payment_method,
-            'payment_status' => $order->status_payment ? 'Đã thanh toán' : 'Chưa thanh toán',
+            'payment_status' => $order->status_payment,
             'total_price_item' => $order->total_price_item,
             'shipping_price' => $order->shipping_price,
             'discount' => $order->discount,
