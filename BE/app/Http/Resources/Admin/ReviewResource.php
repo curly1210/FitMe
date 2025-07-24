@@ -25,6 +25,7 @@ class ReviewResource extends JsonResource
             'category' => $this->category->name,
             'reviews_count' => $this->reviews_count,
             'reviews_avg_rate' => $this->reviews_avg_rate ? round($this->reviews_avg_rate, 1) : null,
+
         ];
     }
 }
