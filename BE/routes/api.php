@@ -11,7 +11,6 @@ use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
 use App\Http\Controllers\Api\Admin\CategoryController;
-
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Client\ProductController;
@@ -396,6 +395,8 @@ Route::prefix('cart-items')->group(function () {
     Route::post('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
     Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
     Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
+    Route::patch('/select-all', [CartItemController::class, 'updateAllSelection']);
+    Route::patch('/{id}/select', [CartItemController::class, 'updateSelection']);
 });
 
 

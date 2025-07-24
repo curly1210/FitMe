@@ -30,10 +30,10 @@ class CartItemController extends Controller
                 'productItem' => function ($query) {
                     $query->where('is_active', 1)
                         ->with([
-                            'product' => fn($q) => $q->where('is_active', 1),
-                            'color' => fn($q) => $q->where('is_active', 1),
-                            'size' => fn($q) => $q->where('is_active', 1),
-                            'product.productImages' => fn($q) => $q->where('is_active', 1)
+                            'product' => fn ($q) => $q->where('is_active', 1),
+                            'color' => fn ($q) => $q->where('is_active', 1),
+                            'size' => fn ($q) => $q->where('is_active', 1),
+                            'product.productImages' => fn ($q) => $q->where('is_active', 1)
                         ]);
                 }
             ])
@@ -70,19 +70,15 @@ class CartItemController extends Controller
                     'subtotal' => $cartItem->quantity * $productItem->sale_price,
                     'color' => optional($productItem->color)->name,
                     'size' => optional($productItem->size)->name,
-                    // 'color' => [
-                    //     'id' => $productItem->color->id,
-                    //     'name' => $productItem->color->name,
-                    // ],
-                    // 'size' => [
-                    //     'id' => $productItem->size->id,
-                    //     'name' => $productItem->size->name,
-                    // ],
+                    'is_choose' => (bool) $cartItem->is_choose,
                 ];
             })->values();
 
             $totalItem = $formattedCartItems->count();
-            $totalPrice = $formattedCartItems->sum('subtotal');
+            // Chỉ tính totalPrice cho các mục có is_choose = 1
+            $totalPrice = $formattedCartItems
+                ->where('is_choose', true)
+                ->sum('subtotal');
 
             $result = [
                 'cartItems' => $formattedCartItems,
@@ -172,7 +168,8 @@ class CartItemController extends Controller
                     $cartItem = CartItem::create([
                         'user_id' => $user->id,
                         'product_item_id' => $productItemId,
-                        'quantity' => $requestedQuantity
+                        'quantity' => $requestedQuantity,
+                        'is_choose' => 1
                     ]);
                 }
 
@@ -192,10 +189,6 @@ class CartItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -266,6 +259,64 @@ class CartItemController extends Controller
             return $this->success($cartItem, 'Xóa sản phẩm khỏi giỏ hàng thành công', 200);
         } catch (\Throwable $th) {
             return $this->error('Lỗi xóa sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
+        }
+    }
+
+    public function updateAllSelection(Request $request)
+    {
+        try {
+            $user = auth('api')->user();
+
+            $validated = $request->validate([
+                'is_choose' => 'nullable|boolean',
+            ]);
+
+            DB::beginTransaction();
+
+            try {
+                CartItem::where('user_id', $user->id)
+                    ->update(['is_choose' => $validated['is_choose']]);
+
+                DB::commit();
+
+                return $this->success([], 'Chọn tất cả thành công', 200);
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return $this->error('Lỗi khi cập nhật trạng thái chọn tất cả', [$th->getMessage()], 403);
+            }
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi cập nhật trạng thái chọn tất cả', [$th->getMessage()], 403);
+        }
+    }
+
+    public function updateSelection(Request $request, string $id)
+    {
+        try {
+            $user = auth('api')->user();
+
+            $cartItem = CartItem::where('user_id', $user->id)
+                ->findOrFail($id);
+
+            $validated = $request->validate([
+                'is_choose' => 'required|boolean',
+            ]);
+
+            DB::beginTransaction();
+
+            try {
+                $cartItem->update([
+                    'is_choose' => $validated['is_choose']
+                ]);
+
+                DB::commit();
+
+                return $this->success($cartItem, 'Chọn sản phẩm thành công', 200);
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return $this->error('Lỗi khi cập nhật trạng thái chọn sản phẩm', [$th->getMessage()], 403);
+            }
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi cập nhật trạng thái chọn sản phẩm', [$th->getMessage()], 403);
         }
     }
 }
