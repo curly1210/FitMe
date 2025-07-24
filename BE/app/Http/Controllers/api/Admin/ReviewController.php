@@ -72,7 +72,8 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         $query =  Product::with('productItems', 'productImages')->withCount('reviews')
-            ->withAvg('reviews', 'rate');
+            ->withAvg('reviews', 'rate')->withMax('reviews', 'created_at')
+            ->orderByDesc('reviews_max_created_at');;
         $perPage = $request->input('per_page', 10);
         if ($request->search) {
             $query->where("name", 'like', '%' . $request->search . '%');

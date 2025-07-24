@@ -233,23 +233,32 @@ Route::prefix('/admin')->group(function () {
 });
 
 // GHN
-Route::get("/ghn/get-province", [GhnController::class, "getProvince"]);
-Route::get("/ghn/get-district", [GhnController::class, "getDistrict"]);
-Route::get("/ghn/get-ward", [GhnController::class, "getWard"]);
 
-Route::get("/ghn/get-store", [GhnController::class, "getStore"]);
-Route::get("/ghn/pick-shift", [GhnController::class, "pickShift"]);
+# Thông Tin
+Route::get("/ghn/get-province", [GhnController::class, "getProvince"]); # api lấy ra danh sách các tỉnh kèm mã tỉnh
+Route::get("/ghn/get-district", [GhnController::class, "getDistrict"]); # api lấy ra danh sách các xã/phường kèm mã xã/phường
+Route::get("/ghn/get-ward", [GhnController::class, "getWard"]); # api lấy ra danh sách các quận/huyện kèm mã quận/huyện
+Route::get("/ghn/get-store", [GhnController::class, "getStore"]); # api lấy ra thông tin của shop
+Route::get("/ghn/pick-shift", [GhnController::class, "pickShift"]); #api lấy ra danh sách ca lấy hàng của bên GHN
+
+# Dịch Vụ
+Route::get("/ghn/get-service", [GhnController::class, "getService"]); # api lấy ra danh sách dịch vụ giao hàng 
+Route::post("/ghn/calculate-fee", [GhnController::class, "calculateFee"]); # api tính phí dịch vụ trước khi tạo đơn
+Route::post("/ghn/calculate-delivery-time", [GhnController::class, "calculateExpectedDeliverytime"]); # api tính thời gian dự kiến giao hàng tới người nhận
+
+# Đơn hàng
+Route::post("/ghn/preview-order", [GhnController::class, "previewOrder"]); # api tạo đơn hàng lên hệ thống 
+Route::post("/ghn/order/print", [GhnController::class, "printOrder"]); # api giao lại đơn hàng
+Route::post("/ghn/order", [GhnController::class, "createOrder"]); # api tạo đơn hàng lên hệ thống
+Route::post("/ghn/order/cancel/{order_code}", [GhnController::class, "cancelOrder"]); # api hủy đơn hàng 
+Route::post("/ghn/order/return/{order_code}", [GhnController::class, "returnOrder"]); # api trả hàng
+Route::post("/ghn/order/storing/{order_code}", [GhnController::class, "storingOrder"]); # api giao lại đơn hàng
 
 
 
-Route::get("/ghn/get-service", [GhnController::class, "getService"]);
-Route::post("/ghn/calculate-fee", [GhnController::class, "calculateFee"]);
+Route::get("/ghn/order-detail-ghn/{order_code}", [GhnController::class, "getOrderDetail"]); # api lấy ra chi tiết đơn hàng dựa trên mã đơn hàng của GHN
+Route::get("/ghn/order-detail/{client_order_code}", [GhnController::class, "getOrderDetailByClientOrderCode"]); # api lấy ra chi tiết đơn hàng dựa trên mã đơn hàng nội bộ (Database)
 
-Route::post("/ghn/calculate-delivery-time", [GhnController::class, "calculateExpectedDeliverytime"]);
-
-
-Route::post("/ghn/order/{order_code}", [GhnController::class, "createOrder"]);
-Route::get("/ghn/order-detail/{order_code}", [GhnController::class, "getOrderDetail"]);
 
 
 
