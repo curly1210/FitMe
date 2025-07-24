@@ -168,7 +168,9 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button onClick={(e) => e.stopPropagation()} type="primary">Xác nhận</Button>
+            <Button onClick={(e) => e.stopPropagation()} type="primary">
+              Xác nhận
+            </Button>
           </Popconfirm>
         );
       case "Đang chuẩn bị hàng":
@@ -186,7 +188,9 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button onClick={(e) => e.stopPropagation()} type="primary">Đang giao hàng</Button>
+            <Button onClick={(e) => e.stopPropagation()} type="primary">
+              Đang giao hàng
+            </Button>
           </Popconfirm>
         );
       case "Đang giao hàng":
@@ -201,7 +205,9 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button  onClick={(e) => e.stopPropagation()} type="primary">Đã giao</Button>
+              <Button onClick={(e) => e.stopPropagation()} type="primary">
+                Đã giao
+              </Button>
             </Popconfirm>
 
             <Popconfirm
@@ -217,7 +223,9 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button onClick={(e) => e.stopPropagation()} danger>Giao hàng thất bại</Button>
+              <Button onClick={(e) => e.stopPropagation()} danger>
+                Giao hàng thất bại
+              </Button>
             </Popconfirm>
           </Space>
         );
@@ -237,7 +245,9 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button onClick={(e) => e.stopPropagation()} type="primary">Đang giao</Button>
+              <Button onClick={(e) => e.stopPropagation()} type="primary">
+                Đang giao
+              </Button>
             </Popconfirm>
             <Popconfirm
               onConfirm={() =>
@@ -248,7 +258,9 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button onClick={(e) => e.stopPropagation()} danger>Hủy đơn hàng</Button>
+              <Button onClick={(e) => e.stopPropagation()} danger>
+                Hủy đơn hàng
+              </Button>
             </Popconfirm>
           </Space>
         );
@@ -261,7 +273,9 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button onClick={(e) => e.stopPropagation()} type="primary">Hoàn tiền</Button>
+            <Button onClick={(e) => e.stopPropagation()} type="primary">
+              Hoàn tiền
+            </Button>
           </Popconfirm>
         );
       default:
@@ -424,15 +438,13 @@ const Oder = () => {
             setCurrent(page);
             setPageSize(size);
           },
-          
         }}
-        onRow={(record)=>({
-          onClick: ()=>{
-            
+        onRow={(record) => ({
+          onClick: () => {
             setSelectedOrderId(record.id);
-                  setDrawerOpen(true);
+            setDrawerOpen(true);
           },
-            style: { cursor: "pointer" },
+          style: { cursor: "pointer" },
         })}
       />
 

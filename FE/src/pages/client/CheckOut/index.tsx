@@ -2,7 +2,12 @@
 import { Button, Modal, Select, Spin, message } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import { useCreate, useList, useCustomMutation, useCustom } from "@refinedev/core";
+import {
+  useCreate,
+  useList,
+  useCustomMutation,
+  useCustom,
+} from "@refinedev/core";
 import { useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
 import dayjs from "dayjs";
@@ -30,7 +35,7 @@ const CheckOut = () => {
   // nhập mã
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null); // Mã người dùng nhập
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
-  const [ appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discount, setDiscount] = useState<number>(0);
 
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
@@ -43,6 +48,16 @@ const CheckOut = () => {
 
   const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
   const orderItems = cart?.cartItems || [];
+
+  console.log(cart, "cart");
+
+  useEffect(() => {
+    if (cart?.cartItems) {
+      if (cart.cartItems.length === 0) {
+        nav("/"); // Chuyển hướng về trang chủ nếu giỏ hàng trống
+      }
+    }
+  }, [cart, nav]);
 
   const totalPrice = orderItems.reduce(
     (sum: number, item: any) => sum + item.subtotal,
@@ -60,7 +75,7 @@ const CheckOut = () => {
   }, [addressData, selectedAddress]);
 
   //Lấy list mã giảm giá
-const fetchCoupons = () => {
+  const fetchCoupons = () => {
     redeemCoupon(
       {
         url: "orders/redem",
@@ -97,28 +112,30 @@ const fetchCoupons = () => {
       return message.warning("Vui lòng chọn mã giảm giá.");
     }
 
-   const coupon = availableCoupons.find(
-  (c) => c.code.trim().toLowerCase() === selectedCoupon?.code.trim().toLowerCase()
-);
+    const coupon = availableCoupons.find(
+      (c) =>
+        c.code.trim().toLowerCase() ===
+        selectedCoupon?.code.trim().toLowerCase()
+    );
     if (!coupon) {
       return message.error("Mã không hợp lệ hoặc đã hết hạn.");
     }
 
-      const calculatedDiscountRaw = Math.min(
-    (coupon.value / 100) * totalPrice,
-    coupon.max_price_discount
-  );
-  const calculatedDiscount = Number(
-  Math.floor(calculatedDiscountRaw).toString().slice(0, 6)
-);
+    const calculatedDiscountRaw = Math.min(
+      (coupon.value / 100) * totalPrice,
+      coupon.max_price_discount
+    );
+    const calculatedDiscount = Number(
+      Math.floor(calculatedDiscountRaw).toString().slice(0, 6)
+    );
     setAppliedCoupon(coupon);
     setDiscount(calculatedDiscount);
     message.success(`Áp dụng mã ${coupon.code} thành công.`);
   };
 
- 
-// console.log("selectedCoupon:", selectedCoupon);
-// console.log("availableCoupons:", availableCoupons.map(c => c.code));
+  // console.log("selectedCoupon:", selectedCoupon);
+  // console.log("availableCoupons:", availableCoupons.map(c => c.code));
+
   // hàm gửi thông tin sau ấn thanh toán
   const handleCheckout = () => {
     if (!selectedAddress) return;
@@ -139,7 +156,7 @@ const fetchCoupons = () => {
       shipping_price: shippingPrice,
       discount: discount,
       total_amount: totalAmount,
-      coupon_code: appliedCoupon || "",
+      coupon_code: appliedCoupon?.code || "",
     };
 
     localStorage.setItem("order", JSON.stringify(values));
@@ -157,7 +174,7 @@ const fetchCoupons = () => {
             // }
             nav("success");
           },
-          onError: (error) => console.error("Thanh toán thất bại:", error),
+          onError: (error) => console.error("Thanh toán thất bại:cod", error),
         }
       );
     }
@@ -293,62 +310,64 @@ const fetchCoupons = () => {
               </div>
               {/* <p className="text-sm mt-2">Trả tiền mặt khi nhận hàng (COD)</p> */}
             </div>
-          
           </div>
 
           {/* Mã giảm giá */}
-           <div >
-        <h3>Chọn mã giảm giá</h3>
+          <div>
+            <h3>Chọn mã giảm giá</h3>
 
+            <Select
+              showSearch
+              allowClear
+              placeholder="Chọn hoặc nhập mã giảm giá"
+              style={{ width: "100%", marginBottom: 8 }}
+              value={selectedCoupon?.code}
+              onChange={(value) => {
+                if (!value) {
+                  setSelectedCoupon(null);
+                  setAppliedCoupon(null);
+                  setDiscount(0);
+                  return;
+                }
+                const selected = availableCoupons.find((c) => c.code === value);
+                setSelectedCoupon(selected || null);
+              }}
+              filterOption={(input, option) =>
+                (option?.value as string)
+                  ?.toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              optionLabelProp="value"
+            >
+              {availableCoupons.map((coupon) => (
+                <Select.Option key={coupon.code} value={coupon.code}>
+                  {`${coupon.code} - ${coupon.name} (Giảm ${
+                    coupon.value
+                  }% tối đa ${coupon.max_price_discount.toLocaleString()}đ)`}
+                </Select.Option>
+              ))}
+            </Select>
 
-<Select
-  showSearch
-  allowClear
-  placeholder="Chọn hoặc nhập mã giảm giá"
-  style={{ width: "100%", marginBottom: 8 }}
-  value={selectedCoupon?.code}
-  onChange={(value) => {
-        if (!value) {
-      setSelectedCoupon(null);
-      setAppliedCoupon(null);
-      setDiscount(0);
-      return;
-    }
-    const selected = availableCoupons.find(c => c.code === value);
-    setSelectedCoupon(selected || null);
-  }}
-  filterOption={(input, option) =>
-    (option?.value as string)?.toLowerCase().includes(input.toLowerCase())
-  }
-  optionLabelProp="value"
->
-  {availableCoupons.map((coupon) => (
-    <Select.Option key={coupon.code} value={coupon.code}>
-      {`${coupon.code} - ${coupon.name} (Giảm ${coupon.value}% tối đa ${coupon.max_price_discount.toLocaleString()}đ)`}
-    </Select.Option>
-  ))}
-</Select>
+            <Button
+              type="primary"
+              onClick={handleApplyCoupon}
+              disabled={!selectedCoupon}
+              style={{
+                backgroundColor: "black",
+                color: "white",
+                borderColor: "black",
+              }}
+            >
+              Áp dụng mã
+            </Button>
 
-
-
-
-
-        <Button
-          type="primary"
-          onClick={handleApplyCoupon}
-          disabled={!selectedCoupon}
-            style={{ backgroundColor: "black", color: "white", borderColor: "black" }}
-        >
-          Áp dụng mã
-        </Button>
-
-        {/* {appliedCoupon && (
+            {/* {appliedCoupon && (
           <p style={{ marginTop: 8 }}>
             ✅ Đã áp dụng: <strong>{appliedCoupon.code}</strong> - Giảm{" "}
             <strong>{discount?.toLocaleString()}đ</strong>
           </p>
         )} */}
-      </div>
+          </div>
         </div>
 
         {/* Cột 3: Đơn hàng */}
@@ -376,8 +395,8 @@ const fetchCoupons = () => {
 
           {appliedCoupon && (
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
-              🎁 Áp dụng mã: <strong>{appliedCoupon.code}</strong> – Giảm{appliedCoupon.value}
-              %
+              🎁 Áp dụng mã: <strong>{appliedCoupon.code}</strong> – Giảm
+              {appliedCoupon.value}%
             </div>
           )}
 

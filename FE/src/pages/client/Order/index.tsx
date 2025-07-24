@@ -242,7 +242,8 @@ const Order = () => {
                     </Link>
                     <RenderReviewButton order={order} />
 
-                    {order.status_name == "Chờ xác nhận" && (
+                    {(order.status_name == "Chờ xác nhận" ||
+                      order.status_name == "Đang chuẩn bị hàng") && (
                       <Popconfirm
                         title="Cập nhật trạng thái"
                         onConfirm={() => onHandleChangeStatus(order.id)}
