@@ -18,6 +18,7 @@ import { InventoryPage } from "../pages/admin/Dashboard/thongKeTonKho";
 import ReviewPage from "../pages/admin/Dashboard/thongKeDanhGia/idext";
 import AdminReviewProductList from "../pages/admin/Review";
 
+
 export const adminRoutes = [
   {
     element: <ProtectAdmin role="Quản trị viên" />,
@@ -78,7 +79,8 @@ export const adminRoutes = [
             path: "oders",
             element: <Oder />,
           },
-          {
+       
+            {
             path: "posts",
             element: <PostList />,
           },

@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Modal, Spin, message } from "antd";
+import { Button, Modal, Select, Spin, message } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import { useCreate, useList, useCustomMutation } from "@refinedev/core";
+import { useCreate, useList, useCustomMutation, useCustom } from "@refinedev/core";
 import { useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
-
+import dayjs from "dayjs";
+type Coupon = {
+  code: string;
+  name: string;
+  value: number;
+  max_price_discount: number;
+};
 const CheckOut = () => {
   const [selectedMethod, setSelectedMethod] = useState("COD");
 
@@ -22,8 +28,9 @@ const CheckOut = () => {
   >("list"); // nút thêm mới địa chỉ và lấy địa chỉ
 
   // nhập mã
-  const [couponCode, setCouponCode] = useState(""); // Mã người dùng nhập
-  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
+  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null); // Mã người dùng nhập
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+  const [ appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discount, setDiscount] = useState<number>(0);
 
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
@@ -31,7 +38,7 @@ const CheckOut = () => {
   const { mutate: createOrder, isLoading } = useCreate(); // gửi thông tin về be khi ấn thanh toán
 
   const { data: addressData } = useList({ resource: "addresses" });
-  const { mutate: redeemCoupon } = useCustomMutation();
+  const { mutate: redeemCoupon, isLoading: isRedeeming } = useCustomMutation();
   const nav = useNavigate();
 
   const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
@@ -52,39 +59,66 @@ const CheckOut = () => {
     }
   }, [addressData, selectedAddress]);
 
-  // này gửi mã về be
-  const handleApplyCoupon = () => {
+  //Lấy list mã giảm giá
+const fetchCoupons = () => {
     redeemCoupon(
       {
         url: "orders/redem",
         method: "post",
-
         values: {
-          coupon_code: couponCode,
           total_price_item: totalPrice,
         },
       },
       {
         onSuccess: (response) => {
           const res = response?.data;
-          if (res?.discount > 0) {
-            setDiscount(res.discount);
-            setAppliedCoupon(res.coupon);
-            message.success(res.message); // dùng message BE
+          if (res?.available_vouchers?.length) {
+            setAvailableCoupons(res.available_vouchers);
           } else {
-            message.error(
-              res.message || "Mã không hợp lệ hoặc không áp dụng được."
-            );
+            setAvailableCoupons([]);
+            message.info("Không có mã giảm giá phù hợp.");
           }
         },
-        onError: (error) => {
-          const msg = error?.response?.data?.message;
-          message.error(msg || "Mã giảm giá không hợp lệ.");
+        onError: () => {
+          message.error("Không thể lấy mã giảm giá.");
         },
       }
     );
   };
 
+  useEffect(() => {
+    if (totalPrice > 0) {
+      fetchCoupons(); // gọi khi giá thay đổi
+    }
+  }, [totalPrice]);
+
+  const handleApplyCoupon = () => {
+    if (!selectedCoupon) {
+      return message.warning("Vui lòng chọn mã giảm giá.");
+    }
+
+   const coupon = availableCoupons.find(
+  (c) => c.code.trim().toLowerCase() === selectedCoupon?.code.trim().toLowerCase()
+);
+    if (!coupon) {
+      return message.error("Mã không hợp lệ hoặc đã hết hạn.");
+    }
+
+      const calculatedDiscountRaw = Math.min(
+    (coupon.value / 100) * totalPrice,
+    coupon.max_price_discount
+  );
+  const calculatedDiscount = Number(
+  Math.floor(calculatedDiscountRaw).toString().slice(0, 6)
+);
+    setAppliedCoupon(coupon);
+    setDiscount(calculatedDiscount);
+    message.success(`Áp dụng mã ${coupon.code} thành công.`);
+  };
+
+ 
+// console.log("selectedCoupon:", selectedCoupon);
+// console.log("availableCoupons:", availableCoupons.map(c => c.code));
   // hàm gửi thông tin sau ấn thanh toán
   const handleCheckout = () => {
     if (!selectedAddress) return;
@@ -259,24 +293,62 @@ const CheckOut = () => {
               </div>
               {/* <p className="text-sm mt-2">Trả tiền mặt khi nhận hàng (COD)</p> */}
             </div>
-            <button className="text-gray-500 text-sm">Thay đổi</button>
+          
           </div>
 
           {/* Mã giảm giá */}
-          <div className="mt-2 flex border border-gray-300 rounded overflow-hidden">
-            <input
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm outline-none"
-              placeholder="Nhập mã giảm giá (nếu có)"
-            />
-            <button
-              onClick={handleApplyCoupon}
-              className="bg-black text-white font-semibold px-4 text-sm cursor-pointer"
-            >
-              Áp dụng
-            </button>
-          </div>
+           <div >
+        <h3>Chọn mã giảm giá</h3>
+
+
+<Select
+  showSearch
+  allowClear
+  placeholder="Chọn hoặc nhập mã giảm giá"
+  style={{ width: "100%", marginBottom: 8 }}
+  value={selectedCoupon?.code}
+  onChange={(value) => {
+        if (!value) {
+      setSelectedCoupon(null);
+      setAppliedCoupon(null);
+      setDiscount(0);
+      return;
+    }
+    const selected = availableCoupons.find(c => c.code === value);
+    setSelectedCoupon(selected || null);
+  }}
+  filterOption={(input, option) =>
+    (option?.value as string)?.toLowerCase().includes(input.toLowerCase())
+  }
+  optionLabelProp="value"
+>
+  {availableCoupons.map((coupon) => (
+    <Select.Option key={coupon.code} value={coupon.code}>
+      {`${coupon.code} - ${coupon.name} (Giảm ${coupon.value}% tối đa ${coupon.max_price_discount.toLocaleString()}đ)`}
+    </Select.Option>
+  ))}
+</Select>
+
+
+
+
+
+        <Button
+          type="primary"
+          onClick={handleApplyCoupon}
+          disabled={!selectedCoupon}
+            style={{ backgroundColor: "black", color: "white", borderColor: "black" }}
+        >
+          Áp dụng mã
+        </Button>
+
+        {/* {appliedCoupon && (
+          <p style={{ marginTop: 8 }}>
+            ✅ Đã áp dụng: <strong>{appliedCoupon.code}</strong> - Giảm{" "}
+            <strong>{discount?.toLocaleString()}đ</strong>
+          </p>
+        )} */}
+      </div>
         </div>
 
         {/* Cột 3: Đơn hàng */}
@@ -304,8 +376,8 @@ const CheckOut = () => {
 
           {appliedCoupon && (
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
-              🎁 Áp dụng mã: <strong>{appliedCoupon}</strong> – Giảm{" "}
-              {discount.toLocaleString()}đ
+              🎁 Áp dụng mã: <strong>{appliedCoupon.code}</strong> – Giảm{appliedCoupon.value}
+              %
             </div>
           )}
 
@@ -322,14 +394,14 @@ const CheckOut = () => {
             </div>
             <div className="flex justify-between">
               <span>Giảm giá</span>
-              <span>{discount.toLocaleString()}đ</span>
+              <span>{discount?.toLocaleString()}đ</span>
             </div>
           </div>
 
           <div className="border-t pt-2 text-sm text-gray-900 space-y-1  ">
             <div className="flex justify-between font-semibold  ">
               <span>Thành tiền</span>
-              <span>{totalAmount.toLocaleString()}đ</span>
+              <span>{totalAmount?.toLocaleString()}đ</span>
             </div>
           </div>
 

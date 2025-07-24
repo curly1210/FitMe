@@ -15,10 +15,16 @@ interface OrderDetail {
   subtotal: number;
 }
 
+interface Status{
+ id: string;
+ label:string;
+ color:string;
+}
+
 interface OrderData {
   order_code: string;
-  customer_name: string;
-  status: string;
+  receiving_name: string;
+  status: Status;
   created_at: string;
   receiving_address: string;
   recipient_phone: string;
@@ -108,7 +114,7 @@ export default function OrderDetailDrawer({
         <div className="flex flex-col gap-6">
           {/* Thông tin */}
        {/* Thông tin đơn hàng */}
-        <div className="text-base font-semibold mb-2">Thông tin</div>
+        <div className="text-base font-semibold mb-2">Thông tin người nhận</div>
         <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
         <div>
             <div className="text-gray-500">Mã đơn hàng</div>
@@ -116,11 +122,11 @@ export default function OrderDetailDrawer({
         </div>
         <div>
             <div className="text-gray-500">Khách hàng</div>
-            <div>{order.customer_name}</div>
+            <div>{order.receiving_name}</div>
         </div>
         <div>
             <div className="text-gray-500">Trạng thái</div>
-            <div className=" font-medium">{order.status}</div>
+            <div className=" font-medium" style={{color: order.status.color}}>{order.status.label}</div>
         </div>
         <div>
             <div className="text-gray-500">Ngày đặt hàng</div>
