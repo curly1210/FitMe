@@ -39,12 +39,13 @@ class OrderController extends Controller
             'total_price_item' => 'nullable|numeric|min:0',
         ]);
 
+        $is_ship = 0;
         $total = $request->input('total_price_item');
         $code = $request->input('coupon_code');
         $discount = 0;
-
         $now = now();
 
+        // Danh sách voucher đủ điều kiện nếu có truyền tổng tiền
         $vouchers = [];
         if ($total !== null) {
             $vouchers = Coupon::where('is_active', true)
@@ -55,6 +56,7 @@ class OrderController extends Controller
                 ->get();
         }
 
+        // Nếu không truyền mã hoặc rỗng → xem như hủy mã
         if (empty($code)) {
             return response()->json([
                 'discount' => 0,
@@ -66,6 +68,7 @@ class OrderController extends Controller
 
         $coupon = Coupon::where('code', $code)->first();
 
+        // Các kiểm tra hợp lệ
         if (!$coupon) {
             return response()->json([
                 'discount' => 0,
@@ -120,23 +123,31 @@ class OrderController extends Controller
             ], 400);
         }
 
-        $discount = ceil(min(
-            $total * ($coupon->value / 100),
-            $coupon->max_price_discount
-        ));
-
-        $vouchers = $vouchers->filter(function ($v) use ($coupon) {
-            return $v->id !== $coupon->id;
-        })->values();
-
+        // === Tính giảm giá theo type ===
+        if ($coupon->type === 'percentage') {
+            $discount = ceil(min(
+                $total * ($coupon->value / 100),
+                $coupon->max_price_discount
+            ));
+        } elseif ($coupon->type === 'fixed') {
+            $discount = min($coupon->value, $coupon->max_price_discount);
+        }
+        elseif($coupon->type === 'free_shipping') {
+            $is_ship = 1;
+            $discount = 0;
+        } ;
+        // Loại bỏ mã đã áp dụng ra khỏi danh sách voucher còn lại
+        $vouchers = $vouchers->filter(fn($v) => $v->id !== $coupon->id)->values();
 
         return response()->json([
             'discount' => $discount,
             'coupon' => $coupon->code,
+            'is_ship' => $is_ship,
             'message' => 'Áp dụng mã giảm giá thành công.',
             'available_vouchers' => CouponResource::collection($vouchers)
         ]);
     }
+
 
     public function store(Request $request)
     {

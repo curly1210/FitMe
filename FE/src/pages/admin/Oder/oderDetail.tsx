@@ -171,15 +171,16 @@ const statusColor =
         </div>
         </div>
 
-            <div>
-              <div className="text-gray-500">Phương thức thanh toán</div>
-              <div>{order.payment_method}</div>
-            </div>
-            <div>
-              <div className="text-gray-500">Trạng thái thanh toán</div>
-              <div className=" font-medium">{order.payment_status}</div>
-            </div>
-          </div>
+          <div>
+  <div className="text-gray-500">Phương thức thanh toán</div>
+  <div>{order.payment_method}</div>
+</div>
+<div>
+  <div className="text-gray-500">Trạng thái thanh toán</div>
+  <div className={`font-medium ${statusColor}`}>
+    {statusText[paymentStatus]}
+  </div>
+</div>
 
           {/* Dưới: sản phẩm & tổng tiền */}
           <div className="text-base font-semibold mb-2">
