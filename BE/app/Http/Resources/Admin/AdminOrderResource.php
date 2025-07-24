@@ -18,6 +18,8 @@ class AdminOrderResource extends JsonResource
             'id' => $this->id,
             'orders_code' => $this->orders_code,
             'customer_name' => $this->user->name ?? 'N/A',
+            'customer_email' => $this->user->email,
+            'customer_phone' => $this->user->phone,
             'created_at' => $this->created_at->format('Y-m-d H:i'),
             'status_order' => [
                 'id' => $this->status_order_id,
@@ -26,7 +28,6 @@ class AdminOrderResource extends JsonResource
             ],
             'total_amount' => $this->total_amount,
             'payment_method' => $this->payment_method,
-            // 'status_payment' => $this->status_payment ? 'Đã thanh toán' : 'Chưa thanh toán',
             'status_payment' => $this->status_payment,
         ];
     }

@@ -22,6 +22,8 @@ use App\Http\Resources\Client\OrderResource;
 use App\Models\User;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Resources\Client\CouponResource;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class OrderController extends Controller
 {
@@ -33,13 +35,34 @@ class OrderController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
 
         $request->validate([
-            'coupon_code' => 'required|string',
-            'total_price_item' => 'required|numeric|min:0',
+            'coupon_code' => 'nullable|string',
+            'total_price_item' => 'nullable|numeric|min:0',
         ]);
 
         $total = $request->input('total_price_item');
         $code = $request->input('coupon_code');
         $discount = 0;
+
+        $now = now();
+
+        $vouchers = [];
+        if ($total !== null) {
+            $vouchers = Coupon::where('is_active', true)
+                ->where('limit_use', '>', 0)
+                ->where('time_start', '<=', $now)
+                ->where('time_end', '>=', $now)
+                ->where('min_price_order', '<=', $total)
+                ->get();
+        }
+
+        if (empty($code)) {
+            return response()->json([
+                'discount' => 0,
+                'coupon' => null,
+                'message' => 'Đã hủy áp dụng mã giảm giá.',
+                'available_vouchers' => CouponResource::collection($vouchers)
+            ]);
+        }
 
         $coupon = Coupon::where('code', $code)->first();
 
@@ -48,6 +71,7 @@ class OrderController extends Controller
                 'discount' => 0,
                 'coupon' => null,
                 'message' => 'Mã giảm giá không tồn tại.',
+                'available_vouchers' => CouponResource::collection($vouchers)
             ], 400);
         }
 
@@ -56,6 +80,7 @@ class OrderController extends Controller
                 'discount' => 0,
                 'coupon' => $coupon->code,
                 'message' => 'Mã giảm giá đã bị vô hiệu hóa.',
+                'available_vouchers' => CouponResource::collection($vouchers)
             ], 400);
         }
 
@@ -64,15 +89,16 @@ class OrderController extends Controller
                 'discount' => 0,
                 'coupon' => $coupon->code,
                 'message' => 'Mã giảm giá đã hết lượt sử dụng.',
+                'available_vouchers' => CouponResource::collection($vouchers)
             ], 400);
         }
 
-        $now = now();
         if ($coupon->time_start && $coupon->time_start > $now) {
             return response()->json([
                 'discount' => 0,
                 'coupon' => $coupon->code,
                 'message' => 'Mã giảm giá chưa được áp dụng.',
+                'available_vouchers' => CouponResource::collection($vouchers)
             ], 400);
         }
 
@@ -81,14 +107,16 @@ class OrderController extends Controller
                 'discount' => 0,
                 'coupon' => $coupon->code,
                 'message' => 'Mã giảm giá đã hết hạn.',
+                'available_vouchers' => CouponResource::collection($vouchers)
             ], 400);
         }
 
-        if ($total < $coupon->min_price_order) {
+        if ($total === null || $total < $coupon->min_price_order) {
             return response()->json([
                 'discount' => 0,
                 'coupon' => $coupon->code,
                 'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã giảm giá. Yêu cầu tối thiểu: ' . number_format($coupon->min_price_order) . '₫',
+                'available_vouchers' => CouponResource::collection($vouchers)
             ], 400);
         }
 
@@ -97,12 +125,19 @@ class OrderController extends Controller
             $coupon->max_price_discount
         ));
 
+        $vouchers = $vouchers->filter(function ($v) use ($coupon) {
+            return $v->id !== $coupon->id;
+        })->values();
+
+
         return response()->json([
             'discount' => $discount,
             'coupon' => $coupon->code,
             'message' => 'Áp dụng mã giảm giá thành công.',
+            'available_vouchers' => CouponResource::collection($vouchers)
         ]);
     }
+
     public function store(Request $request)
     {
 
@@ -199,9 +234,9 @@ class OrderController extends Controller
             // $newStatus = $request->input('status_order_id');
 
             // Xử lý logic cập nhật trạng thái
-            if ($currentStatus == 1) {
+            if ($currentStatus == 1 || $currentStatus == 2) {
                 DB::transaction(function () use ($order) {
-                    // Chuyển từ "Chưa xác nhận" (1) sang "Đã hủy" (7)
+                    // Chuyển từ "Chưa xác nhận" (1) hoặc "đang chuẩn bị" (2) sang "Đã hủy" (7)
                     $order->update(['status_order_id' => 7]);
                     if ($order->payment_method == "vnpay") {
                         $order->update(['status_payment' => 2]); # Chờ hoàn tiền
@@ -249,6 +284,10 @@ class OrderController extends Controller
             ])->where('user_id', $user->id)
                 ->findOrFail($id);
 
+            if (!$order) {
+                return response()->json(['message' => 'Không có sản phẩm nào được chọn để tạo đơn hàng.'], 404);
+            }
+
             // Định dạng order_items
             $orderItems = $order->orderDetails->map(function ($detail) {
                 $productItem = $detail->productItem;
@@ -293,6 +332,8 @@ class OrderController extends Controller
             ];
 
             return response()->json($response);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Không tìm thấy đơn hàng.'], 404);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy chi tiết đơn hàng', [$th->getMessage()], 403);
         }

@@ -25,12 +25,12 @@ class ReviewReplyController extends Controller
             if (!$request->user() || !$request->user()->id) {
                 return $this->error("Không có quyền truy cập", ["user_id" => "Không tồn tại"], 403);
             }
-            $validator = Validator::make($request->only(["content", "reply_id"]), [
-                "reply_id" => "required|exists:reviews,id",
+            $validator = Validator::make($request->only(["content", "review_id"]), [
+                "review_id" => "required|exists:reviews,id",
                 "content" => "required|string",
             ], [
-                'reply_id.required' => 'Không tìm thấy đánh giá',
-                'reply_id.exists' => 'Đánh giá không tồn tại',
+                'review_id.required' => 'Không tìm thấy đánh giá',
+                'review_id.exists' => 'Đánh giá không tồn tại',
                 "content.string" => "Nội dung phản hồi phải là một chuỗi kỹ tự",
                 "content.required" => "Nội dung phản hồi là bắt buộc",
             ]);
@@ -52,15 +52,15 @@ class ReviewReplyController extends Controller
         content
         */
     #Cập nhật phản hồi (admin)
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         try {
-            $validator = Validator::make($request->only(["content", "reply_id"]), [
-                "reply_id" => "required|exists:reviews,id",
+            $validator = Validator::make($request->only(["content"]), [
+                // "reply_id" => "required|exists:reviews,id",
                 "content" => "required|string",
             ], [
-                'reply_id.required' => 'Không tìm thấy đánh giá',
-                'reply_id.exists' => 'Đánh giá không tồn tại',
+                // 'reply_id.required' => 'Không tìm thấy đánh giá',
+                // 'reply_id.exists' => 'Đánh giá không tồn tại',
                 "content.string" => "Nội dung phản hồi phải là một chuỗi kỹ tự",
                 "content.required" => "Nội dung phản hồi là bắt buộc",
             ]);
@@ -68,7 +68,7 @@ class ReviewReplyController extends Controller
                 return $this->error("Lỗi nhập dữ liệu", $validator->errors(), 422);
             }
 
-            $reply = ReviewReply::find($request->reply_id);
+            $reply = ReviewReply::find($id);
 
             $reply->update([
                 "content" => $request->content,
@@ -98,10 +98,10 @@ class ReviewReplyController extends Controller
     }
     /* Request: reply_id */
     # Xóa phản hồi (admin)
-    public function delete(Request $request)
+    public function delete(Request $request, $id)
     {
         try {
-            $reply = $reply = ReviewReply::find($request->reply_id);
+            $reply = $reply = ReviewReply::find($id);
             if (!$reply) {
                 return $this->error("Không tìm thấy phản hồi", [], 404);
             }

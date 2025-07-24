@@ -20,10 +20,13 @@ class ReviewResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'total_inventory' => $this->total_inventory,
             'product_images' => $this->productImages ? $this->buildImageUrl($this->productImages->first()->url) : null,
             'category' => $this->category->name,
             'reviews_count' => $this->reviews_count,
-            'reviews_avg_rate' => $this->reviews_avg_rate,
+
+            'reviews_avg_rate' => $this->reviews_avg_rate ? round($this->reviews_avg_rate, 1) : null,
+
         ];
     }
 }
