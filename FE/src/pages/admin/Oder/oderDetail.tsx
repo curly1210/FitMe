@@ -29,6 +29,7 @@ interface OrderData {
   receiving_address: string;
   recipient_phone: string;
   payment_method: string;
+  customer_email: string;
   payment_status: string;
   total_price_item: number;
   shipping_price: number;
@@ -58,6 +59,18 @@ export default function OrderDetailDrawer({
   });
 
   const order = data?.data;
+const paymentStatus = Number(order?.payment_status ?? 0);
+
+const statusText: Record<number, string> = {
+  0: "Chưa thanh toán",
+  1: "Đã thanh toán",
+  2: "Chờ hoàn tiền",
+  3: "Đã hoàn tiền",
+};
+
+const statusColor =
+  paymentStatus === 1 || paymentStatus === 3 ? "text-green-500" : "text-red-500";
+
 
   const columns = [
     {
@@ -141,8 +154,8 @@ export default function OrderDetailDrawer({
             <div>{order.recipient_phone}</div>
         </div>
         <div>
-            <div className="text-gray-500">Ghi chú</div>
-            <div>{order.note || "—"}</div>
+            <div className="text-gray-500">Email</div>
+            <div>{order.customer_email || "—"}</div>
         </div>
      
         <div>
@@ -150,8 +163,10 @@ export default function OrderDetailDrawer({
             <div>{order.payment_method}</div>
         </div>
         <div>
-            <div className="text-gray-500">Trạng thái thanh toán</div>
-            <div className=" font-medium">{order.payment_status}</div>
+      <div className="text-gray-500">Trạng thái thanh toán</div>
+<div className={`font-medium ${statusColor}`}>
+  {statusText[paymentStatus]}
+</div>
         </div>
         </div>
 

@@ -89,7 +89,7 @@ const OrderList = () => {
                     </Col>
                     <Col flex="auto">
                       <Title level={5}>Mã đơn: {order.orders_code}</Title>
-                      <Text>Khách: {order.customer_name}</Text> <br />
+                      <Text>Tên tài khoản: {order.customer_name}</Text> <br />
                       <Text>Tổng tiền: {order.total_amount}</Text> <br />
                       <Text type="secondary">Tạo lúc: {order.created_at}</Text>
                     </Col>
