@@ -24,7 +24,6 @@ class ReviewResource extends JsonResource
             'product_images' => $this->productImages ? $this->buildImageUrl($this->productImages->first()->url) : null,
             'category' => $this->category->name,
             'reviews_count' => $this->reviews_count,
-
             'reviews_avg_rate' => $this->reviews_avg_rate ? round($this->reviews_avg_rate, 1) : null,
 
         ];
