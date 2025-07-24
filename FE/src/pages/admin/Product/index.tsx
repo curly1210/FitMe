@@ -26,8 +26,12 @@ const ListProducts = () => {
   const [openDrawerAdd, setOpenDrawerAdd] = useState(false);
   const [openDrawerEdit, setOpenDrawerEdit] = useState(false);
   const [openDrawerDetail, setOpenDrawerDetail] = useState(false);
-  const [idProductEdit, setIdProductEdit] = useState<number | undefined>(undefined);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [idProductEdit, setIdProductEdit] = useState<number | undefined>(
+    undefined
+  );
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null
+  );
 
   const [searchText, setSearchText] = useState<any>(undefined);
   const [selectCategory, setSelectCategory] = useState<any>(undefined);
@@ -53,7 +57,8 @@ const ListProducts = () => {
   const { mutate: deleteProduct } = useDelete();
 
   const products =
-    productResponse?.data.map((product) => ({ ...product, key: product.id })) || [];
+    productResponse?.data.map((product) => ({ ...product, key: product.id })) ||
+    [];
 
   const handleDeleteProduct = (id: number) => {
     deleteProduct(
@@ -127,7 +132,11 @@ const ListProducts = () => {
       key: "is_active",
       dataIndex: "is_active",
       render: (status: boolean) =>
-        !status ? <Tag color="red">Đang ẩn</Tag> : <Tag color="green">Đang hiển thị</Tag>,
+        !status ? (
+          <Tag color="red">Đang ẩn</Tag>
+        ) : (
+          <Tag color="green">Đang hiển thị</Tag>
+        ),
     },
     {
       title: "Hành động",
@@ -208,7 +217,11 @@ const ListProducts = () => {
       </div>
 
       <div>
-        {isLoading ? <Skeleton active /> : <Table dataSource={products} columns={columns} />}
+        {isLoading ? (
+          <Skeleton active />
+        ) : (
+          <Table dataSource={products} columns={columns} />
+        )}
       </div>
 
       <DrawerAdd

@@ -14,6 +14,7 @@ class CartItem extends Model
         'quantity',
         'user_id',
         'product_item_id',
+        'is_choose'
     ];
 
     // Quan hệ: Mỗi cart thuộc về 1 user

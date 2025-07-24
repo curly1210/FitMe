@@ -11,7 +11,6 @@ use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
 use App\Http\Controllers\Api\Admin\CategoryController;
-
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Client\ProductController;
@@ -95,6 +94,7 @@ Route::prefix('admin')->group(function () {
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
 Route::get('/admin/statistics', [StatisticsController::class, 'statistics']);
 Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topSellingProducts']);
+Route::get('/admin/statistics/recentOrder', [StatisticsController::class, 'recentOrders']);
 Route::get('/admin/statistics/customers', [StatisticsController::class, 'customerStatistics']);
 Route::get('/admin/statistics/products', [StatisticsController::class, 'productStatistics']);
 Route::get('/admin/statistics/orderLocation', [StatisticsController::class, 'orderByLocation']);
@@ -224,12 +224,12 @@ Route::post('/reviews/update/{id}', [ClientReviewController::class, 'update'])->
 
 Route::prefix('/admin')->group(function () {
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index'); #api list review trang chi tiết sản phẩm
-    Route::get('/reviews/get-detail', [AdminReviewController::class, 'getDetail'])->name('reviews.index');
+    Route::get('/reviews/get-detail/{id}', [AdminReviewController::class, 'getDetail'])->name('reviews.index');
     Route::post('/reviews/hidden', [AdminReviewController::class, 'hidden'])->name('reviews.hidden'); #api list review trang chi tiết sản phẩm
     Route::get("/reviews/reply", [ReviewReplyController::class, "edit"]);
     Route::post("/reviews/reply/create", [ReviewReplyController::class, "create"]);
-    Route::post("/reviews/reply/update", [ReviewReplyController::class, "update"]);
-    Route::post("/reviews/reply/delete", [ReviewReplyController::class, "delete"]);
+    Route::patch("/reviews/reply/update/{id}", [ReviewReplyController::class, "update"]);
+    Route::delete("/reviews/reply/delete/{id}", [ReviewReplyController::class, "delete"]);
 });
 
 // GHN
@@ -404,6 +404,8 @@ Route::prefix('cart-items')->group(function () {
     Route::post('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
     Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
     Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
+    Route::patch('/select-all', [CartItemController::class, 'updateAllSelection']);
+    Route::patch('/{id}/select', [CartItemController::class, 'updateSelection']);
 });
 
 

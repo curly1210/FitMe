@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\OrderActivityResource;
 use App\Http\Resources\Admin\OverviewStatisticResource;
 use App\Http\Resources\Admin\CustomerStatisticsResource;
 use App\Http\Resourcesư\Admin\ProductStatisticsResource;
@@ -152,6 +153,16 @@ class StatisticsController extends Controller
         return response()->json([
             'data' => $query
         ]);
+    }
+
+    public function recentOrders()
+    {
+        $orders = Order::with(['user', 'orderDetails'])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return OrderActivityResource::collection($orders);
     }
 
     public function customerStatistics(Request $request)
@@ -471,8 +482,8 @@ class StatisticsController extends Controller
 
     public function reviewStatistics(Request $request)
     {
-        $sortBy = $request->input('sort_by', 'count'); 
-        $star = $request->input('rating'); 
+        $sortBy = $request->input('sort_by', 'count');
+        $star = $request->input('rating');
 
         $ratingCounts = Review::select(
             DB::raw('FLOOR(rate) as rounded_rate'),
