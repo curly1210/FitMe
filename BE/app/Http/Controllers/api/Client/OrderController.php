@@ -23,6 +23,7 @@ use App\Models\User;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\Client\CouponResource;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class OrderController extends Controller
 {
@@ -126,7 +127,7 @@ class OrderController extends Controller
 
         $vouchers = $vouchers->filter(function ($v) use ($coupon) {
             return $v->id !== $coupon->id;
-        })->values(); 
+        })->values();
 
 
         return response()->json([
@@ -283,6 +284,10 @@ class OrderController extends Controller
             ])->where('user_id', $user->id)
                 ->findOrFail($id);
 
+            if (!$order) {
+                return response()->json(['message' => 'Không có sản phẩm nào được chọn để tạo đơn hàng.'], 404);
+            }
+
             // Định dạng order_items
             $orderItems = $order->orderDetails->map(function ($detail) {
                 $productItem = $detail->productItem;
@@ -327,6 +332,8 @@ class OrderController extends Controller
             ];
 
             return response()->json($response);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Không tìm thấy đơn hàng.'], 404);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy chi tiết đơn hàng', [$th->getMessage()], 403);
         }

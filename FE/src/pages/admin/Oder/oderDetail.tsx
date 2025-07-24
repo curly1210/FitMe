@@ -107,57 +107,55 @@ export default function OrderDetailDrawer({
       ) : (
         <div className="flex flex-col gap-6">
           {/* Thông tin */}
-       {/* Thông tin đơn hàng */}
-        <div className="text-base font-semibold mb-2">Thông tin</div>
-        <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
-        <div>
-            <div className="text-gray-500">Mã đơn hàng</div>
-            <div>{order.order_code}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Khách hàng</div>
-            <div>{order.customer_name}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Trạng thái</div>
-            <div className=" font-medium">{order.status}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Ngày đặt hàng</div>
-            <div>{order.created_at}</div>
-        </div>
-        <div className="col-span-2">
-            <div className="text-gray-500">Địa chỉ nhận hàng</div>
-            <div>{order.receiving_address}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Số điện thoại</div>
-            <div>{order.recipient_phone}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Ghi chú</div>
-            <div>{order.note || "—"}</div>
-        </div>
-     
-        <div>
-            <div className="text-gray-500">Phương thức thanh toán</div>
-            <div>{order.payment_method}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Trạng thái thanh toán</div>
-            <div className=" font-medium">{order.payment_status}</div>
-        </div>
-        </div>
+          {/* Thông tin đơn hàng */}
+          <div className="text-base font-semibold mb-2">Thông tin</div>
+          <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
+            <div>
+              <div className="text-gray-500">Mã đơn hàng</div>
+              <div>{order.order_code}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Khách hàng</div>
+              <div>{order.customer_name}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Trạng thái</div>
+              <div className=" font-medium">{order.status}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Ngày đặt hàng</div>
+              <div>{order.created_at}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-gray-500">Địa chỉ nhận hàng</div>
+              <div>{order.receiving_address}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Số điện thoại</div>
+              <div>{order.recipient_phone}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Ghi chú</div>
+              <div>{order.note || "—"}</div>
+            </div>
 
+            <div>
+              <div className="text-gray-500">Phương thức thanh toán</div>
+              <div>{order.payment_method}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Trạng thái thanh toán</div>
+              <div className=" font-medium">{order.payment_status}</div>
+            </div>
+          </div>
 
           {/* Dưới: sản phẩm & tổng tiền */}
-                  <div className="text-base font-semibold mb-2">
-                Chi tiết thanh toán
-              </div>
+          <div className="text-base font-semibold mb-2">
+            Chi tiết thanh toán
+          </div>
           <div className="grid grid-cols-3 gap-4">
             {/* Bảng sản phẩm (2/3) */}
             <div className="col-span-2">
-      
               <Table
                 columns={columns}
                 dataSource={order.order_details}
@@ -190,9 +188,7 @@ export default function OrderDetailDrawer({
               </div>
               <div className="flex justify-between mt-4 font-semibold text-base">
                 <span>Tổng</span>
-                <span>
-                  {order.total_amount.toLocaleString("vi-VN")} VND
-                </span>
+                <span>{order.total_amount.toLocaleString("vi-VN")} VND</span>
               </div>
             </div>
           </div>
