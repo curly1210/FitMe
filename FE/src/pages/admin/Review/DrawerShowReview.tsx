@@ -22,7 +22,7 @@ const DrawerShowReview = ({
 
   const {
     data: reviewsResponse,
-    isLoading,
+    isFetching,
     refetch: refetchListReviews,
   } = useList({
     resource: `admin/reviews/get-detail/${productId}`,
@@ -70,7 +70,7 @@ const DrawerShowReview = ({
           </div>
         }
       >
-        {isLoading || !reviews ? (
+        {isFetching || !reviews ? (
           <Skeleton active />
         ) : (
           <div className="space-y-5">

@@ -49,6 +49,16 @@ const CheckOut = () => {
   const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
   const orderItems = cart?.cartItems || [];
 
+  console.log(cart, "cart");
+
+  useEffect(() => {
+    if (cart?.cartItems) {
+      if (cart.cartItems.length === 0) {
+        nav("/"); // Chuyển hướng về trang chủ nếu giỏ hàng trống
+      }
+    }
+  }, [cart, nav]);
+
   const totalPrice = orderItems.reduce(
     (sum: number, item: any) => sum + item.subtotal,
     0

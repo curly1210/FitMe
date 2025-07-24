@@ -126,6 +126,7 @@ const statusColor =
       ) : (
         <div className="flex flex-col gap-6">
           {/* Thông tin */}
+
        {/* Thông tin đơn hàng */}
         <div className="text-base font-semibold mb-2">Thông tin người nhận</div>
         <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
@@ -170,15 +171,23 @@ const statusColor =
         </div>
         </div>
 
+            <div>
+              <div className="text-gray-500">Phương thức thanh toán</div>
+              <div>{order.payment_method}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Trạng thái thanh toán</div>
+              <div className=" font-medium">{order.payment_status}</div>
+            </div>
+          </div>
 
           {/* Dưới: sản phẩm & tổng tiền */}
-                  <div className="text-base font-semibold mb-2">
-                Chi tiết thanh toán
-              </div>
+          <div className="text-base font-semibold mb-2">
+            Chi tiết thanh toán
+          </div>
           <div className="grid grid-cols-3 gap-4">
             {/* Bảng sản phẩm (2/3) */}
             <div className="col-span-2">
-      
               <Table
                 columns={columns}
                 dataSource={order.order_details}
@@ -211,9 +220,7 @@ const statusColor =
               </div>
               <div className="flex justify-between mt-4 font-semibold text-base">
                 <span>Tổng</span>
-                <span>
-                  {order.total_amount.toLocaleString("vi-VN")} VND
-                </span>
+                <span>{order.total_amount.toLocaleString("vi-VN")} VND</span>
               </div>
             </div>
           </div>

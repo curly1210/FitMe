@@ -26,13 +26,13 @@ trait CreateOrderTrait
         $orderItems = [];
 
         // Lọc chỉ các cart item có is_choose = 1
-        $items = array_filter($items, function ($item) {
-            return isset($item['is_choose']) && $item['is_choose'] == true;
-        });
+        // $items = array_filter($items, function ($item) {
+        //     return isset($item['is_choose']) && $item['is_choose'] == true;
+        // });
 
-        if (empty($items)) {
-            return response()->json(['message' => 'Không có sản phẩm nào được chọn để tạo đơn hàng.'], 400);
-        }
+        // if (empty($items)) {
+        //     return response()->json(['message' => 'Không có sản phẩm nào được chọn để tạo đơn hàng.'], 400);
+        // }
 
         foreach ($items as $item) {
             $productItem = ProductItem::with('product', 'color', 'size')->find($item['idProduct_item']);
