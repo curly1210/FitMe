@@ -67,7 +67,6 @@ export default function OrderDetailDrawer({
     3: "Đã hoàn tiền",
   };
 
-
   const statusColor =
     paymentStatus === 1 || paymentStatus === 3
       ? "text-green-500"
@@ -151,7 +150,6 @@ export default function OrderDetailDrawer({
               >
                 {order.status.label}
               </div>
-
             </div>
             <div>
               <div className="text-gray-500">Ngày đặt hàng</div>
@@ -181,7 +179,6 @@ export default function OrderDetailDrawer({
               </div>
             </div>
           </div>
-
 
           {/* Dưới: sản phẩm & tổng tiền */}
           <div className="text-base font-semibold mb-2">

@@ -10,6 +10,7 @@ import {
   Drawer,
   Form,
   Input,
+  InputNumber,
   notification,
   Select,
   Spin,
@@ -179,6 +180,16 @@ const DrawerEdit = ({
     }
     if (!validateColorsWithImages()) return;
 
+    // kiểm tra giá khuyến mãi bé hơn hoặc bằng giá thường
+    for (const variant of formData?.variants || []) {
+      if (variant?.sale_price > variant?.price) {
+        notification.error({
+          message: "Giá khuyến mãi không được lớn hơn giá bán",
+        });
+        return; // dừng hàm cha luôn
+      }
+    }
+
     const formDataRequest = new FormData();
 
     // formDataRequest.append("_method", "PATCH");
@@ -207,14 +218,14 @@ const DrawerEdit = ({
     formData.variants.forEach((variant: any, index: any) => {
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
       formDataRequest.append(`variants[${index}][size_id]`, variant.size.id);
-      formDataRequest.append(
-        `variants[${index}][sale_percent]`,
-        variant.sale_percent
-      );
+      // formDataRequest.append(
+      //   `variants[${index}][sale_percent]`,
+      //   variant.sale_percent
+      // );
 
       formDataRequest.append(
-        `variants[${index}][import_price]`,
-        variant.import_price
+        `variants[${index}][sale_price]`,
+        variant.sale_price
       );
       formDataRequest.append(`variants[${index}][price]`, variant.price);
       formDataRequest.append(`variants[${index}][stock]`, variant.stock);
@@ -272,30 +283,19 @@ const DrawerEdit = ({
       ),
     });
   };
-  const updateImportPrice = (variantId: number, import_price: number) => {
+  const updateSalePrice = (variantId: number, sale_price: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, import_price } : variant
+        variant.id === variantId ? { ...variant, sale_price } : variant
       ),
     });
   };
-  const updateSellingPrice = (variantId: number, price: number) => {
+  const updatePrice = (variantId: number, price: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
         variant.id === variantId ? { ...variant, price } : variant
-      ),
-    });
-  };
-  const updatePercent = (variantId: number, percent: number) => {
-    console.log("cuong");
-    setFormData({
-      ...formData,
-      variants: formData.variants.map((variant: any) =>
-        variant.id === variantId
-          ? { ...variant, sale_percent: percent }
-          : variant
       ),
     });
   };
@@ -356,9 +356,9 @@ const DrawerEdit = ({
             color,
             size,
             stock: 10,
-            import_price: 10000,
+            sale_price: 10000,
             price: 10000,
-            sale_percent: 0,
+            // sale_percent: 0,
           });
         }
       });
@@ -694,9 +694,9 @@ const DrawerEdit = ({
                     <th className="text-left p-2">Màu sắc</th>
                     <th className="text-left p-2">Kích thước</th>
                     <th className="text-left p-2">Số lượng tồn</th>
-                    <th className="text-left p-2">Giá nhập</th>
-                    <th className="text-left p-2">Giá bán</th>
-                    <th className="text-left p-2">Phần trăm khuyến mãi</th>
+                    <th className="text-left p-2">Giá thường (VNĐ)</th>
+                    <th className="text-left p-2">Giá khuyến mãi (VNĐ)</th>
+                    {/* <th className="text-left p-2">Phần trăm khuyến mãi</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -718,27 +718,35 @@ const DrawerEdit = ({
                           className="w-24"
                         />
                       </td>
+
                       <td className="p-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={variant?.import_price}
-                          onChange={(e) =>
-                            updateImportPrice(
-                              variant.id,
-                              Number(e.target.value) || 0
-                            )
-                          }
-                          className="w-24"
-                        />
-                      </td>
-                      <td className="p-2">
-                        <Input
-                          type="number"
+                        <InputNumber
                           min="0"
                           value={variant?.price}
+                          formatter={(value) =>
+                            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }
+                          parser={(value) =>
+                            value?.replace(/\$\s?|(,*)/g, "") || ""
+                          }
                           onChange={(e) =>
-                            updateSellingPrice(
+                            updatePrice(variant.id, Number(e.target.value) || 0)
+                          }
+                          className="w-24"
+                        />
+                      </td>
+                      <td className="p-2">
+                        <InputNumber
+                          min="0"
+                          value={variant?.sale_price}
+                          formatter={(value) =>
+                            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }
+                          parser={(value) =>
+                            value?.replace(/\$\s?|(,*)/g, "") || ""
+                          }
+                          onChange={(e) =>
+                            updateSalePrice(
                               variant.id,
                               Number(e.target.value) || 0
                             )
@@ -746,7 +754,7 @@ const DrawerEdit = ({
                           className="w-24"
                         />
                       </td>
-                      <td className="p-2">
+                      {/* <td className="p-2">
                         <Input
                           type="number"
                           min="0"
@@ -759,7 +767,7 @@ const DrawerEdit = ({
                           }
                           className="w-24"
                         />
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>

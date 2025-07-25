@@ -49,9 +49,9 @@ const DrawerAdd = ({
   const [form] = Form.useForm();
 
   const resetAllStates = () => {
-    setImportPrice(0);
-    setSellingPrice(0);
-    setPercent(0);
+    setSalePrice(0);
+    setPrice(0);
+    // setPercent(0);
 
     setUploadImagesMap({});
     setSelectedColors([]);
@@ -77,9 +77,10 @@ const DrawerAdd = ({
     form.resetFields();
   };
 
-  const [importPrice, setImportPrice] = useState<any>(0);
-  const [sellingPrice, setSellingPrice] = useState<any>(0);
-  const [percent, setPercent] = useState<any>(0);
+  const [salePrice, setSalePrice] = useState<any>(0);
+  // const [price, setprice] = useState<any>(0);
+  const [price, setPrice] = useState<any>(0);
+  // const [percent, setPercent] = useState<any>(0);
 
   const [uploadImagesMap, setUploadImagesMap] = useState<{
     [colorId: string]: UploadFile[];
@@ -131,6 +132,16 @@ const DrawerAdd = ({
     }
     if (!validateColorsWithImages()) return;
 
+    // kiểm tra giá khuyến mãi bé hơn hoặc bằng giá thường
+    for (const variant of formData?.variants || []) {
+      if (variant?.salePrice > variant?.price) {
+        notification.error({
+          message: "Giá khuyến mãi không được lớn hơn giá bán",
+        });
+        return; // dừng hàm cha luôn
+      }
+    }
+
     const formDataRequest = new FormData();
 
     formDataRequest.append("name", values.name);
@@ -146,15 +157,15 @@ const DrawerAdd = ({
     formData.variants.forEach((variant: any, index: any) => {
       formDataRequest.append(`variants[${index}][color_id]`, variant.color.id);
       formDataRequest.append(`variants[${index}][size_id]`, variant.size.id);
+      // formDataRequest.append(
+      //   `variants[${index}][sale_percent]`,
+      //   variant.percent
+      // );
       formDataRequest.append(
-        `variants[${index}][sale_percent]`,
-        variant.percent
+        `variants[${index}][sale_price]`,
+        variant.salePrice
       );
-      formDataRequest.append(
-        `variants[${index}][import_price]`,
-        variant.importPrice
-      );
-      formDataRequest.append(`variants[${index}][price]`, variant.sellingPrice);
+      formDataRequest.append(`variants[${index}][price]`, variant.price);
       formDataRequest.append(`variants[${index}][stock]`, variant.stock);
     });
 
@@ -186,8 +197,8 @@ const DrawerAdd = ({
     );
   };
 
-  const gia_nhap = useWatch("gia_nhap", form); // Giá bán
-  const gia_ban = useWatch("gia_ban", form); // Giá nhập
+  const gia_thuong = useWatch("gia_thuong", form); // Giá bán
+  const gia_khuyen_mai = useWatch("gia_khuyen_mai", form); // Giá nhập
 
   const updateVariantStock = (variantId: number, stock: number) => {
     setFormData({
@@ -197,29 +208,19 @@ const DrawerAdd = ({
       ),
     });
   };
-  const updateImportPrice = (variantId: number, importPrice: number) => {
+  const updateSalePrice = (variantId: number, salePrice: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, importPrice } : variant
+        variant.id === variantId ? { ...variant, salePrice } : variant
       ),
     });
   };
-  const updateSellingPrice = (variantId: number, sellingPrice: number) => {
+  const updatePrice = (variantId: number, price: number) => {
     setFormData({
       ...formData,
       variants: formData.variants.map((variant: any) =>
-        variant.id === variantId ? { ...variant, sellingPrice } : variant
-      ),
-    });
-  };
-  const updatePercent = (variantId: number, percentSell: number) => {
-    setFormData({
-      ...formData,
-      variants: formData.variants.map((variant: any) =>
-        variant.id === variantId
-          ? { ...variant, percent: percentSell }
-          : variant
+        variant.id === variantId ? { ...variant, price } : variant
       ),
     });
   };
@@ -370,9 +371,9 @@ const DrawerAdd = ({
             color,
             size,
             stock: defaultStock,
-            importPrice: importPrice,
-            sellingPrice: sellingPrice,
-            percent: percent,
+            salePrice: salePrice,
+            price: price,
+            // percent: percent,
           });
         }
       });
@@ -426,8 +427,8 @@ const DrawerAdd = ({
         <Form
           initialValues={{
             defaultStock: defaultStock,
-            gia_ban: 0,
-            gia_nhap: 0,
+            gia_khuyen_mai: 0,
+            gia_thuong: 0,
             percent: 0,
             status: "1",
           }}
@@ -483,34 +484,79 @@ const DrawerAdd = ({
             <Form.Item
               label={
                 <span>
-                  Giá nhập<span className="text-red-500 ml-1">*</span>
+                  Giá thường (VNĐ)<span className="text-red-500 ml-1">*</span>
                 </span>
               }
-              name="gia_nhap"
+              name="gia_thuong"
               required={false}
               rules={[
                 { required: true, message: "Vui lòng nhập giá!" },
                 { pattern: /^[1-9]\d*$/, message: "Vui lòng nhập số dương!" },
               ]}
             >
-              <InputNumber onChange={(value) => setImportPrice(value)} />
+              <InputNumber
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
+                onChange={(value) => setPrice(value)}
+              />
             </Form.Item>
             <Form.Item
               label={
                 <span>
-                  Giá bán<span className="text-red-500 ml-1">*</span>
+                  Giá khuyến mãi (VNĐ)
+                  <span className="text-red-500 ml-1">*</span>
                 </span>
               }
-              name="gia_ban"
+              name="gia_khuyen_mai"
               required={false}
               rules={[
                 { required: true, message: "Vui lòng nhập giá!" },
-                { pattern: /^[1-9]\d*$/, message: "Vui lòng nhập số dương!" },
+                {
+                  validator: (_, value) => {
+                    const regularPrice = form.getFieldValue("gia_thuong");
+                    if (!value || !regularPrice) {
+                      return Promise.resolve();
+                    }
+                    if (value > regularPrice) {
+                      return Promise.reject(
+                        new Error(
+                          "Giá khuyến mãi phải nhỏ hơn hoặc bằng giá thường!"
+                        )
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
               ]}
+              // rules={[
+              //   { required: true, message: "Vui lòng nhập giá!" },
+              //   { pattern: /^[1-9]\d*$/, message: "Vui lòng nhập số dương!" },
+              // ]}
             >
-              <InputNumber onChange={(value) => setSellingPrice(value)} />
+              <InputNumber
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
+                onChange={(value) => setSalePrice(value)}
+              />
             </Form.Item>
             <Form.Item
+              label={
+                <span>
+                  Số lượng<span className="text-red-500 ml-1">*</span>
+                </span>
+              }
+              name="defaultStock"
+            >
+              <InputNumber
+                className=""
+                onChange={(value) => setDefaultStock(value)}
+              />
+            </Form.Item>
+            {/* <Form.Item
               label={
                 <span>
                   Phần trăm khuyến mãi
@@ -524,10 +570,10 @@ const DrawerAdd = ({
               ]}
             >
               <InputNumber onChange={(value) => setPercent(value)} />
-            </Form.Item>
+            </Form.Item> */}
           </div>
           <div className="grid grid-cols-3 gap-6">
-            <Form.Item
+            {/* <Form.Item
               label={
                 <span>
                   Tồn kho<span className="text-red-500 ml-1">*</span>
@@ -539,7 +585,7 @@ const DrawerAdd = ({
                 className=""
                 onChange={(value) => setDefaultStock(value)}
               />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item
               label={
                 <span>
@@ -575,14 +621,22 @@ const DrawerAdd = ({
                     <Tooltip
                       className="flex items-center gap-2"
                       title={
-                        !gia_ban || !gia_nhap ? "Vui lòng nhập giá trước" : ""
+                        !gia_khuyen_mai ||
+                        !gia_thuong ||
+                        gia_khuyen_mai > gia_thuong
+                          ? "Vui lòng nhập giá trước"
+                          : ""
                       }
                     >
                       <Checkbox
                         id={`${color?.id}`}
                         // value={color.id}
                         checked={selectedColorsId.includes(color.id)}
-                        disabled={!gia_ban || !gia_nhap}
+                        disabled={
+                          !gia_khuyen_mai ||
+                          !gia_thuong ||
+                          gia_khuyen_mai > gia_thuong
+                        }
                         onChange={(e: CheckboxChangeEvent) =>
                           handleColorToggle(color, e.target.checked === true)
                         }
@@ -601,13 +655,21 @@ const DrawerAdd = ({
                     <Tooltip
                       className="flex items-center gap-2"
                       title={
-                        !gia_ban || !gia_nhap ? "Vui lòng nhập giá trước" : ""
+                        !gia_khuyen_mai ||
+                        !gia_thuong ||
+                        gia_khuyen_mai > gia_thuong
+                          ? "Vui lòng nhập giá trước"
+                          : ""
                       }
                     >
                       <Checkbox
                         id={`${size?.id}`}
                         // value={size.id}
-                        disabled={!gia_ban || !gia_nhap}
+                        disabled={
+                          !gia_khuyen_mai ||
+                          !gia_thuong ||
+                          gia_khuyen_mai > gia_thuong
+                        }
                         checked={selectedSizesId.includes(size.id)}
                         onChange={(e: CheckboxChangeEvent) =>
                           handleSizeToggle(size, e.target.checked === true)
@@ -681,10 +743,10 @@ const DrawerAdd = ({
                   <tr>
                     <th className="text-left p-2">Màu sắc</th>
                     <th className="text-left p-2">Kích thước</th>
-                    <th className="text-left p-2">Số lượng tồn</th>
-                    <th className="text-left p-2">Giá nhập</th>
-                    <th className="text-left p-2">Giá bán</th>
-                    <th className="text-left p-2">Phần trăm khuyến mãi</th>
+                    <th className="text-left p-2">Số lượng</th>
+                    <th className="text-left p-2">Giá thường (VNĐ)</th>
+                    <th className="text-left p-2">Giá khuyến mãi (VNĐ)</th>
+                    {/* <th className="text-left p-2">Phần trăm khuyến mãi</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -707,34 +769,43 @@ const DrawerAdd = ({
                         />
                       </td>
                       <td className="p-2">
-                        <Input
-                          type="number"
+                        <InputNumber
+                          // type="number"
                           min="0"
-                          value={variant?.importPrice}
+                          value={variant?.price}
                           onChange={(e) =>
-                            updateImportPrice(
-                              variant.id,
-                              Number(e.target.value) || 0
-                            )
+                            updatePrice(variant.id, Number(e.target.value) || 0)
+                          }
+                          formatter={(value) =>
+                            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }
+                          parser={(value) =>
+                            value?.replace(/\$\s?|(,*)/g, "") || ""
                           }
                           className="w-24"
                         />
                       </td>
                       <td className="p-2">
-                        <Input
-                          type="number"
+                        <InputNumber
+                          // type="number"
                           min="0"
-                          value={variant?.sellingPrice}
+                          value={variant?.salePrice}
                           onChange={(e) =>
-                            updateSellingPrice(
+                            updateSalePrice(
                               variant.id,
                               Number(e.target.value) || 0
                             )
                           }
+                          formatter={(value) =>
+                            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }
+                          parser={(value) =>
+                            value?.replace(/\$\s?|(,*)/g, "") || ""
+                          }
                           className="w-24"
                         />
                       </td>
-                      <td className="p-2">
+                      {/* <td className="p-2">
                         <Input
                           type="number"
                           min="0"
@@ -747,7 +818,7 @@ const DrawerAdd = ({
                           }
                           className="w-24"
                         />
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
