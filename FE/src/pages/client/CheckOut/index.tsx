@@ -156,8 +156,11 @@ const CheckOut = () => {
     } else if (coupon.type === "free_shipping") {
       calculatedDiscount = 0; // Không giảm giá tiền
       setShippingPrice(0); // giá ship =0
-    }
-
+    } 
+     // Nếu đang là freeship mà giờ đổi sang mã khác => reset lại phí ship
+if (appliedCoupon?.type === "free_shipping" && coupon.type !== "free_shipping") {
+  setShippingPrice(20000); // hoặc giá ship mặc định như 40000
+}
     setAppliedCoupon(coupon);
     setDiscount(Math.floor(calculatedDiscount)); // Làm tròn nếu cần
     message.success(`Áp dụng mã ${coupon.code} thành công.`);
@@ -357,6 +360,9 @@ const CheckOut = () => {
                   setSelectedCoupon(null);
                   setAppliedCoupon(null);
                   setDiscount(0);
+                      if (appliedCoupon?.type === "free_shipping") {
+      setShippingPrice(20000); // hoặc 40000 tùy theo mặc định bạn muốn
+    }
                   return;
                 }
                 const selected = availableCoupons.find((c) => c.code === value);
