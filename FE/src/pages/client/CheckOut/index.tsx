@@ -11,6 +11,7 @@ type Coupon = {
   name: string;
   value: number;
   max_price_discount: number;
+  type: "percentage" | "fixed" | "free_shipping";
 };
 const CheckOut = () => {
   const [selectedMethod, setSelectedMethod] = useState("COD");
@@ -75,7 +76,13 @@ const CheckOut = () => {
   );
 
   console.log(totalPrice, "totalPrice");
-  const totalAmount = totalPrice + shippingPrice - discount; // tính giá sau khi nhập mã
+  const [totalAmount, setTotalAmount] = useState(
+    totalPrice + shippingPrice - discount
+  );
+
+  useEffect(() => {
+    setTotalAmount(totalPrice + shippingPrice - discount);
+  }, [totalPrice, shippingPrice, discount]); // tính giá sau khi nhập mã
 
   useEffect(() => {
     if (addressData?.data && !selectedAddress) {
@@ -119,6 +126,7 @@ const CheckOut = () => {
     }
   }, [totalPrice]);
 
+  // tính giảm giá theo type
   const handleApplyCoupon = () => {
     if (!selectedCoupon) {
       return message.warning("Vui lòng chọn mã giảm giá.");
@@ -129,19 +137,32 @@ const CheckOut = () => {
         c.code.trim().toLowerCase() ===
         selectedCoupon?.code.trim().toLowerCase()
     );
+
     if (!coupon) {
       return message.error("Mã không hợp lệ hoặc đã hết hạn.");
     }
 
-    const calculatedDiscountRaw = Math.min(
-      (coupon.value / 100) * totalPrice,
-      coupon.max_price_discount
-    );
-    const calculatedDiscount = Number(
-      Math.floor(calculatedDiscountRaw).toString().slice(0, 6)
-    );
+    let calculatedDiscount = 0;
+    // mã theo %
+    if (coupon.type === "percentage") {
+      calculatedDiscount = Math.min(
+        (coupon.value / 100) * totalPrice,
+        coupon.max_price_discount
+      );
+      // mã giảm cố định
+    } else if (coupon.type === "fixed") {
+      calculatedDiscount = Math.min(coupon.value, coupon.max_price_discount);
+      // mã freeship
+    } else if (coupon.type === "free_shipping") {
+      calculatedDiscount = 0; // Không giảm giá tiền
+      setShippingPrice(0); // giá ship =0
+    } 
+     // Nếu đang là freeship mà giờ đổi sang mã khác => reset lại phí ship
+if (appliedCoupon?.type === "free_shipping" && coupon.type !== "free_shipping") {
+  setShippingPrice(20000); // hoặc giá ship mặc định như 40000
+}
     setAppliedCoupon(coupon);
-    setDiscount(calculatedDiscount);
+    setDiscount(Math.floor(calculatedDiscount)); // Làm tròn nếu cần
     message.success(`Áp dụng mã ${coupon.code} thành công.`);
   };
 
@@ -339,6 +360,9 @@ const CheckOut = () => {
                   setSelectedCoupon(null);
                   setAppliedCoupon(null);
                   setDiscount(0);
+                      if (appliedCoupon?.type === "free_shipping") {
+      setShippingPrice(20000); // hoặc 40000 tùy theo mặc định bạn muốn
+    }
                   return;
                 }
                 const selected = availableCoupons.find((c) => c.code === value);
@@ -353,9 +377,13 @@ const CheckOut = () => {
             >
               {availableCoupons.map((coupon) => (
                 <Select.Option key={coupon.code} value={coupon.code}>
-                  {`${coupon.code} - ${coupon.name} (Giảm ${
-                    coupon.value
-                  }% tối đa ${coupon.max_price_discount.toLocaleString()}đ)`}
+                  {coupon.type === "free_shipping"
+                    ? `${coupon.code}-freeship`
+                    : `${coupon.code} (Giảm ${
+                        coupon.type === "percentage"
+                          ? `${coupon.value}%`
+                          : `${coupon.value.toLocaleString()}đ`
+                      } tối đa ${coupon.max_price_discount.toLocaleString()}đ)`}
                 </Select.Option>
               ))}
             </Select>
@@ -434,8 +462,14 @@ const CheckOut = () => {
 
           {appliedCoupon && (
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
-              🎁 Áp dụng mã: <strong>{appliedCoupon.code}</strong> – Giảm
-              {appliedCoupon.value}%
+              🎁 Áp dụng mã: <strong>{appliedCoupon.code}</strong> –{" "}
+              {appliedCoupon.type === "free_shipping"
+                ? "Miễn phí vận chuyển"
+                : `Giảm ${
+                    appliedCoupon.type === "percentage"
+                      ? `${appliedCoupon.value}%`
+                      : `${appliedCoupon.value.toLocaleString()}đ`
+                  }`}
             </div>
           )}
 
@@ -448,7 +482,11 @@ const CheckOut = () => {
             </div>
             <div className="flex justify-between">
               <span>Phí vận chuyển</span>
-              <span>{shippingPrice.toLocaleString()}đ</span>
+              <span>
+                {appliedCoupon?.type === "free_shipping"
+                  ? "Miễn phí"
+                  : `${shippingPrice.toLocaleString()}đ`}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Giảm giá</span>
