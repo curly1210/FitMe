@@ -30,14 +30,90 @@ class CartItemController extends Controller
                 'productItem' => function ($query) {
                     $query->where('is_active', 1)
                         ->with([
-                            'product' => fn ($q) => $q->where('is_active', 1),
-                            'color' => fn ($q) => $q->where('is_active', 1),
-                            'size' => fn ($q) => $q->where('is_active', 1),
-                            'product.productImages' => fn ($q) => $q->where('is_active', 1)
+                            'product' => fn($q) => $q->where('is_active', 1),
+                            'color' => fn($q) => $q->where('is_active', 1),
+                            'size' => fn($q) => $q->where('is_active', 1),
+                            'product.productImages' => fn($q) => $q->where('is_active', 1)
                         ]);
                 }
             ])
                 ->where('user_id', $user->id)
+                ->orderBy('id', 'desc')->get();
+
+            // Lọc các cart item có dữ liệu hợp lệ
+            $validCartItems = $cartItems->filter(function ($cartItem) {
+                return $cartItem->productItem
+                    && $cartItem->productItem->product
+                    && $cartItem->productItem->color
+                    && $cartItem->productItem->size;
+            });
+
+
+            $formattedCartItems = $validCartItems->map(function ($cartItem) {
+                $productItem = $cartItem->productItem;
+                $product = $productItem->product;
+                // Lấy ảnh đầu tiên khớp với color_id của productItem
+                $image = $product->productImages->where('color_id', $productItem->color_id)->first()?->url;
+                $image = $this->buildImageUrl($image) ?? null;
+
+                return [
+                    'id' => $cartItem->id,
+                    'idProduct_item' => $productItem->id,
+                    'name' => $product->name,
+                    'quantity' => $cartItem->quantity,
+                    'price' => $productItem->price,
+                    'sale_percent' => $productItem->sale_percent,
+                    'sale_price' => $productItem->sale_price,
+                    'slug' => $product->slug,
+                    'sku' => $productItem->sku,
+                    'image' => $image,
+                    'subtotal' => $cartItem->quantity * $productItem->sale_price,
+                    'color' => optional($productItem->color)->name,
+                    'size' => optional($productItem->size)->name,
+                    'is_choose' => (bool) $cartItem->is_choose,
+                ];
+            })->values();
+
+            $totalItem = $formattedCartItems->count();
+            // Chỉ tính totalPrice cho các mục có is_choose = 1
+            $totalPrice = $formattedCartItems
+                ->where('is_choose', true)
+                ->sum('subtotal');
+
+            $result = [
+                'cartItems' => $formattedCartItems,
+                'idUser' => $user->id,
+                'totalItem' => $totalItem,
+                'totalPriceCart' => $totalPrice,
+            ];
+
+            //             return response()->json($formattedCartItems);
+            return response()->json($result);
+        } catch (\Throwable $th) {
+            return $this->error('Lỗi khi lấy danh sách sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
+        }
+    }
+    public function getAllItemsSelected()
+    {
+        try {
+            $user = auth('api')->user();
+            // return response()->json([
+            //     'user' => $user
+            // ], 501);
+            $cartItems = CartItem::with([
+                // Load quan hệ với điều kiện is_active = 1 cho tất cả các bảng
+                'productItem' => function ($query) {
+                    $query->where('is_active', 1)
+                        ->with([
+                            'product' => fn($q) => $q->where('is_active', 1),
+                            'color' => fn($q) => $q->where('is_active', 1),
+                            'size' => fn($q) => $q->where('is_active', 1),
+                            'product.productImages' => fn($q) => $q->where('is_active', 1)
+                        ]);
+                }
+            ])
+                ->where('user_id', $user->id)
+                ->where('is_choose', 1)
                 ->orderBy('id', 'desc')->get();
 
             // Lọc các cart item có dữ liệu hợp lệ
@@ -236,7 +312,7 @@ class CartItemController extends Controller
                 return $this->success($cartItem, 'Cập nhật giỏ hàng thành công', 200);
             } catch (\Throwable $th) {
                 DB::rollBack();
-                return $this->error('Lỗi cập nhật sản phẩm trong giỏ hàng', [$th->getMessage()], 402);
+                return $this->error('Lỗi cập nhật sản phẩm trong giỏ hàng', [$th->getMessage()], 403);
             }
         } catch (\Throwable $th) {
             return $this->error('Lỗi cập nhật sản phẩm trong giỏ hàng', [$th->getMessage()], 403);

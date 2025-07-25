@@ -400,12 +400,15 @@ Route::middleware('jwt.auth')->group(function () {
 
 Route::prefix('cart-items')->group(function () {
     Route::get('/', [CartItemController::class, 'index'])->name('cart-items.index');
+    Route::get('/selected-all', [CartItemController::class, 'getAllItemsSelected'])->name('cart-items.getAllItemsSelected');
     Route::post('/', [CartItemController::class, 'store'])->name('cart-items.store');
-    Route::post('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
-    Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
-    Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
+
     Route::patch('/select-all', [CartItemController::class, 'updateAllSelection']);
-    Route::patch('/{id}/select', [CartItemController::class, 'updateSelection']);
+    Route::patch('/select/{id}', [CartItemController::class, 'updateSelection']);
+
+    Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('cart-items.destroy');
+    Route::patch('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
+    Route::post('/{id}', [CartItemController::class, 'update'])->name('cart-items.update');
 });
 
 

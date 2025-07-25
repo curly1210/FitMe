@@ -1,7 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Drawer, Spin, Table } from "antd";
 import { useOne } from "@refinedev/core";
-import React from "react";
-import Oder from "./indext";
 
 interface OrderDetail {
   image_product: string;
@@ -68,9 +67,11 @@ export default function OrderDetailDrawer({
     3: "Đã hoàn tiền",
   };
 
-  const statusColor =
-    paymentStatus === 1 || paymentStatus === 3 ? "text-green-500" : "text-red-500";
 
+  const statusColor =
+    paymentStatus === 1 || paymentStatus === 3
+      ? "text-green-500"
+      : "text-red-500";
 
   const columns = [
     {
@@ -128,7 +129,10 @@ export default function OrderDetailDrawer({
           {/* Thông tin */}
 
           {/* Thông tin đơn hàng */}
-          <div className="text-base font-semibold mb-2">Thông tin người nhận</div>
+          <div className="text-base font-semibold mb-2">
+            Thông tin người nhận
+          </div>
+
           <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
             <div>
               <div className="text-gray-500">Mã đơn hàng</div>
@@ -140,7 +144,14 @@ export default function OrderDetailDrawer({
             </div>
             <div>
               <div className="text-gray-500">Trạng thái</div>
-              <div className=" font-medium" style={{ color: order.status.color }}>{order.status.label}</div>
+
+              <div
+                className=" font-medium"
+                style={{ color: order.status.color }}
+              >
+                {order.status.label}
+              </div>
+
             </div>
             <div>
               <div className="text-gray-500">Ngày đặt hàng</div>
@@ -168,17 +179,6 @@ export default function OrderDetailDrawer({
               <div className={`font-medium ${statusColor}`}>
                 {statusText[paymentStatus]}
               </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-gray-500">Phương thức thanh toán</div>
-            <div>{order.payment_method}</div>
-          </div>
-          <div>
-            <div className="text-gray-500">Trạng thái thanh toán</div>
-            <div className={`font-medium ${statusColor}`}>
-              {statusText[paymentStatus]}
             </div>
           </div>
 
@@ -216,10 +216,7 @@ export default function OrderDetailDrawer({
                 <span>Khuyến mãi</span>
                 <span>- {order.discount.toLocaleString("vi-VN")} VND</span>
               </div>
-              <div className="flex justify-between mb-2 text-sm">
-                <span>VAT</span>
-                <span>10.000 VND</span>
-              </div>
+
               <div className="flex justify-between mt-4 font-semibold text-base">
                 <span>Tổng</span>
                 <span>{order.total_amount.toLocaleString("vi-VN")} VND</span>

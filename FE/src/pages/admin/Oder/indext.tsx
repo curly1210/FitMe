@@ -3,8 +3,6 @@
 import { CrudFilters, useCreate, useList, useUpdate } from "@refinedev/core";
 import {
   Button,
-  Dropdown,
-  Menu,
   Select,
   Space,
   Table,
@@ -285,10 +283,22 @@ const Oder = () => {
 
   const columns = [
     { title: "Mã đơn hàng", dataIndex: "orders_code", key: "orders_code" },
-    { title: "Tên tài khoản", dataIndex: "customer_name", key: "customer_name" },
-    { title: "Email tài khoản", dataIndex: "customer_email", key: "customer_email" },
-    { title: "Sđt tài khoản", dataIndex: "customer_phone", key: "customer_phone" },
-    
+    {
+      title: "Tên tài khoản",
+      dataIndex: "customer_name",
+      key: "customer_name",
+    },
+    {
+      title: "Email tài khoản",
+      dataIndex: "customer_email",
+      key: "customer_email",
+    },
+    {
+      title: "Sđt tài khoản",
+      dataIndex: "customer_phone",
+      key: "customer_phone",
+    },
+
     { title: "Thời gian mua", dataIndex: "created_at", key: "created_at" },
     {
       title: "Tổng tiền",

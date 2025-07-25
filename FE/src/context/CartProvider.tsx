@@ -13,6 +13,9 @@ interface CartContextType {
   isLoadingUpdateToCart?: boolean;
   loadingItemId?: string | null;
   deleteCartItemHandler?: (idCartItem: any) => void;
+  updateAllSelection: () => void;
+  isLoadingUpdateAllSelection?: boolean;
+  // updateAllSelectionHandler?: (isSelected: boolean) => void;
   refetch: () => void;
 }
 
@@ -24,6 +27,8 @@ export const CartContext = createContext<CartContextType>({
   isLoadingUpdateToCart: false,
   loadingItemId: null,
   deleteCartItemHandler: () => {},
+  updateAllSelection: () => {},
+  isLoadingUpdateAllSelection: false,
   refetch: () => {},
 });
 
@@ -39,6 +44,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       enabled: hasAuth, // ✅ chỉ gọi API khi đã có accessToken & user
     },
   });
+
+  // const { data: cartResponse} = useList({
+  //   resource: "cart-items",
+  //   queryOptions: {
+  //     enabled: hasAuth, // ✅ chỉ gọi API khi đã có accessToken & user
+  //   },
+  // });
 
   const { mutate: addToCart, isLoading: isLoadingAddtoCart } = useCreate({
     resource: "cart-items",
@@ -57,11 +69,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     resource: "cart-items",
   });
 
+  const { mutate: updateAllSelection, isLoading: isLoadingUpdateAllSelection } =
+    useUpdate({
+      resource: "cart-items/select-all",
+    });
+
   const addToCartHandler = (idProductItem: any, quantity: any) => {
     addToCart({
       values: { product_item_id: idProductItem, quantity },
     });
   };
+
+  // const updateAllSelectionHandler = (is_choose: boolean) => {
+  //   updateAllSelection();
+  //   // updateAllSelection(
+  //   //   { values: { is_choose }, id: "" },
+  //   //   {
+  //   //     onSuccess: (response) => {
+  //   //       refetch();
+  //   //       console.log("thành công");
+  //   //       // notification.success({ message: response?.data?.message });
+  //   //     },
+  //   //     onError: (error) => {
+  //   //       console.log("lỗi");
+  //   //       // notification.error({ message: `${error?.response?.data?.message}` });
+  //   //     },
+  //   //   }
+  //   // );
+  // };
 
   const { mutate: deleteCartItem } = useDelete();
 
@@ -131,6 +166,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         loadingItemId,
         deleteCartItemHandler,
         refetch,
+        // updateAllSelectionHandler,
+        updateAllSelection,
+        isLoadingUpdateAllSelection,
       }}
     >
       {/* Children components will go here */}
