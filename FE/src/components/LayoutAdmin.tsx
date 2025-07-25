@@ -5,7 +5,6 @@ import {
   InboxOutlined,
   PercentageOutlined,
   PictureOutlined,
-  PieChartOutlined,
   ProductOutlined,
   ShoppingOutlined,
   UnorderedListOutlined,

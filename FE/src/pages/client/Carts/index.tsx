@@ -1,14 +1,108 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
-import { Button } from "antd";
+import { Button, Checkbox } from "antd";
 import CartItem from "./CartItem";
 import emptyCart from "../../../assets/images/empty_cart.png";
+import { useEffect, useState } from "react";
+import { useUpdate } from "@refinedev/core";
 
 const Carts = () => {
-  const { cart } = useCart();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  const { cart, refetch } = useCart();
   const navigate = useNavigate();
+
+  const totalItems = cart?.cartItems?.length || -1;
+  const allSelected = selectedIds.length === totalItems;
+  const isIndeterminate = selectedIds.length > 0 && !allSelected;
+
+  const { mutate: updateAllSelection, isPending: isLoadingUpdateAllSelection } =
+    useUpdate({
+      resource: "cart-items/select-all",
+    });
+
+  const handleSelectAll = (isSelected: boolean) => {
+    updateAllSelection(
+      { values: { is_choose: isSelected }, id: "" },
+      {
+        onError: () => {
+          console.log("Lỗi");
+        },
+        onSuccess: () => {
+          console.log("Thành công");
+          refetch();
+        },
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (!hasInitialized && cart?.cartItems?.length > 0) {
+      updateAllSelection(
+        { values: { is_choose: true }, id: "" },
+        {
+          onError: () => {
+            console.log("Lỗi");
+          },
+          onSuccess: () => {
+            refetch();
+            setHasInitialized(true);
+            console.log("Thành công");
+            setSelectedIds(cart.cartItems.map((item: any) => item.id));
+          },
+        }
+      );
+    }
+  }, [cart?.cartItems, hasInitialized]);
+
+  const handlerCheckboxUpdateAllSelection = (e: any) => {
+    const isChecked = e.target.checked;
+
+    if (isChecked) {
+      handleSelectAll(true);
+      setSelectedIds(cart.cartItems.map((item: any) => item.id));
+    } else {
+      handleSelectAll(false);
+      setSelectedIds([]);
+    }
+  };
+
+  const {
+    mutate: updateSelectionItem,
+    // isPending: isLoadingUpdateSelectionItem,
+  } = useUpdate({
+    resource: "cart-items/select",
+  });
+
+  const handleSelectItem = (itemId: number, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedIds((prev) => [...prev, itemId]);
+    } else {
+      setSelectedIds((prev) => prev.filter((id) => id !== itemId));
+    }
+    updateSelectionItem(
+      {
+        id: itemId,
+        values: { is_choose: isSelected },
+      },
+      {
+        onSuccess: () => {
+          refetch();
+          // setSelectedIds((prev) =>
+          //   isSelected ? [...prev, itemId] : prev.filter((id) => id !== itemId)
+          // );
+        },
+        onError: () => {
+          console.log("Lỗi khi cập nhật lựa chọn");
+        },
+      }
+    );
+  };
+
   return (
     <div>
       <div className="flex gap-3 border border-gray-300 items-center py-5 px-4 mb-5">
@@ -40,9 +134,31 @@ const Carts = () => {
                 </p>
               </div>
             ) : (
-              cart?.cartItems?.map((item: any) => (
-                <CartItem key={item.id} item={item} />
-              ))
+              <div>
+                <div className="flex gap-3 mb-5">
+                  <Checkbox
+                    className="!rounded-none"
+                    indeterminate={isIndeterminate}
+                    checked={allSelected}
+                    onChange={handlerCheckboxUpdateAllSelection}
+                    // disabled={totalAddresses === 1}
+                  />
+                  <p>Chọn tất cả</p>
+                </div>
+                {cart?.cartItems?.map((item: any) => (
+                  <div className="flex items-center gap-3 mb-5" key={item.id}>
+                    <Checkbox
+                      className="!rounded-none "
+                      checked={selectedIds.includes(item.id)}
+                      onChange={(e) =>
+                        handleSelectItem(item.id, e.target.checked)
+                      }
+                      // disabled={totalAddresses === 1}
+                    />
+                    <CartItem key={item.id} item={item} />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -54,8 +170,16 @@ const Carts = () => {
           <Button
             // loading={isLoadingAddtoCart}
             size="large"
-            className="!bg-black !text-white !border-none !rounded-none     w-full !py-6"
-            disabled={cart?.cartItems?.length === 0}
+            className={`${
+              cart?.totalPriceCart === 0
+                ? "!bg-black !text-white !opacity-20"
+                : "!bg-black !text-white"
+            } !border-none !rounded-none   w-full !py-6`}
+            disabled={
+              cart?.cartItems?.length === 0 ||
+              cart?.totalPriceCart === 0 ||
+              isLoadingUpdateAllSelection
+            }
             onClick={() => navigate("/checkout")}
           >
             Thanh toán

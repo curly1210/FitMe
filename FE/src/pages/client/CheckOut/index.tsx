@@ -1,16 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Modal, Select, Spin, message } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import {
-  useCreate,
-  useList,
-  useCustomMutation,
-  useCustom,
-} from "@refinedev/core";
+import { useCreate, useList, useCustomMutation } from "@refinedev/core";
 import { useNavigate } from "react-router";
 import { useCart } from "../../../hooks/useCart";
-import dayjs from "dayjs";
 type Coupon = {
   code: string;
   name: string;
@@ -19,6 +14,7 @@ type Coupon = {
 };
 const CheckOut = () => {
   const [selectedMethod, setSelectedMethod] = useState("COD");
+  const [cart, setCart] = useState<any>({});
 
   const paymentMethods = [
     { id: "COD", label: "Trả tiền mặt khi nhận hàng (COD)" },
@@ -46,23 +42,39 @@ const CheckOut = () => {
   const { mutate: redeemCoupon, isLoading: isRedeeming } = useCustomMutation();
   const nav = useNavigate();
 
-  const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
-  const orderItems = cart?.cartItems || [];
+  const { refetch } = useCart(); // lấy đơn hàng từ cart
+  // const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
 
-  console.log(cart, "cart");
+  const { data: cartResponse, isFetching: isLoadingCarts } = useList({
+    resource: "cart-items/selected-all",
+    // queryOptions: {
+    //   enabled: hasAuth, // ✅ chỉ gọi API khi đã có accessToken & user
+    // },
+  });
 
   useEffect(() => {
-    if (cart?.cartItems) {
-      if (cart.cartItems.length === 0) {
+    if (cartResponse?.data) {
+      console.log("cartResponse:", cartResponse);
+      setCart(cartResponse.data);
+    }
+  }, [cartResponse]);
+
+  // console.log(orderItems, "cart");
+
+  useEffect(() => {
+    if (cartResponse?.cartItems) {
+      if (cartResponse.cartItems.length === 0) {
         nav("/"); // Chuyển hướng về trang chủ nếu giỏ hàng trống
       }
     }
-  }, [cart, nav]);
+  }, [cartResponse, nav]);
 
-  const totalPrice = orderItems.reduce(
+  const totalPrice = (cart?.cartItems || []).reduce(
     (sum: number, item: any) => sum + item.subtotal,
     0
   );
+
+  console.log(totalPrice, "totalPrice");
   const totalAmount = totalPrice + shippingPrice - discount; // tính giá sau khi nhập mã
 
   useEffect(() => {
@@ -141,7 +153,7 @@ const CheckOut = () => {
     if (!selectedAddress) return;
 
     const values = {
-      cartItems: orderItems.map((item: any) => ({
+      cartItems: cart?.cartItems.map((item: any) => ({
         idProduct_item: item.idProduct_item,
         quantity: item.quantity,
         idItem: item.id,
@@ -371,10 +383,37 @@ const CheckOut = () => {
         </div>
 
         {/* Cột 3: Đơn hàng */}
-        <div className="bg-white p-4 border border-gray-300 rounded shadow-md space-y-4">
+        <div className="bg-white p-4 border border-gray-300 rounded shadow-md space-y-4 relative">
           <h2 className="font-semibold text-lg">Đơn hàng</h2>
 
-          {orderItems.map((item: any, index: number) => (
+          {isLoadingCarts ? (
+            <Spin
+              className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+              style={{ textAlign: "center" }}
+              size="large"
+            />
+          ) : (
+            (cart?.cartItems || []).map((item: any, index: number) => (
+              <div key={index} className="flex space-x-4 items-center">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{item.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {item.color}, {item.size} – SL: {item.quantity}
+                  </p>
+                </div>
+                <div className="text-sm font-semibold">
+                  {(item.subtotal || 0).toLocaleString()}đ
+                </div>
+              </div>
+            ))
+          )}
+
+          {/* {(cart?.cartItems || []).map((item: any, index: number) => (
             <div key={index} className="flex space-x-4 items-center">
               <img
                 src={item.image}
@@ -391,7 +430,7 @@ const CheckOut = () => {
                 {(item.subtotal || 0).toLocaleString()}đ
               </div>
             </div>
-          ))}
+          ))} */}
 
           {appliedCoupon && (
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">

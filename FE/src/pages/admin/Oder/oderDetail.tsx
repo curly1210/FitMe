@@ -1,7 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Drawer, Spin, Table } from "antd";
 import { useOne } from "@refinedev/core";
-import React from "react";
-import Oder from "./indext";
 
 interface OrderDetail {
   image_product: string;
@@ -15,10 +14,10 @@ interface OrderDetail {
   subtotal: number;
 }
 
-interface Status{
- id: string;
- label:string;
- color:string;
+interface Status {
+  id: string;
+  label: string;
+  color: string;
 }
 
 interface OrderData {
@@ -59,18 +58,19 @@ export default function OrderDetailDrawer({
   });
 
   const order = data?.data;
-const paymentStatus = Number(order?.payment_status ?? 0);
+  const paymentStatus = Number(order?.payment_status ?? 0);
 
-const statusText: Record<number, string> = {
-  0: "Chưa thanh toán",
-  1: "Đã thanh toán",
-  2: "Chờ hoàn tiền",
-  3: "Đã hoàn tiền",
-};
+  const statusText: Record<number, string> = {
+    0: "Chưa thanh toán",
+    1: "Đã thanh toán",
+    2: "Chờ hoàn tiền",
+    3: "Đã hoàn tiền",
+  };
 
-const statusColor =
-  paymentStatus === 1 || paymentStatus === 3 ? "text-green-500" : "text-red-500";
-
+  const statusColor =
+    paymentStatus === 1 || paymentStatus === 3
+      ? "text-green-500"
+      : "text-red-500";
 
   const columns = [
     {
@@ -126,50 +126,44 @@ const statusColor =
       ) : (
         <div className="flex flex-col gap-6">
           {/* Thông tin */}
-
-       {/* Thông tin đơn hàng */}
-        <div className="text-base font-semibold mb-2">Thông tin người nhận</div>
-        <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
-        <div>
-            <div className="text-gray-500">Mã đơn hàng</div>
-            <div>{order.order_code}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Khách hàng</div>
-            <div>{order.receiving_name}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Trạng thái</div>
-            <div className=" font-medium" style={{color: order.status.color}}>{order.status.label}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Ngày đặt hàng</div>
-            <div>{order.created_at}</div>
-        </div>
-        <div className="col-span-2">
-            <div className="text-gray-500">Địa chỉ nhận hàng</div>
-            <div>{order.receiving_address}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Số điện thoại</div>
-            <div>{order.recipient_phone}</div>
-        </div>
-        <div>
-            <div className="text-gray-500">Email</div>
-            <div>{order.customer_email || "—"}</div>
-        </div>
-     
-        <div>
-            <div className="text-gray-500">Phương thức thanh toán</div>
-            <div>{order.payment_method}</div>
-        </div>
-        <div>
-      <div className="text-gray-500">Trạng thái thanh toán</div>
-<div className={`font-medium ${statusColor}`}>
-  {statusText[paymentStatus]}
-</div>
-        </div>
-        </div>
+          {/* Thông tin đơn hàng */}
+          <div className="text-base font-semibold mb-2">
+            Thông tin người nhận
+          </div>
+          <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">
+            <div>
+              <div className="text-gray-500">Mã đơn hàng</div>
+              <div>{order.order_code}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Khách hàng</div>
+              <div>{order.receiving_name}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Trạng thái</div>
+              <div
+                className=" font-medium"
+                style={{ color: order.status.color }}
+              >
+                {order.status.label}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-500">Ngày đặt hàng</div>
+              <div>{order.created_at}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-gray-500">Địa chỉ nhận hàng</div>
+              <div>{order.receiving_address}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Số điện thoại</div>
+              <div>{order.recipient_phone}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">Email</div>
+              <div>{order.customer_email || "—"}</div>
+            </div>
 
             <div>
               <div className="text-gray-500">Phương thức thanh toán</div>
@@ -177,7 +171,9 @@ const statusColor =
             </div>
             <div>
               <div className="text-gray-500">Trạng thái thanh toán</div>
-              <div className=" font-medium">{order.payment_status}</div>
+              <div className={`font-medium ${statusColor}`}>
+                {statusText[paymentStatus]}
+              </div>
             </div>
           </div>
 
@@ -214,10 +210,7 @@ const statusColor =
                 <span>Khuyến mãi</span>
                 <span>- {order.discount.toLocaleString("vi-VN")} VND</span>
               </div>
-              <div className="flex justify-between mb-2 text-sm">
-                <span>VAT</span>
-                <span>10.000 VND</span>
-              </div>
+
               <div className="flex justify-between mt-4 font-semibold text-base">
                 <span>Tổng</span>
                 <span>{order.total_amount.toLocaleString("vi-VN")} VND</span>

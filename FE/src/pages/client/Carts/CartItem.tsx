@@ -27,7 +27,7 @@ const CartItem = ({ item }: any) => {
   };
 
   return (
-    <div key={item.id} className="flex justify-between items-end mb-5">
+    <div key={item.id} className="flex justify-between items-end flex-grow ">
       <div className="flex items-stretch gap-3">
         <img width={80} height={100} src={item?.image} alt="" />
         <div className="flex flex-col justify-between">
