@@ -16,6 +16,7 @@ import DashboardUser from "../pages/admin/Dashboard/thongKeKhachHang";
 import DashboardProduct from "../pages/admin/Dashboard/thongKeSanPhamDonHang";
 import { InventoryPage } from "../pages/admin/Dashboard/thongKeTonKho";
 import ReviewPage from "../pages/admin/Dashboard/thongKeDanhGia/idext";
+import AdminReviewProductList from "../pages/admin/Review";
 
 
 export const adminRoutes = [
@@ -70,19 +71,23 @@ export const adminRoutes = [
             path: "products/trash",
             element: <TrashProducts />,
           },
-               {
+          {
             path: "coupons",
             element: <CouponsList />,
           },
-                  {
+          {
             path: "oders",
             element: <Oder />,
           },
-                  {
+       
+            {
             path: "posts",
             element: <PostList />,
           },
-      
+          {
+            path: "reviews",
+            element: <AdminReviewProductList />,
+          },
         ],
       },
     ],

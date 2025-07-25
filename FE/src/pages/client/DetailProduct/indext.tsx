@@ -8,6 +8,7 @@ import {
   Space,
   notification,
   Pagination,
+  Spin,
 } from "antd";
 import { useCreate, useCustom, useOne } from "@refinedev/core";
 import { Link, useNavigate, useParams } from "react-router";
@@ -163,7 +164,9 @@ const ProductDetail = () => {
 
   const {
     data: responseReviews,
-    // isLoading,
+    isLoading: isLoadingReviews,
+    // isFetching: isFetchingReviews,
+    // isFetched: isFetchedReviews,
     // refetch,
   } = useCustom({
     method: "get",
@@ -177,7 +180,16 @@ const ProductDetail = () => {
       },
     },
 
-    queryOptions: { enabled: !!product?.id },
+    queryOptions: {
+      enabled: !!product?.id,
+      // keepPreviousData: false,
+      // queryKey: [
+      //   "admin-reviews",
+      //   currentPageReview,
+      //   pageSizeReviews,
+      //   selectedRating,
+      // ],
+    },
   });
 
   const handlePageReviewsChange = (page: number, pageSize?: number) => {
@@ -185,7 +197,7 @@ const ProductDetail = () => {
     if (pageSize) setPageSizeReviews(pageSize);
   };
 
-  console.log(responseReviews?.data);
+  // console.log(responseReviews?.data);
 
   const reviews = responseReviews?.data?.data || [];
   const totalReviews = responseReviews?.data?.meta?.total || 0;
@@ -658,39 +670,60 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <div>
-              {reviews?.map((review: any) => (
-                <div
-                  key={review?.id}
-                  className="border-b-[1px] border-gray-300 "
-                >
-                  <div className="flex gap-4 px-5 mb-8 mt-8">
-                    <div>
-                      <img src="" className="w-8 h-8 rounded-full" alt="" />
-                    </div>
-                    <div className="flex flex-col gap-5">
-                      <div className="flex flex-col gap-[2px]">
-                        <p>{review?.user?.name}</p>
-                        <div className="flex">
-                          <StarRating rating={review?.rate} />
-                          {/* <StarRating rating={review.rate} /> */}
-                        </div>
-                        <p className="text-gray-500">{review?.updated_at}</p>
-                      </div>
-                      <p className="text-justify">{review?.content}</p>
-                      <div className="flex gap-3">
-                        {review?.review_images?.map((image: any) => (
-                          <img
-                            key={image?.id}
-                            src={image?.url}
-                            className="block w-[80px] h-[80px] object-cover"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+            <div className="relative ">
+              {isLoadingReviews ? (
+                <div className="flex flex-col items-center justify-center py-6">
+                  <Spin size="large" />
+                  <p className="text-gray-500 text-sm mt-2">
+                    Đang tải dữ liệu...
+                  </p>
                 </div>
-              ))}
+              ) : (
+                <>
+                  {reviews?.map((review: any) => (
+                    <div
+                      key={review?.id}
+                      className="border-b-[1px] border-gray-300 "
+                    >
+                      <div className="flex gap-4 px-5 mb-8 mt-8">
+                        <div>
+                          <img src="" className="w-8 h-8 rounded-full" alt="" />
+                        </div>
+                        <div className="flex flex-col gap-5 grow">
+                          <div className="flex flex-col gap-[2px]">
+                            <p>{review?.user?.name}</p>
+                            <div className="flex">
+                              <StarRating rating={review?.rate} />
+                              {/* <StarRating rating={review.rate} /> */}
+                            </div>
+                            <p className="text-gray-500">
+                              {review?.updated_at}
+                            </p>
+                          </div>
+                          <p className="text-justify">{review?.content}</p>
+                          <div className="flex gap-3">
+                            {review?.review_images?.map((image: any) => (
+                              <img
+                                key={image?.id}
+                                src={image?.url}
+                                className="block w-[80px] h-[80px] object-cover"
+                              />
+                            ))}
+                          </div>
+                          {review?.replies?.length > 0 && (
+                            <div className="py-3 px-3 bg-gray-100">
+                              <p className="mb-3 ">Phản hồi của Shop :</p>
+                              <p className="text-gray-700 ">
+                                {review?.replies[0].content}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
 
             <div className="flex justify-center ">

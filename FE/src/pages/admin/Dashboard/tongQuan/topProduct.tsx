@@ -81,7 +81,7 @@ const TopProducts = () => {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24,maxHeight: 600, overflow: "auto" }}>
       <Card style={{ marginTop: 16 }}>
         <Space
           style={{

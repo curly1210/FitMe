@@ -11,7 +11,6 @@ class ProductItem extends Model
     /** @use HasFactory<\Database\Factories\ProductItemFactory> */
     use HasFactory;
     protected $fillable = [
-        'import_price',
         'price',
         'sale_price',
         'sale_percent',

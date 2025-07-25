@@ -10,14 +10,34 @@ import { BiDollar } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa6";
 import { BsBoxSeam } from "react-icons/bs";
 import { MdClose } from "react-icons/md";
+import NotFound from "../../../assets/images/404.png";
 
 const DetailOrder = () => {
   const { id } = useParams();
 
-  const { data: orderResponse, isLoading } = useOne({
+  const {
+    data: orderResponse,
+    isLoading,
+    error,
+  } = useOne({
     resource: "orders",
     id: id,
+    queryOptions: {
+      enabled: !!id, // Ensure the request is made only if id is available
+      retry: 1,
+    },
   });
+
+  if (error) {
+    if (error?.status === 404) {
+      return (
+        <div className="flex flex-col items-center gap-5">
+          <img src={NotFound} className="w-3xs " alt="" />
+          <p className="text-2xl">Không tìm thấy đơn hàng !</p>
+        </div>
+      );
+    }
+  }
 
   const order: any = orderResponse?.data || [];
 
