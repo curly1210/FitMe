@@ -130,7 +130,10 @@ const HeaderClient = () => {
     <header className=" shrink-0 sticky top-0 z-50 bg-white  border-gray-200  px-4 mb-5">
       <div className="text-black w-7xl m-auto flex justify-between items-center py-5 px-4">
         <div className="flex gap-6 items-center">
-          <SearchOutlined className="text-2xl" />
+         <SearchOutlined
+  className="text-xl cursor-pointer"
+  onClick={() => setIsOpenSearchPanel(true)}
+/>
           <div className="list-none flex gap-3.5">
             {categories.map((category: any) => (
               <li

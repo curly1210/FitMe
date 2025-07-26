@@ -12,6 +12,7 @@ type SearchPanelType = {
   selectedCategory: any;
   setSelectedCategory: (category: any) => void;
   isLoadingSearchPanel: boolean;
+  isLoadingProducts: boolean;
 };
 
 export const SearchPanelContext = createContext<SearchPanelType>({
@@ -21,6 +22,7 @@ export const SearchPanelContext = createContext<SearchPanelType>({
   selectedCategory: [],
   setSelectedCategory: () => {},
   isLoadingSearchPanel: false,
+  isLoadingProducts: false,
 });
 
 export const SearchPanelProvider = ({ children }: { children: ReactNode }) => {
@@ -29,13 +31,33 @@ export const SearchPanelProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCategory, setSelectedCategory] = useState<any>([]);
   const location = useLocation();
 
-  const { data: responseCategories, isLoading: isLoadingSearchPanel } = useList(
-    {
-      resource: "admin/categories",
-    }
-  );
+  // Gọi API danh mục
+  const {
+    data: responseCategories,
+    isLoading: isLoadingSearchPanel,
+  } = useList({
+    resource: "admin/categories",
+  });
 
   const listCategory = responseCategories?.data || [];
+
+  // Gọi API sản phẩm (giả định sẽ gọi theo selectedCategory)
+  const {
+    data: responseProducts,
+    isLoading: isLoadingProducts,
+  } = useList({
+    resource: "products",
+    filters: [
+      {
+        field: "categoryId",
+        operator: "eq",
+        value: selectedCategory?.id,
+      },
+    ],
+    pagination: {
+      pageSize: 10,
+    },
+  });
 
   useEffect(() => {
     if (listCategory?.length > 0) {
@@ -49,11 +71,7 @@ export const SearchPanelProvider = ({ children }: { children: ReactNode }) => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (isOpenSearchPanel) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "scroll";
-    }
+    document.body.style.overflow = isOpenSearchPanel ? "hidden" : "scroll";
   }, [isOpenSearchPanel]);
 
   return (
@@ -65,6 +83,7 @@ export const SearchPanelProvider = ({ children }: { children: ReactNode }) => {
         selectedCategory,
         setSelectedCategory,
         isLoadingSearchPanel,
+        isLoadingProducts,
       }}
     >
       {children}
