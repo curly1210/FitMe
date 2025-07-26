@@ -16,11 +16,9 @@ class GeminiChatService
         $this->url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
     }
 
-    public function chatWithSession(string $message, ?int $userId = null): string
+    public function chatWithSession(string $message, ?string $sessionId = null): string
     {
-        $sessionKey = $userId
-            ? 'chatbot.history.' . $userId
-            : 'chatbot.history.guest';
+        $sessionKey = 'chatbot.history.' . ($sessionId ?? session()->getId());
 
         $history = session($sessionKey, []);
         $contents = [];
@@ -82,11 +80,9 @@ EOD;
         return 'Lỗi khi gọi Gemini API.';
     }
 
-    public function resetHistory(?int $userId = null): void
+    public function resetHistory(?string $sessionId = null): void
     {
-        $sessionKey = $userId
-            ? 'chatbot.history.' . $userId
-            : 'chatbot.history.guest';
+        $sessionKey = 'chatbot.history.' . ($sessionId ?? session()->getId());
 
         session()->forget($sessionKey);
     }

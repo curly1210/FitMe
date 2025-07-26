@@ -2,45 +2,41 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Chatbot Gemini Test</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chatbot</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        #chat-box { background: #fff; padding: 15px; max-width: 600px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .chat-message { margin-bottom: 10px; }
-        .user { color: #0d6efd; }
-        .bot { color: #198754; }
+        .chat-box { width: 400px; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; }
+        .user { color: blue; margin: 5px 0; }
+        .bot { color: green; margin: 5px 0; }
     </style>
 </head>
 <body>
+    <h2>💬 Chatbot test</h2>
 
-<div id="chat-box">
-    <h2>💬 Trò chuyện với trợ lý thời trang</h2>
+    <div class="chat-box">
+        @php
+            $history = session('history', []);
+        @endphp
 
-    <div id="messages">
-        @if(session('chatbot.history.guest'))
-            @foreach(session('chatbot.history.guest') as $entry)
-                <div class="chat-message"><strong class="user">Bạn:</strong> {{ $entry['user'] }}</div>
-                <div class="chat-message"><strong class="bot">Bot:</strong> {{ $entry['bot'] }}</div>
-            @endforeach
+        @foreach($history as $chat)
+            <div class="user"><strong>Bạn:</strong> {{ $chat['user'] }}</div>
+            <div class="bot"><strong>Bot:</strong> {{ $chat['bot'] }}</div>
+        @endforeach
+
+        @if(session('reply') && empty($history))
+            <div class="bot"><strong>Bot:</strong> {{ session('reply') }}</div>
         @endif
     </div>
 
-    <form method="POST" action="{{ route('chatbot.test') }}">
+    <form action="{{ route('chatbot.chat') }}" method="POST" style="margin-top:10px;">
         @csrf
-        <input type="text" name="message" placeholder="Nhập câu hỏi..." style="width:80%;" required>
+        <input type="text" name="message" placeholder="Nhập câu hỏi..." required>
         <button type="submit">Gửi</button>
     </form>
 
-    {{-- @if(session('reply'))
-        <p><strong>Phản hồi:</strong> {{ session('reply') }}</p>
-    @endif --}}
-
-    <form method="POST" action="/chatbot-test/reset" style="margin-top: 10px;">
+    <form action="{{ route('chatbot.reset') }}" method="POST" style="margin-top:10px;">
         @csrf
-        <button type="submit">🔁 Xóa lịch sử trò chuyện</button>
+        <button type="submit">🗑 Reset Chat</button>
     </form>
-</div>
-
 </body>
 </html>

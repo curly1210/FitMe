@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\api\Client;
 
-
 use App\Models\Size;
 use App\Models\Color;
 use App\Models\Product;
@@ -15,7 +14,6 @@ use App\Http\Resources\Client\ProductDetailResource;
 
 class ProductController extends Controller
 {
-
     use ApiResponse;
 
     public function index(Request $request)
@@ -153,7 +151,7 @@ class ProductController extends Controller
                 $q->whereBetween('sale_price', [$min, $max]);
             });
         }
-        // Lấy giá nhỏ nhất từ productItems 
+        // Lấy giá nhỏ nhất từ productItems
         $query->withMin(['productItems' => function ($q) {
             $q->where('is_active', 1);
         }], 'sale_price');
@@ -213,249 +211,6 @@ class ProductController extends Controller
         return response()->json($sizes);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function show($slug)
     {
 
@@ -470,5 +225,40 @@ class ProductController extends Controller
         ])->where('slug', $slug)->firstOrFail();
 
         return new ProductDetailResource($product);
+    }
+
+    public function getAllProductChatbot()
+    {
+        $products = Product::with(['productItems.size', 'productItems.color', 'category'])
+            ->where('is_active', 1)
+            ->get();
+
+        $result = $products->map(function ($product) {
+            $productItems = $product->productItems ?? collect();
+
+            return [
+                "name"         => $product->name,
+                "category"     => $product->category->name ?? null,
+                "sizes"        => $productItems->pluck('size.name')
+                                        ->filter()
+                                        ->unique()
+                                        ->values()
+                                        ->toArray(),
+                "colors"       => $productItems->pluck('color.name')
+                                        ->filter()
+                                        ->unique()
+                                        ->values()
+                                        ->toArray(),
+                "price"        => $productItems->min('price'),
+                "sale_price"   => $productItems->min('sale_price'),
+                "sale_percent" => $productItems->first()->sale_percent ?? 0,
+                "stock"        => $productItems->where('stock', '>', 0)->count() > 0 
+                                    ? "Còn hàng" 
+                                    : "Hết hàng",
+                "description"  => $product->description,
+            ];
+        });
+
+        return response()->json($result);
     }
 }

@@ -7,9 +7,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/chatbot-test', function () {
-    return view('chatbot');
-});
-
-Route::post('/chatbot-test', [ChatbotController::class, 'chat'])->name('chatbot.test');
+Route::view('/chatbot-test', 'chatbot')->name('chatbot.test');
+Route::post('/chatbot-test', [ChatbotController::class, 'chat'])->name('chatbot.chat');
 Route::post('/chatbot-test/reset', [ChatbotController::class, 'reset'])->name('chatbot.reset');

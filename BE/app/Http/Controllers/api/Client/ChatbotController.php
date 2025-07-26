@@ -15,24 +15,33 @@ class ChatbotController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        $userId = Auth::check() ? Auth::id() : null;
+        $sessionId = $request->session()->getId();
+
         $message = $request->input('message');
-        $reply = $gemini->chatWithSession($message, $userId);
+        $reply = $gemini->chatWithSession($message, $sessionId);
+
+        $history = session('chatbot.history.' . $sessionId, []);
 
         // Nếu đến từ blade view, redirect lại
         if ($request->isMethod('post') && $request->is('chatbot-test')) {
-            return back()->with('reply', $reply);
+            return back()->with([
+            'reply' => $reply,
+            'history' => $history,
+        ]);
         }
 
         return response()->json([
             'reply' => $reply,
+            'history' => $history,
         ]);
     }
 
     public function reset(Request $request, GeminiChatService $gemini)
     {
-        $userId = Auth::check() ? Auth::id() : null;
-        $gemini->resetHistory($userId);
+        // $userId = Auth::check() ? Auth::id() : null;
+        $sessionId = $request->session()->getId();
+
+        $gemini->resetHistory($sessionId);
 
         // Nếu từ web, chuyển hướng về lại form
         if ($request->is('chatbot-test/reset')) {
