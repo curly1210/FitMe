@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { filterColor, filterSize } from "../pages/client/Products/product";
-import { useApiUrl, useCustom, useList } from "@refinedev/core";
+import { useApiUrl, useCustom } from "@refinedev/core";
 
 type FilterTabType = "color" | "size" | "price" | "";
+
 interface ProductContextType {
   categorySlug?: string;
   categoryData: { name: string };
@@ -19,6 +19,19 @@ interface ProductContextType {
   toggleColor: (color: string) => any;
   listProduct: any[];
   handleSearch: (clear: boolean) => void;
+  metaLink: any;
+  setCurrentPage: (page: number) => void;
+  currentPage: number;
+  setSortData: (value: string) => void;
+  sortData: string;
+  searchValue: string | null;
+  fieldFilter: {
+    color: number[];
+    size: number[];
+    price: number[];
+  };
+  setFieldFilter: (value: any) => void;
+  isLoadingProduct: boolean;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -47,18 +60,19 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   });
   const navigate = useNavigate();
 
-  /* Gọi danh sách sản phầm */
-  const urlListProduct = categorySlug ? `${useApiUrl()}/category/${categorySlug}` : `${useApiUrl()}/search`;
+  const urlListProduct = categorySlug
+    ? `${useApiUrl()}/category/${categorySlug}`
+    : `${useApiUrl()}/search`;
+
   const {
     data: response,
     isLoading,
-    isError,
   } = useCustom({
     url: urlListProduct,
     method: "get",
     queryOptions: {
       enabled: callapiList,
-      onSuccess: (data) => {
+      onSuccess: () => {
         setCallapiList(false);
       },
     },
@@ -69,15 +83,16 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
         size: fieldFilter.size.length ? `[${fieldFilter.size.join(",")}]` : "",
         price: fieldFilter.price.length ? `[${fieldFilter.price.join(",")}]` : "",
         sort: sortData,
-        keyword: searchValue ? searchValue : "",
+        keyword: searchValue || "",
       },
     },
   });
-  /* gọi màu và size */
+
   const { data: responseFilterTabColors } = useCustom({
     url: `${useApiUrl()}/get-colors`,
     method: "get",
   });
+
   const { data: responseFilterTabSizes } = useCustom({
     url: `${useApiUrl()}/get-sizes`,
     method: "get",
@@ -86,16 +101,17 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (response?.data?.data) {
       setListProduct(response.data.data);
-      console.log(response.data.data);
       setMetaLink(response.data.meta);
     } else {
       setListProduct([]);
       setMetaLink(null);
     }
   }, [isLoading, response]);
+
   useEffect(() => {
     setCallapiList(true);
-  }, [categorySlug,searchValue]);
+  }, [categorySlug, searchValue]);
+
   useEffect(() => {
     if (showFilter) setShowSort(false);
   }, [showFilter]);
@@ -107,40 +123,33 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     switch (filterTab) {
       case "color":
-        return setFilterData(responseFilterTabColors.data);
+        return setFilterData(responseFilterTabColors?.data || []);
       case "size":
-        return setFilterData(responseFilterTabSizes.data);
+        return setFilterData(responseFilterTabSizes?.data || []);
       default:
         return setFilterData([]);
     }
   }, [filterTab]);
 
   const toggleColor = (id: number) => {
-    setFieldFilter((prev) => {
-      return {
-        ...prev,
-        [filterTab]: prev[filterTab].includes(id)
-          ? prev[filterTab].filter((itemId) => itemId !== id)
-          : [...prev[filterTab], id],
-      };
-    });
+    setFieldFilter((prev) => ({
+      ...prev,
+      [filterTab]: prev[filterTab].includes(id)
+        ? prev[filterTab].filter((itemId) => itemId !== id)
+        : [...prev[filterTab], id],
+    }));
   };
-  const handleSearch = (clear: boolean = false) => {
-    console.log(clear);
 
+  const handleSearch = (clear: boolean = false) => {
     if (clear) {
-      setFieldFilter((prev) => ({
-        ...prev,
-        color: [],
-        size: [],
-        price: [],
-      }));
+      setFieldFilter({ color: [], size: [], price: [] });
       setSortData("");
     }
     setShowFilter(false);
     setCallapiList(true);
     handleAppendQueryUrl();
   };
+
   const handleAppendQueryUrl = () => {
     const params = new URLSearchParams();
     if (fieldFilter.color.length) {
@@ -174,11 +183,12 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
         metaLink,
         setCurrentPage,
         currentPage,
-        fieldFilter,
-        setFieldFilter,
         setSortData,
         sortData,
         searchValue,
+        fieldFilter,
+        setFieldFilter,
+        isLoadingProduct: isLoading,
       }}
     >
       {children}

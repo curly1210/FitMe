@@ -8,6 +8,7 @@ import {
   Button,
   message,
   Image,
+  Spin,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useCreate, useList, useUpdate } from "@refinedev/core";
@@ -69,7 +70,7 @@ export default function BannerList() {
   const [directLink, setDirectLink] = useState<string>("#");
 
   const [categories, setCategories] = useState<Category[]>([]);
-
+const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
   const {
     data: bannersData,
     isLoading,
@@ -210,55 +211,60 @@ export default function BannerList() {
     setDirectLink(`/danh-muc/${catSlug}/${subCatSlug}`);
   };
 
-  const onFinish = (values: any) => {
-    if (!selectedBanner) {
-      message.error("Không tìm thấy banner để cập nhật");
-      return;
-    }
+ const onFinish = (values: any) => {
+  if (!selectedBanner) {
+    message.error("Không tìm thấy banner để cập nhật");
+    return;
+  }
 
-    const formData = new FormData();
-    const [_, type, value, sub] = directLink.split("/") || [];
+  const formData = new FormData();
+  const [_, type, value, sub] = directLink.split("/") || [];
 
-    formData.append("title", values.title);
-    formData.append("direct_type", type || "#");
-    formData.append("direct_value", value || "");
-    formData.append("sub_direct_value", sub ?? "");
-    formData.append("direct_link", directLink);
-    formData.append("_method", "PATCH");
-    formData.append(
-      "updated_at",
-      dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")
-    );
+  formData.append("title", values.title);
+  formData.append("direct_type", type || "#");
+  formData.append("direct_value", value || "");
+  formData.append("sub_direct_value", sub ?? "");
+  formData.append("direct_link", directLink);
+  formData.append("_method", "PATCH");
+  formData.append(
+    "updated_at",
+    dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")
+  );
 
-    if (bannerImage) {
-      formData.append("url_image", bannerImage);
-    }
+  if (bannerImage) {
+    formData.append("url_image", bannerImage);
+  }
 
-    updateBanner(
-      {
-        resource: `admin/banners/${selectedBanner.id}`,
-        // id: selectedBanner.id,
-        values: formData,
-        meta: { headers: { "Content-Type": "multipart/form-data" } },
+  setUpdatingBannerLoading(true);
+
+  updateBanner(
+    {
+      resource: `admin/banners/${selectedBanner.id}`,
+      values: formData,
+      meta: { headers: { "Content-Type": "multipart/form-data" } },
+    },
+    {
+      onSuccess: () => {
+        refetch();
+        message.success("Cập nhật banner thành công");
+        handleClose();
+        setUpdatingBannerLoading(false);
       },
-      {
-        onSuccess: () => {
-          refetch();
-          message.success("Cập nhật banner thành công");
-          handleClose();
-        },
-        onError: () => {
-          message.error("Cập nhật banner thất bại");
-        },
-      }
-    );
-  };
+      onError: () => {
+        message.error("Cập nhật banner thất bại");
+        setUpdatingBannerLoading(false);
+      },
+    }
+  );
+};
+
 
   const parentCategories = categories.filter((c) => c.parent_id === null);
   const subCategories =
     categories.find((cat) => cat.id === selectedCategory)?.items ?? [];
 
   return (
+    <Spin spinning={updatingBannerLoading} tip="Đang cập nhật..." size="large">
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-4">Danh sách banner</h2>
       <div className="grid grid-cols-2 gap-4">
@@ -406,5 +412,6 @@ export default function BannerList() {
         onClose={() => setDetailDrawerOpen(false)}
       />
     </div>
+    </Spin>
   );
 }

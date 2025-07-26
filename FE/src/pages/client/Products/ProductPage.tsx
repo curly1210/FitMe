@@ -3,7 +3,7 @@ import { HiBars3 } from "react-icons/hi2";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import FilterProduct from "../../../components/Products/FilterProduct";
 import { useProduct } from "../../../hooks/useProduct";
-import { Pagination } from "antd";
+import { Pagination, Spin } from "antd";
 import { Link, useNavigate } from "react-router";
 import { HeartOutlined } from "@ant-design/icons";
 import { usePopupMessage } from "../../../hooks/usePopupMessage";
@@ -23,8 +23,10 @@ function ProductPage() {
     metaLink,
     setSortData,
     handleSearch,
-    searchValue
+    searchValue,
+    isLoadingProduct,
   } = useProduct();
+
   const { accessToken, user } = useAuthen();
   const hasAuth = !!accessToken && !!user;
   const { notify } = usePopupMessage();
@@ -39,8 +41,6 @@ function ProductPage() {
     },
   });
   const dataLike = wishlistData?.data?.data || [];
-
-  // console.log(listProduct);
 
   const handleLikeProduct = (productId: any, unlike: boolean) => {
     if (unlike) {
@@ -63,13 +63,13 @@ function ProductPage() {
       }
     );
   };
+
   const unLike = (productId: any) => {
     mutate(
       { resource: "wishlist", id: productId },
       {
         onError: (error) => {
           notify("error", error?.response?.data?.message);
-          // An error occurred!
         },
         onSuccess: (response) => {
           refetch();
@@ -78,6 +78,7 @@ function ProductPage() {
       }
     );
   };
+
   return (
     <>
       <div className="font-sans bg-white min-h-screen">
@@ -86,18 +87,16 @@ function ProductPage() {
           <div className="border border-gray-200 rounded-sm mb-4">
             <div className="flex justify-between items-center px-6 py-4 relative">
               <div className="text-sm text-gray-500 space-x-2">
+                <Link to="/" className="hover:underline cursor-pointer">Trang chủ</Link> /
                 <span className="hover:underline cursor-pointer">
-                  Trang chủ
-                </span>{" "}
-                /
-                <span className="hover:underline cursor-pointer">
-                  {searchValue ? 'Tìm kiếm' : 'Thời trang'}
+                  {searchValue ? "Tìm kiếm" : "Thời trang"}
                 </span>{" "}
                 /
                 <span className="font-semibold text-black">
                   {categoryData?.name || searchValue}
                 </span>
               </div>
+
               <div className="flex items-center gap-2">
                 {/* Filter Button */}
                 <div className="relative">
@@ -120,9 +119,7 @@ function ProductPage() {
                   </button>
                   {showSort && (
                     <div className="absolute right-0 z-10 mt-2 w-52 bg-white border border-gray-200 rounded-md shadow-lg">
-                      <div className="p-3 border-b font-semibold">
-                        Sắp xếp theo
-                      </div>
+                      <div className="p-3 border-b font-semibold">Sắp xếp theo</div>
                       <div
                         className="flex items-center px-4 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
@@ -148,18 +145,21 @@ function ProductPage() {
             </div>
           </div>
 
-          {/* Product Grid or Empty Message */}
-          {listProduct.length > 0 ? (
+          {/* Loading State */}
+          {isLoadingProduct ? (
+            <div className="flex justify-center py-10">
+              <Spin tip="Đang tải sản phẩm..." size="large" />
+            </div>
+          ) : listProduct.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {listProduct.map((product) => {
                 const productItems =
                   product.colors.flatMap((itemV) => itemV.product_items) || [];
-                // lấy ảnh đầu tiên
                 const imgFirst = product.colors[0]?.images[0]?.url;
-                const thumbnals =
+                const thumbnails =
                   product.colors.flatMap((itemV) => itemV.images[0]) || [];
                 const minPrice = Math.min(
-                  ...product.colors.flatMap((item) => item.min_sale_price)
+                  ...product.colors.map((item) => item.min_sale_price)
                 );
                 const percent = product.colors[0]?.product_items[0]
                   ?.sale_percent as number;
@@ -175,17 +175,15 @@ function ProductPage() {
                       onClick={() =>
                         handleLikeProduct(
                           product.id,
-                          dataLike.some(
-                            (item) => item?.product?.id === product.id
-                          )
+                          dataLike.some((item) => item?.product?.id === product.id)
                         )
                       }
                     >
                       <HeartOutlined
                         className={`text-2xl group-hover/group-like:!text-red-400 ${
-                          dataLike.some(
-                            (item) => item?.product?.id === product.id
-                          ) && "!text-red-400"
+                          dataLike.some((item) => item?.product?.id === product.id)
+                            ? "!text-red-400"
+                            : ""
                         }`}
                       />
                     </div>
@@ -213,24 +211,17 @@ function ProductPage() {
                         </div>
                       </div>
                     </div>
+
                     <div className="px-2 pt-2 pb-3 space-y-1">
                       <p className="text-sm font-semibold text-black">
                         {product.name}
                       </p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {minPrice
-                          ?.toString()
-                          ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                        ₫ -
-                        <span className="text-green-600">
-                          {percent
-                            ?.toString()
-                            ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                          %
-                        </span>
+                        {minPrice?.toLocaleString("vi-VN")}₫ -{" "}
+                        <span className="text-green-600">{percent}%</span>
                       </p>
                       <div className="flex gap-1 mt-2">
-                        {thumbnals.map((modelImg, key) => (
+                        {thumbnails.map((modelImg, key) => (
                           <img
                             key={modelImg.id + key}
                             src={modelImg.url}
