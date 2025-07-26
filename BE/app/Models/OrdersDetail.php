@@ -24,6 +24,11 @@ class OrdersDetail extends Model
         'color',
         'size',
         'name_product',
+        "width",
+        "height",
+        "length",
+        "weight",
+
     ];
 
     /**

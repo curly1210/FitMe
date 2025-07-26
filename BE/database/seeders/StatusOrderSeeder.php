@@ -13,6 +13,6 @@ class StatusOrderSeeder extends Seeder
      */
     public function run(): void
     {
-        StatusOrder::factory(7)->create();
+        StatusOrder::factory(22)->create();
     }
 }

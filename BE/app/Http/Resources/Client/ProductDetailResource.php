@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Resources\Client;
 
 
@@ -18,32 +19,32 @@ class ProductDetailResource extends JsonResource
     {
         $productItems = $this->productItems;
 
-      $colorImages = [];
+        $colorImages = [];
 
-$colors = $productItems
-    ->pluck('color')
-    ->unique('id');
+        $colors = $productItems
+            ->pluck('color')
+            ->unique('id');
 
-foreach ($colors as $color) {
-    $colorImages[$color->id] = [
-        'id' => $color->id,
-        'name' => $color->name,
-        'code' => $color->code,
-        'images' => [],
-    ];
-}
+        foreach ($colors as $color) {
+            $colorImages[$color->id] = [
+                'id' => $color->id,
+                'name' => $color->name,
+                'code' => $color->code,
+                'images' => [],
+            ];
+        }
 
-// Gắn ảnh vào đúng color_id nếu có
-foreach ($this->productImages as $image) {
-    $colorId = $image->color_id;
+        // Gắn ảnh vào đúng color_id nếu có
+        foreach ($this->productImages as $image) {
+            $colorId = $image->color_id;
 
-    if (isset($colorImages[$colorId])) {
-        $colorImages[$colorId]['images'][] = [
-            'id' => $image->id,
-            'url' => $this->buildImageUrl($image->url),
-        ];
-    }
-}
+            if (isset($colorImages[$colorId])) {
+                $colorImages[$colorId]['images'][] = [
+                    'id' => $image->id,
+                    'url' => $this->buildImageUrl($image->url),
+                ];
+            }
+        }
         $sizes = $productItems
             ->pluck('size')
             ->unique('id')
@@ -74,9 +75,14 @@ foreach ($this->productImages as $image) {
                     'import_price' => $item->import_price,
                     'price' => $item->price,
                     'sale_price' => $item->sale_price,
-                    'sale_percent'=> $item->sale_percent,
+                    'sale_percent' => $item->sale_percent,
                     'stock' => $item->stock,
                     'sku' => $item->sku,
+                    'width' => $item->width,
+                    'height' => $item->height,
+                    'length' => $item->length,
+                    'weight' => $item->weight,
+
                     'color_id' => $item->color->id,
 
 
@@ -139,19 +145,14 @@ foreach ($this->productImages as $image) {
                 'price' => $firstItem?->price,
                 'images' => $firstItem
                     ? $product->productImages
-                        ->where('color_id', $firstItem->color_id)
-                        ->take(2)
-                        ->map(fn($img) => [
-                            'url' => $this->buildImageUrl($img->url),
-                        ])->values()
+                    ->where('color_id', $firstItem->color_id)
+                    ->take(2)
+                    ->map(fn($img) => [
+                        'url' => $this->buildImageUrl($img->url),
+                    ])->values()
                     : [],
                 'colors' => $colors,
             ];
         });
     }
-
-
-
-
-
 }

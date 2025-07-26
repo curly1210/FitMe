@@ -16,7 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedInteger('price');
             $table->unsignedInteger('sale_price')->nullable();
+            $table->unsignedInteger('width');
+            $table->unsignedInteger('length');
+            $table->unsignedInteger('height');
+            $table->unsignedInteger('weight');
             $table->unsignedInteger('stock')->default(0);
+
             $table->string('sku', 30)->unique();
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();

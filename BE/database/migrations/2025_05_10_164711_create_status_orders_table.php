@@ -15,6 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name', 20);
             $table->string('color', 20);
+            $table->string('code', 50);
+            $table->string('description', 255);
+            $table->unsignedInteger('public_status_id')->nullable();
+
+
             $table->timestamps();
         });
     }

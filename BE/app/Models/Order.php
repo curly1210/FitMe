@@ -26,6 +26,9 @@ class Order extends Model
         'transaction_at',
         'bank_code',
         "success_at",
+        "expected_delivery_time",
+        "shipping_code",
+
     ];
 
     // Quan hệ với User

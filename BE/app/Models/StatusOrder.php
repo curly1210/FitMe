@@ -12,6 +12,10 @@ class StatusOrder extends Model
     protected $fillable = [
         'name',
         'color',
+        "public_status_code",
+        "code",
+        "description",
+        "public_status_id",
     ];
     public function orders()
     {

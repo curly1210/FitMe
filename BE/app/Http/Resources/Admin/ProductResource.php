@@ -47,6 +47,10 @@ class ProductResource extends JsonResource
                         'id' => $item->size->id,
                         'name' => $item->size->name,
                     ] : null,
+                    'width' => $item->width,
+                    'height' => $item->height,
+                    'length' => $item->length,
+                    'weight' => $item->weight,
                 ];
             }),
             'images' => $this->productImages->map(function ($image) {

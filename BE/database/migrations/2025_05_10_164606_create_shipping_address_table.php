@@ -16,9 +16,12 @@ return new class extends Migration
             $table->string('name_receive', 50);
             $table->string('phone', 10);
             $table->string('country', 50)->default('Vietnam');
-            $table->string('city', 50);
+            $table->string('province', 50);
+            $table->unsignedInteger('province_id');
             $table->string('district', 50);
+            $table->unsignedInteger('district_id');
             $table->string('ward', 50);
+            $table->string('ward_code', 50);
             $table->string('detail_address', 50);
             $table->tinyInteger('is_default')->default(0);
             $table->unsignedBigInteger('user_id');

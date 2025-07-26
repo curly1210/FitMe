@@ -15,6 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedInteger('quantity');
             $table->unsignedInteger('price');
+            $table->unsignedInteger('weight');
+            $table->unsignedInteger('width');
+            $table->unsignedInteger('height');
+            $table->unsignedInteger('length');
+
             $table->foreignId('product_item_id')->constrained('product_items')->onDelete('cascade');
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->timestamps();
@@ -26,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('orders_detail', function (Blueprint $table) {
+        Schema::table('orders_detail', function (Blueprint $table) {
             $table->dropForeign(['product_item_id']);
             $table->dropForeign(['order_id']);
         });

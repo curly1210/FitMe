@@ -38,9 +38,15 @@ class AddressController extends Controller
                 'phone' => 'required|string|min:10|max:10',
                 // 'email' => 'required|email|max:50',
                 // 'country' => 'required|string|max:50',
-                'city' => 'required|string|max:50',
+                'province' => 'required|string|max:50',
+                'province_id' => 'required|interger|min:0',
+
                 'district' => 'required|string|max:50',
+                'district_id' => 'required|interger|min:0',
+
                 'ward' => 'required|string|max:50',
+                'ward_code' => 'required|string|max:50',
+
                 'detail_address' => 'required|string|max:50',
                 'is_default' => 'boolean|nullable',
             ], [
@@ -55,12 +61,27 @@ class AddressController extends Controller
                 // 'email.max' => 'Email không được dài quá 50 ký tự.',
                 // 'country.required' => 'Quốc gia là bắt buộc.',
                 // 'country.max' => 'Quốc gia không được dài quá 50 ký tự.',
-                // 'city.required' => 'Thành phố là bắt buộc.',
-                // 'city.max' => 'Thành phố không được dài quá 50 ký tự.',
+                'province.required' => 'Tên tỉnh thành là bắt buộc.',
+                'province.max' => 'Tên tỉnh không được dài quá 50 ký tự.',
+                'province_id.min' => 'Mã tỉnh phải là số dương',
+                'province_id.required' => 'Mã tỉnh là bắt buộc',
+                'province_id.interger' => 'Mã tỉnh phải là số nguyên',
+
+
+
                 'district.required' => 'Quận/Huyện là bắt buộc.',
                 'district.max' => 'Quận/Huyện không được dài quá 50 ký tự.',
+                'district_id.min' => 'Mã quận/huyện phải là số dương',
+                'district_id.required' => 'Mã quận/huyện là bắt buộc',
+                'district_id.interger' => 'Mã quận/huyện phải là số nguyên',
+
+
+
                 'ward.required' => 'Phường/Xã là bắt buộc.',
                 'ward.max' => 'Phường/Xã không được dài quá 50 ký tự.',
+                'ward_code.required' => 'Mã phường/Xã là bắt buộc.',
+                'ward_code.max' => 'Mã phường/Xã không được dài quá 50 ký tự.',
+                'ward_code.string' => 'Mã phường/Xã phải là kiểu chuỗi',
                 'detail_address.required' => 'Địa chỉ chi tiết là bắt buộc.',
                 'detail_address.max' => 'Địa chỉ chi tiết không được dài quá 50 ký tự.',
             ]);
@@ -124,9 +145,15 @@ class AddressController extends Controller
                 'phone' => 'required|string|min:10|max:10',
                 // 'email' => 'required|email|max:50',
                 // 'country' => 'required|string|max:50',
-                'city' => 'required|string|max:50',
+                'province' => 'required|string|max:50',
+                'province_id' => 'required|interger|min:0',
+
                 'district' => 'required|string|max:50',
+                'district_id' => 'required|interger|min:0',
+
                 'ward' => 'required|string|max:50',
+                'ward_code' => 'required|string|max:50',
+
                 'detail_address' => 'required|string|max:50',
                 'is_default' => 'boolean|nullable',
             ], [
@@ -143,10 +170,27 @@ class AddressController extends Controller
                 // 'country.max' => 'Quốc gia không được dài quá 50 ký tự.',
                 // 'city.required' => 'Thành phố là bắt buộc.',
                 // 'city.max' => 'Thành phố không được dài quá 50 ký tự.',
+                'province.required' => 'Tên tỉnh thành là bắt buộc.',
+                'province.max' => 'Tên tỉnh không được dài quá 50 ký tự.',
+                'province_id.min' => 'Mã tỉnh phải là số dương',
+                'province_id.required' => 'Mã tỉnh là bắt buộc',
+                'province_id.interger' => 'Mã tỉnh phải là số nguyên',
+
+
+
                 'district.required' => 'Quận/Huyện là bắt buộc.',
                 'district.max' => 'Quận/Huyện không được dài quá 50 ký tự.',
+                'district_id.min' => 'Mã quận/huyện phải là số dương',
+                'district_id.required' => 'Mã quận/huyện là bắt buộc',
+                'district_id.interger' => 'Mã quận/huyện phải là số nguyên',
+
+
+
                 'ward.required' => 'Phường/Xã là bắt buộc.',
                 'ward.max' => 'Phường/Xã không được dài quá 50 ký tự.',
+                'ward_code.required' => 'Mã phường/Xã là bắt buộc.',
+                'ward_code.max' => 'Mã phường/Xã không được dài quá 50 ký tự.',
+                'ward_code.string' => 'Mã phường/Xã phải là kiểu chuỗi',
                 'detail_address.required' => 'Địa chỉ chi tiết là bắt buộc.',
                 'detail_address.max' => 'Địa chỉ chi tiết không được dài quá 50 ký tự.',
             ]);

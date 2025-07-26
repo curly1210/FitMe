@@ -99,6 +99,10 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
                 'variants.*.sale_price' => 'required|numeric|min:0|lte:variants.*.price',
+                'variants.*.width' => 'required|numeric|min:0',
+                'variants.*.height' => 'required|numeric|min:0',
+                'variants.*.length' => 'required|numeric|min:0',
+                'variants.*.weight' => 'required|numeric|min:0',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
@@ -148,6 +152,10 @@ class ProductController extends Controller
                     'price' => $variant['price'],
                     'sale_price' => $variant['sale_price'],
                     'sale_percent' => $salePercent,
+                    'width' => $variant['width'],
+                    'height' => $variant['height'],
+                    'length' => $variant['length'],
+                    'weight' => $variant['weight'],
                 ]);
             }
 
@@ -206,12 +214,16 @@ class ProductController extends Controller
                 'variants.*.price' => 'required|numeric|min:0',
                 'variants.*.sale_price' => 'required|numeric|min:0|lte:variants.*.price',
                 'variants.*.id' => 'required',
+                'variants.*.width' => 'required|numeric|min:0',
+                'variants.*.height' => 'required|numeric|min:0',
+                'variants.*.length' => 'required|numeric|min:0',
+                'variants.*.weight' => 'required|numeric|min:0',
                 'images' => 'required|array|min:1',
                 // 'images.*.url' => 'nullable',
 
                 'images.*.url' => [
                     'required_with:images|file|mimes:jpeg,png,jpg,webp|max:2048|nullable',
-                    fn ($att, $val, $fail) =>
+                    fn($att, $val, $fail) =>
                     !is_string($val) && !($val instanceof \Illuminate\Http\UploadedFile)
                         && $fail("The $att must be a file or string.")
                 ],
@@ -265,6 +277,10 @@ class ProductController extends Controller
                         'price' => $variant['price'],
                         'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
+                        'width' => $variant['width'],
+                        'height' => $variant['height'],
+                        'length' => $variant['length'],
+                        'weight' => $variant['weight'],
                     ]);
                 } else {
                     // Tạo mới variant
@@ -281,6 +297,10 @@ class ProductController extends Controller
                         'price' => $variant['price'],
                         'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
+                        'width' => $variant['width'],
+                        'height' => $variant['height'],
+                        'length' => $variant['length'],
+                        'weight' => $variant['weight'],
                     ]);
                 }
             }

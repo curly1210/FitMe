@@ -20,8 +20,14 @@ class AddressResource extends JsonResource
             'phone' => $this->phone,
             // 'email' => $this->email,
             'ward' => $this->ward,
+            'ward_code' => $this->ward_code,
+
             'district' => $this->district,
-            'city' => $this->city,
+            'district_id' => $this->district_id,
+
+            'province' => $this->province,
+            'province_id' => $this->province_id,
+
             'full_address' => implode(', ', array_filter([
                 // $this->detail_address,
                 $this->ward,
