@@ -154,13 +154,13 @@ const Oder = () => {
       case "Chờ xác nhận":
         return (
           <Popconfirm
-            onConfirm={() =>
+            onConfirm={() => {
               handleUpdateStatus(
                 STATUS_MAP["Đang chuẩn bị hàng"],
                 "Đang chuẩn bị hàng",
                 "success"
-              )
-            }
+              );
+            }}
             title="Cập nhật trạng thái"
             description="Bạn có muốn xác nhận không?"
             okText="Có"
@@ -449,8 +449,16 @@ const Oder = () => {
             setPageSize(size);
           },
         }}
+        // chặn link chi tiết đơn hàng khi ấn nút
         onRow={(record) => ({
-          onClick: () => {
+          onClick: (event) => {
+            
+            const isInsidePopover = (event.target as HTMLElement).closest(
+              ".ant-popover"
+            );
+            const isButton = (event.target as HTMLElement).closest("button");
+
+            if (isInsidePopover || isButton) return;
             setSelectedOrderId(record.id);
             setDrawerOpen(true);
           },
