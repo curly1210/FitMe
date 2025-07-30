@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "react";
 import { useChatbox } from "../../hooks/useChatbox";
 import { IoIosChatboxes } from "react-icons/io";
 
-
 const stripHtml = (html: string) => {
   const div = document.createElement("div");
   div.innerHTML = html;
@@ -23,11 +22,15 @@ const stripHtml = (html: string) => {
 const SearchPanel = () => {
   const { isLoadingSearchPanel, selectedCategory, setIsOpenSearchPanel } =
     useSearchPanel();
+  const { data, isLoading } = useList({ resource: "client/posts" });
 
-  const { data, isLoading } = useList({
-    resource: "client/posts",
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { accessToken } = useAuthen();
+  const { openModal } = useModal();
 
+  const [searchValue, setSearchValue] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   const {
     isOpenChatbox,
@@ -45,14 +48,6 @@ const SearchPanel = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { accessToken } = useAuthen();
-  const { openModal } = useModal();
-
-  const [searchValue, setSearchValue] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-
   useEffect(() => {
     // Khi chuyển trang -> tắt loading tìm kiếm
     setIsSearching(false);
@@ -68,20 +63,17 @@ const SearchPanel = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (e.key === "Enter") {
-    setIsSearching(true);
-
-  const [searchValue, setSearchValue] = useState("");
-  const handleKeyDown = (e: any) => {
     if (e.key === "Enter") {
+      setIsSearching(true);
 
-      setIsOpenSearchPanel(false);
-      const encoded = encodeURIComponent(searchValue);
-      navigate(`/search?searchValue=${encoded}`);
-    }, 100); // 100ms là vừa đủ
-  }
-};
-
+      // Delay nhỏ để Spin kịp render trước khi navigate
+      setTimeout(() => {
+        setIsOpenSearchPanel(false);
+        const encoded = encodeURIComponent(searchValue);
+        navigate(`/search?searchValue=${encoded}`);
+      }, 100); // 100ms là vừa đủ
+    }
+  };
 
   const newsList = data?.data?.slice(0, 4) ?? [];
 
@@ -129,14 +121,19 @@ const SearchPanel = () => {
                   Các bộ sưu tập của Fitme
                 </h2>
                 <div className="flex items-start gap-[22px]">
-                  {["https://media.routine.vn/400x400/prod/media/thumb-copy-png-5o81.webp", 
-                    "https://media.routine.vn/400x400/prod/media/1-png-zjme-1-png-mwmb.webp", 
-                    "https://media.routine.vn/400x400/prod/media/476229736-1074507978046092-3929017900147860215-n-jpg-orfd.webp"]
-                    .map((src, index) => (
+                  {[
+                    "https://media.routine.vn/400x400/prod/media/thumb-copy-png-5o81.webp",
+                    "https://media.routine.vn/400x400/prod/media/1-png-zjme-1-png-mwmb.webp",
+                    "https://media.routine.vn/400x400/prod/media/476229736-1074507978046092-3929017900147860215-n-jpg-orfd.webp",
+                  ].map((src, index) => (
                     <div key={index} className="overflow-hidden">
                       <div className="cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
                         <div className="w-[248px] h-[248px] mb-2">
-                          <img src={src} alt="" className="object-cover block h-full w-full" />
+                          <img
+                            src={src}
+                            alt=""
+                            className="object-cover block h-full w-full"
+                          />
                         </div>
                         <p className="font-semibold">Bộ sưu tập {index + 1}</p>
                       </div>
@@ -186,7 +183,6 @@ const SearchPanel = () => {
               <div className="mt-6 pb-8">
                 <h2 className="text-xl font-bold mb-5">Về Fitme</h2>
                 <div className="flex items-start gap-[22px]">
-
                   {[
                     {
                       title: "Châm ngôn của chúng tôi",
@@ -207,10 +203,16 @@ const SearchPanel = () => {
                     <div key={idx} className="overflow-hidden w-[298px]">
                       <div className="flex flex-col gap-[9px] cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
                         <div className="h-[298px]">
-                          <img src={item.img} alt="" className="object-cover block h-full w-full" />
+                          <img
+                            src={item.img}
+                            alt=""
+                            className="object-cover block h-full w-full"
+                          />
                         </div>
                         <p className="font-semibold">{item.title}</p>
-                        <p className="line-clamp-2 text-[18px] text-ellipsis leading-6">{item.desc}</p>
+                        <p className="line-clamp-2 text-[18px] text-ellipsis leading-6">
+                          {item.desc}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -246,9 +248,7 @@ const SearchPanel = () => {
               </button>
             </Tooltip>
 
-
             {/* Phòng thử đồ */}
-
             <Tooltip placement="top" title={"Phòng thử đồ"}>
               <button
                 onClick={handleClickToTryClothesPage}
