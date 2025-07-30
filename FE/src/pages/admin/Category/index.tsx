@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import {
   Button,
@@ -12,6 +11,7 @@ import {
   Space,
   Upload,
   notification,
+  Spin,
 } from "antd";
 import { MoreOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { useList, useUpdate, useCreate, useDelete } from "@refinedev/core";
@@ -35,6 +35,7 @@ const Category: React.FC = () => {
   const [categoryImage, setCategoryImage] = useState<File | null>(null);
   const [itemImage, setItemImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
+  const [actionLoading, setActionLoading] = useState(false);
 
   const { data, refetch } = useList({ resource: "admin/categories" });
   const { mutate: updateCategory } = useUpdate();
@@ -50,14 +51,14 @@ const Category: React.FC = () => {
       setEditingCategory(category);
       setCategoryName(category.name);
       setPreviewImage(category.image || "");
-      setCategoryImage(null); // reset
+      setCategoryImage(null);
     } else if (item) {
       setMode("edit-item");
       setEditingItem(item);
       setItemName(item.name);
       setPreviewImage(item.image || "");
       setParentCategory(parent);
-      setItemImage(null); // reset
+      setItemImage(null);
     } else if (parent) {
       setMode("add-item");
       setParentCategory(parent);
@@ -99,16 +100,6 @@ const Category: React.FC = () => {
     return false;
   };
 
-  // const handleDeletePreviewImage = () => {
-  //   setPreviewImage("");
-  //   if (mode === "add-category" || mode === "edit-category") {
-  //     setCategoryImage(null);
-  //   } else {
-  //     setItemImage(null);
-  //   }
-  //   notification.info({ message: "Ảnh preview đã bị xoá." });
-  // };
-
   const handleAddCategory = () => {
     if (!categoryName.trim()) {
       notification.warning({ message: "Vui lòng nhập tên danh mục!" });
@@ -118,6 +109,7 @@ const Category: React.FC = () => {
       notification.warning({ message: "Vui lòng nhập ảnh danh mục!" });
       return;
     }
+
     const now = getNow();
     const formData = new FormData();
     formData.append("name", categoryName);
@@ -126,6 +118,7 @@ const Category: React.FC = () => {
     if (categoryImage) formData.append("image", categoryImage);
     formData.append("items", JSON.stringify([]));
 
+    setActionLoading(true);
     createCategory(
       {
         resource: "admin/categories/insert",
@@ -137,9 +130,11 @@ const Category: React.FC = () => {
           notification.success({ message: "Thêm danh mục thành công!" });
           refetch();
           onClose();
+          setActionLoading(false);
         },
         onError: () => {
           notification.error({ message: "Thêm danh mục thất bại!" });
+          setActionLoading(false);
         },
       }
     );
@@ -150,7 +145,6 @@ const Category: React.FC = () => {
       notification.warning({ message: "Vui lòng nhập tên mục con!" });
       return;
     }
-    console.log("Tên mục con: ", itemName);
     if (!itemImage) {
       notification.warning({ message: "Vui lòng chọn ảnh mục con!" });
       return;
@@ -160,6 +154,7 @@ const Category: React.FC = () => {
     const newItemId = Date.now();
     const newItem = { id: newItemId, name: itemName, image: "" };
     const updatedItems = [...(parentCategory.items || []), newItem];
+
     const formData = new FormData();
     formData.append("name", itemName);
     formData.append("updated_at", now);
@@ -168,6 +163,7 @@ const Category: React.FC = () => {
     formData.append("new_item_id", newItemId.toString());
     formData.append("parent_id", parentCategory.id);
 
+    setActionLoading(true);
     createCategory(
       {
         resource: "admin/categories/insert",
@@ -179,9 +175,11 @@ const Category: React.FC = () => {
           notification.success({ message: "Thêm mục con thành công!" });
           refetch();
           onClose();
+          setActionLoading(false);
         },
         onError: () => {
           notification.error({ message: "Thêm mục con thất bại!" });
+          setActionLoading(false);
         },
       }
     );
@@ -192,11 +190,15 @@ const Category: React.FC = () => {
     if (mode === "add-category") return handleAddCategory();
     if (mode === "add-item") return handleAddItem();
 
+    setActionLoading(true);
+
     if (mode === "edit-category") {
       if (!categoryName.trim()) {
         notification.warning({ message: "Vui lòng nhập tên danh mục!" });
+        setActionLoading(false);
         return;
       }
+
       const formData = new FormData();
       formData.append("name", categoryName);
       formData.append("updated_at", now);
@@ -215,9 +217,11 @@ const Category: React.FC = () => {
             notification.success({ message: "Cập nhật danh mục thành công!" });
             refetch();
             onClose();
+            setActionLoading(false);
           },
           onError: () => {
             notification.error({ message: "Cập nhật danh mục thất bại!" });
+            setActionLoading(false);
           },
         }
       );
@@ -226,14 +230,16 @@ const Category: React.FC = () => {
     if (mode === "edit-item") {
       if (!itemName.trim()) {
         notification.warning({ message: "Vui lòng nhập tên danh mục con!" });
+        setActionLoading(false);
         return;
       }
+
       const formData = new FormData();
       formData.append("name", itemName);
       formData.append("updated_at", now);
       formData.append("parent_id", parentCategory.id);
-      formData.append("_method", "PATCH");
       if (itemImage) formData.append("image", itemImage);
+      formData.append("_method", "PATCH");
 
       createCategory(
         {
@@ -248,9 +254,11 @@ const Category: React.FC = () => {
             });
             refetch();
             onClose();
+            setActionLoading(false);
           },
           onError: () => {
             notification.error({ message: "Cập nhật danh mục con thất bại!" });
+            setActionLoading(false);
           },
         }
       );
@@ -267,6 +275,7 @@ const Category: React.FC = () => {
     Modal.confirm({
       title: "Bạn có chắc muốn xóa danh mục này?",
       onOk: () => {
+        setActionLoading(true);
         deleteCategory(
           {
             resource: "admin/categories/delete",
@@ -277,9 +286,11 @@ const Category: React.FC = () => {
             onSuccess: () => {
               notification.success({ message: "Xoá thành công!" });
               refetch();
+              setActionLoading(false);
             },
             onError: () => {
               notification.error({ message: "Xoá thất bại!" });
+              setActionLoading(false);
             },
           }
         );
@@ -290,6 +301,7 @@ const Category: React.FC = () => {
   const categoryList = data?.data;
 
   return (
+     <Spin spinning={actionLoading} tip="Đang xử lý..." size="large">
     <div className="p-2 bg-white min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Quản lý danh mục sản phẩm</h1>
       <div className="flex gap-4 items-start overflow-x-auto">
@@ -516,6 +528,7 @@ const Category: React.FC = () => {
         )}
       </Drawer>
     </div>
+    </Spin>
   );
 };
 

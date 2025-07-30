@@ -192,7 +192,10 @@ const HomePage = () => {
                 className="block mb-2"
               />
               <div className="flex gap-7">
-                <SearchOutlined className="text-xl" />
+               <SearchOutlined
+  className="text-xl cursor-pointer"
+  onClick={() => setIsOpenSearchPanel(true)}
+/>
                 <div className="list-none flex gap-3.5">
                   {categories.map((category: any) => (
                     <li
