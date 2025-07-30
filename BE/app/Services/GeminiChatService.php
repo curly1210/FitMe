@@ -61,6 +61,7 @@ class GeminiChatService
                 "name"         => $product->name,
                 "category"     => $product->category->name ?? null,
                 "sizes"        => $productItems->pluck('size.name')
+
                     ->filter()
                     ->unique()
                     ->values()
