@@ -11,6 +11,8 @@ class ChatbotController extends Controller
 {
     public function chat(Request $request, GeminiChatService $gemini)
     {
+
+        // dd(session()->getId());
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
@@ -18,6 +20,8 @@ class ChatbotController extends Controller
         $sessionId = $request->session()->getId();
 
         $message = $request->input('message');
+
+        // return response()->json($message);
         $reply = $gemini->chatWithSession($message, $sessionId);
 
         $history = session('chatbot.history.' . $sessionId, []);
@@ -25,11 +29,12 @@ class ChatbotController extends Controller
         // Nếu đến từ blade view, redirect lại
         if ($request->isMethod('post') && $request->is('chatbot-test')) {
             return back()->with([
-            'reply' => $reply,
-            'history' => $history,
-        ]);
+                'reply' => $reply,
+                'history' => $history,
+            ]);
         }
 
+        // return response()->json(env('GEMINI_API_KEY'));
         return response()->json([
             'reply' => $reply,
             'history' => $history,

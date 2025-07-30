@@ -21,15 +21,18 @@ import ChangePassword from "../pages/client/ChangePassword";
 import PostDetail from "../pages/client/Tintuc";
 import ListPost from "../pages/client/Tintuc/ListPost";
 import TryClothes from "../pages/client/TryClothes";
+import { ChatboxProvider } from "../context/ChatboxProvider";
 
 export const clientRoutes = [
   {
     path: "/",
     element: (
       <SearchPanelProvider>
-        <CartProvider>
-          <Outlet />
-        </CartProvider>
+        <ChatboxProvider>
+          <CartProvider>
+            <Outlet />
+          </CartProvider>
+        </ChatboxProvider>
       </SearchPanelProvider>
     ),
     children: [

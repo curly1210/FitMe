@@ -279,7 +279,8 @@ Route::post('change-password', [ClientUserController::class, 'updatePassword']);
 Route::patch('change-password/{id}', [ClientUserController::class, 'updatePassword']);
 
 // chatbot
-Route::post('/chatbot', [ChatbotController::class, 'chat']);
+// Route::post('/chatbot', [ChatbotController::class, 'chat']);
+Route::middleware('web')->post('/chatbot', [ChatbotController::class, 'chat']);
 Route::post('/chatbot/reset', [ChatbotController::class, 'reset']);
 Route::get('/chatbot/products', [ProductController::class, 'getAllProductChatbot']);
 

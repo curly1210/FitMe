@@ -10,3 +10,5 @@ Route::get('/', function () {
 Route::view('/chatbot-test', 'chatbot')->name('chatbot.test');
 Route::post('/chatbot-test', [ChatbotController::class, 'chat'])->name('chatbot.chat');
 Route::post('/chatbot-test/reset', [ChatbotController::class, 'reset'])->name('chatbot.reset');
+
+// Route::post('/chatbot', [ChatbotController::class, 'chat']);

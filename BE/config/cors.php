@@ -2,7 +2,8 @@
 
 return [
 
-  'paths' => ['api/*'],
+  // 'paths' => ['api/*'],
+  'paths' => ['api/*', 'chatbot', 'sanctum/csrf-cookie'], // ← thêm 'chatbot'
 
   'allowed_methods' => ['*'],
 
