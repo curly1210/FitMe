@@ -70,6 +70,10 @@ export const clientRoutes = [
             element: <ListProducts />,
           },
           {
+            path: "contact",
+            element: <Contact />,
+          },
+          {
             element: <ProtectClient role="client" />,
             children: [
               {
