@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\api\Client\ReplicateController;
+use App\Http\Controllers\Api\Client\ForgotPasswordController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -104,7 +105,8 @@ Route::get('admin/statistics/reviews', [StatisticsController::class, 'reviewStat
 
 
 
-
+Route::post('/forgotpassword', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/resetpassword', [ForgotPasswordController::class, 'resetPassword']);
 
 
 
