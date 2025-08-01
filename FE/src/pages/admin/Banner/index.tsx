@@ -70,7 +70,7 @@ export default function BannerList() {
   const [directLink, setDirectLink] = useState<string>("#");
 
   const [categories, setCategories] = useState<Category[]>([]);
-const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
+  const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
   const {
     data: bannersData,
     isLoading,
@@ -111,17 +111,17 @@ const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
     let linkType = "#";
     let productSlug, newsSlug, categoryId, subCategoryId;
 
-    if (rawLink.startsWith("/san-pham/")) {
+    if (rawLink.startsWith("/products/")) {
       linkType = "/products";
-      productSlug = rawLink.replace("/san-pham/", "");
+      productSlug = rawLink.replace("/products/", "");
       setSelectedProduct(productSlug);
-    } else if (rawLink.startsWith("/tin-tuc/")) {
+    } else if (rawLink.startsWith("/post/")) {
       linkType = "/news";
-      newsSlug = rawLink.replace("/tin-tuc/", "");
+      newsSlug = rawLink.replace("/post/", "");
       setSelectedNews(newsSlug);
-    } else if (rawLink.startsWith("/danh-muc/")) {
+    } else if (rawLink.startsWith("/category/")) {
       linkType = "/category";
-      const parts = rawLink.replace("/danh-muc/", "").split("/");
+      const parts = rawLink.replace("/category/", "").split("/");
       const catSlug = banner.direct_value;
       const subCatSlug = parts[1] ?? "";
 
@@ -186,12 +186,12 @@ const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
 
   const handleProductChange = (slug: string) => {
     setSelectedProduct(slug);
-    setDirectLink(`/san-pham/${slug}`);
+    setDirectLink(`/products/${slug}`);
   };
 
   const handleNewsChange = (slug: string) => {
     setSelectedNews(slug);
-    setDirectLink(`/tin-tuc/${slug}`);
+    setDirectLink(`/post/${slug}`);
   };
 
   const handleCategoryChange = (id: string) => {
@@ -199,7 +199,7 @@ const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
     setSelectedSubCategory(undefined);
     const category = categories.find((c) => c.id === id);
     const slug = category ? slugify(category.name) : "";
-    setDirectLink(`/danh-muc/${slug}`);
+    setDirectLink(`/category/${slug}`);
   };
 
   const handleSubCategoryChange = (id: string) => {
@@ -208,56 +208,55 @@ const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
     const subCategory = category?.items.find((item) => item.id === id);
     const catSlug = category ? slugify(category.name) : "";
     const subCatSlug = subCategory ? slugify(subCategory.name) : "";
-    setDirectLink(`/danh-muc/${catSlug}/${subCatSlug}`);
+    setDirectLink(`/category/${catSlug}/${subCatSlug}`);
   };
 
- const onFinish = (values: any) => {
-  if (!selectedBanner) {
-    message.error("Không tìm thấy banner để cập nhật");
-    return;
-  }
-
-  const formData = new FormData();
-  const [_, type, value, sub] = directLink.split("/") || [];
-
-  formData.append("title", values.title);
-  formData.append("direct_type", type || "#");
-  formData.append("direct_value", value || "");
-  formData.append("sub_direct_value", sub ?? "");
-  formData.append("direct_link", directLink);
-  formData.append("_method", "PATCH");
-  formData.append(
-    "updated_at",
-    dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")
-  );
-
-  if (bannerImage) {
-    formData.append("url_image", bannerImage);
-  }
-
-  setUpdatingBannerLoading(true);
-
-  updateBanner(
-    {
-      resource: `admin/banners/${selectedBanner.id}`,
-      values: formData,
-      meta: { headers: { "Content-Type": "multipart/form-data" } },
-    },
-    {
-      onSuccess: () => {
-        refetch();
-        message.success("Cập nhật banner thành công");
-        handleClose();
-        setUpdatingBannerLoading(false);
-      },
-      onError: () => {
-        message.error("Cập nhật banner thất bại");
-        setUpdatingBannerLoading(false);
-      },
+  const onFinish = (values: any) => {
+    if (!selectedBanner) {
+      message.error("Không tìm thấy banner để cập nhật");
+      return;
     }
-  );
-};
 
+    const formData = new FormData();
+    const [_, type, value, sub] = directLink.split("/") || [];
+
+    formData.append("title", values.title);
+    formData.append("direct_type", type || "#");
+    formData.append("direct_value", value || "");
+    formData.append("sub_direct_value", sub ?? "");
+    formData.append("direct_link", directLink);
+    formData.append("_method", "PATCH");
+    formData.append(
+      "updated_at",
+      dayjs().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")
+    );
+
+    if (bannerImage) {
+      formData.append("url_image", bannerImage);
+    }
+
+    setUpdatingBannerLoading(true);
+
+    updateBanner(
+      {
+        resource: `admin/banners/${selectedBanner.id}`,
+        values: formData,
+        meta: { headers: { "Content-Type": "multipart/form-data" } },
+      },
+      {
+        onSuccess: () => {
+          refetch();
+          message.success("Cập nhật banner thành công");
+          handleClose();
+          setUpdatingBannerLoading(false);
+        },
+        onError: () => {
+          message.error("Cập nhật banner thất bại");
+          setUpdatingBannerLoading(false);
+        },
+      }
+    );
+  };
 
   const parentCategories = categories.filter((c) => c.parent_id === null);
   const subCategories =
@@ -265,153 +264,161 @@ const [updatingBannerLoading, setUpdatingBannerLoading] = useState(false);
 
   return (
     <Spin spinning={updatingBannerLoading} tip="Đang cập nhật..." size="large">
-    <div className="p-6">
-      <h2 className="text-xl font-semibold mb-4">Danh sách banner</h2>
-      <div className="grid grid-cols-2 gap-4">
-        {banners.map((banner) => (
-          <div
-            key={banner.id}
-            className="relative rounded overflow-hidden shadow-md group hover:shadow-xl transition duration-300"
-          >
-            <img
-              src={banner.url_image}
-              alt={banner.title}
-              className="w-full h-48 object-cover cursor-pointer"
-              onClick={() => handleEdit(banner)}
-            />
+      <div className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Danh sách banner</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {banners.map((banner) => (
             <div
-              className="bg-blue-950 text-white text-center py-2 text-sm font-medium cursor-pointer"
-              onClick={() => handleViewDetail(banner.id)}
+              key={banner.id}
+              className="relative rounded overflow-hidden shadow-md group hover:shadow-xl transition duration-300"
             >
-              {banner.title}
+              <img
+                src={banner.url_image}
+                alt={banner.title}
+                className="w-full h-48 object-cover cursor-pointer"
+                onClick={() => handleEdit(banner)}
+              />
+              <div
+                className="bg-blue-950 text-white text-center py-2 text-sm font-medium cursor-pointer"
+                onClick={() => handleViewDetail(banner.id)}
+              >
+                {banner.title}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <Drawer
-        title="Chỉnh sửa banner"
-        placement="right"
-        width={500}
-        onClose={handleClose}
-        open={drawerOpen}
-        footer={
-          <div className="text-right">
-            <Button onClick={handleClose} style={{ marginRight: 8 }}>
-              Hủy
-            </Button>
-            <Button
-              type="primary"
-              loading={updating}
-              onClick={() => form.submit()}
-            >
-              Lưu
-            </Button>
-          </div>
-        }
-      >
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item label="Tiêu đề" name="title" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Kiểu liên kết"
-            name="direct_link"
-            rules={[{ required: true }]}
-          >
-            <Select onChange={handleLinkTypeChange}>
-              <Option value="#">Không liên kết</Option>
-              <Option value="/products">Sản phẩm</Option>
-              <Option value="/news">Tin tức</Option>
-              <Option value="/category">Danh mục</Option>
-            </Select>
-          </Form.Item>
-
-          {selectedLinkType === "/products" && (
+        <Drawer
+          title="Chỉnh sửa banner"
+          placement="right"
+          width={500}
+          onClose={handleClose}
+          open={drawerOpen}
+          footer={
+            <div className="text-right">
+              <Button onClick={handleClose} style={{ marginRight: 8 }}>
+                Hủy
+              </Button>
+              <Button
+                type="primary"
+                loading={updating}
+                onClick={() => form.submit()}
+              >
+                Lưu
+              </Button>
+            </div>
+          }
+        >
+          <Form form={form} layout="vertical" onFinish={onFinish}>
             <Form.Item
-              label="Sản phẩm"
-              name="product"
+              label="Tiêu đề"
+              name="title"
               rules={[{ required: true }]}
             >
-              <Select onChange={handleProductChange}>
-                {products.map((p) => (
-                  <Option key={p.id} value={p.slug}>
-                    {p.name}
-                  </Option>
-                ))}
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Kiểu liên kết"
+              name="direct_link"
+              rules={[{ required: true }]}
+            >
+              <Select onChange={handleLinkTypeChange}>
+                <Option value="#">Không liên kết</Option>
+                <Option value="/products">Sản phẩm</Option>
+                <Option value="/news">Tin tức</Option>
+                <Option value="/category">Danh mục</Option>
               </Select>
             </Form.Item>
-          )}
 
-          {selectedLinkType === "/news" && (
-            <Form.Item label="Tin tức" name="news" rules={[{ required: true }]}>
-              <Select onChange={handleNewsChange}>
-                {news.map((n) => (
-                  <Option key={n.id} value={n.slug}>
-                    {n.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
-
-          {selectedLinkType === "/category" && (
-            <>
+            {selectedLinkType === "/products" && (
               <Form.Item
-                label="Danh mục cha"
-                name="category"
+                label="Sản phẩm"
+                name="product"
                 rules={[{ required: true }]}
               >
-                <Select onChange={handleCategoryChange}>
-                  {parentCategories.map((cat) => (
-                    <Option key={cat.id} value={cat.id}>
-                      {cat.name}
+                <Select onChange={handleProductChange}>
+                  {products.map((p) => (
+                    <Option key={p.id} value={p.slug}>
+                      {p.name}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
-              {subCategories.length > 0 && (
-                <Form.Item label="Danh mục con" name="sub_category">
-                  <Select onChange={handleSubCategoryChange} allowClear>
-                    {subCategories.map((item) => (
-                      <Option key={item.id} value={item.id}>
-                        {item.name}
+            )}
+
+            {selectedLinkType === "/news" && (
+              <Form.Item
+                label="Tin tức"
+                name="news"
+                rules={[{ required: true }]}
+              >
+                <Select onChange={handleNewsChange}>
+                  {news.map((n) => (
+                    <Option key={n.id} value={n.slug}>
+                      {n.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )}
+
+            {selectedLinkType === "/category" && (
+              <>
+                <Form.Item
+                  label="Danh mục cha"
+                  name="category"
+                  rules={[{ required: true }]}
+                >
+                  <Select onChange={handleCategoryChange}>
+                    {parentCategories.map((cat) => (
+                      <Option key={cat.id} value={cat.id}>
+                        {cat.name}
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
-              )}
-            </>
-          )}
+                {subCategories.length > 0 && (
+                  <Form.Item label="Danh mục con" name="sub_category">
+                    <Select onChange={handleSubCategoryChange} allowClear>
+                      {subCategories.map((item) => (
+                        <Option key={item.id} value={item.id}>
+                          {item.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                )}
+              </>
+            )}
 
-          <label className="block font-medium mb-1">Ảnh banner</label>
-          <Upload
-            beforeUpload={handleBeforeUpload}
-            listType="picture"
-            maxCount={1}
-            showUploadList={false}
-          >
-            <Button icon={<UploadOutlined />}>Chọn ảnh banner</Button>
-          </Upload>
-          {previewImage && (
-            <div className="mt-4 mb-2">
-              <Image
-                src={previewImage}
-                alt="Ảnh preview"
-                style={{ maxHeight: 150, borderRadius: 6 }}
-                preview
-              />
-            </div>
-          )}
-        </Form>
-      </Drawer>
+            <label className="block font-medium mb-1">Ảnh banner</label>
+            <Upload
+              beforeUpload={handleBeforeUpload}
+              listType="picture"
+              maxCount={1}
+              showUploadList={false}
+            >
+              <Button icon={<UploadOutlined />}>Chọn ảnh banner</Button>
+            </Upload>
+            {previewImage && (
+              <div className="mt-4 mb-2">
+                <Image
+                  src={previewImage}
+                  alt="Ảnh preview"
+                  style={{ maxHeight: 150, borderRadius: 6 }}
+                  preview
+                />
+              </div>
+            )}
+          </Form>
+        </Drawer>
 
-      <BannerDetailDrawer
-        bannerId={selectedBannerId}
-        visible={detailDrawerOpen}
-        onClose={() => setDetailDrawerOpen(false)}
-      />
-    </div>
+        <BannerDetailDrawer
+          bannerId={selectedBannerId}
+          visible={detailDrawerOpen}
+          onClose={() => setDetailDrawerOpen(false)}
+        />
+      </div>
     </Spin>
   );
 }
