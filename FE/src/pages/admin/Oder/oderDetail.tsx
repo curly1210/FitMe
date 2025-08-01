@@ -81,7 +81,7 @@ export default function OrderDetailDrawer({
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: "Dãy chuyền",
+      title: "Sản phẩm",
       dataIndex: "product_name",
       key: "product_name",
       render: (_: any, record: OrderDetail) => (
@@ -104,11 +104,16 @@ export default function OrderDetailDrawer({
     },
     {
       title: "Giá tiền",
-      dataIndex: "price",
+      dataIndex: "price", 
       key: "price",
       width: 120,
-      render: (value: number) =>
-        value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }),
+      render: (_: any, record: { price: number; sale_price?: number }) => {
+        const priceToDisplay = record.sale_price ?? record.price;
+        return priceToDisplay.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        });
+      },
     },
   ];
 
