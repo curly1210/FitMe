@@ -15,7 +15,7 @@ class OrderFactory extends Factory
 {
     public function definition(): array
     {
-         $shippingAddress = ShippingAddress::inRandomOrder()->first();
+        $shippingAddress = ShippingAddress::inRandomOrder()->first();
 
         // Nếu không có địa chỉ thì không thể tạo order hợp lệ => bạn có thể xử lý tùy tình huống
         if (!$shippingAddress) {
@@ -29,9 +29,11 @@ class OrderFactory extends Factory
             'payment_method' => $this->faker->randomElement(['cod', 'banking', 'vnpay']),
             'status_order_id' => StatusOrder::inRandomOrder()->value('id'),
             'user_id' => $shippingAddress->user_id,
-            'receiving_address' => "{$shippingAddress->detail_address}, {$shippingAddress->ward}, {$shippingAddress->district}, {$shippingAddress->city}, {$shippingAddress->country}",
+            'receiving_address' => "{$shippingAddress->detail_address}, {$shippingAddress->ward}, {$shippingAddress->district}, {$shippingAddress->province}, {$shippingAddress->country}",
             'recipient_name' => $shippingAddress->name_receive,
             'recipient_phone' => $shippingAddress->phone,
+            'district_id' => $shippingAddress->district_id,
+            'ward_code' => $shippingAddress->ward_code,
             'created_at' => now(),
             'updated_at' => now(),
         ];

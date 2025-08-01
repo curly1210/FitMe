@@ -54,4 +54,8 @@ class Order extends Model
     {
         return $this->hasMany(OrdersDetail::class);
     }
+    public function shippingOrders()
+    {
+        return $this->hasMany(ShippingOrder::class);
+    }
 }

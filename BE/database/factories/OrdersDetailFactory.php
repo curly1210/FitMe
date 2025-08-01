@@ -30,6 +30,7 @@ class OrdersDetailFactory extends Factory
             'sale_price' => $salePrice,
             'sale_percent' => $salePercent,
             'image_product' => $image,
+            'weight' => 400,
             'color' => $colorName,
             'size' => $sizeName,
             'name_product' => $productName,
@@ -37,5 +38,4 @@ class OrdersDetailFactory extends Factory
             'updated_at' => now(),
         ];
     }
-
 }

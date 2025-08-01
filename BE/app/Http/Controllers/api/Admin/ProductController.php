@@ -99,9 +99,6 @@ class ProductController extends Controller
                 'variants.*.stock' => 'required|integer|min:0',
                 'variants.*.price' => 'required|numeric|min:0',
                 'variants.*.sale_price' => 'required|numeric|min:0|lte:variants.*.price',
-                'variants.*.width' => 'required|numeric|min:0',
-                'variants.*.height' => 'required|numeric|min:0',
-                'variants.*.length' => 'required|numeric|min:0',
                 'variants.*.weight' => 'required|numeric|min:0',
                 'images' => 'required|array|min:1',
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
@@ -152,9 +149,6 @@ class ProductController extends Controller
                     'price' => $variant['price'],
                     'sale_price' => $variant['sale_price'],
                     'sale_percent' => $salePercent,
-                    'width' => $variant['width'],
-                    'height' => $variant['height'],
-                    'length' => $variant['length'],
                     'weight' => $variant['weight'],
                 ]);
             }
@@ -214,9 +208,6 @@ class ProductController extends Controller
                 'variants.*.price' => 'required|numeric|min:0',
                 'variants.*.sale_price' => 'required|numeric|min:0|lte:variants.*.price',
                 'variants.*.id' => 'required',
-                'variants.*.width' => 'required|numeric|min:0',
-                'variants.*.height' => 'required|numeric|min:0',
-                'variants.*.length' => 'required|numeric|min:0',
                 'variants.*.weight' => 'required|numeric|min:0',
                 'images' => 'required|array|min:1',
                 // 'images.*.url' => 'nullable',
@@ -277,9 +268,6 @@ class ProductController extends Controller
                         'price' => $variant['price'],
                         'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
-                        'width' => $variant['width'],
-                        'height' => $variant['height'],
-                        'length' => $variant['length'],
                         'weight' => $variant['weight'],
                     ]);
                 } else {
@@ -297,9 +285,6 @@ class ProductController extends Controller
                         'price' => $variant['price'],
                         'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
-                        'width' => $variant['width'],
-                        'height' => $variant['height'],
-                        'length' => $variant['length'],
                         'weight' => $variant['weight'],
                     ]);
                 }

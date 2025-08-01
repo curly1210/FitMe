@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
             CouponSeeder::class,
             BannerSeeder::class,
             ContactSeeder::class,
-
+            PackingRuleSeeder::class
         ]);
     }
 }

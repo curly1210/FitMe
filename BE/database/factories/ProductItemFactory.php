@@ -29,7 +29,7 @@ class ProductItemFactory extends Factory
         $size = Size::inRandomOrder()->first();
         $color = Color::inRandomOrder()->first();
         $year = now()->year;
-
+        $weight = 400;
         $price = fake()->numberBetween(200000, 300000);
         $sale_price = fake()->numberBetween(100000, 199999);
         $sale_percent = $price > 0 ? round((($price - $sale_price) / $price) * 100) : 0;
@@ -42,6 +42,7 @@ class ProductItemFactory extends Factory
             'sale_percent' => $sale_percent,
             'stock' => fake()->numberBetween(5, 50),
             'sku' => $sku,
+            'weight' => $weight,
             'color_id' => $color->id,
             'size_id' => $size->id,
             'created_at' => now(),
@@ -97,5 +98,4 @@ class ProductItemFactory extends Factory
         $unique = rand(100, 999);
         return "{$yearPart}{$categoryPart}{$productId}{$genderPart}{$unique}_C{$colorId}S{$sizeId}";
     }
-
 }

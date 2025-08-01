@@ -16,10 +16,6 @@ return new class extends Migration
             $table->unsignedInteger('quantity');
             $table->unsignedInteger('price');
             $table->unsignedInteger('weight');
-            $table->unsignedInteger('width');
-            $table->unsignedInteger('height');
-            $table->unsignedInteger('length');
-
             $table->foreignId('product_item_id')->constrained('product_items')->onDelete('cascade');
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->timestamps();

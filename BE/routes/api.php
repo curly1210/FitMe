@@ -253,6 +253,7 @@ Route::post("/ghn/order", [GhnController::class, "createOrder"]); # api tạo đ
 Route::post("/ghn/order/cancel/{order_code}", [GhnController::class, "cancelOrder"]); # api hủy đơn hàng 
 Route::post("/ghn/order/return/{order_code}", [GhnController::class, "returnOrder"]); # api trả hàng
 Route::post("/ghn/order/storing/{order_code}", [GhnController::class, "storingOrder"]); # api giao lại đơn hàng
+Route::post("/ghn/webhook/status", [GhnController::class, "getWebhookStatus"]); # api tạo đơn hàng lên hệ thống
 
 
 

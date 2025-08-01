@@ -13,13 +13,8 @@ return new class extends Migration
     {
         Schema::create('status_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 20);
+            $table->string('name', 50);
             $table->string('color', 20);
-            $table->string('code', 50);
-            $table->string('description', 255);
-            $table->unsignedInteger('public_status_id')->nullable();
-
-
             $table->timestamps();
         });
     }

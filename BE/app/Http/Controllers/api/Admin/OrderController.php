@@ -24,6 +24,11 @@ class OrderController extends Controller
         5 => ['label' => 'Giao hàng thất bại', 'color' => '#198754'],
         6 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
         7 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
+        8 => ['label' => 'Đã giao một phần', 'color' => '#0d6efd'],
+        9 => ['label' => 'Giao thiếu hàng', 'color' => '#fd7e14'],
+        10 => ['label' => 'Đang xử lý giao thiếu', 'color' => '#ffc107'],
+        11 => ['label' => 'Đang giao lại', 'color' => '#ffc107'],
+
     ];
 
     public function index(Request $request)
@@ -61,7 +66,18 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::with(['user', 'statusOrder', 'orderDetails'])->findOrFail($id);
-
+        // $totalShippingFee = $order->shippingOrders->whereNull('is_resolve')->sum('shipping_fee');
+        $package_amount = $order->shippingOrders->whereNull('is_resolve')->count();
+        // if ($package_amount == 2) {
+        //     $discount = 0.10; // 10%
+        // } elseif ($package_amount == 3) {
+        //     $discount = 0.15; // 15%
+        // } elseif ($package_amount >= 4) {
+        //     $discount = 0.20; // 20%
+        // } else {
+        //     $discount = 0;
+        // }
+        // $finalShippingFee = $totalShippingFee * (1 - $discount);
         return response()->json([
             'order_code' => $order->orders_code,
             'customer_name' => $order->user->name,
@@ -82,7 +98,10 @@ class OrderController extends Controller
             'shipping_price' => $order->shipping_price,
             'discount' => $order->discount,
             'total_amount' => $order->total_amount,
-            'order_details' => AdminOrderDetailResource::collection($order->orderDetails)
+            'order_details' => AdminOrderDetailResource::collection($order->orderDetails),
+            'expected_delivery_time' => $order->shippingOrders->first()->expected_delivery_time ?? null,
+            'package_amount' => $package_amount ?? 0,
+            'shipping_fee' => $order->shipping_price,
         ]);
     }
 
@@ -125,6 +144,11 @@ class OrderController extends Controller
             5 => 'Giao hàng thất bại.',
             6 => 'Đơn hàng đã hoàn thành.',
             7 => 'Đơn hàng đã bị hủy và số lượng đã được hoàn lại kho.',
+            8 => 'Đơn hàng đã được giao một phần.',
+            9 => 'Đơn hàng giao đã bị thiếu.',
+            10 => 'Đơn hàng đang được giao lại.',
+
+
             default => 'Cập nhật trạng thái đơn hàng thành công.',
         };
 

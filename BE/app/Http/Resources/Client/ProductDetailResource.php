@@ -78,11 +78,7 @@ class ProductDetailResource extends JsonResource
                     'sale_percent' => $item->sale_percent,
                     'stock' => $item->stock,
                     'sku' => $item->sku,
-                    'width' => $item->width,
-                    'height' => $item->height,
-                    'length' => $item->length,
                     'weight' => $item->weight,
-
                     'color_id' => $item->color->id,
 
 

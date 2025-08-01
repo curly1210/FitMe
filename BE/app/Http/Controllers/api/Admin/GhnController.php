@@ -5,17 +5,19 @@ namespace App\Http\Controllers\api\Admin;
 use App\Models\Order;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\Client\WardResource;
 
+use App\Http\Resources\Client\WardResource;
 use App\Http\Resources\Client\StoreResource;
 use App\Http\Resources\Client\ServiceResource;
 use App\Http\Resources\Client\DistrictResource;
 use App\Http\Resources\Client\ProvinceResource;
 use App\Http\Resources\Client\DeliverytimeResource;
 use App\Http\Resources\Client\GhnOrderDetailResource;
+use App\Models\ShippingOrder;
 
 class GhnController extends Controller
 {
@@ -52,8 +54,6 @@ class GhnController extends Controller
             // Dịch vụ GHN
             'service_id' => 'required|integer',
             'service_type_id' => 'required|integer',
-            'coupon' => 'nullable|string|max:255',
-            'pick_shift' => 'required|integer',
 
             // Items
             'items' => 'required|array|min:1',
@@ -61,10 +61,7 @@ class GhnController extends Controller
             'items.*.sku' => 'required|string|max:255',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.sale_price' => 'required|numeric|min:0',
-            'items.*.length' => 'nullable|numeric|min:0',
-            'items.*.width' => 'nullable|numeric|min:0',
-            'items.*.height' => 'nullable|numeric|min:0',
-            'items.*.weight' => 'nullable|numeric|min:0',
+            'items.*.weight' => 'required|numeric|min:0',
             'items.*.category_name' => 'nullable|max:255',
         ], [
             'from_name.required' => 'Tên người gửi không được bỏ trống.',
@@ -91,22 +88,6 @@ class GhnController extends Controller
             'weight.numeric' => 'Cân nặng kiện hàng phải là số.',
             'weight.min' => 'Cân nặng kiện hàng phải lớn hơn hoặc bằng 0.',
 
-            'length.required' => 'Chiều dài kiện hàng không được bỏ trống.',
-            'length.numeric' => 'Chiều dài kiện hàng phải là số.',
-            'length.min' => 'Chiều dài kiện hàng phải lớn hơn hoặc bằng 0.',
-
-            'width.required' => 'Chiều rộng kiện hàng không được bỏ trống.',
-            'width.numeric' => 'Chiều rộng kiện hàng phải là số.',
-            'width.min' => 'Chiều rộng kiện hàng phải lớn hơn hoặc bằng 0.',
-
-            'height.required' => 'Chiều cao kiện hàng không được bỏ trống.',
-            'height.numeric' => 'Chiều cao kiện hàng phải là số.',
-            'height.min' => 'Chiều cao kiện hàng phải lớn hơn hoặc bằng 0.',
-
-            'service_id.required' => 'Vui lòng chọn dịch vụ GHN.',
-            'service_type_id.required' => 'Vui lòng chọn loại dịch vụ GHN.',
-            'pick_shift.required' => 'Vui lòng chọn ca lấy hàng.',
-
             'items.required' => 'Đơn hàng phải có ít nhất 1 sản phẩm.',
             'items.array' => 'Danh sách sản phẩm không hợp lệ.',
             'items.*.name_product.required' => 'Tên sản phẩm không được bỏ trống.',
@@ -116,6 +97,9 @@ class GhnController extends Controller
             'items.*.quantity.min' => 'Số lượng sản phẩm ít nhất là 1.',
             'items.*.sale_price.required' => 'Giá bán sản phẩm không được bỏ trống.',
             'items.*.sale_price.numeric' => 'Giá bán sản phẩm phải là số.',
+            'items.*.weight.required' => 'Trọng lượng sản phẩm là bắt buộc.',
+            'items.*.weight.numberic' => 'Trọng lượng sản phẩm phải là kiểu số',
+            'items.*.weight.min' => 'Trọng lượng sản phẩm phải là số không âm',
         ]);
         if ($validator->fails()) {
             return $this->error("Thiếu dữ liệu truyền vào", $validator->errors(), 422);
@@ -159,22 +143,19 @@ class GhnController extends Controller
                 // "pick_station_id" => 1444,
                 "deliver_station_id" => null,
                 "insurance_value" => $request->total_amount, # Tiền bồi thường khi hỏng hóc hoặc mất
-                "service_id" => $request->service_id,
-                "service_type_id" => $request->service_type_id,
+                "service_id" => 53321,
+                "service_type_id" => 2, // 2 : Hàng nhẹ ,  5 : hàng nặng
                 "coupon" => null,
-                "pick_shift" => [$request->pick_shift],
+                "pick_shift" => [3], // lấy hàng vào ngày hôm sau
                 #order_detail
-                "items" => $request->items->map(function ($item) {
+                "items" => collect($request->items)->map(function ($item) {
                     return [
-                        "name" => $item->name_product,
-                        "code" => $item->sku,
-                        "quantity" => $item->quantity,
-                        "price" => $item->sale_price,
-                        "length" =>  $item->length,
-                        "width" => $item->width,
-                        "height" => $item->height,
-                        "weight" => $item->weight,
-                        "category" => $item->category_name,
+                        "name" => $item['name_product'],
+                        "code" => $item['sku'],
+                        "quantity" => $item['quantity'],
+                        "price" => $item['sale_price'],
+                        "weight" => $item['weight'],
+                        "category" => $item['category_name'],
                     ];
                     // ---------------------
                     // "name" => "Áo Polo",
@@ -242,7 +223,7 @@ class GhnController extends Controller
             };
             return $response->json();
         }
-        return $this->error("Không có mã tỉnh", ["province_id" => "Không có dữ liệu"], 422);
+        return $this->error("Không có mã Quận/huyện", ["district_id" => "Không có dữ liệu"], 422);
     }
     public function getStore()
     {
@@ -296,14 +277,16 @@ class GhnController extends Controller
                 "from_ward_code"  => "required|string",
                 "to_district_id"  => "required|integer",
                 "to_ward_code"    => "required|string",
-                "length"          => "nullable|numeric",
-                "width"           => "nullable|numeric",
-                "height"          => "nullable|numeric",
-                "weight"          => "nullable|numeric",
+                "length"          => "required|numeric",
+                "width"           => "required|numeric",
+                "height"          => "required|numeric",
+                "weight"          => "required|numeric",
                 "total_amount"    => "required|numeric|min:0",
                 "items"           => "required|array|min:1",
                 "items.*.name"    => "required|string",
                 "items.*.quantity" => "required|integer|min:1",
+                "items.*.weight" => "required|integer|min:1",
+
             ],
             [
                 "required" => ":attribute không được để trống.",
@@ -322,34 +305,27 @@ class GhnController extends Controller
             "token" => env('GHN_TOKEN'),
             "ShopId" => env("GHN_SHOP_ID"),
         ])->get("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee", [
-            "service_id" => 100039,
-            "service_type_id" => 5, // 2 : Hàng nhẹ ,  5 : hàng nặng
+            "service_id" => 53321,
+            "service_type_id" => 2, // 2 : Hàng nhẹ ,  5 : hàng nặng
             "from_ward_code" => $request->from_ward_code,
             "to_district_id" => $request->to_district_id,
             "to_ward_code" => $request->to_ward_code,
-            "length" => $request->length ?? 1, // tổng chiều dài
-            "width" => $request->width ?? 1,  //tổng chiều rộng
-            "height" => $request->height ?? 1, // tổng chiều cao
-            "weight" => $request->weight ?? 1, // Tổng cân nặng
+            "length" => $request->length,
+            "width" => $request->width,
+            "height" => $request->height,
+            "weight" => $request->weight,
             "insurance_value" => $request->total_amount, #Phí đền bù khi đóng bảo hiểm
             "coupon" => null,
-            "items" => collect($request->items)->map(function ($item) use ($request) {
+            "items" => collect($request->items)->map(function ($item) {
                 return [
                     "name" => $item['name'],
                     "quantity" => $item['quantity'],
-                    "length" => $item['length'], // tổng chiều dài
-                    "width" => $item['width'],  //tổng chiều rộng
-                    "height" => $item['height'], // tổng chiều cao
-                    "weight" => $item['weight'], // Tổng cân nặng
+                    "weight" => $item['weight'],  //cân nặng sản phẩm
                 ];
             }), // sản phẩm
 
         ]);
-        // dd($response->json());
 
-        if ($response['code'] == 200) {
-            return ServiceResource::collection($response['data']);
-        };
         return $response->json();
     }
     public function calculateExpectedDeliverytime(Request $request)
@@ -359,7 +335,6 @@ class GhnController extends Controller
             'from_ward_code'   => 'required|string',
             'to_district_id'   => 'integer|required|min:0',
             'to_ward_code'     => 'required|string',
-            'service_id'       => 'integer|required|min:0',
         ], [
             'from_district_id.required' => 'Vui lòng nhập quận/huyện lấy hàng.',
             'from_district_id.integer'  => 'Quận/huyện lấy hàng phải là số.',
@@ -374,10 +349,6 @@ class GhnController extends Controller
 
             'to_ward_code.required'     => 'Vui lòng nhập phường/xã giao hàng.',
             'to_ward_code.string'       => 'Phường/xã giao hàng phải là chuỗi.',
-
-            'service_id.required'       => 'Vui lòng chọn dịch vụ.',
-            'service_id.integer'        => 'Mã dịch vụ phải là số.',
-            'service_id.min'            => 'Mã dịch vụ không hợp lệ.',
         ]);
         if ($validator->fails()) {
             return $this->error("Dữ liệu truyền không hợp lệ", $validator->errors(), 422);
@@ -391,7 +362,7 @@ class GhnController extends Controller
             "from_ward_code" => $request->from_ward_code,
             "to_district_id" => $request->to_district_id,
             "to_ward_code" => $request->to_ward_code,
-            "service_id" => $request->service_id
+            "service_id" => 53321,
         ]);
         // dd($response->json());
         if ($response['code'] == 200) {
@@ -406,7 +377,7 @@ class GhnController extends Controller
             'Content-Type' => 'application/json',
             "token" => env('GHN_TOKEN'),
         ])->post("https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail", [
-            "order_code" => $order_code,
+            "order_code" => $order_code, // mã đơn hàng giao hàng nhanh
         ]);
         if ($response['code'] == 200) {
 
@@ -457,10 +428,7 @@ class GhnController extends Controller
             "width" => "required|numeric|min:0",
             "height" =>  "required|numeric|min:0",
             // Dịch vụ GHN
-            'service_id' => 'required|integer',
-            'service_type_id' => 'required|integer',
             'coupon' => 'nullable|string|max:255',
-            'pick_shift' => 'required|integer',
 
             // Items
             'items' => 'required|array|min:1',
@@ -468,9 +436,6 @@ class GhnController extends Controller
             'items.*.sku' => 'required|string|max:255',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.sale_price' => 'required|numeric|min:0',
-            'items.*.length' => 'nullable|numeric|min:0',
-            'items.*.width' => 'nullable|numeric|min:0',
-            'items.*.height' => 'nullable|numeric|min:0',
             'items.*.weight' => 'nullable|numeric|min:0',
             'items.*.category_name' => 'nullable|max:255',
         ], [
@@ -512,7 +477,6 @@ class GhnController extends Controller
 
             'service_id.required' => 'Vui lòng chọn dịch vụ GHN.',
             'service_type_id.required' => 'Vui lòng chọn loại dịch vụ GHN.',
-            'pick_shift.required' => 'Vui lòng chọn ca lấy hàng.',
 
             'items.required' => 'Đơn hàng phải có ít nhất 1 sản phẩm.',
             'items.array' => 'Danh sách sản phẩm không hợp lệ.',
@@ -566,10 +530,10 @@ class GhnController extends Controller
                 // "pick_station_id" => 1444,
                 "deliver_station_id" => null,
                 "insurance_value" => $request->total_amount, # Tiền bồi thường khi hỏng hóc hoặc mất
-                "service_id" => $request->service_id,
-                "service_type_id" => $request->service_type_id,
+                "service_id" => 53321,
+                "service_type_id" => 2, // 2 : Hàng nhẹ ,  5 : hàng nặng
                 "coupon" => null,
-                "pick_shift" => [$request->pick_shift],
+                "pick_shift" => [3], // ca lấy hàng vào sáng ngày hôm sau
                 #order_detail
                 "items" => collect($request->items)->map(function ($item) {
                     return [
@@ -577,9 +541,6 @@ class GhnController extends Controller
                         "code" => $item['sku'],
                         "quantity" => $item['quantity'],
                         "price" => $item['sale_price'],
-                        "length" =>  $item['length'],
-                        "width" => $item['width'],
-                        "height" => $item['height'],
                         "weight" => $item['weight'],
                         "category" => $item['category_name'],
                     ];
@@ -646,5 +607,27 @@ class GhnController extends Controller
             "order_codes" =>  $request->order_codes,
         ]);
         return $response->json();
+    }
+    public function getWebhookStatus(Request $request)
+    {
+        // info
+        Log::info('GHN Webhook Received:', $request->all());
+        $statusShipping = $request->Status; // Create, Switch_status, v.v.
+        $shippingCode = $request->ClientOrderCode;
+        $type = $request->Type;
+        // event
+        $shippingOrder = ShippingOrder::where('shipping_code', $shippingCode)->first();
+        $shippingOrder->update([
+            'status_shipping' => $statusShipping
+        ]);
+        $shippingCode->reset();
+        // payload
+        $data = [
+            'type' => $type,
+            'status_shipping' => $statusShipping,
+            'shipping_code' => $shippingCode,
+
+        ];
+        return response()->json(['message' => 'Received', 'data' => $data], 200);
     }
 }

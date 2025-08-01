@@ -55,9 +55,6 @@ class ProductResource extends JsonResource
                                 'stock' => $item->stock,
                                 'sku' => $item->sku,
                                 "weight" => $item->weight,
-                                "height" => $item->height,
-                                "length" => $item->length,
-                                "width" => $item->width,
 
                                 'size' => [
                                     'id' => $item->size->id,
