@@ -19,6 +19,7 @@ import { useSearchPanel } from "../../../hooks/useSearchPanel";
 import { Link, useNavigate } from "react-router";
 import { Badge, Dropdown, MenuProps } from "antd";
 import { useCart } from "../../../hooks/useCart";
+import { useList } from "@refinedev/core";
 // import HeaderClient from "../../../components/Client/HeaderClient";
 
 const contentStyle: React.CSSProperties = {
@@ -31,12 +32,12 @@ const contentStyle: React.CSSProperties = {
   background: "#364d79",
 };
 
-const carousels = [
-  "https://media.routine.vn/1920x0/prod/media/rou09543-03-jpg-01da.webp",
-  "https://media.routine.vn/1920x0/prod/media/untitled-2-01-11-jpg-hwu3.webp",
-  "https://media.routine.vn/1920x0/prod/media/banner-kv-landing-page-04-png-jl2j.webp",
-  "https://media.routine.vn/1920x0/prod/media/smart-shirt-cover-web-copy-png-b369.webp",
-];
+// const carousels = [
+//   "https://media.routine.vn/1920x0/prod/media/rou09543-03-jpg-01da.webp",
+//   "https://media.routine.vn/1920x0/prod/media/untitled-2-01-11-jpg-hwu3.webp",
+//   "https://media.routine.vn/1920x0/prod/media/banner-kv-landing-page-04-png-jl2j.webp",
+//   "https://media.routine.vn/1920x0/prod/media/smart-shirt-cover-web-copy-png-b369.webp",
+// ];
 
 const HomePage = () => {
   const sliderRef = useRef<Slider>(null);
@@ -54,6 +55,12 @@ const HomePage = () => {
   const { cart } = useCart();
 
   const navigate = useNavigate();
+
+  const { data: responseBanners, isLoading: isLoadingBanner } = useList({
+    resource: "client/banners",
+  });
+
+  console.log(responseBanners?.data);
 
   const handleClickToCartPage = () => {
     if (!accessToken) {
@@ -102,6 +109,67 @@ const HomePage = () => {
       logout();
     }
   };
+
+  const handleMenuExtraClick: MenuProps["onClick"] = ({ key }) => {
+    if (key === "1") {
+      navigate("/post");
+    }
+
+    if (key === "2") {
+      if (!accessToken) {
+        openModal(<ModalLogin />);
+      } else {
+        navigate("/account/order");
+      }
+    }
+
+    if (key === "3") {
+      navigate("/contact");
+      // logout();
+    }
+  };
+
+  const itemsExtra: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/3596/3596091.png"
+            alt=""
+          />
+          <div className="">Tin thời trang</div>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/846/846364.png"
+            alt=""
+          />
+          <div className="">Tra cứu đơn hàng</div>
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/3894/3894024.png"
+            alt=""
+          />
+          <div className="">Liên hệ</div>
+        </div>
+      ),
+    },
+  ];
 
   const items: MenuProps["items"] = [
     {
@@ -192,10 +260,10 @@ const HomePage = () => {
                 className="block mb-2"
               />
               <div className="flex gap-7">
-               <SearchOutlined
-  className="text-xl cursor-pointer"
-  onClick={() => setIsOpenSearchPanel(true)}
-/>
+                <SearchOutlined
+                  className="text-xl cursor-pointer"
+                  onClick={() => setIsOpenSearchPanel(true)}
+                />
                 <div className="list-none flex gap-3.5">
                   {categories.map((category: any) => (
                     <li
@@ -213,15 +281,15 @@ const HomePage = () => {
                       {category.name}
                     </li>
                   ))}
-                  <Link to="/address">
+                  {/* <Link to="/address">
                     <li>Địa chỉ</li>
                   </Link>
-                  <li>Khuyến mãi</li>
+                  <li>Khuyến mãi</li> */}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 dropdown-main">
                 {!accessToken ? (
                   <>
                     <UserOutlined className="text-2xl" />
@@ -252,20 +320,38 @@ const HomePage = () => {
                   className="text-3xl cursor-pointer !text-white"
                 />
               </Badge>
-              {/* <ShoppingCartOutlined className="text-3xl" /> */}
-              <EllipsisOutlined className="text-3xl" />
+
+              <Dropdown
+                menu={{ items: itemsExtra, onClick: handleMenuExtraClick }}
+                trigger={["click"]}
+                placement="topCenter"
+              >
+                <EllipsisOutlined className="text-3xl cursor-pointer" />
+              </Dropdown>
             </div>
           </div>
         </header>
-        <Slider className="h-dvh" ref={sliderRef} {...settings}>
-          {carousels.map((slide, index) => (
-            <div className="h-dvh" key={index}>
-              <div style={contentStyle}>
-                <img src={slide} className="object-cover" alt="" />
-              </div>
-            </div>
-          ))}
-        </Slider>
+        {isLoadingBanner ? (
+          <div className="fixed inset-0 z-50 bg-white opacity-100 flex items-center justify-center pointer-events-auto">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-gray-500" />
+          </div>
+        ) : (
+          <Slider className="h-dvh" ref={sliderRef} {...settings}>
+            {responseBanners?.data.map((slide, index) => (
+              <Link to={slide?.direct_link}>
+                <div className="h-dvh" key={index}>
+                  <div style={contentStyle}>
+                    <img
+                      src={slide?.url_image}
+                      className="object-cover"
+                      alt=""
+                    />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </Slider>
+        )}
 
         {isOpenSearchPanel && <SearchPanel />}
 

@@ -77,6 +77,67 @@ const HeaderClient = () => {
     }
   };
 
+  const handleMenuExtraClick: MenuProps["onClick"] = ({ key }) => {
+    if (key === "1") {
+      navigate("/post");
+    }
+
+    if (key === "2") {
+      if (!accessToken) {
+        openModal(<ModalLogin />);
+      } else {
+        navigate("/account/order");
+      }
+    }
+
+    if (key === "3") {
+      navigate("/contact");
+      // logout();
+    }
+  };
+
+  const itemsExtra: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/3596/3596091.png"
+            alt=""
+          />
+          <div className="">Tin thời trang</div>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/846/846364.png"
+            alt=""
+          />
+          <div className="">Tra cứu đơn hàng</div>
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <div className="text-base flex items-center gap-4 py-1">
+          <img
+            width={35}
+            src="https://cdn-icons-png.flaticon.com/512/3894/3894024.png"
+            alt=""
+          />
+          <div className="">Liên hệ</div>
+        </div>
+      ),
+    },
+  ];
+
   const items: MenuProps["items"] = [
     {
       key: "1",
@@ -130,10 +191,10 @@ const HeaderClient = () => {
     <header className=" shrink-0 sticky top-0 z-50 bg-white  border-gray-200  px-4 mb-5">
       <div className="text-black w-7xl m-auto flex justify-between items-center py-5 px-4">
         <div className="flex gap-6 items-center">
-         <SearchOutlined
-  className="text-xl cursor-pointer"
-  onClick={() => setIsOpenSearchPanel(true)}
-/>
+          <SearchOutlined
+            className="text-xl cursor-pointer"
+            onClick={() => setIsOpenSearchPanel(true)}
+          />
           <div className="list-none flex gap-3.5">
             {categories.map((category: any) => (
               <li
@@ -151,10 +212,10 @@ const HeaderClient = () => {
                 {category.name}
               </li>
             ))}
-            <Link to="/address">
+            {/* <Link to="/address">
               <li>Địa chỉ</li>
             </Link>
-            <li>Khuyến mãi</li>
+            <li>Khuyến mãi</li> */}
           </div>
         </div>
         <div>
@@ -199,11 +260,14 @@ const HeaderClient = () => {
               className="text-3xl cursor-pointer"
             />
           </Badge>
-          {/* <ShoppingCartOutlined
-            onClick={() => handleClickToCartPage()}
-            className="text-3xl cursor-pointer"
-          /> */}
-          <EllipsisOutlined className="text-3xl" />
+
+          <Dropdown
+            menu={{ items: itemsExtra, onClick: handleMenuExtraClick }}
+            trigger={["click"]}
+            placement="topCenter"
+          >
+            <EllipsisOutlined className="text-3xl cursor-pointer" />
+          </Dropdown>
         </div>
       </div>
     </header>

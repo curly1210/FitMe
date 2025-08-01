@@ -305,7 +305,7 @@ const CheckOut = () => {
                 />
                 <span>Giao Hàng tiết kiệm</span>
               </label>
-              <span>40.000VNĐ</span>
+              <span>40.000 VNĐ</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <label className="flex items-center space-x-2">
@@ -316,7 +316,7 @@ const CheckOut = () => {
                 />
                 <span>ViettelPost</span>
               </label>
-              <span>20.000VNĐ</span>
+              <span>20.000 VNĐ</span>
             </div>
           </div>
 
@@ -381,12 +381,12 @@ const CheckOut = () => {
               {availableCoupons.map((coupon) => (
                 <Select.Option key={coupon.code} value={coupon.code}>
                   {coupon.type === "free_shipping"
-                    ? `${coupon.code}-freeship`
+                    ? `${coupon.code} - Free Ship`
                     : `${coupon.code} (Giảm ${
                         coupon.type === "percentage"
-                          ? `${coupon.value}%`
-                          : `${coupon.value.toLocaleString()}đ`
-                      } tối đa ${coupon.max_price_discount.toLocaleString()}đ)`}
+                          ? `${coupon.value }% tối đa: ${coupon.max_price_discount.toLocaleString()} VNĐ`
+                          : `${coupon.value.toLocaleString()} VNĐ` 
+                      })`}
                 </Select.Option>
               ))}
             </Select>
@@ -438,7 +438,7 @@ const CheckOut = () => {
                   </p>
                 </div>
                 <div className="text-sm font-semibold">
-                  {(item.subtotal || 0).toLocaleString()}đ
+                  {(item.subtotal || 0).toLocaleString()} VNĐ 
                 </div>
               </div>
             ))
@@ -471,7 +471,7 @@ const CheckOut = () => {
                 : `Giảm ${
                     appliedCoupon.type === "percentage"
                       ? `${appliedCoupon.value}%`
-                      : `${appliedCoupon.value.toLocaleString()}đ`
+                      : `${appliedCoupon.value.toLocaleString()} VNĐ`
                   }`}
             </div>
           )}
@@ -480,7 +480,7 @@ const CheckOut = () => {
             <div className="flex justify-between">
               <span>Tổng giá trị đơn hàng</span>
               <span className="font-semibold">
-                {totalPrice.toLocaleString()}đ
+                {totalPrice.toLocaleString()} VNĐ
               </span>
             </div>
             <div className="flex justify-between">
@@ -488,19 +488,19 @@ const CheckOut = () => {
               <span>
                 {appliedCoupon?.type === "free_shipping"
                   ? "Miễn phí"
-                  : `${shippingPrice.toLocaleString()}đ`}
+                  : `${shippingPrice.toLocaleString()} VNĐ`}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Giảm giá</span>
-              <span>{discount?.toLocaleString()}đ</span>
+              <span>{discount?.toLocaleString()} VNĐ</span>
             </div>
           </div>
 
           <div className="border-t pt-2 text-sm text-gray-900 space-y-1  ">
             <div className="flex justify-between font-semibold  ">
               <span>Thành tiền</span>
-              <span>{totalAmount?.toLocaleString()}đ</span>
+              <span>{totalAmount?.toLocaleString()} VNĐ</span>
             </div>
           </div>
 
