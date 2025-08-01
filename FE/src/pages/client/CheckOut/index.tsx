@@ -62,13 +62,11 @@ const CheckOut = () => {
 
   // console.log(orderItems, "cart");
 
-  useEffect(() => {
-    if (cartResponse?.cartItems) {
-      if (cartResponse.cartItems.length === 0) {
-        nav("/"); // Chuyển hướng về trang chủ nếu giỏ hàng trống
-      }
-    }
-  }, [cartResponse, nav]);
+useEffect(() => {
+  if (cart?.cartItems && cart.cartItems.length === 0) {
+    nav("/", { replace: true }); // Chuyển hướng về trang chủ nếu giỏ hàng trống
+  }
+}, [cart, nav]);
 
   const totalPrice = (cart?.cartItems || []).reduce(
     (sum: number, item: any) => sum + item.subtotal,
