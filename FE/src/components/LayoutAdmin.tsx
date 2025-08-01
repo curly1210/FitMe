@@ -16,7 +16,7 @@ import { Breadcrumb, Dropdown, Layout, Menu, MenuProps, theme } from "antd";
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { useAuthen } from "../hooks/useAuthen";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -159,6 +159,8 @@ const LayoutAdmin = () => {
 
   const { logout } = useAuthen();
 
+  const navi = useNavigate();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -167,12 +169,21 @@ const LayoutAdmin = () => {
     if (key === "1") {
       logout();
     }
+
+    if (key === "2") {
+      navi("/");
+      // logout();
+    }
   };
 
   const items: MenuProps["items"] = [
     {
       key: "1",
       label: <div className="text-base font-bold py-1">Đăng xuất</div>,
+    },
+    {
+      key: "2",
+      label: <div className="text-base font-bold py-1">Quay về trang chủ</div>,
     },
   ];
 
@@ -186,11 +197,13 @@ const LayoutAdmin = () => {
         onCollapse={(value) => setCollapsed(value)}
       >
         <div className="flex justify-center p-4">
-          <img
-            className="w-[100px]"
-            src="https://media.routine.vn/prod/media/f0c0d744-fa73-41f1-b4bd-bd352808fcec.webp"
-            alt=""
-          />
+          <Link to={"/"}>
+            <img
+              className="w-[100px]"
+              src="https://media.routine.vn/prod/media/f0c0d744-fa73-41f1-b4bd-bd352808fcec.webp"
+              alt=""
+            />
+          </Link>
         </div>
         <Menu
           theme="dark"
