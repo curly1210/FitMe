@@ -74,7 +74,7 @@ export const clientRoutes = [
             element: <Contact />,
           },
           {
-            element: <ProtectClient role="client" />,
+            element: <ProtectClient role="Customer" />,
             children: [
               {
                 // path: "address",

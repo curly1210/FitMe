@@ -16,7 +16,7 @@ import { useAuthen } from "../../../hooks/useAuthen";
 import ModalLogin from "../../../components/Modal/ModalLogin";
 import { useModal } from "../../../hooks/useModal";
 import { useSearchPanel } from "../../../hooks/useSearchPanel";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Badge, Dropdown, MenuProps } from "antd";
 import { useCart } from "../../../hooks/useCart";
 import { useList } from "@refinedev/core";
@@ -338,11 +338,17 @@ const HomePage = () => {
         ) : (
           <Slider className="h-dvh" ref={sliderRef} {...settings}>
             {responseBanners?.data.map((slide, index) => (
-              <div className="h-dvh" key={index}>
-                <div style={contentStyle}>
-                  <img src={slide?.url_image} className="object-cover" alt="" />
+              <Link to={slide?.direct_link}>
+                <div className="h-dvh" key={index}>
+                  <div style={contentStyle}>
+                    <img
+                      src={slide?.url_image}
+                      className="object-cover"
+                      alt=""
+                    />
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </Slider>
         )}
