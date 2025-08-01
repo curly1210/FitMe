@@ -336,7 +336,7 @@ class OrderController extends Controller
                 'discount' => $order->discount,
                 'total_amount' => $order->total_amount,
                 'status_payment' => $order->status_payment,
-                // 'status_order_id' => $order->status_order_id,
+                'status_order_id' => $order->status_order_id,
                 'status_name' => $order->statusOrder->name,
                 "created_at" => $order->created_at,
                 "order_code" => $order->orders_code,

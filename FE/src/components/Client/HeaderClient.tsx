@@ -13,6 +13,8 @@ import { useSearchPanel } from "../../hooks/useSearchPanel";
 import { Badge, Dropdown, MenuProps } from "antd";
 import { useCart } from "../../hooks/useCart";
 
+import { BsDoorOpen } from "react-icons/bs";
+
 const HeaderClient = () => {
   /* Start dont-delete */
 
@@ -26,6 +28,8 @@ const HeaderClient = () => {
     setIsOpenSearchPanel,
   } = useSearchPanel();
   const navigate = useNavigate();
+
+  console.log(user);
 
   const handleClickToCartPage = () => {
     if (!accessToken) {
@@ -73,6 +77,10 @@ const HeaderClient = () => {
     }
 
     if (key === "4") {
+      navigate("/admin");
+    }
+
+    if (key === "5") {
       logout();
     }
   };
@@ -181,8 +189,24 @@ const HeaderClient = () => {
         </div>
       ),
     },
+    ...(user?.role === "Admin"
+      ? [
+          {
+            key: "4",
+            label: (
+              <div className="text-base flex items-center gap-4 py-1">
+                <BsDoorOpen className="text-4xl" />
+                <div className="flex flex-col">
+                  <p className="font-bold">Truy cập trang quản trị</p>
+                  <span className="text-xs">Trang quản trị</span>
+                </div>
+              </div>
+            ),
+          },
+        ]
+      : []),
     {
-      key: "4",
+      key: "5",
       label: <div className="text-base font-bold py-1">Đăng xuất</div>,
     },
   ];

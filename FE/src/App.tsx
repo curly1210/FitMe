@@ -9,7 +9,7 @@ import AttachAxios from "./components/AttachAxios";
 import { PopupProvider } from "./context/PopupMessageProvider";
 import { API_URL } from "./utils/constant";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // const axiosInstance = axios.create({
 //   baseURL: "http://localhost:8000/api",
@@ -18,35 +18,35 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const dataProvider = simpleRestDataProvider(API_URL, axiosInstance);
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: true, // hoặc true tùy bạn
-      // staleTime: 1000 * 60 * 5,
-    },
-  },
-});
+// const queryClient = new QueryClient({
+//   defaultOptions: {
+//     queries: {
+//       refetchOnWindowFocus: true, // hoặc true tùy bạn
+//       // staleTime: 1000 * 60 * 5,
+//     },
+//   },
+// });
 
 function App() {
   return (
     <>
-      <QueryClientProvider client={queryClient}>
-        <Refine
-          dataProvider={dataProvider}
-          options={{
-            syncWithLocation: true,
-          }}
-        >
-          <PopupProvider>
-            <AuthProvider>
-              <AttachAxios />
-              <ModalProvider>
-                <Outlet />
-              </ModalProvider>
-            </AuthProvider>
-          </PopupProvider>
-        </Refine>
-      </QueryClientProvider>
+      {/* <QueryClientProvider client={queryClient}> */}
+      <Refine
+        dataProvider={dataProvider}
+        // options={{
+        //   syncWithLocation: true,
+        // }}
+      >
+        <PopupProvider>
+          <AuthProvider>
+            <AttachAxios />
+            <ModalProvider>
+              <Outlet />
+            </ModalProvider>
+          </AuthProvider>
+        </PopupProvider>
+      </Refine>
+      {/* </QueryClientProvider> */}
     </>
   );
 }

@@ -20,6 +20,7 @@ import { Link, useNavigate } from "react-router";
 import { Badge, Dropdown, MenuProps } from "antd";
 import { useCart } from "../../../hooks/useCart";
 import { useList } from "@refinedev/core";
+import { BsDoorOpen } from "react-icons/bs";
 // import HeaderClient from "../../../components/Client/HeaderClient";
 
 const contentStyle: React.CSSProperties = {
@@ -106,6 +107,10 @@ const HomePage = () => {
     }
 
     if (key === "4") {
+      navigate("/admin");
+    }
+
+    if (key === "5") {
       logout();
     }
   };
@@ -214,8 +219,24 @@ const HomePage = () => {
         </div>
       ),
     },
+    ...(user?.role === "Admin"
+      ? [
+          {
+            key: "4",
+            label: (
+              <div className="text-base flex items-center gap-4 py-1">
+                <BsDoorOpen className="text-4xl" />
+                <div className="flex flex-col">
+                  <p className="font-bold">Truy cập trang quản trị</p>
+                  <span className="text-xs">Trang quản trị</span>
+                </div>
+              </div>
+            ),
+          },
+        ]
+      : []),
     {
-      key: "4",
+      key: "5",
       label: <div className="text-base font-bold py-1">Đăng xuất</div>,
     },
   ];
