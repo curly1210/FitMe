@@ -10,7 +10,6 @@ import {
   Drawer,
   Form,
   Input,
-  InputNumber,
   notification,
   Select,
   Spin,
@@ -77,6 +76,7 @@ const DrawerEdit = ({
   });
 
   const productDetail: any = productDetailResponse?.data || [];
+  console.log(productDetail);
   const [form] = Form.useForm();
 
   function findCategoryPath(
@@ -127,7 +127,7 @@ const DrawerEdit = ({
       );
 
       setSelectedSizes(arraySelectedSize);
-      setSelectedSizesId(arraySelectedColor.map((size: any) => size.id));
+      setSelectedSizesId(arraySelectedSize.map((size: any) => size.id));
 
       const grouped: { [colorId: string]: UploadFile[] } = {};
       if (productDetail?.images) {
@@ -720,7 +720,14 @@ const DrawerEdit = ({
                       </td>
 
                       <td className="p-2">
-                        <InputNumber
+                        <Input
+                          type="number"
+                          value={variant?.price}
+                          onChange={(e) =>
+                            updatePrice(variant.id, Number(e.target.value) || 0)
+                          }
+                        />
+                        {/* <InputNumber
                           min="0"
                           value={variant?.price}
                           formatter={(value) =>
@@ -733,10 +740,20 @@ const DrawerEdit = ({
                             updatePrice(variant.id, Number(e.target.value) || 0)
                           }
                           className="w-24"
-                        />
+                        /> */}
                       </td>
                       <td className="p-2">
-                        <InputNumber
+                        <Input
+                          type="number"
+                          value={variant?.sale_price}
+                          onChange={(e) =>
+                            updateSalePrice(
+                              variant.id,
+                              Number(e.target.value) || 0
+                            )
+                          }
+                        />
+                        {/* <InputNumber
                           min="0"
                           value={variant?.sale_price}
                           formatter={(value) =>
@@ -752,7 +769,7 @@ const DrawerEdit = ({
                             )
                           }
                           className="w-24"
-                        />
+                        /> */}
                       </td>
                       {/* <td className="p-2">
                         <Input

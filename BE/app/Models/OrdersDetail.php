@@ -39,7 +39,7 @@ class OrdersDetail extends Model
      */
     public function productItem()
     {
-        return $this->belongsTo(ProductItem::class, 'product_item_id');
+        return $this->belongsTo(ProductItem::class, 'product_item_id')->withTrashed();
     }
     public function review()
     {

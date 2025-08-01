@@ -41,6 +41,13 @@ const Carts = () => {
   };
 
   useEffect(() => {
+    if (cart?.cartItems) {
+      const currentIds = cart.cartItems.map((item: any) => item.id);
+      setSelectedIds((prev) => prev.filter((id) => currentIds.includes(id)));
+    }
+  }, [cart?.cartItems]);
+
+  useEffect(() => {
     if (!hasInitialized && cart?.cartItems?.length > 0) {
       updateAllSelection(
         { values: { is_choose: true }, id: "" },

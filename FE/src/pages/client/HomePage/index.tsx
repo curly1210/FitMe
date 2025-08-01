@@ -314,7 +314,11 @@ const HomePage = () => {
                   </Dropdown>
                 )}
               </div>
-              <Badge count={cart?.totalItem ? cart?.totalItem : 0} showZero>
+              {/* <Badge count={cart?.totalItem ? cart?.totalItem : 0} showZero> */}
+              <Badge
+                count={!cart?.totalItem || !accessToken ? 0 : cart?.totalItem}
+                showZero
+              >
                 <ShoppingCartOutlined
                   onClick={handleClickToCartPage}
                   className="text-3xl cursor-pointer !text-white"

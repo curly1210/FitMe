@@ -769,7 +769,14 @@ const DrawerAdd = ({
                         />
                       </td>
                       <td className="p-2">
-                        <InputNumber
+                        <Input
+                          type="number"
+                          value={variant?.price}
+                          onChange={(e) =>
+                            updatePrice(variant.id, Number(e.target.value) || 0)
+                          }
+                        />
+                        {/* <InputNumber
                           // type="number"
                           min="0"
                           value={variant?.price}
@@ -783,10 +790,20 @@ const DrawerAdd = ({
                             value?.replace(/\$\s?|(,*)/g, "") || ""
                           }
                           className="w-24"
-                        />
+                        /> */}
                       </td>
                       <td className="p-2">
-                        <InputNumber
+                        <Input
+                          type="number"
+                          value={variant?.salePrice}
+                          onChange={(e) =>
+                            updateSalePrice(
+                              variant.id,
+                              Number(e.target.value) || 0
+                            )
+                          }
+                        />
+                        {/* <InputNumber
                           // type="number"
                           min="0"
                           value={variant?.salePrice}
@@ -803,22 +820,8 @@ const DrawerAdd = ({
                             value?.replace(/\$\s?|(,*)/g, "") || ""
                           }
                           className="w-24"
-                        />
+                        /> */}
                       </td>
-                      {/* <td className="p-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={variant?.percent}
-                          onChange={(e) =>
-                            updatePercent(
-                              variant.id,
-                              Number(e.target.value) || 0
-                            )
-                          }
-                          className="w-24"
-                        />
-                      </td> */}
                     </tr>
                   ))}
                 </tbody>
