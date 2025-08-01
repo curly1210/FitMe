@@ -43,6 +43,8 @@ const TrashProducts = () => {
       key: product?.id,
     })) || [];
 
+  console.log(productsDeleted);
+
   const options = useMemo(() => {
     if (!categories?.data) return [];
 
@@ -70,7 +72,7 @@ const TrashProducts = () => {
         },
       }
     );
-    console.log(id);
+    // console.log(id);
   };
 
   const handleSearchText = (value: any) => {

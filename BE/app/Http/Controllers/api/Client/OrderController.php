@@ -131,11 +131,10 @@ class OrderController extends Controller
             ));
         } elseif ($coupon->type === 'fixed') {
             $discount = min($coupon->value, $coupon->max_price_discount);
-        }
-        elseif($coupon->type === 'free_shipping') {
+        } elseif ($coupon->type === 'free_shipping') {
             $is_ship = 1;
             $discount = 0;
-        } ;
+        };
         // Loại bỏ mã đã áp dụng ra khỏi danh sách voucher còn lại
         $vouchers = $vouchers->filter(fn($v) => $v->id !== $coupon->id)->values();
 
@@ -291,7 +290,8 @@ class OrderController extends Controller
                         },
                         'productItem.product.productImages'
                     ]);
-                }
+                },
+                'statusOrder'
             ])->where('user_id', $user->id)
                 ->findOrFail($id);
 
@@ -327,6 +327,7 @@ class OrderController extends Controller
 
             // Định dạng response
             $response = [
+                'id' => $order->id,
                 'orderItems' => $orderItems,
                 'payment_method' => $order->payment_method,
                 'receiving_address' => $order->receiving_address,
@@ -335,7 +336,8 @@ class OrderController extends Controller
                 'discount' => $order->discount,
                 'total_amount' => $order->total_amount,
                 'status_payment' => $order->status_payment,
-                'status_order_id' => $order->status_order_id,
+                // 'status_order_id' => $order->status_order_id,
+                'status_name' => $order->statusOrder->name,
                 "created_at" => $order->created_at,
                 "order_code" => $order->orders_code,
                 "recipient_name" => $order->recipient_name,

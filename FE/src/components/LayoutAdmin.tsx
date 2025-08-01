@@ -6,7 +6,9 @@ import {
   PercentageOutlined,
   PictureOutlined,
   ProductOutlined,
+  ReadOutlined,
   ShoppingOutlined,
+  StarOutlined,
   UnorderedListOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -91,12 +93,12 @@ const itemsNavigate: MenuItem[] = [
   getItem(
     <Link to="/admin/posts">Quản lý tin tức</Link>,
     "10",
-    <UserOutlined />
+    <ReadOutlined />
   ),
   getItem(
     <Link to="/admin/reviews">Quản lý đánh giá</Link>,
     "15",
-    <UserOutlined />
+    <StarOutlined />
   ),
 ];
 

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class ProductItem extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductItemFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $fillable = [
         'price',
         'sale_price',
@@ -23,7 +23,7 @@ class ProductItem extends Model
     ];
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
     // Một product item có thể nằm trong nhiều cart item
     public function cartItems()
