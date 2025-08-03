@@ -382,7 +382,10 @@ class ProductController extends Controller
             DB::beginTransaction();
 
             $product->update(['is_active' => 0]);
-
+            $productItems = $product->productItems;
+            foreach ($productItems as $item) {
+                $item->delete();
+            }
             $product->delete();
 
             DB::commit();
