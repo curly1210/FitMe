@@ -19,7 +19,7 @@ return new class extends Migration
             $table->datetime('time_start');
             $table->datetime('time_end')->nullable();
             $table->unsignedInteger('min_price_order');
-            $table->unsignedInteger('max_price_discount');
+            $table->unsignedInteger('max_price_discount')->nullable();
             $table->integer('limit_use');
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
