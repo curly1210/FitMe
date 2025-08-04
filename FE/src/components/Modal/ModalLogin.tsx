@@ -27,7 +27,12 @@ const ModalLogin = () => {
         setAccessToken(response?.data?.data?.access_token);
         notify("success", "Đăng nhập", "Thành công");
         localStorage.setItem("persist", JSON.stringify(true));
-        // navi("/");
+        if (response?.data?.data?.user?.role === "Admin") {
+          navi("/admin");
+          closeModal();
+          return;
+        }
+        // console.log(response?.data?.data?.user);
         navi(location.pathname);
         closeModal();
         // openPopup(<ModalLogin />);

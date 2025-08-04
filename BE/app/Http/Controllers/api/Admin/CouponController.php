@@ -28,7 +28,7 @@ class CouponController extends Controller
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('name', 'like', "%{$keyword}%")->orWhere('code', 'like', "%{$keyword}%")
-                      ->orWhere('type', 'like', "%{$keyword}%");
+                        ->orWhere('type', 'like', "%{$keyword}%");
                 });
             }
         }
@@ -43,7 +43,7 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         try {
-            $validate = Validator::make($request->only(['name', 'type' ,'code', 'value', 'time_start', 'time_end', 'min_price_order', 'max_price_discount', 'limit_use']), [
+            $validate = Validator::make($request->only(['name', 'type', 'code', 'value', 'time_start', 'time_end', 'min_price_order', 'max_price_discount', 'limit_use']), [
                 'name' => 'required|string|max:50',
                 'code' => 'required|string|max:50|unique:coupons,code',
                 'type' => 'required|string|in:percentage,fixed', // Loại mã: phần trăm hoặc cố định
@@ -51,7 +51,7 @@ class CouponController extends Controller
                 'time_start' => 'required|date|after:now',
                 'time_end' => 'nullable|date|after:time_start',
                 'min_price_order' => 'required|integer|min:0',
-                'max_price_discount' => 'required|integer|min:0|lte:min_price_order',
+                'max_price_discount' => 'nullable|integer|min:0|lte:min_price_order',
                 'limit_use' => 'required|integer|min:0',
 
             ], [
@@ -86,6 +86,20 @@ class CouponController extends Controller
             if ($validate->fails()) {
                 return $this->error('Dữ liệu không hợp lệ', $validate->errors(), 422);
             }
+            switch ($request->type) {
+                case 'percentage':
+                    if (!$request->max_price_discount) {
+                        return $this->error('Nhập dữ liệu không hợp lệ', ['max_price_discount' => "Không được để trống"], 422);
+                    }
+                    break;
+                case 'fixed':
+                    if ($request->value >= $request->max_price_discount) {
+                        return $this->error('Nhập dữ liệu không hợp lệ', ["value" => "Giá trị giảm không được vượt quá giá trị tối thiểu áp mã"], 422);
+                    }
+                    break;
+                default:
+                    return $this->error('Loại mã không hợp lệ', ['type' => "loại biến thể là percentage và fixed"], 422);
+            }
             $coupon = Coupon::create([
                 'name' => $request->name,
                 'code' => $request->code,
@@ -94,7 +108,7 @@ class CouponController extends Controller
                 'time_start' => $request->time_start,
                 'time_end' => $request->time_end,
                 'min_price_order' => $request->min_price_order,
-                'max_price_discount' => $request->max_price_discount,
+                'max_price_discount' => $request->max_price_discount ?? null,
                 'limit_use' => $request->limit_use,
                 'is_active' => 1, // Mặc định là hoạt động
             ]);
@@ -116,7 +130,7 @@ class CouponController extends Controller
         try {
             $coupon = Coupon::findOrFail($id);
 
-            $validate = Validator::make($request->only(['name', 'type' ,'time_start', 'time_end', 'limit_use']), [
+            $validate = Validator::make($request->only(['name', 'type', 'time_start', 'time_end', 'limit_use']), [
                 'name' => 'required|string|max:50',
                 'type' => 'required|string|in:percentage,fixed',
                 'time_end' => 'nullable|date|after:time_start',

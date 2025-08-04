@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined } from "@ant-design/icons";
-import { useOne } from "@refinedev/core";
-import { Spin, Steps, Tag } from "antd";
+import { useOne, useUpdate } from "@refinedev/core";
+import { notification, Popconfirm, Spin, Steps, Tag } from "antd";
 import { Link, useParams } from "react-router";
 import { formatDate } from "../../../utils/dateUtils";
 import { formatCurrencyVND } from "../../../utils/currencyUtils";
@@ -19,6 +19,7 @@ const DetailOrder = () => {
     data: orderResponse,
     isLoading,
     error,
+    refetch,
   } = useOne({
     resource: "orders",
     id: id,
@@ -27,6 +28,28 @@ const DetailOrder = () => {
       retry: 1,
     },
   });
+
+  const { mutate } = useUpdate({
+    resource: "orders",
+    mutationOptions: {
+      onSuccess: (response) => {
+        refetch();
+        notification.success({
+          message: `${response?.data?.message}`,
+        });
+      },
+      onError: (error) => {
+        notification.error({ message: `${error?.response?.data?.message}` });
+      },
+    },
+  });
+
+  const onHandleChangeStatus = (orderId: number) => {
+    mutate({
+      id: orderId,
+      values: {},
+    });
+  };
 
   if (error) {
     if (error?.status === 404) {
@@ -41,7 +64,7 @@ const DetailOrder = () => {
 
   const order: any = orderResponse?.data || [];
 
-  console.log(order);
+  // console.log(order);
 
   // const description = "This is a description.";
 
@@ -94,10 +117,40 @@ const DetailOrder = () => {
             Đơn hàng #{order?.order_code}
           </h2>
 
-          <p className="font-bold mb-11">
+          <p className="font-bold mb-5">
             Giao hàng dự kiến: {formatDate(order?.created_at)} -{" "}
             {formatDate(order?.created_at, 3)}
           </p>
+
+          <div className="flex justify-end">
+            {(order.status_name == "Chờ xác nhận" ||
+              order.status_name == "Đang chuẩn bị hàng") && (
+              <Popconfirm
+                title="Cập nhật trạng thái"
+                onConfirm={() => onHandleChangeStatus(order.id)}
+                description="Bạn có chắc chắn muốn hủy đơn hàng không?"
+                okText="Có"
+                cancelText="Không"
+              >
+                <button className="text-white bg-black py-2 px-3 cursor-pointer mb-5">
+                  HỦY ĐƠN
+                </button>
+              </Popconfirm>
+            )}
+            {order.status_name == "Đã giao hàng" && (
+              <Popconfirm
+                title="Cập nhật trạng thái"
+                onConfirm={() => onHandleChangeStatus(order.id)}
+                description="Xác nhận nhận hàng thành công?"
+                okText="Có"
+                cancelText="Không"
+              >
+                <button className="text-white bg-black py-2 px-3 cursor-pointer mb-5">
+                  ĐÃ NHẬN HÀNG
+                </button>
+              </Popconfirm>
+            )}
+          </div>
 
           <div className="grid grid-cols-3 gap-x-4 mb-5">
             <div className="border border-gray-300 px-5 py-3">

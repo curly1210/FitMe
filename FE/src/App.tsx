@@ -9,6 +9,8 @@ import AttachAxios from "./components/AttachAxios";
 import { PopupProvider } from "./context/PopupMessageProvider";
 import { API_URL } from "./utils/constant";
 
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 // const axiosInstance = axios.create({
 //   baseURL: "http://localhost:8000/api",
 //   withCredentials: true,
@@ -16,10 +18,25 @@ import { API_URL } from "./utils/constant";
 
 const dataProvider = simpleRestDataProvider(API_URL, axiosInstance);
 
+// const queryClient = new QueryClient({
+//   defaultOptions: {
+//     queries: {
+//       refetchOnWindowFocus: true, // hoặc true tùy bạn
+//       // staleTime: 1000 * 60 * 5,
+//     },
+//   },
+// });
+
 function App() {
   return (
     <>
-      <Refine dataProvider={dataProvider}>
+      {/* <QueryClientProvider client={queryClient}> */}
+      <Refine
+        dataProvider={dataProvider}
+        // options={{
+        //   syncWithLocation: true,
+        // }}
+      >
         <PopupProvider>
           <AuthProvider>
             <AttachAxios />
@@ -29,6 +46,7 @@ function App() {
           </AuthProvider>
         </PopupProvider>
       </Refine>
+      {/* </QueryClientProvider> */}
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { Button } from "antd";
-
+import { Link } from "react-router";
 
 const CheckoutSuccess = () => {
   return (
@@ -16,16 +16,17 @@ const CheckoutSuccess = () => {
       </p>
 
       <div className="mt-6 space-x-3">
-   
+        <Link to={"/"}>
           <Button className="bg-black text-white hover:opacity-90 px-6 py-2 text-sm font-medium rounded">
             Tiếp tục mua sắm
           </Button>
-       
-        
+        </Link>
+
+        <Link to={"/account/order"}>
           <Button className="border border-gray-300 text-gray-700 px-6 py-2 text-sm font-medium rounded">
             Xem đơn hàng
           </Button>
-     
+        </Link>
       </div>
     </div>
   );
