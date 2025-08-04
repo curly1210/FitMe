@@ -105,8 +105,9 @@ Route::get('admin/statistics/reviews', [StatisticsController::class, 'reviewStat
 
 
 
-Route::post('/forgotpassword', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/forgotpassword-email', [ForgotPasswordController::class, 'sendResetLinkByEmail']);
 Route::post('/resetpassword', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('/forgotpassword-password', [ForgotPasswordController::class, 'sendResetLinkByPassword']);
 
 
 

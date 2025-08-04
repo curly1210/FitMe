@@ -2,23 +2,27 @@
 
 namespace App\Http\Controllers\Api\Client;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Models\PasswordReset;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Carbon;
 use App\Mail\ResetPasswordMail;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class ForgotPasswordController extends Controller
 {
 
-    public function sendResetLink(Request $request)
+    public function sendResetLinkByEmail(Request $request)
     {
         $request->validate([
             'email' => 'required|email'
+        ], [
+            'email.required' => 'Email là bắt buộc.',
+            'email.email' => 'Email không hợp lệ.',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -77,6 +81,41 @@ class ForgotPasswordController extends Controller
         $reset->save();
 
         return response()->json(['message' => 'Mật khẩu đã được cập nhật.']);
+    }
+
+    public function sendResetLinkByPassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+        ], [
+            'current_password.required' => 'Mật khẩu hiện tại là bắt buộc.',
+            'current_password.string' => 'Mật khẩu hiện tại phải là chuỗi.',
+        ]);
+
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Mật khẩu hiện tại không đúng.'], 401);
+        }
+
+        // Xóa các token cũ
+        PasswordReset::where('user_id', $user->id)->delete();
+
+        $token = Str::random(6);
+
+        PasswordReset::create([
+            'user_id' => $user->id,
+            'token' => hash('sha256', $token),
+            'created_at' => now(),
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        // Gửi mail
+        Mail::to($user->email)->send(new ResetPasswordMail($token));
+
+        return response()->json([
+            'message' => 'Đã gửi mã xác thực đến email của bạn. Vui lòng kiểm tra hộp thư.'
+        ]);
     }
 
 
