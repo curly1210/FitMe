@@ -418,7 +418,7 @@ const ProductDetail = () => {
               src={selectedImage || images[0]?.url}
               alt="main"
               loading="lazy"
-              className="w-full object-cover  h-[700px]"
+              className="w-full object-cover  h-[500px]"
             />
           </div>
         </div>

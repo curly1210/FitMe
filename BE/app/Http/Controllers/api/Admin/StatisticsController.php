@@ -324,8 +324,7 @@ class StatisticsController extends Controller
             // ],
         ]);
     }
-
-    public function orderByLocation(Request $request)
+public function orderByLocation(Request $request)
     {
         $from = $request->input('from');
         $to = $request->input('to');
@@ -349,12 +348,18 @@ class StatisticsController extends Controller
         foreach ($orders as $order) {
             $address = $order->receiving_address;
             $parts = explode(',', $address);
-            $city = trim(end($parts));
+            $lastPart = trim(end($parts));
+
+            $city = null;
+            if (preg_match('/(Tỉnh|Thành phố)\s+([^\d,]+)/u', $lastPart, $matches)) {
+                $city = trim($matches[2]);
+            } else {
+                $city = $lastPart;
+            }
 
             if (!isset($cityStats[$city])) {
                 $cityStats[$city] = [
                     'order_count' => 0,
-
                 ];
             }
 
