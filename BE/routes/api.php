@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\api\Client\ChatbotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\Admin\GhnController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\UserController;
@@ -10,26 +10,28 @@ use App\Http\Controllers\api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CouponController;
 use App\Http\Controllers\Api\Client\OrderController;
 use App\Http\Controllers\api\Client\VNPayController;
+use App\Http\Controllers\api\Client\WalletController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
+use App\Http\Controllers\api\Client\ChatbotController;
 use App\Http\Controllers\Api\Client\CommentController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
 use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
+use App\Http\Controllers\api\Client\ReplicateController;
 use App\Http\Controllers\api\Admin\ReviewReplyController;
+use App\Http\Controllers\api\Client\WithdrawRequestController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Client\UserController as ClientUserController;
 use App\Http\Controllers\api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
-use App\Http\Controllers\api\Admin\GhnController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-use App\Http\Controllers\api\Client\ReplicateController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -261,7 +263,17 @@ Route::get("/ghn/order-detail/{client_order_code}", [GhnController::class, "getO
 
 
 
+// wallet 
+Route::get("/wallet", [WalletController::class, "index"]); // lấy ra thông tin ví
+Route::get("/wallet/check", [WalletController::class, "checkWalletExist"]); // Kiểm tra tài khoản thiết lập ví hay chưa (phục vụ UI)
+Route::post("/wallet/create", [WalletController::class, "store"]);
+Route::post("/wallet/update", [WalletController::class, "update"]);
+Route::get("/wallet/transaction", [WalletController::class, "getWalletTransaction"]); // Lấy lịch sử ví  (hoàn/rút)
 
+// withdraw
+Route::get("/wallet/widraw-request", [WithdrawRequestController::class, "index"]); //lấy danh sách yêu cầu rút tiền
+Route::get("/wallet/widraw-request/check-exist", [WithdrawRequestController::class, "checkRequest"]); // Kiểm tra tồn tại yêu cầu
+Route::post("/wallet/widraw-request/create", [WithdrawRequestController::class, "store"]); //lấy danh sách yêu cầu rút tiền
 
 
 
