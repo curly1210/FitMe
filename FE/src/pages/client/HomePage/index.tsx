@@ -21,6 +21,7 @@ import { Badge, Dropdown, MenuProps } from "antd";
 import { useCart } from "../../../hooks/useCart";
 import { useList } from "@refinedev/core";
 import { BsDoorOpen } from "react-icons/bs";
+import logo_white from "../../../assets/images/logo_white.png";
 // import HeaderClient from "../../../components/Client/HeaderClient";
 
 const contentStyle: React.CSSProperties = {
@@ -275,8 +276,9 @@ const HomePage = () => {
           <div className="flex justify-between">
             <div>
               <img
-                width={156}
-                src="https://media.routine.vn/prod/media/f0c0d744-fa73-41f1-b4bd-bd352808fcec.webp"
+                width={150}
+                // src="https://media.routine.vn/prod/media/f0c0d744-fa73-41f1-b4bd-bd352808fcec.webp"
+                src={logo_white}
                 alt=""
                 className="block mb-2"
               />
