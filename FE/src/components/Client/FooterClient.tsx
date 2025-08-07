@@ -3,6 +3,7 @@ import {
   MailOutlined,
   PhoneOutlined,
 } from "@ant-design/icons";
+import logo_black from "../../assets/images/logo_black.png";
 
 const FooterClient = () => {
   return (
@@ -10,7 +11,8 @@ const FooterClient = () => {
       <div className="mb-6">
         <img
           width={138}
-          src="https://media.routine.vn/0x0/prod/media/52ba65a3-e085-45a6-bf5e-fb9c359abff7.webp"
+          src={logo_black}
+          // src="https://media.routine.vn/0x0/prod/media/52ba65a3-e085-45a6-bf5e-fb9c359abff7.webp"
           alt=""
         />
       </div>

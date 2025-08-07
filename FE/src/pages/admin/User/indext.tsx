@@ -57,7 +57,7 @@ const { data, isLoading } = useList({
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
+    { title: "Name", dataIndex: "name", key: "name",ellipsis: true  },
     { title: "Email", dataIndex: "email", key: "email" },
     { title: "Ngày sinh", dataIndex: "birthday", key: "birthday" },
     { title: "Số điện thoại", dataIndex: "phone", key: "phone" },

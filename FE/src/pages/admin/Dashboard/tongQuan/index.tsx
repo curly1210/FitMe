@@ -1,5 +1,5 @@
 import { useCustom } from "@refinedev/core";
-import { Card, Col, Row, Space, Spin } from "antd";
+import { Card, Col, Row, Select, Space, Spin } from "antd";
 import {
   ShoppingCartOutlined,
   ShoppingOutlined,
@@ -51,6 +51,22 @@ const Dashboard = () => {
     now.format("YYYY-MM-DD"),
   ]);
   const [statusOrderId, setStatusOrderId] = useState<number | undefined>();
+
+  const { Option } = Select;
+
+  const [chartType, setChartType] = useState("lastDays");
+  const renderChart = () => {
+    switch (chartType) {
+      case "lastDays":
+        return <ChartLastDays />;
+      case "month":
+        return <ChartByMonth />;
+      case "year":
+        return <ChartByYear />;
+      default:
+        return null;
+    }
+  };
 
   const { data, isLoading } = useCustom<OverviewResponse>({
     url: "admin/statistics/overview",
@@ -214,24 +230,26 @@ const Dashboard = () => {
 
           {/*Biểu đồ thống kê*/}
           <div style={{ padding: 24 }}>
-            <h1 className="font-bold text-lg">Thống kê doanh thu</h1>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12} lg={8}>
-                <Card title="Biểu đồ 7 / 14 / 30 ngày gần nhất">
-                  <ChartLastDays />
-                </Card>
-              </Col>
-              <Col xs={24} md={12} lg={8}>
-                <Card title="Biểu đồ theo tháng">
-                  <ChartByMonth />
-                </Card>
-              </Col>
-              <Col xs={24} md={12} lg={8}>
-                <Card title="Biểu đồ theo năm">
-                  <ChartByYear />
-                </Card>
-              </Col>
-            </Row>
+            <Card title="Thống kê doanh thu">
+              <Row gutter={[16, 16]} justify="space-between" align="middle">
+                <Col>
+                  <Select
+                    defaultValue="lastDays"
+                    value={chartType}
+                    onChange={(value) => setChartType(value)}
+                    style={{ width: 250 }}
+                  >
+                    <Option value="lastDays">
+                      Biểu đồ 7 / 14 / 30 ngày gần nhất
+                    </Option>
+                    <Option value="month">Biểu đồ theo tháng</Option>
+                    <Option value="year">Biểu đồ theo năm</Option>
+                  </Select>
+                </Col>
+              </Row>
+
+              <Card className="mt-4">{renderChart()}</Card>
+            </Card>
           </div>
           {/*Top sản phẩm và 10 đơn gần đây*/}
           <Row gutter={24} style={{ marginTop: 32 }}>
