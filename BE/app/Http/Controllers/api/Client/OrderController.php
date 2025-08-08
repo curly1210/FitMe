@@ -279,6 +279,10 @@ class OrderController extends Controller
 
     public function show($id)
     {
+        // return response()->json([
+        //     'message' => (int) $id,
+        // ], 403);
+
         try {
             $user = auth('api')->user();
 
@@ -293,7 +297,11 @@ class OrderController extends Controller
                 },
                 'statusOrder'
             ])->where('user_id', $user->id)
-                ->findOrFail($id);
+                ->where('orders_code', $id)->first();
+
+            // return response()->json([
+            //     'order' => $order,
+            // ], 403);
 
             if (!$order) {
                 return response()->json(['message' => 'Không có sản phẩm nào được chọn để tạo đơn hàng.'], 404);
@@ -301,27 +309,29 @@ class OrderController extends Controller
 
             // Định dạng order_items
             $orderItems = $order->orderDetails->map(function ($detail) {
-                $productItem = $detail->productItem;
-                $product = $productItem->product;
-                $color = $productItem->color;
-                $size = $productItem->size;
-                // Lấy ảnh đầu tiên khớp với color_id của productItem
-                $image = $product->productImages->where('color_id', $productItem->color_id)->first()?->url;
-                $image = $this->buildImageUrl($image) ?? null;
+                // $productItem = $detail->productItem;
+                // $product = $productItem->product;
+                // $color = $productItem->color;
+                // $size = $productItem->size;
+                // // Lấy ảnh đầu tiên khớp với color_id của productItem
+                // $image = $product->productImages->where('color_id', $productItem->color_id)->first()?->url;
+                // $image = $this->buildImageUrl($image) ?? null;
 
                 return [
                     'id' => $detail->id,
-                    'idProduct_item' => $productItem->id,
-                    'name' => $product->name,
+                    'idProduct_item' => $detail->product_item_id,
+                    'name' => $detail->name_product,
                     'quantity' => $detail->quantity,
                     'price' => $detail->price,
                     'sale_percent' => $detail->sale_percent,
                     'sale_price' => $detail->sale_price,
-                    'sku' => $productItem->sku,
-                    'image' => $image,
+                    // 'sku' => $detail->sku,
+                    'image' => $this->buildImageUrl($detail->image_product) ?? null,
                     'subtotal' => $detail->quantity * $detail->sale_price,
-                    'color' => $color->name ?? null,
-                    'size' => $size->name ?? null,
+                    'color' => $detail->color ?? null,
+                    'size' => $detail->size ?? null,
+
+
                 ];
             })->values();
 
