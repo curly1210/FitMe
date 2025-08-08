@@ -81,13 +81,17 @@ function ProductPage() {
 
   return (
     <>
-      <div className="font-sans bg-white min-h-screen">
+      {/* <div className="font-sans bg-white min-h-screen"> */}
+      <div className="font-sans bg-white ">
         <div className="max-w-[1280px] mx-auto">
           {/* Breadcrumb + Filter + Sort */}
           <div className="border border-gray-200 rounded-sm mb-4">
             <div className="flex justify-between items-center px-6 py-4 relative">
               <div className="text-sm text-gray-500 space-x-2">
-                <Link to="/" className="hover:underline cursor-pointer">Trang chủ</Link> /
+                <Link to="/" className="hover:underline cursor-pointer">
+                  Trang chủ
+                </Link>{" "}
+                /
                 <span className="hover:underline cursor-pointer">
                   {searchValue ? "Tìm kiếm" : "Thời trang"}
                 </span>{" "}
@@ -119,7 +123,9 @@ function ProductPage() {
                   </button>
                   {showSort && (
                     <div className="absolute right-0 z-10 mt-2 w-52 bg-white border border-gray-200 rounded-md shadow-lg">
-                      <div className="p-3 border-b font-semibold">Sắp xếp theo</div>
+                      <div className="p-3 border-b font-semibold">
+                        Sắp xếp theo
+                      </div>
                       <div
                         className="flex items-center px-4 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
@@ -175,13 +181,17 @@ function ProductPage() {
                       onClick={() =>
                         handleLikeProduct(
                           product.id,
-                          dataLike.some((item) => item?.product?.id === product.id)
+                          dataLike.some(
+                            (item) => item?.product?.id === product.id
+                          )
                         )
                       }
                     >
                       <HeartOutlined
                         className={`text-2xl group-hover/group-like:!text-red-400 ${
-                          dataLike.some((item) => item?.product?.id === product.id)
+                          dataLike.some(
+                            (item) => item?.product?.id === product.id
+                          )
                             ? "!text-red-400"
                             : ""
                         }`}

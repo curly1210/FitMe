@@ -58,6 +58,8 @@ const Order = () => {
 
   const orders = ordersResponse?.data?.data || [];
 
+  // console.log(orders);
+
   const total = ordersResponse?.data?.total ?? 0;
 
   const handlePageChange = (page: number, pageSize?: number) => {
@@ -235,7 +237,7 @@ const Order = () => {
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{order?.status_name}</p>
                   <div className="flex gap-3">
-                    <Link to={`/order/${order?.id}`}>
+                    <Link to={`/order/${order?.orders_code}`}>
                       <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
                         XEM CHI TIẾT
                       </button>

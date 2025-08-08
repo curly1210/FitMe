@@ -18,6 +18,7 @@ import Sider from "antd/es/layout/Sider";
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { useAuthen } from "../hooks/useAuthen";
+import logo_white from "../assets/images/logo_white.png";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -200,7 +201,8 @@ const LayoutAdmin = () => {
           <Link to={"/"}>
             <img
               className="w-[100px]"
-              src="https://media.routine.vn/prod/media/f0c0d744-fa73-41f1-b4bd-bd352808fcec.webp"
+              src={logo_white}
+              // src="https://media.routine.vn/prod/media/f0c0d744-fa73-41f1-b4bd-bd352808fcec.webp"
               alt=""
             />
           </Link>

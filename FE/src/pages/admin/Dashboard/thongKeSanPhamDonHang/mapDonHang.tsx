@@ -18,6 +18,8 @@ const normalizeProvinceName = (str: string) =>
     .replace(/đ/g, "d")
     .replace(/Đ/g, "D")
     .replace(/\s+/g, " ")
+    .replace("Tỉnh ", "") // Bỏ tiền tố "Tỉnh"
+    .replace("Thành phố ", "") // Bỏ tiền tố "Thành phố"
     .trim()
     .toLowerCase();
 
@@ -78,6 +80,10 @@ export const OrderLocationMap = () => {
 
   const [tooltipContent, setTooltipContent] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+
+console.log("Số đơn hàng theo tỉnh:", normalizedApiData);
+console.log("Raw API data:", data?.data?.data);
+console.log("Địa danh trên bản đồ:", geoNameMap.properties);
 
   if (isLoading) return <Spin />;
 

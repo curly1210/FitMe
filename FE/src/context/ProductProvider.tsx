@@ -34,7 +34,9 @@ interface ProductContextType {
   isLoadingProduct: boolean;
 }
 
-export const ProductContext = createContext<ProductContextType | undefined>(undefined);
+export const ProductContext = createContext<ProductContextType | undefined>(
+  undefined
+);
 
 export default function ProductProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -64,10 +66,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
     ? `${useApiUrl()}/category/${categorySlug}`
     : `${useApiUrl()}/search`;
 
-  const {
-    data: response,
-    isLoading,
-  } = useCustom({
+  const { data: response, isLoading } = useCustom({
     url: urlListProduct,
     method: "get",
     queryOptions: {
@@ -75,13 +74,18 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
       onSuccess: () => {
         setCallapiList(false);
       },
+      retry: 1,
     },
     config: {
       query: {
         page: currentPage,
-        color: fieldFilter.color.length ? `[${fieldFilter.color.join(",")}]` : "",
+        color: fieldFilter.color.length
+          ? `[${fieldFilter.color.join(",")}]`
+          : "",
         size: fieldFilter.size.length ? `[${fieldFilter.size.join(",")}]` : "",
-        price: fieldFilter.price.length ? `[${fieldFilter.price.join(",")}]` : "",
+        price: fieldFilter.price.length
+          ? `[${fieldFilter.price.join(",")}]`
+          : "",
         sort: sortData,
         keyword: searchValue || "",
       },
@@ -161,7 +165,10 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
     if (fieldFilter.size.length) {
       params.set("size", JSON.stringify(fieldFilter.size));
     }
-    navigate({ search: params.toString() }, { replace: true, state: { categoryData } });
+    navigate(
+      { search: params.toString() },
+      { replace: true, state: { categoryData } }
+    );
   };
 
   return (

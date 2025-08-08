@@ -10,7 +10,8 @@ import { BiDollar } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa6";
 import { BsBoxSeam } from "react-icons/bs";
 import { MdClose } from "react-icons/md";
-import NotFound from "../../../assets/images/404.png";
+// import NotFound from "../../../assets/images/404.png";
+import NotFound_404 from "../NotFound_404";
 
 const DetailOrder = () => {
   const { id } = useParams();
@@ -54,15 +55,14 @@ const DetailOrder = () => {
   if (error) {
     if (error?.status === 404) {
       return (
-        <div className="flex flex-col items-center gap-5">
-          <img src={NotFound} className="w-3xs " alt="" />
-          <p className="text-2xl">Không tìm thấy đơn hàng !</p>
-        </div>
+        <NotFound_404 message="Không tìm thấy đơn hàng" fullscreen={false} />
       );
     }
   }
 
   const order: any = orderResponse?.data || [];
+
+  // console.log(order);
 
   // console.log(order);
 
@@ -304,7 +304,15 @@ const DetailOrder = () => {
                           )}
                           {item?.sale_price.toLocaleString()}đ
                         </p>
+                        <p className="font-semibold">x{item?.quantity}</p>
                       </div>
+                      {item?.idProduct_item ? (
+                        ""
+                      ) : (
+                        <Tag className="!font-bold !w-fit" color={"red"}>
+                          Ngừng bán
+                        </Tag>
+                      )}
                     </div>
                   </div>
                   <div className="font-bold">

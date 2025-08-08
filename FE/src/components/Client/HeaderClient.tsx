@@ -14,6 +14,8 @@ import { Badge, Dropdown, MenuProps } from "antd";
 import { useCart } from "../../hooks/useCart";
 
 import { BsDoorOpen } from "react-icons/bs";
+import logo_F from "../../assets/images/logo_F.png";
+// import logo_black from "../../assets/images/logo_black.png";
 
 const HeaderClient = () => {
   /* Start dont-delete */
@@ -29,7 +31,7 @@ const HeaderClient = () => {
   } = useSearchPanel();
   const navigate = useNavigate();
 
-  console.log(user);
+  // console.log(user);
 
   const handleClickToCartPage = () => {
     if (!accessToken) {
@@ -245,8 +247,10 @@ const HeaderClient = () => {
         <div>
           <Link to={"/"}>
             <img
-              width={36}
-              src="https://media.routine.vn/1920x0/prod/media/a31071fa-22a1-440b-a6d2-776d07fe0419.webp"
+              width={30}
+              // src={logo_black}
+              src={logo_F}
+              // src="https://media.routine.vn/1920x0/prod/media/a31071fa-22a1-440b-a6d2-776d07fe0419.webp"
               alt=""
             />
           </Link>

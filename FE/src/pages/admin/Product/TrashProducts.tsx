@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCreate, useList } from "@refinedev/core";
+import { useCreate, useDelete, useList } from "@refinedev/core";
 import {
   Cascader,
   Input,
@@ -36,6 +36,7 @@ const TrashProducts = () => {
   });
 
   const { mutate: restoreProduct } = useCreate();
+  const { mutate: destroyProduct } = useDelete();
 
   const productsDeleted =
     productDeletedResponse?.data.map((product) => ({
@@ -73,6 +74,22 @@ const TrashProducts = () => {
       }
     );
     // console.log(id);
+  };
+
+  const handleDestroyProduct = (id: number) => {
+    destroyProduct(
+      { resource: `admin/products/destroy`, id: id },
+      {
+        onSuccess: (response) => {
+          console.log(response);
+          notification.success({ message: response?.data?.message });
+          refetch();
+        },
+        onError: (_err) => {
+          notification.error({ message: "Xóa sản phẩm thất bại" });
+        },
+      }
+    );
   };
 
   const handleSearchText = (value: any) => {
@@ -170,7 +187,7 @@ const TrashProducts = () => {
               cancelText="Không"
               title="Xóa sản phẩm"
               description="Bạn có muốn xóa vĩnh viễn sản phẩm này không?"
-              // onConfirm={() => mutate(product.id)}
+              onConfirm={() => handleDestroyProduct(product.id)}
             >
               <FaTrash className="text-2xl text-red-400 cursor-pointer" />
             </Popconfirm>

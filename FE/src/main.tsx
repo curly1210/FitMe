@@ -5,13 +5,14 @@ import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { clientRoutes } from "./routes/clientRoutes.tsx";
 import { adminRoutes } from "./routes/adminRoutes.tsx";
+import { notFoundRoute } from "./routes/notFoundRoute.tsx";
 
 // const router = createBrowserRouter([...clientRoutes, ...adminRoutes]);
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    children: [...clientRoutes, ...adminRoutes],
+    children: [...clientRoutes, ...adminRoutes, ...notFoundRoute],
   },
 ]);
 

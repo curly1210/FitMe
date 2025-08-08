@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedInteger('quantity');
             $table->unsignedInteger('price');
-            $table->foreignId('product_item_id')->constrained('product_items')->onDelete('cascade');
+            // $table->foreignId('product_item_id')->constrained('product_items')->onDelete('cascade');
+            $table->foreignId('product_item_id')
+                ->nullable() // bắt buộc
+                ->constrained('product_items')
+                ->onDelete('set null');
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->timestamps();
         });
@@ -26,7 +30,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('orders_detail', function (Blueprint $table) {
+        Schema::table('orders_detail', function (Blueprint $table) {
             $table->dropForeign(['product_item_id']);
             $table->dropForeign(['order_id']);
         });
