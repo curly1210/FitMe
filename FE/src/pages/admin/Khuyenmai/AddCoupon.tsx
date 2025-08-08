@@ -38,7 +38,8 @@ const AddCoupon: React.FC<AddCouponProps> = ({
           time_start: values.time_start?.format("YYYY-MM-DD HH:mm:ss"),
           time_end: values.time_end?.format("YYYY-MM-DD HH:mm:ss") || null,
           min_price_order: values.min_price_order,
-          max_price_discount: values.max_price_discount,
+          max_price_discount:
+            type === "percentage" ? values.max_price_discount : null,
           limit_use: values.limit_use,
           is_active: 1,
         },
@@ -112,9 +113,13 @@ const AddCoupon: React.FC<AddCouponProps> = ({
             options={[
               { label: "Phần trăm (%)", value: "percentage" },
               { label: "Số tiền (VND)", value: "fixed" },
-             
             ]}
-            onChange={(val) => setType(val)}
+            onChange={(val) => {
+              setType(val);
+              if (val === "fixed") {
+                form.setFieldValue("max_price_discount", null);
+              }
+            }}
           />
         </Form.Item>
 
@@ -171,12 +176,17 @@ const AddCoupon: React.FC<AddCouponProps> = ({
         <Form.Item
           label="Giảm giá tối đa (VND)"
           name="max_price_discount"
-          rules={[{ required: true, message: "Vui lòng nhập số tiền tối đa!" }]}
+          rules={
+            type === "percentage"
+              ? [{ required: true, message: "Vui lòng nhập số tiền tối đa!" }]
+              : []
+          }
         >
           <InputNumber
             style={{ width: "100%" }}
             min={0}
             placeholder="Nhập số tiền tối đa (VND)"
+            disabled={type === "fixed"}
           />
         </Form.Item>
 
