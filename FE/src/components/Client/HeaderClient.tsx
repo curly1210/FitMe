@@ -31,7 +31,7 @@ const HeaderClient = () => {
   } = useSearchPanel();
   const navigate = useNavigate();
 
-  console.log(user);
+  // console.log(user);
 
   const handleClickToCartPage = () => {
     if (!accessToken) {
