@@ -79,11 +79,14 @@ class ReviewController extends Controller
     public function getProductsNeedReview(Request $request)
     {
         try {
+            // return response()->json($request->query('order_id'));
             $order = Order::with(['orderDetails.productItem.product'])
                 ->where('id', $request->query('order_id'))
                 ->where('status_order_id', 6)
                 // ->where('success_at', '>=', Carbon::now()->subDays(7))
                 ->first();
+            // return response()->json($order);
+
             if (!$order || !$order->orderDetails || $order->orderDetails->isEmpty()) {
                 return $this->error("Không tìm thấy đơn hàng hoặc đơn hàng không có sản phẩm", [], 404);
             }
