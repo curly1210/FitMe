@@ -72,17 +72,25 @@ class ReviewController extends Controller
     }
     public function index(Request $request)
     {
-        $query =  Product::with('productItems', 'productImages')->withCount('reviews')
+        $query =  Product::with([
+            'productItems' => function ($q) {
+                $q->withTrashed();
+            },
+            'productImages'
+
+        ])->withCount('reviews')
             ->withAvg('reviews', 'rate')->withMax('reviews', 'created_at')
             ->orderByDesc('reviews_max_created_at');
 
         $perPage = $request->input('per_page', 10);
+
         if ($request->search) {
             $query->where("name", 'like', '%' . $request->search . '%');
         }
         if ($request->category) {
             $query->where("category_id", $request->category);
         }
+
         if ($request->rate) {
             #low rate<3
             #high rate>=3
@@ -98,7 +106,6 @@ class ReviewController extends Controller
             $query->havingNotNull('reviews_avg_rate');
         }
         $data = $query->paginate($perPage);
-        // return response()->json($data);
         return AdminReviewResource::collection($data);
     }
 

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id');
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
+            $table->softDeletes();
 
             // Khóa ngoại
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
