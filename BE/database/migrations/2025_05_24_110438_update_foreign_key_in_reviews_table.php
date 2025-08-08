@@ -18,11 +18,11 @@ return new class extends Migration {
             $table->dropColumn('product_id');
             $table->dropColumn('order_id');
 
-            $table->unsignedBigInteger('product_item_id');
+            $table->unsignedBigInteger('product_item_id')->nullable();
             $table->unsignedBigInteger('order_detail_id');
 
 
-            $table->foreign('product_item_id')->references('id')->on('product_items')->onDelete('cascade');
+            $table->foreign('product_item_id')->references('id')->on('product_items')->onDelete('set null');
             $table->foreign('order_detail_id')->references('id')->on('orders_detail')->onDelete('cascade');
         });
     }

@@ -454,7 +454,10 @@ class ProductController extends Controller
 
             // Khôi phục sản phẩm
             $product->restore();
-
+            $productItems = $product->productItems()->withTrashed()->get();
+            foreach ($productItems as $item) {
+                $item->restore();
+            }
             DB::commit();
 
             return $this->success(null, 'Sản phẩm đã được khôi phục thành công.', 200);
@@ -472,6 +475,10 @@ class ProductController extends Controller
                 return $this->error('Sản phẩm không tồn tại hoặc đã bị xóa.', null, 404);
             }
             DB::beginTransaction();
+            $productItems = $product->productItems()->withTrashed()->get();
+            foreach ($productItems as $item) {
+                $item->forceDelete();
+            }
             $product->forceDelete();
             DB::commit();
 
