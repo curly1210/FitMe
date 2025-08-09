@@ -144,6 +144,8 @@ const DrawerAdd = ({
 
     const formDataRequest = new FormData();
 
+    console.log(values);
+
     formDataRequest.append("name", values.name);
     formDataRequest.append(
       "category_id",
@@ -151,6 +153,7 @@ const DrawerAdd = ({
     );
     formDataRequest.append("short_description", values.description);
     formDataRequest.append("description", values.long_description);
+    formDataRequest.append("is_active", values.status);
     // formDataRequest.append("variants", formData.variants);
     // formDataRequest.append("images", formData.images);
 
@@ -175,6 +178,10 @@ const DrawerAdd = ({
       // if (image.file?.originFileObj) {
       // }
     });
+
+    for (const [key, value] of formDataRequest.entries()) {
+      console.log(key, value);
+    }
 
     createProduct(
       {
@@ -430,7 +437,7 @@ const DrawerAdd = ({
             gia_khuyen_mai: 0,
             gia_thuong: 0,
             percent: 0,
-            status: "1",
+            status: 1,
           }}
           form={form}
           onFinish={onFinish}
@@ -472,10 +479,10 @@ const DrawerAdd = ({
               rules={[{ required: true }]}
             >
               <Select
-                defaultValue={"1"}
+                defaultValue={1}
                 options={[
-                  { value: "1", label: "Hiển thị" },
-                  { value: "0", label: "Ẩn" },
+                  { value: 1, label: "Hiển thị" },
+                  { value: 0, label: "Ẩn" },
                 ]}
               />
             </Form.Item>
