@@ -76,7 +76,7 @@ const DrawerEdit = ({
   });
 
   const productDetail: any = productDetailResponse?.data || [];
-  console.log(productDetail);
+  // console.log(productDetail);
   const [form] = Form.useForm();
 
   function findCategoryPath(
@@ -201,6 +201,7 @@ const DrawerEdit = ({
     );
     formDataRequest.append("short_description", values.description);
     formDataRequest.append("description", values.long_description);
+    formDataRequest.append("is_active", values.status);
     // formDataRequest.append("variants", formData.variants);
     // formDataRequest.append("images", formData.images);
 

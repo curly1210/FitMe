@@ -16,7 +16,7 @@ import { Breadcrumb, Dropdown, Layout, Menu, MenuProps, theme } from "antd";
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import { useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Outlet, useLocation } from "react-router";
 import { useAuthen } from "../hooks/useAuthen";
 import logo_white from "../assets/images/logo_white.png";
 
@@ -160,7 +160,7 @@ const LayoutAdmin = () => {
 
   const { logout } = useAuthen();
 
-  const navi = useNavigate();
+  // const navi = useNavigate();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -171,10 +171,10 @@ const LayoutAdmin = () => {
       logout();
     }
 
-    if (key === "2") {
-      navi("/");
-      // logout();
-    }
+    // if (key === "2") {
+    //   navi("/");
+    //   // logout();
+    // }
   };
 
   const items: MenuProps["items"] = [
@@ -182,10 +182,10 @@ const LayoutAdmin = () => {
       key: "1",
       label: <div className="text-base font-bold py-1">Đăng xuất</div>,
     },
-    {
-      key: "2",
-      label: <div className="text-base font-bold py-1">Quay về trang chủ</div>,
-    },
+    // {
+    //   key: "2",
+    //   label: <div className="text-base font-bold py-1">Quay về trang chủ</div>,
+    // },
   ];
 
   return (

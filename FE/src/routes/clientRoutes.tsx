@@ -22,19 +22,24 @@ import PostDetail from "../pages/client/Tintuc";
 import ListPost from "../pages/client/Tintuc/ListPost";
 import TryClothes from "../pages/client/TryClothes";
 import { ChatboxProvider } from "../context/ChatboxProvider";
+import ProtectRole from "../components/ProtectRole";
+
 import ModalChangePass from "../components/Modal/ModalChangePassword";
+
 
 export const clientRoutes = [
   {
     path: "/",
     element: (
-      <SearchPanelProvider>
-        <ChatboxProvider>
-          <CartProvider>
-            <Outlet />
-          </CartProvider>
-        </ChatboxProvider>
-      </SearchPanelProvider>
+      <ProtectRole role="Customer">
+        <SearchPanelProvider>
+          <ChatboxProvider>
+            <CartProvider>
+              <Outlet />
+            </CartProvider>
+          </ChatboxProvider>
+        </SearchPanelProvider>
+      </ProtectRole>
     ),
     children: [
       {
