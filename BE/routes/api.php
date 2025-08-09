@@ -33,7 +33,7 @@ use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
 
-use App\Http\Controllers\api\Client\ReplicateController;
+
 use App\Http\Controllers\Api\Client\ForgotPasswordController;
 
 
