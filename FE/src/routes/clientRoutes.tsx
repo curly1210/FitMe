@@ -22,6 +22,7 @@ import PostDetail from "../pages/client/Tintuc";
 import ListPost from "../pages/client/Tintuc/ListPost";
 import TryClothes from "../pages/client/TryClothes";
 import { ChatboxProvider } from "../context/ChatboxProvider";
+import ModalChangePass from "../components/Modal/ModalChangePassword";
 
 export const clientRoutes = [
   {
@@ -45,6 +46,10 @@ export const clientRoutes = [
         path: "/",
         element: <LayoutClient />,
         children: [
+          {
+            path: "change-password",
+            element: <ModalChangePass />,
+          },
           {
             path: "contact",
             element: <Contact />,
@@ -73,6 +78,8 @@ export const clientRoutes = [
             path: "contact",
             element: <Contact />,
           },
+
+  
           {
             element: <ProtectClient role="Customer" />,
             children: [

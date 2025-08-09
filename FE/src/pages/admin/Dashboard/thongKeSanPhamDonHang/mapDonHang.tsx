@@ -96,7 +96,7 @@ console.log("Địa danh trên bản đồ:", geoNameMap.properties);
         <Col>
           <Space>
             <RangePicker
-              allowClear={false}
+              allowClear={true}
               value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
               onChange={(dates) => {
                 if (dates) {

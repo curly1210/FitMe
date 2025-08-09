@@ -41,7 +41,7 @@ class ForgotPasswordController extends Controller
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        $resetUrl = 'http://127.0.0.1:8000/api/password/verify?token=' . $rawToken;
+        $resetUrl = 'http://localhost:5173/change-password?token=' . $rawToken ;
          // thay đổi đường dẫn từ ? đổ về trước
         Mail::to($user->email)->send(new ResetPasswordMail($resetUrl));
 
