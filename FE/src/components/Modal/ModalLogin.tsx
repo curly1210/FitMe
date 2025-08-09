@@ -9,6 +9,8 @@ import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../hooks/useAuthen";
 import { useLocation, useNavigate } from "react-router";
 import { usePopupMessage } from "../../hooks/usePopupMessage";
+import ModalChagenPass from "./ModalForgotPassword";
+import ModalForgotPass from "./ModalForgotPassword";
 
 const ModalLogin = () => {
   const { openModal, closeModal } = useModal();
@@ -106,7 +108,11 @@ const ModalLogin = () => {
             </Form.Item>
 
             <p className="text-right font-semibold underline my-4">
-              Quên mật khẩu
+              <span
+               onClick={() => openModal(<ModalForgotPass />)}>
+                Quên mật khẩu
+
+              </span>
             </p>
             <Button
               loading={isLoading}

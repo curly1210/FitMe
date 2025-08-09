@@ -18,14 +18,15 @@ return new class extends Migration
             // $table->string('updated_content', 200)->nullable();
             $table->tinyInteger('is_update')->default(0); // Mặc định là chưa được cập nhật
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_id')->nullable();
             $table->unsignedBigInteger('order_id');
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
+            $table->softDeletes();
 
             // Khóa ngoại
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
         });
     }

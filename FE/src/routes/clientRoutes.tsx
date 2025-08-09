@@ -24,6 +24,9 @@ import TryClothes from "../pages/client/TryClothes";
 import { ChatboxProvider } from "../context/ChatboxProvider";
 import ProtectRole from "../components/ProtectRole";
 
+import ModalChangePass from "../components/Modal/ModalChangePassword";
+
+
 export const clientRoutes = [
   {
     path: "/",
@@ -48,6 +51,10 @@ export const clientRoutes = [
         path: "/",
         element: <LayoutClient />,
         children: [
+          {
+            path: "change-password",
+            element: <ModalChangePass />,
+          },
           {
             path: "contact",
             element: <Contact />,
@@ -76,6 +83,8 @@ export const clientRoutes = [
             path: "contact",
             element: <Contact />,
           },
+
+  
           {
             element: <ProtectClient role="Customer" />,
             children: [

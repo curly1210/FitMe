@@ -389,39 +389,42 @@ const ProductDetail = () => {
         </div>
       ))} */}
       </div>
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 flex gap-4">
-          {/* Ảnh nhỏ kéo dọc, max chiều cao fix */}
-          <div className="flex flex-col gap-2 w-20 max-h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-            {images.map((img) => (
-              <div
-                key={img.id}
-                className={`w-[80px] h-[80px]  overflow-hidden border  cursor-pointer    ${
-                  selectedImage === img.url
-                    ? " border-black"
-                    : " border-gray-300"
-                }`}
-              >
-                <img
-                  src={img.url}
-                  alt="thumb"
-                  loading="lazy"
-                  onClick={() => setSelectedImage(img.url)}
-                  className={`w-full h-full object-cover  duration-200 hover:scale-110 `}
-                />
-              </div>
-            ))}
-          </div>
-          {/* Ảnh lớn */}
-          <div className="flex-1">
-            <img
-              src={selectedImage || images[0]?.url}
-              alt="main"
-              loading="lazy"
-              className="w-full object-cover  h-[500px]"
-            />
-          </div>
+      <div className="grid grid-cols-2 gap-6">
+
+        {/* Cột trái: ảnh nhỏ + ảnh to */}
+  <div className="flex gap-4">
+    {/* Ảnh nhỏ kéo dọc */}
+    <div className="flex flex-col gap-2 w-20 max-h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+      {images.map((img) => (
+        <div
+          key={img.id}
+          className={`w-[80px] h-[80px] overflow-hidden border cursor-pointer ${
+            selectedImage === img.url
+              ? "border-black"
+              : "border-gray-300"
+          }`}
+        >
+          <img
+            src={img.url}
+            alt="thumb"
+            loading="lazy"
+            onClick={() => setSelectedImage(img.url)}
+            className="w-full h-full object-cover duration-200 hover:scale-110"
+          />
         </div>
+      ))}
+    </div>
+
+    {/* Ảnh to */}
+    <div className="flex-1">
+      <img
+        src={selectedImage || images[0]?.url}
+        alt="main"
+        loading="lazy"
+        className="w-full object-contain h-[500px]"
+      />
+    </div>
+  </div>
 
         <div className="col-span-1 border border-gray-200 rounded-md p-4 space-y-4 self-start">
           <div className="">
@@ -551,6 +554,7 @@ const ProductDetail = () => {
             </Button>
           </Tooltip>
         </div>
+
       </div>
 
       <div>

@@ -102,7 +102,7 @@ const TopProducts = () => {
           <RangePicker
             value={range}
             onChange={(val: any) => val && setRange(val)}
-            allowClear={false}
+            allowClear={true}
           />
         </Space>
 
