@@ -135,7 +135,7 @@ class WalletController extends Controller
             return $this->error('Tài khoản chưa thiết lập ví', [], 404);
         }
         $walletId = $user->wallet->id;
-        $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('desc')->paginate(8);
+        $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
         if ($transactions->isEmpty()) {
             return response()->json(['data' => [], 'message' => 'Lịch sử ví trống'], 200);
         }

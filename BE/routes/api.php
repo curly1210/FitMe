@@ -22,7 +22,9 @@ use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
 use App\Http\Controllers\api\Client\ReplicateController;
 use App\Http\Controllers\api\Admin\ReviewReplyController;
-use App\Http\Controllers\api\Client\WithdrawRequestController;
+use App\Http\Controllers\api\Client\WithdrawRequestController as ClientWithdrawRequestController;
+use App\Http\Controllers\api\Admin\WithdrawRequestController as AdminWithdrawRequestController;
+
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Client\UserController as ClientUserController;
@@ -279,11 +281,16 @@ Route::post("/wallet/update", [WalletController::class, "update"]);
 Route::get("/wallet/transaction", [WalletController::class, "getWalletTransaction"]); // Lấy lịch sử ví  (hoàn/rút)
 
 // withdraw
-Route::get("/wallet/widraw-request", [WithdrawRequestController::class, "index"]); //lấy danh sách yêu cầu rút tiền
-Route::get("/wallet/widraw-request/check-exist", [WithdrawRequestController::class, "checkRequest"]); // Kiểm tra tồn tại yêu cầu
-Route::post("/wallet/widraw-request/create", [WithdrawRequestController::class, "store"]); //lấy danh sách yêu cầu rút tiền
+Route::get("/wallet/widraw-request", [ClientWithdrawRequestController::class, "index"]); //lấy danh sách yêu cầu rút tiền
+Route::get("/wallet/widraw-request/check-exist", [ClientWithdrawRequestController::class, "checkRequest"]); // Kiểm tra tồn tại yêu cầu
+Route::post("/wallet/widraw-request/create", [ClientWithdrawRequestController::class, "store"]); //lấy danh sách yêu cầu rút tiền
 
-
+Route::prefix('admin')->group(function () {
+    Route::get('/wallet/widraw-request', [AdminWithdrawRequestController::class, 'index']);
+    Route::post('/wallet/widraw-request/accept', [AdminWithdrawRequestController::class, 'acceptRequest']);
+    Route::post('/wallet/widraw-request/reject', [AdminWithdrawRequestController::class, 'rejectRequest']);
+    Route::get('/wallet/widraw-request/{id}', [AdminWithdrawRequestController::class, 'show'])->whereNumber('id');
+});
 
 
 
