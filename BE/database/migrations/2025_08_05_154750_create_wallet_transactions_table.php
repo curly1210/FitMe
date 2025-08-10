@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('wallet_id');
             $table->unsignedBigInteger('amount');
             $table->enum('type', ['refund', 'withdraw']);
-            $table->string('bill_url');
+            $table->string('bill_url')->nullable();
             $table->foreign('wallet_id')->references('id')->on('wallets')->onDelete('cascade');
 
             $table->timestamps();

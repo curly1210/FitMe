@@ -20,7 +20,7 @@ class WithdrawRequestController extends Controller
             return $this->error('Tài khoản chưa thiết lập ví', [], 404);
         }
         $walletId = $user->wallet->id;
-        $withdrawRequests = WithdrawRequest::where('wallet_id', $walletId)->orderBy('desc')->paginate(8);
+        $withdrawRequests = WithdrawRequest::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
         if ($withdrawRequests->isEmpty()) {
             return response()->json(['data' => [], 'message' => 'Chưa có yêu cầu nào'], 200);
         }
