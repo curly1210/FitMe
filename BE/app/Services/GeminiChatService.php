@@ -55,10 +55,9 @@ Hướng dẫn:
 2. Phong cách: thân thiện, chuyên nghiệp.
 3. Ngắn gọn (2-3 câu) nhưng đầy đủ ý.
 4. Khi khách hỏi về sản phẩm, sử dụng dữ liệu dưới đây.
-5. Nếu khách hỏi size/màu, trả lời dựa trên dữ liệu thực tế.
-6. Không lặp lại lời chào trong nhiều lần trả lời.
-7. Có thể gửi link ảnh nếu cần.
-8. Dữ liệu sản phẩm:
+5. Nếu khách hỏi size/màu, trả lời chính xác dựa trên dữ liệu sản phẩm dưới đây.
+6. Chỉ chào khách hàng một lần duy nhất trong cuộc hội thoại.
+7. Dữ liệu sản phẩm:
 {$productsData->toJson(JSON_UNESCAPED_UNICODE)}
 EOD;
 
