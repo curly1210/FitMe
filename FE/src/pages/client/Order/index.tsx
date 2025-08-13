@@ -272,7 +272,7 @@ const Order = () => {
                       >
                         <Button
                           loading={isPendingUpdateStatus}
-                          className="text-white bg-black py-2 px-3 cursor-pointer"
+                          className="!text-white !bg-black !border-black !py-5 !px-3 !cursor-pointer"
                         >
                           ĐÃ NHẬN HÀNG
                         </Button>

@@ -95,13 +95,10 @@ class OrderStatusNotification extends Notification implements ShouldBroadcast
     public function broadcastOn()
     {
         // $notifiable là instance của User đang nhận
-        Log::info("Kiểm tra Admin: userId={$this->isAdmin}");
         if ($this->isAdmin === 1) {
             // kênh riêng cho admin
-            Log::info("Notification dành cho Admin: userId={$this->userId}");
             return new PrivateChannel('admin.notifications');
         }
-        Log::info("Notification dành cho user: userId={$this->userId}");
         return new PrivateChannel('App.Models.User.' . $this->userId);
         // return new PrivateChannel('App.Models.User.' . $this->userId);
     }
