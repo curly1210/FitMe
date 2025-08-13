@@ -2,28 +2,36 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Log;
 
-class OrderStatusNotification extends Notification
+class OrderStatusNotification extends Notification implements ShouldBroadcast
 {
     use Queueable;
 
     public $orderId;
     public $status;
     public $message;
+    public $userId;
+    public $isAdmin = 0;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(int $orderId, int $status, string $message)
+    public function __construct(int $userId, string $orderId, int $status, string $message, int $isAdmin = 0)
     {
+        $this->userId = $userId;
         $this->orderId = $orderId;
         $this->status  = $status;
         $this->message = $message;
+        $this->isAdmin = $isAdmin; // 1 nếu là admin, 0 nếu là user
     }
 
     /**
@@ -64,9 +72,11 @@ class OrderStatusNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
+            'user_id' => $this->userId,
             'order_id' => $this->orderId,
             'status'   => $this->status,
             'message'  => $this->message,
+            'icon' => '📦'
         ];
     }
 
@@ -74,9 +84,37 @@ class OrderStatusNotification extends Notification
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
+            'user_id' => $this->userId,
             'order_id' => $this->orderId,
             'status'   => $this->status,
             'message'  => $this->message,
+            'icon' => '📦'
         ]);
     }
+
+    public function broadcastOn()
+    {
+        // $notifiable là instance của User đang nhận
+        Log::info("Kiểm tra Admin: userId={$this->isAdmin}");
+        if ($this->isAdmin === 1) {
+            // kênh riêng cho admin
+            Log::info("Notification dành cho Admin: userId={$this->userId}");
+            return new PrivateChannel('admin.notifications');
+        }
+        Log::info("Notification dành cho user: userId={$this->userId}");
+        return new PrivateChannel('App.Models.User.' . $this->userId);
+        // return new PrivateChannel('App.Models.User.' . $this->userId);
+    }
+
+    public function broadcastAs()
+    {
+        return 'order.updated';
+    }
+
+    // protected function isAdmin($userId)
+    // {
+    //     // $user = \App\Models\User::find($userId);
+    //     $user = User::find($userId);
+    //     return $user && $user->role === 'Admin';
+    // }
 }

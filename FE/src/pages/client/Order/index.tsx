@@ -3,6 +3,7 @@ import { SwapRightOutlined } from "@ant-design/icons";
 import { useCustom, useUpdate } from "@refinedev/core";
 
 import {
+  Button,
   ConfigProvider,
   DatePicker,
   Input,
@@ -49,9 +50,6 @@ const Order = () => {
         date_to: toDate?.format("YYYY-MM-DD"),
       },
     },
-    // queryOptions: {
-    //   keepPreviousData: true, // không nháy dữ liệu khi load lại
-    // },
   });
 
   // console.log("ngay bat dau:", fromDate);
@@ -71,7 +69,7 @@ const Order = () => {
     setSearchText(value || undefined);
   };
 
-  const { mutate } = useUpdate({
+  const { mutate, isPending: isPendingUpdateStatus } = useUpdate({
     resource: "orders",
     mutationOptions: {
       onSuccess: (response) => {
@@ -238,9 +236,12 @@ const Order = () => {
                   <p className="font-semibold">{order?.status_name}</p>
                   <div className="flex gap-3">
                     <Link to={`/order/${order?.orders_code}`}>
-                      <button className="border-2 py-2 px-3 font-semibold cursor-pointer">
+                      {/* <button className="!border-2 !py-2 !px-3 !font-semibold !cursor-pointer">
                         XEM CHI TIẾT
-                      </button>
+                      </button> */}
+                      <Button className="!border-2 !py-5 !px-3 !font-semibold !text-black !border-black !cursor-pointer">
+                        XEM CHI TIẾT
+                      </Button>
                     </Link>
                     <RenderReviewButton order={order} />
 
@@ -253,9 +254,12 @@ const Order = () => {
                         okText="Có"
                         cancelText="Không"
                       >
-                        <button className="text-white bg-black py-2 px-3 cursor-pointer">
+                        <Button
+                          loading={isPendingUpdateStatus}
+                          className="!text-white !bg-black !border-black !py-5 !px-3 !cursor-pointer"
+                        >
                           HỦY ĐƠN
-                        </button>
+                        </Button>
                       </Popconfirm>
                     )}
                     {order.status_name == "Đã giao hàng" && (
@@ -266,9 +270,12 @@ const Order = () => {
                         okText="Có"
                         cancelText="Không"
                       >
-                        <button className="text-white bg-black py-2 px-3 cursor-pointer">
+                        <Button
+                          loading={isPendingUpdateStatus}
+                          className="text-white bg-black py-2 px-3 cursor-pointer"
+                        >
                           ĐÃ NHẬN HÀNG
-                        </button>
+                        </Button>
                       </Popconfirm>
                     )}
                   </div>

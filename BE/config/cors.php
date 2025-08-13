@@ -3,7 +3,7 @@
 return [
 
   // 'paths' => ['api/*'],
-  'paths' => ['api/*', 'chatbot', 'sanctum/csrf-cookie'], // ← thêm 'chatbot'
+  'paths' => ['api/*', 'chatbot', 'sanctum/csrf-cookie', 'broadcasting/auth'], // ← thêm 'chatbot'
 
   'allowed_methods' => ['*'],
 

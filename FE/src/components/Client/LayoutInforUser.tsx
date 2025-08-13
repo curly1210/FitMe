@@ -14,8 +14,10 @@ const LayoutInforUser = () => {
     pageTitle = "Đơn hàng";
   } else if (path.includes("user-info")) {
     pageTitle = "Thông tin tài khoản";
-  } else {
+  } else if (path.includes("change-password")) {
     pageTitle = "Đổi mật khẩu";
+  } else if (path.includes("notifications")) {
+    pageTitle = "Thông báo";
   }
   return (
     <div>
@@ -67,6 +69,14 @@ const LayoutInforUser = () => {
             to={"/account/change-password"}
           >
             Đổi mật khẩu
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              isActive ? "font-bold text-black" : ""
+            }
+            to={"/account/notifications"}
+          >
+            Thông báo
           </NavLink>
         </div>
         <div className="col-span-8">

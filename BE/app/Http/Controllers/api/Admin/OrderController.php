@@ -119,18 +119,18 @@ class OrderController extends Controller
         $order->save();
 
         $message = match ($newStatus) {
-            1 => 'Đơn hàng đang ở trạng thái: Chờ xác nhận.',
-            2 => 'Đơn hàng đang được chuẩn bị.',
-            3 => 'Đơn hàng đang được giao.',
-            4 => 'Đơn hàng đã được giao.',
-            5 => 'Giao hàng thất bại.',
-            6 => 'Đơn hàng đã hoàn thành.',
-            7 => 'Đơn hàng đã bị hủy và số lượng đã được hoàn lại kho.',
+            1 => 'đang chờ xác nhận.',
+            2 => 'đang được chuẩn bị.',
+            3 => 'đang được giao.',
+            4 => 'đã được giao.',
+            5 => 'giao hàng thất bại.',
+            6 => 'đã hoàn thành.',
+            7 => 'đã bị hủy',
             default => 'Cập nhật trạng thái đơn hàng thành công.',
         };
         // Gửi Notification (lưu DB + broadcast qua Pusher) cho chủ đơn hàng
         if ($order->user) {
-            $order->user->notify(new OrderStatusNotification($order->id, $newStatus, $message));
+            $order->user->notify(new OrderStatusNotification($order->user_id, $order->orders_code, $newStatus, $message));
         }
 
         return response()->json(['message' => $message]);

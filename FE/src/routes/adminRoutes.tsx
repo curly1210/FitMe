@@ -17,6 +17,7 @@ import DashboardProduct from "../pages/admin/Dashboard/thongKeSanPhamDonHang";
 import { InventoryPage } from "../pages/admin/Dashboard/thongKeTonKho";
 import ReviewPage from "../pages/admin/Dashboard/thongKeDanhGia/idext";
 import AdminReviewProductList from "../pages/admin/Review";
+import NotificationAdmin from "../pages/admin/Notification";
 
 export const adminRoutes = [
   {
@@ -86,6 +87,10 @@ export const adminRoutes = [
           {
             path: "reviews",
             element: <AdminReviewProductList />,
+          },
+          {
+            path: "notifications",
+            element: <NotificationAdmin />,
           },
         ],
       },
