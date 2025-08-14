@@ -135,15 +135,18 @@ const Oder = () => {
               response?.data?.message ||
               `Đơn hàng chuyển sang: ${successMessage}`;
 
+            // notification[type]({
+            //   message: beMessage,
+            // });
             notification[type]({
-              message: beMessage,
+              message: "Cập nhật trạng thái thành công",
             });
           },
           onError: (error: any) => {
             const errorMessage =
               error?.response?.data?.message || "Cập nhật trạng thái thất bại";
             notification.error({
-              message: errorMessage,
+              message: "Cập nhật trạng thái thất bại",
             });
           },
         }
@@ -368,6 +371,7 @@ const Oder = () => {
 
   return (
     <>
+      <h1 className="text-2xl font-bold mb-5">Quản lý đơn hàng</h1>
       <div className="flex gap-3 mb-4 flex-wrap">
         <Search
           size="middle"
@@ -452,7 +456,6 @@ const Oder = () => {
         // chặn link chi tiết đơn hàng khi ấn nút
         onRow={(record) => ({
           onClick: (event) => {
-            
             const isInsidePopover = (event.target as HTMLElement).closest(
               ".ant-popover"
             );

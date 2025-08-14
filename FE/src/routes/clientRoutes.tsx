@@ -25,13 +25,14 @@ import { ChatboxProvider } from "../context/ChatboxProvider";
 import ProtectRole from "../components/ProtectRole";
 
 import ModalChangePass from "../components/Modal/ModalChangePassword";
-
+import Notification from "../pages/client/Notification";
 
 export const clientRoutes = [
   {
     path: "/",
     element: (
       <ProtectRole role="Customer">
+        {/* <NotificationUserProvider> */}
         <SearchPanelProvider>
           <ChatboxProvider>
             <CartProvider>
@@ -39,6 +40,7 @@ export const clientRoutes = [
             </CartProvider>
           </ChatboxProvider>
         </SearchPanelProvider>
+        {/* </NotificationUserProvider> */}
       </ProtectRole>
     ),
     children: [
@@ -84,7 +86,6 @@ export const clientRoutes = [
             element: <Contact />,
           },
 
-  
           {
             element: <ProtectClient role="Customer" />,
             children: [
@@ -112,6 +113,10 @@ export const clientRoutes = [
                   {
                     path: "change-password",
                     element: <ChangePassword />,
+                  },
+                  {
+                    path: "notifications",
+                    element: <Notification />,
                   },
                 ],
               },

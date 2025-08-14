@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\Client;
 
+use App\Events\OrderStatusUpdated;
+use App\Notifications\OrderStatusNotification;
 use Log;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -24,6 +26,7 @@ use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\Client\CouponResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -229,6 +232,7 @@ class OrderController extends Controller
         // ], 501);
         try {
             $order = Order::findOrFail($id);
+            /** @var \App\Models\User $user */
             $user = auth('api')->user();
             // return response()->json([
             //     'user' => $user
@@ -260,11 +264,32 @@ class OrderController extends Controller
                     };
                 });
                 $message = 'Đơn hàng đã được hủy thành công.';
+                // Notify owner (user) — optional (he is the one who canceled)
+                $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 7, $message));
+
+                // Notify admins (tùy project: chọn admin bằng cột is_admin hoặc role)
+                $admins = User::where('role', 'Admin')->get();
+                // Notification::send($admins, new OrderStatusNotification($user->id, $order->orders_code, 7, "Khách hàng {$user->name} đã hủy đơn #{$order->orders_code}"));
+                Notification::send($admins, new OrderStatusNotification($user->id, $order->orders_code, 7, '<span>
+                            Khách hàng
+                            <span style="color:red;font-weight:bold;">' .
+                    $user->name . '
+                            </span>
+                            đã hủy đơn
+                            <span style="color:red;font-weight:bold;">
+                              #' . $order->orders_code . '
+                            </span>
+                          </span>', 1));
             } elseif ($currentStatus == 4) {
                 // Chuyển từ "Đã giao hàng" (4) sang "Hoàn thành" (6)
                 $order->update(['status_order_id' => 6]);
 
                 $message = 'Đơn hàng đã được hoàn thành.';
+                $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 6, $message));
+
+                // Notify admins
+                $admins = User::where('role', 'Admin')->get();
+                Notification::send($admins, new OrderStatusNotification($user->id, $order->orders_code, 6, "Khách hàng {$user->name} đã hoàn thành đơn #{$order->orders_code}", 1));
             } else {
                 return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
             }

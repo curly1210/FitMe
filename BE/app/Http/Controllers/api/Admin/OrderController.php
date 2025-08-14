@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\api\Admin;
 
+use App\Events\OrderStatusUpdated;
 use App\Models\User;
 use App\Models\Order;
-
 use App\Models\ProductItem;
 use App\Models\OrdersDetail;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ class OrderController extends Controller
         2 => ['label' => 'Đang chuẩn bị hàng', 'color' => '#0d6efd'],
         3 => ['label' => 'Đang giao hàng', 'color' => '#ffc107'],
         4 => ['label' => 'Đã giao hàng', 'color' => '#ffc107'],
-        5 => ['label' => 'Giao hàng thất bại', 'color' => '#198754'],
+        5 => ['label' => 'Giao hàng thất bại', 'color' => '#d47190ff'],
         6 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
         7 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
     ];
@@ -118,15 +119,19 @@ class OrderController extends Controller
         $order->save();
 
         $message = match ($newStatus) {
-            1 => 'Đơn hàng đã được chuyển sang trạng thái: Chờ xác nhận.',
-            2 => 'Đơn hàng đang được chuẩn bị.',
-            3 => 'Đơn hàng đang được giao.',
-            4 => 'Đơn hàng đã được giao.',
-            5 => 'Giao hàng thất bại.',
-            6 => 'Đơn hàng đã hoàn thành.',
-            7 => 'Đơn hàng đã bị hủy và số lượng đã được hoàn lại kho.',
+            1 => 'đang chờ xác nhận.',
+            2 => 'đang được chuẩn bị.',
+            3 => 'đang được giao.',
+            4 => 'đã được giao.',
+            5 => 'giao hàng thất bại.',
+            6 => 'đã hoàn thành.',
+            7 => 'đã bị hủy',
             default => 'Cập nhật trạng thái đơn hàng thành công.',
         };
+        // Gửi Notification (lưu DB + broadcast qua Pusher) cho chủ đơn hàng
+        if ($order->user) {
+            $order->user->notify(new OrderStatusNotification($order->user_id, $order->orders_code, $newStatus, $message));
+        }
 
         return response()->json(['message' => $message]);
     }

@@ -8,6 +8,7 @@ import axiosInstance from "./utils/axiosInstance";
 import AttachAxios from "./components/AttachAxios";
 import { PopupProvider } from "./context/PopupMessageProvider";
 import { API_URL } from "./utils/constant";
+import { NotificationUserProvider } from "./context/NotificationUserProvider";
 
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -18,35 +19,21 @@ import { API_URL } from "./utils/constant";
 
 const dataProvider = simpleRestDataProvider(API_URL, axiosInstance);
 
-// const queryClient = new QueryClient({
-//   defaultOptions: {
-//     queries: {
-//       refetchOnWindowFocus: true, // hoặc true tùy bạn
-//       // staleTime: 1000 * 60 * 5,
-//     },
-//   },
-// });
-
 function App() {
   return (
     <>
-      {/* <QueryClientProvider client={queryClient}> */}
-      <Refine
-        dataProvider={dataProvider}
-        // options={{
-        //   syncWithLocation: true,
-        // }}
-      >
+      <Refine dataProvider={dataProvider}>
         <PopupProvider>
           <AuthProvider>
-            <AttachAxios />
-            <ModalProvider>
-              <Outlet />
-            </ModalProvider>
+            <NotificationUserProvider>
+              <AttachAxios />
+              <ModalProvider>
+                <Outlet />
+              </ModalProvider>
+            </NotificationUserProvider>
           </AuthProvider>
         </PopupProvider>
       </Refine>
-      {/* </QueryClientProvider> */}
     </>
   );
 }

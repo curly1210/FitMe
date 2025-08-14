@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\Admin\GhnController;
@@ -317,15 +318,13 @@ Route::middleware('web')->post('/chatbot', [ChatbotController::class, 'chat']);
 Route::post('/chatbot/reset', [ChatbotController::class, 'reset']);
 Route::get('/chatbot/products', [ProductController::class, 'getAllProductChatbot']);
 
-
-
-
-
-
-
-
-
-
+// danh sách thông báo
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::get('/notifications/unread', [NotificationController::class, 'listUnread']);
+// đánh dấu đã đọc 1 thông báo
+Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+// đánh dấu tất cả thông báo đã đọc
+Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 
 
 
