@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\api\Client\ReturnRequestController as ClientReturnRequestController;
+use App\Http\Controllers\api\Admin\ReturnRequestController as AdminReturnRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\Admin\GhnController;
@@ -37,7 +39,7 @@ use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryControll
 
 
 use App\Http\Controllers\Api\Client\ForgotPasswordController;
-
+use App\Models\ReturnRequest;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -299,10 +301,22 @@ Route::prefix('admin')->group(function () {
     Route::get('/wallet/widraw-request/{id}', [AdminWithdrawRequestController::class, 'show'])->whereNumber('id');
 });
 
+// Hoàn hàng
 
+Route::get("order/return-request", [ClientReturnRequestController::class, "index"]);
+Route::get("order/return-request/check-exist/{id}", [ClientReturnRequestController::class, "checkRequest"])->whereNumber('id');
+Route::post("order/{id}/return-request/create", [ClientReturnRequestController::class, "store"])->whereNumber('id');
+Route::post("order/return-request/cancel/{id}", [ClientReturnRequestController::class, "cancelRequest"])->whereNumber('id');
+Route::get("order/return-request/{id}", [ClientReturnRequestController::class, "show"])->whereNumber('id');
+Route::post("order/return-request/update-shipping-label-image/{id}", [ClientReturnRequestController::class, "updateShippingLabel"])->whereNumber('id');
 
-
-
+Route::prefix('admin')->group(function () {
+    Route::get("order/return-request", [AdminReturnRequestController::class, 'index']);
+    Route::post("order/return-request/{id}/change-status", [AdminReturnRequestController::class, 'changeStatus'])->whereNumber('id');
+    Route::post("order/return-request/{id}/accept", [AdminReturnRequestController::class, 'acceptRequest'])->whereNumber('id');
+    Route::post("order/return-request/{id}/reject", [AdminReturnRequestController::class, 'rejectRequest'])->whereNumber('id');
+    Route::get("order/return-request/{id}", [AdminReturnRequestController::class, "show"])->whereNumber('id');
+});
 
 // info acc client
 Route::get('profile', [ClientUserController::class, 'showInfo']);

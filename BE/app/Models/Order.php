@@ -51,4 +51,8 @@ class Order extends Model
     {
         return $this->hasMany(OrdersDetail::class);
     }
+    public function returnRequest()
+    {
+        return $this->hasOne(ReturnRequest::class);
+    }
 }

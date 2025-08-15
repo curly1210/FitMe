@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Cloudinary\Api\Upload\UploadApi;
 use Cloudinary\Cloudinary;
 use Intervention\Image\Laravel\Facades\Image;
 
@@ -22,7 +23,19 @@ trait CloudinaryTrait
         return "https://res.cloudinary.com/{$cloudName}/image/upload/{$image}";
     }
 
-
+    protected function buildVideoUrl($video)
+    {
+        if (!$video) {
+            return null;
+        }
+        // Nếu là URL thật thì trả về luôn
+        if (filter_var($video, FILTER_VALIDATE_URL)) {
+            return $video;
+        }
+        // Nếu là public_id thì build link Cloudinary
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        return "https://res.cloudinary.com/{$cloudName}/video/upload/{$video}";
+    }
     # hàm upload ảnh lên Cloudinary
     /**
      * @param array $options [
@@ -91,5 +104,24 @@ trait CloudinaryTrait
             return false;
         }
     }
-
+    public function uploadVideoToCloudinary($file, $folder)
+    {
+        try {
+            $cloudinary = new UploadApi();
+            $filePath = $file->getRealPath();
+            $data = $cloudinary->upload($filePath, [
+                'folder' => $folder,
+                'resource_type' => 'video',
+                'chunk_size' => 6000000,
+                'eager' => [
+                    ['width' => 300, 'height' => 300, 'crop' => 'pad'],
+                    ['width' => 160, 'height' => 100, 'crop' => 'crop', 'gravity' => 'south']
+                ],
+                'eager_async' => true,
+            ]);
+            return $data;
+        } catch (\Throwable $th) {
+            return $this->error("Tải video thất bại", $th->getMessage(), 400);
+        }
+    }
 }

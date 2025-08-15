@@ -45,4 +45,8 @@ class OrdersDetail extends Model
     {
         return $this->hasOne(Review::class, 'order_detail_id', 'id');
     }
+    public function returnItem()
+    {
+        return $this->hasOne(ReturnItem::class);
+    }
 }

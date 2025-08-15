@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Review;
 use App\Models\Product;
 use Carbon\CarbonPeriod;
+use App\Models\ReturnItem;
 use App\Models\ProductItem;
 use App\Models\OrdersDetail;
 use Illuminate\Http\Request;
@@ -41,12 +42,18 @@ class StatisticsController extends Controller
         });
 
         $totalRevenue = Order::where('status_order_id', 6)->sum('total_amount');
+        $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) {
+            $query->where('status_order_id', 6);
+        })
+            ->selectRaw('SUM(price * quantity) as total')
+            ->value('total');
 
+        $netRevenue = $totalRevenue - ($totalRefund ?? 0);
         $data = [
             'total_orders' => $totalOrders,
             'total_selling_products' => $totalSellingProducts,
             'total_customers' => $totalCustomers,
-            'total_sold' => $totalRevenue,
+            'total_sold' => $netRevenue,
             'orders_by_status' => $allStatuses,
         ];
 
@@ -324,7 +331,7 @@ class StatisticsController extends Controller
             // ],
         ]);
     }
-public function orderByLocation(Request $request)
+    public function orderByLocation(Request $request)
     {
         $from = $request->input('from');
         $to = $request->input('to');
@@ -545,18 +552,4 @@ public function orderByLocation(Request $request)
             'filter_products' => $products,
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
