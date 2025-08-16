@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Traits\CreateOrderTrait;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -166,7 +167,9 @@ class VNPayController extends Controller
                 $request->merge([
                     'orders_code' => $vnp_TxnRef,
                     'bank_code' => $vnp_TransactionNo,
-                    'transaction_at' => $vnp_TransactionDate
+                    'transaction_at' => $vnp_TransactionDate,
+                    'bank_name' => $request->vnp_BankCode,
+
                 ]);
                 // return response()->json($request->all());
                 $this->createOrder($request, 1,); // 1 - đã thanh toán , 2 - Chờ hoàn tiền , 3 - Đã hoàn tiền   
@@ -340,7 +343,7 @@ class VNPayController extends Controller
 
             if ($ispTxn["vnp_ResponseCode"] == "00") {
 
-                $order->update(["status_payment" => 3]); # Đã hoàn tiền
+                $order->update(["status_payment" => 3, 'refunded_at' => now()]); # Đã hoàn tiền
 
                 return response()->json(["message" => "Hoàn tiền thành công"]);
             } else {

@@ -124,6 +124,8 @@ trait CreateOrderTrait
                 'recipient_phone' => $address->phone,
                 'transaction_at' => $request->transaction_at ?? null,
                 "bank_code" => $request->bank_code ?? null,
+                "bank_name" => $request->bank_name ?? null,
+
 
             ]);
 

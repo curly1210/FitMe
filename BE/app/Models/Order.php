@@ -25,6 +25,8 @@ class Order extends Model
         'recipient_phone',
         'transaction_at',
         'bank_code',
+        'bank_name',
+        'refunded_at',
         "success_at",
     ];
 
