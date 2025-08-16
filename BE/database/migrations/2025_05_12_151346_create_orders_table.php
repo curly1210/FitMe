@@ -21,7 +21,11 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('shipping_address_id');
             $table->string('bank_code', 20)->unique()->nullable();
+            $table->string('bank_name', 50)->nullable();
+
             $table->timestamps();
+            $table->timestamp('refunded_at')->nullable();
+
             $table->timestamp('success_at')->nullable(); # thời gian chuyển trạng thái hoàn thành
             $table->timestamp('transaction_at')->nullable(); # thời gian giao dịch thành công
             // Foreign keys (nếu muốn ràng buộc luôn)
