@@ -25,6 +25,7 @@ type AuthContextType = {
   setUser: (user: User | null) => void;
   setPersist: (val: boolean) => void;
   logout: () => void;
+  channelAuth: BroadcastChannel;
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -35,7 +36,10 @@ export const AuthContext = createContext<AuthContextType>({
   setUser: () => {},
   setPersist: () => {},
   logout: () => {},
+  channelAuth: new BroadcastChannel("auth"),
 });
+
+const channelAuth = new BroadcastChannel("auth");
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAppReady, setIsAppReady] = useState(false);
@@ -52,10 +56,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     mutationOptions: {
       onSuccess: (response) => {
         notify("success", "Đăng xuất", response?.data?.message);
+        channelAuth.postMessage({ type: "logout" });
         setAccessToken(null);
         setUser(null);
         setPersist(false);
-        console.log("hello");
         localStorage.removeItem("persist");
         // openPopup(<ModalLogin />);
       },
@@ -65,6 +69,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     },
   });
+
+  useEffect(() => {
+    // Nhận message từ các tab khác
+    channelAuth.onmessage = (event) => {
+      const { type, payload } = event.data || {};
+      if (type === "logout") {
+        setAccessToken(null);
+        setUser(null);
+        setPersist(false);
+        localStorage.removeItem("persist");
+      }
+
+      if (type === "login") {
+        setAccessToken(payload.accessToken);
+        setUser(payload.user);
+        // setPersist(true);
+        // localStorage.setItem("persist", "true");
+      }
+    };
+
+    return () => {
+      channelAuth.onmessage = null;
+    };
+  }, [navigate]);
 
   const refreshToken = async () => {
     try {
@@ -115,6 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser,
         setPersist,
         logout,
+        channelAuth,
       }}
     >
       {!isAppReady ? (

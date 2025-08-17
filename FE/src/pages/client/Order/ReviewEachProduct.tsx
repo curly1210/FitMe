@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Tag } from "antd";
 import { useModal } from "../../../hooks/useModal";
 import ModalAddReview from "./ModalAddReview";
 // import ModalAddReview from "./ModalAddReview";
 import ShowReview from "./ShowReview";
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 type Review = {
   id: string | number;
@@ -12,6 +14,7 @@ type Review = {
   size?: string;
   is_review?: any; // Thêm trường này để xác định đã đánh giá hay chưa
   order_id?: any; // Thêm order_id nếu cần
+  product_item_id: string | number;
 };
 
 interface ReviewEachProductProps {
@@ -27,11 +30,12 @@ const ReviewEachProduct = ({ review }: ReviewEachProductProps) => {
       <div key={review.id}>
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-start gap-3">
-            <img
+            <ImageWithFallback
               src={review.product_image}
-              // alt={review.product_name}
-              className="w-16 h-16 object-cover"
+              width={64}
+              height={64}
             />
+
             <div className="flex flex-col ">
               <p className="font-semibold">{review.product_name}</p>
               <div className="flex text-sm text-gray-500">
@@ -54,7 +58,7 @@ const ReviewEachProduct = ({ review }: ReviewEachProductProps) => {
               >
                 XEM ĐÁNH GIÁ
               </button>
-            ) : (
+            ) : review?.product_item_id ? (
               <button
                 onClick={() => {
                   openModal(<ModalAddReview review={review} />);
@@ -64,6 +68,10 @@ const ReviewEachProduct = ({ review }: ReviewEachProductProps) => {
               >
                 ĐÁNH GIÁ
               </button>
+            ) : (
+              <Tag className="!font-bold !w-fit" color={"red"}>
+                Ngừng bán
+              </Tag>
             )}
           </div>
         </div>

@@ -6,6 +6,7 @@ import { LuTrash } from "react-icons/lu";
 import { useCart } from "../../../hooks/useCart";
 import { Button, Popconfirm } from "antd";
 import { Link } from "react-router";
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 const CartItem = ({ item }: any) => {
   const [quantity, setQuantity] = useState(item.quantity);
@@ -29,7 +30,8 @@ const CartItem = ({ item }: any) => {
   return (
     <div key={item.id} className="flex justify-between items-end flex-grow ">
       <div className="flex items-stretch gap-3">
-        <img width={80} height={100} src={item?.image} alt="" />
+        <ImageWithFallback width={80} height={100} src={item?.image} />
+        {/* <img width={80} height={100} src={item?.image} alt="" /> */}
         <div className="flex flex-col justify-between">
           <Link className="hover:underline" to={`/products/${item?.slug}`}>
             <p className="text-sm font-semibold">

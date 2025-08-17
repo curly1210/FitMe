@@ -334,7 +334,7 @@ class OrderController extends Controller
 
             // Định dạng order_items
             $orderItems = $order->orderDetails->map(function ($detail) {
-                // $productItem = $detail->productItem;
+                $productItem = $detail->productItem;
                 // $product = $productItem->product;
                 // $color = $productItem->color;
                 // $size = $productItem->size;
@@ -350,7 +350,8 @@ class OrderController extends Controller
                     'price' => $detail->price,
                     'sale_percent' => $detail->sale_percent,
                     'sale_price' => $detail->sale_price,
-                    // 'sku' => $detail->sku,
+                    'sku' => $productItem->sku ?? null,
+                    'slug' => $productItem->product->slug ?? null,
                     'image' => $this->buildImageUrl($detail->image_product) ?? null,
                     'subtotal' => $detail->quantity * $detail->sale_price,
                     'color' => $detail->color ?? null,

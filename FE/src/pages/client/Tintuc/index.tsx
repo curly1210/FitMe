@@ -23,7 +23,6 @@ const PostDetail = () => {
   const { data, isLoading, isError } = useCustom<Post>({
     url: `/client/posts/${slug}`,
     method: "get",
-
   });
 
   const post = data?.data;
@@ -49,9 +48,14 @@ const PostDetail = () => {
     <div className="max-w-[1000px] mx-auto py-10 px-4">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-4">
-        <Link to="/" className="text-blue-500">Trang chủ</Link> {'>'}{" "}
-        <Link to="/tin-tuc" className="text-blue-500">Tin tức</Link> {'>'}{" "}
-        <span className="font-semibold text-black">{post.title}</span>
+        <Link to="/" className="text-blue-500">
+          Trang chủ
+        </Link>{" "}
+        {">"}{" "}
+        <Link to="/tin-tuc" className="text-blue-500">
+          Tin tức
+        </Link>{" "}
+        {">"} <span className="font-semibold text-black">{post.title}</span>
       </div>
 
       {/* Title */}
@@ -69,14 +73,16 @@ const PostDetail = () => {
       {/* Thumbnail */}
       {post.thumbnail && (
         <div className="rounded-xl overflow-hidden shadow-xl mb-10">
+          {/* <ImageWithFallback
+            src={post.thumbnail}
+            alt={post.title}
+            width={"100%"}
+            height={"100%"}
+          /> */}
           <img
             src={post.thumbnail}
             alt={post.title}
             className="w-full object-cover"
-            // onError={(e) => {
-            //   (e.target as HTMLImageElement).src =
-            //     "https://via.placeholder.com/800x400?text=No+Image";
-            // }}
           />
         </div>
       )}
@@ -88,40 +94,41 @@ const PostDetail = () => {
       />
 
       {/* Related Posts */}
-    {Array.isArray(post.related_posts) && post.related_posts.length > 0 && (
-  <div className="mt-14">
-    <h2 className="text-2xl font-bold mb-6 text-center uppercase">
-      CÁC BÀI VIẾT LIÊN QUAN
-    </h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {post.related_posts
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 3)
-        .map((related) => (
-          <Link
-            to={`/post/${related.slug}`}
-            key={related.id}
-            className="bg-white rounded-lg overflow-hidden shadow block"
-          >
-            <div className="relative aspect-[16/9] bg-gray-100">
-              <img
-                src={related.thumbnail}
-                className="w-full h-full object-cover"
-              />
-              <div className="">
-                {related.title}
-              </div>
-            </div>
-            <div className="p-4">
-              <p className="text-xs text-gray-500 mb-1">Tin tức</p>
-              <h3 className="font-semibold text-sm">{related.title}</h3>
-            </div>
-          </Link>
-        ))}
-    </div>
-  </div>
-)}
-
+      {Array.isArray(post.related_posts) && post.related_posts.length > 0 && (
+        <div className="mt-14">
+          <h2 className="text-2xl font-bold mb-6 text-center uppercase">
+            CÁC BÀI VIẾT LIÊN QUAN
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {post.related_posts
+              .sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime()
+              )
+              .slice(0, 3)
+              .map((related) => (
+                <Link
+                  to={`/post/${related.slug}`}
+                  key={related.id}
+                  className="bg-white rounded-lg overflow-hidden shadow block"
+                >
+                  <div className="relative aspect-[16/9] bg-gray-100">
+                    <img
+                      src={related.thumbnail}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="">{related.title}</div>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-xs text-gray-500 mb-1">Tin tức</p>
+                    <h3 className="font-semibold text-sm">{related.title}</h3>
+                  </div>
+                </Link>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

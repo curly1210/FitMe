@@ -26,6 +26,7 @@ import TextArea from "antd/es/input/TextArea";
 
 import { GoStarFill } from "react-icons/go";
 import StarRating from "../../../utils/StarRating";
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 const { TabPane } = Tabs;
 
@@ -360,7 +361,12 @@ const ProductDetail = () => {
     );
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center py-10">
+        <Spin tip="Đang tải sản phẩm..." size="large" />
+      </div>
+    );
   if (error) return <p>Error: {error.message}</p>;
   if (!product) return <p>Không tìm thấy sản phẩm</p>;
 
@@ -390,41 +396,51 @@ const ProductDetail = () => {
       ))} */}
       </div>
       <div className="grid grid-cols-2 gap-6">
-
         {/* Cột trái: ảnh nhỏ + ảnh to */}
-  <div className="flex gap-4">
-    {/* Ảnh nhỏ kéo dọc */}
-    <div className="flex flex-col gap-2 w-20 max-h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-      {images.map((img) => (
-        <div
-          key={img.id}
-          className={`w-[80px] h-[80px] overflow-hidden border cursor-pointer ${
-            selectedImage === img.url
-              ? "border-black"
-              : "border-gray-300"
-          }`}
-        >
-          <img
-            src={img.url}
-            alt="thumb"
-            loading="lazy"
-            onClick={() => setSelectedImage(img.url)}
-            className="w-full h-full object-cover duration-200 hover:scale-110"
-          />
-        </div>
-      ))}
-    </div>
+        <div className="flex gap-4">
+          {/* Ảnh nhỏ kéo dọc */}
+          <div className="flex flex-col gap-2 w-20 max-h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            {images.map((img) => (
+              <div
+                key={img.id}
+                className={`w-[80px] h-[80px] overflow-hidden border cursor-pointer ${
+                  selectedImage === img.url ? "border-black" : "border-gray-300"
+                }`}
+              >
+                <ImageWithFallback
+                  src={img.url}
+                  alt="thumb"
+                  width={80}
+                  height={80}
+                  onClick={() => setSelectedImage(img.url)}
+                />
+                {/* <img
+                  src={img.url}
+                  alt="thumb"
+                  loading="lazy"
+                  onClick={() => setSelectedImage(img.url)}
+                  className="w-full h-full object-cover duration-200 hover:scale-110"
+                /> */}
+              </div>
+            ))}
+          </div>
 
-    {/* Ảnh to */}
-    <div className="flex-1">
-      <img
-        src={selectedImage || images[0]?.url}
-        alt="main"
-        loading="lazy"
-        className="w-full object-contain h-[500px]"
-      />
-    </div>
-  </div>
+          {/* Ảnh to */}
+          <div className="flex-1">
+            <ImageWithFallback
+              src={selectedImage || images[0]?.url}
+              alt="main"
+              height={500}
+              width={"100%"}
+            />
+            {/* <img
+              src={selectedImage || images[0]?.url}
+              alt="main"
+              loading="lazy"
+              className="w-full object-contain h-[500px]"
+            /> */}
+          </div>
+        </div>
 
         <div className="col-span-1 border border-gray-200 rounded-md p-4 space-y-4 self-start">
           <div className="">
@@ -554,7 +570,6 @@ const ProductDetail = () => {
             </Button>
           </Tooltip>
         </div>
-
       </div>
 
       <div>
@@ -678,9 +693,9 @@ const ProductDetail = () => {
               {isLoadingReviews ? (
                 <div className="flex flex-col items-center justify-center py-6">
                   <Spin size="large" />
-                  <p className="text-gray-500 text-sm mt-2">
+                  {/* <p className="text-gray-500 text-sm mt-2">
                     Đang tải dữ liệu...
-                  </p>
+                  </p> */}
                 </div>
               ) : (
                 <>
@@ -760,16 +775,28 @@ const ProductDetail = () => {
               <div className="relative w-full h-80 overflow-hidden">
                 {/* Container chứa 2 ảnh xếp ngang */}
                 <div className="flex w-[200%] h-full transition-transform duration-500 ease-in-out group-hover:-translate-x-1/2">
-                  <img
+                  <ImageWithFallback
+                    src={rp.images?.[0]?.url}
+                    width={"50%"}
+                    height={"100%"}
+                    attribute="object-cover"
+                  />
+                  <ImageWithFallback
+                    src={rp.images?.[1]?.url}
+                    width={"50%"}
+                    height={"100%"}
+                    attribute="object-cover"
+                  />
+                  {/* <img
                     src={rp.images?.[0]?.url}
                     alt={rp.name}
                     className="w-1/2 h-full object-cover"
-                  />
-                  <img
+                  /> */}
+                  {/* <img
                     src={rp.images?.[1]?.url}
                     alt={rp.name}
                     className="w-1/2 h-full object-cover"
-                  />
+                  /> */}
                 </div>
               </div>
 

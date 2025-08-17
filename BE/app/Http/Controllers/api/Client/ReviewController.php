@@ -153,6 +153,7 @@ class ReviewController extends Controller
                     "sale_price" => $review->orderDetail->sale_price,
                     "sale_percent" => $review->orderDetail->sale_percent,
                     "quantity" => $review->orderDetail->quantity,
+                    "product_item_id" => $review->orderDetail->product_item_id,
                 ],
                 "review_images" => $review->reviewImages ? $review->reviewImages->map(function ($image) {
                     return [

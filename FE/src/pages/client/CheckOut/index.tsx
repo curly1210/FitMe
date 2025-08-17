@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Modal, Select, Spin, message } from "antd";
+import { Button, Modal, Select, Spin, message, notification } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
 import { useCreate, useList, useCustomMutation } from "@refinedev/core";
 import { useNavigate } from "react-router";
-import { useCart } from "../../../hooks/useCart";
+import ImageWithFallback from "../../../components/ImageFallBack";
 type Coupon = {
   code: string;
   name: string;
@@ -43,10 +43,14 @@ const CheckOut = () => {
   const { mutate: redeemCoupon, isLoading: isRedeeming } = useCustomMutation();
   const nav = useNavigate();
 
-  const { refetch } = useCart(); // lấy đơn hàng từ cart
+  // const { refetch } = useCart(); // lấy đơn hàng từ cart
   // const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
 
-  const { data: cartResponse, isFetching: isLoadingCarts } = useList({
+  const {
+    data: cartResponse,
+    isFetching: isLoadingCarts,
+    refetch,
+  } = useList({
     resource: "cart-items/selected-all",
     // queryOptions: {
     //   enabled: hasAuth, // ✅ chỉ gọi API khi đã có accessToken & user
@@ -55,25 +59,26 @@ const CheckOut = () => {
 
   useEffect(() => {
     if (cartResponse?.data) {
-      console.log("cartResponse:", cartResponse);
+      // console.log("cartResponse:", cartResponse);
       setCart(cartResponse.data);
     }
   }, [cartResponse]);
 
+  console.log("cart:", cart);
+
   // console.log(orderItems, "cart");
 
-useEffect(() => {
-  if (cart?.cartItems && cart.cartItems.length === 0) {
-    nav("/", { replace: true }); // Chuyển hướng về trang chủ nếu giỏ hàng trống
-  }
-}, [cart, nav]);
+  // useEffect(() => {
+  //   if (cart?.cartItems && cart.cartItems.length === 0) {
+  //     nav("/", { replace: true }); // Chuyển hướng về trang chủ nếu giỏ hàng trống
+  //   }
+  // }, [cart, nav]);
 
   const totalPrice = (cart?.cartItems || []).reduce(
     (sum: number, item: any) => sum + item.subtotal,
     0
   );
 
-  console.log(totalPrice, "totalPrice");
   const [totalAmount, setTotalAmount] = useState(
     totalPrice + shippingPrice - discount
   );
@@ -183,6 +188,7 @@ useEffect(() => {
         sale_price: item.sale_price,
         sale_percent: item.sale_percent,
         image_product: item.image,
+        name_product: item.name,
       })),
       payment_method: selectedMethod,
       shipping_address_id: selectedAddress.id,
@@ -208,7 +214,11 @@ useEffect(() => {
             // }
             nav("success");
           },
-          onError: (error) => console.error("Thanh toán thất bại:cod", error),
+          onError: (error) => {
+            refetch(); // Lấy lại dữ liệu giỏ hàng nếu có lỗi
+            console.log(error?.response?.data?.message);
+            notification.error({ message: error?.response?.data?.message });
+          },
         }
       );
     }
@@ -382,8 +392,10 @@ useEffect(() => {
                     ? `${coupon.code} - Free Ship`
                     : `${coupon.code} (Giảm ${
                         coupon.type === "percentage"
-                          ? `${coupon.value }% tối đa: ${coupon.max_price_discount.toLocaleString()} VNĐ`
-                          : `${coupon.value.toLocaleString()} VNĐ` 
+                          ? `${
+                              coupon.value
+                            }% tối đa: ${coupon.max_price_discount.toLocaleString()} VNĐ`
+                          : `${coupon.value.toLocaleString()} VNĐ`
                       })`}
                 </Select.Option>
               ))}
@@ -424,19 +436,23 @@ useEffect(() => {
           ) : (
             (cart?.cartItems || []).map((item: any, index: number) => (
               <div key={index} className="flex space-x-4 items-center">
-                <img
+                <ImageWithFallback src={item.image} width={64} height={64} />
+                {/* <img
                   src={item.image}
                   alt={item.name}
                   className="w-16 h-16 object-cover"
-                />
+                /> */}
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">{item.name}</p>
+                  <p className="text-sm font-semibold">
+                    {item.name} -{" "}
+                    <span className="text-xs text-gray-500">{item?.sku}</span>
+                  </p>
                   <p className="text-xs text-gray-500">
                     {item.color}, {item.size} – SL: {item.quantity}
                   </p>
                 </div>
                 <div className="text-sm font-semibold">
-                  {(item.subtotal || 0).toLocaleString()} VNĐ 
+                  {(item.subtotal || 0).toLocaleString()} VNĐ
                 </div>
               </div>
             ))
@@ -502,17 +518,21 @@ useEffect(() => {
             </div>
           </div>
 
-          <button
-            disabled={!selectedAddress}
+          <Button
+            disabled={
+              !selectedAddress ||
+              (cart?.cartItems && cart.cartItems.length === 0)
+            }
             onClick={handleCheckout}
-            className={`w-full py-2 rounded text-sm font-semibold cursor-pointer ${
-              selectedAddress
-                ? "bg-black text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            className={`!w-full !py-6 !rounded !text-sm !bg-black !text-white !font-semibold  ${
+              !selectedAddress ||
+              (cart?.cartItems && cart?.cartItems?.length === 0)
+                ? "!opacity-20"
+                : ""
             }`}
           >
             Thanh toán
-          </button>
+          </Button>
 
           <p className="text-xs text-center text-gray-600 mt-2">
             Khi tiếp tục, bạn đồng ý với các{" "}

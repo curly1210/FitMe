@@ -1,27 +1,23 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { Link } from "react-router";
-import { useModal } from "../../../hooks/useModal";
-import ModalAddress from "../../../components/Modal/ModalAddress";
 import { useDelete, useList } from "@refinedev/core";
-import { Empty, notification, Popconfirm, Skeleton, Spin } from "antd";
-import { useState } from "react";
+import { Empty, notification, Popconfirm, Skeleton } from "antd";
 import emptyImage from "../../../assets/images/empty_data.png";
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 const ProductLike = () => {
-  const { openModal } = useModal();
-  // const [deletingId, setDeletingId] = useState<number | null>(null);
-
   const {
     data: wishlistData,
     refetch,
     isLoading,
-  } = useList({ resource: "wishlist" });
+  } = useList({
+    resource: "wishlist",
+    queryOptions: {
+      retry: 1, // chỉ retry 1 lần khi lỗi
+    },
+  });
   const listAddress = wishlistData?.data?.data || [];
 
   const { mutate, isLoading: loadingUnlike } = useDelete();
@@ -76,31 +72,35 @@ const ProductLike = () => {
                   key={address?.product?.id}
                   className="relative text-sm flex justify-between items-center p-5 border border-gray-400"
                 >
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={`/products/${address?.product?.slug}`}
-                        className="font-bold text-blue-600 hover:underline"
-                      >
-                        {address?.product?.name}
-                      </Link>
-                    </div>
-                    <div>
-                      Giá:{" "}
-                      {sale_price
-                        .toString()
-                        ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                      ₫
+                  <div className="flex items-center gap-4">
+                    <ImageWithFallback src={img?.url} />
+
+                    <div className="flex flex-col gap-3 text-base">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/products/${address?.product?.slug}`}
+                          className="font-bold  hover:underline"
+                        >
+                          {address?.product?.name}
+                        </Link>
+                      </div>
+                      <div>
+                        Giá:{" "}
+                        {sale_price
+                          .toString()
+                          ?.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                        ₫
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="w-10 h-10">
+                    {/* <div className="w-10 h-10">
                       <img
                         src={img.url}
                         alt="ảnh"
                         className="w-full object-contain object-center "
                       />
-                    </div>
+                    </div> */}
                     <Popconfirm
                       title="Xóa sản phẩm yêu thíchi"
                       onConfirm={() => unLike(address?.product?.id)}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FiFilter } from "react-icons/fi";
 import { HiBars3 } from "react-icons/hi2";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
@@ -9,6 +10,7 @@ import { HeartOutlined } from "@ant-design/icons";
 import { usePopupMessage } from "../../../hooks/usePopupMessage";
 import { useCreate, useDelete, useList } from "@refinedev/core";
 import { useAuthen } from "../../../hooks/useAuthen";
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 function ProductPage() {
   const {
@@ -200,20 +202,22 @@ function ProductPage() {
 
                     <div className="relative">
                       <Link to={`/products/${product.slug}`}>
-                        <img
+                        <ImageWithFallback
                           src={imgFirst}
-                          className="w-full h-[400px] object-contain object-center bg-white hover:opacity-90 transition duration-200"
-                          alt={product.name}
+                          height={400}
+                          width={"100%"}
+                          attribute="bg-white hover:opacity-90 transition duration-200"
                         />
+                        {/* <img className=" h-[400px] object-contain object-center bg-white hover:opacity-90 transition duration-200" /> */}
                       </Link>
 
                       <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition bg-white">
                         <div className="flex border-t border-gray-200 divide-x divide-gray-200">
-                          <button className="flex-1 text-xs py-2 bg-black text-white hover:opacity-90 cursor-pointer">
+                          {/* <button className="flex-1 text-xs py-2 bg-black text-white hover:opacity-90 cursor-pointer">
                             Mua nhanh
-                          </button>
+                          </button> */}
                           <Link
-                            className="flex-1 text-xs py-2 hover:bg-gray-100 cursor-pointer flex justify-center items-center"
+                            className="flex-1 text-xs py-2 cursor-pointer bg-black text-white flex justify-center items-center"
                             to={`/products/${product.slug}`}
                           >
                             <button className="">Xem chi tiết</button>
@@ -231,13 +235,19 @@ function ProductPage() {
                         <span className="text-green-600">{percent}%</span>
                       </p>
                       <div className="flex gap-1 mt-2">
-                        {thumbnails.map((modelImg, key) => (
-                          <img
+                        {thumbnails.map((modelImg: any, key: any) => (
+                          <ImageWithFallback
                             key={modelImg.id + key}
                             src={modelImg.url}
-                            alt={modelImg.id}
-                            className="w-6 h-6 object-cover border rounded"
+                            height={24}
+                            width={24}
                           />
+                          // <img
+                          //   key={modelImg.id + key}
+                          //   src={modelImg.url}
+                          //   alt={modelImg.id}
+                          // className="w-6 h-6 object-cover border rounded"
+                          // />
                         ))}
                       </div>
                     </div>

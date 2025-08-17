@@ -143,6 +143,7 @@ const Oder = () => {
             });
           },
           onError: (error: any) => {
+            refetch();
             const errorMessage =
               error?.response?.data?.message || "Cập nhật trạng thái thất bại";
             notification.error({
