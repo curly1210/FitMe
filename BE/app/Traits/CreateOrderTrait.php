@@ -38,7 +38,7 @@ trait CreateOrderTrait
             $productItem = ProductItem::with('product', 'color', 'size')->find($item['idProduct_item']);
 
             if (!$productItem || !$productItem->product) {
-                return response()->json(['message' => "Không tìm thấy sản phẩm với ID {$item['idProduct_item']}."], 400);
+                return response()->json(['message' => "Không tìm thấy sản phẩm {$item['name_product']}."], 400);
             }
 
             if ($productItem->stock < $item['quantity']) {

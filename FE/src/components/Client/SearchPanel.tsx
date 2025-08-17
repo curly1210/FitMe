@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseOutlined } from "@ant-design/icons";
-import { Spin, Tooltip } from "antd";
+import { Popconfirm, Spin, Tooltip } from "antd";
 import HeaderClient from "./HeaderClient";
 import { useSearchPanel } from "../../hooks/useSearchPanel";
 import { useList } from "@refinedev/core";
@@ -12,6 +12,9 @@ import { useModal } from "../../hooks/useModal";
 import { useEffect, useRef, useState } from "react";
 import { useChatbox } from "../../hooks/useChatbox";
 import { IoIosChatboxes } from "react-icons/io";
+import ImageWithFallback from "../ImageFallBack";
+import trashCan from "../../assets/images/trash-can.png";
+import close from "../../assets/images/close.png";
 
 const stripHtml = (html: string) => {
   const div = document.createElement("div");
@@ -40,6 +43,7 @@ const SearchPanel = () => {
     input,
     sendMessage,
     setInput,
+    resetChatbox,
   } = useChatbox();
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -102,12 +106,16 @@ const SearchPanel = () => {
                       className="flex gap-2 items-center"
                     >
                       <div className="w-10 h-11">
-                        <img
+                        <ImageWithFallback
                           src={sub?.image}
                           width={40}
-                          alt=""
-                          className="object-cover h-full"
+                          height={"100%"}
                         />
+                        {/* <img
+                          src={sub?.image}
+                          width={40}
+                          className="object-cover h-full"
+                        /> */}
                       </div>
                       <p>{sub.name}</p>
                     </Link>
@@ -157,11 +165,17 @@ const SearchPanel = () => {
                       >
                         <div className="flex flex-col gap-[9px] cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
                           <div className="h-[198px]">
-                            <img
+                            <ImageWithFallback
+                              src={item.thumbnail}
+                              width={"100%"}
+                              height={"100%"}
+                              attribute="object-cover "
+                            />
+                            {/* <img
                               src={item.thumbnail}
                               alt={item.title}
                               className="object-cover block h-full w-full"
-                            />
+                            /> */}
                           </div>
                           <p className="font-semibold text-sm text-[#8C8C8C]">
                             {item.created_at}
@@ -260,6 +274,29 @@ const SearchPanel = () => {
 
             {isOpenChatbox && (
               <div className="fixed bottom-20 right-20 w-80 h-96 bg-white rounded-l border border-gray-300 shadow-xl flex flex-col z-50 ">
+                <div className="absolute -top-7 right-8">
+                  <Popconfirm
+                    title="Xóa hội thoại"
+                    onConfirm={() => resetChatbox()}
+                    description="Bạn có chắc chắn muốn xóa không?"
+                    okText="Có"
+                    cancelText="Không"
+                  >
+                    <img
+                      src={trashCan}
+                      alt="Xóa cuộc trò chuyện"
+                      className="w-6 h-6 cursor-pointer"
+                    />
+                  </Popconfirm>
+                </div>
+                <div className="absolute -top-7 right-0 ">
+                  <img
+                    src={close}
+                    alt="Đóng chat"
+                    onClick={() => toggleChat()}
+                    className="w-6 h-6 cursor-pointer"
+                  />
+                </div>
                 {/* Khung chat */}
                 <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-2">
                   {messages.map((msg: any, index: any) => (
@@ -276,7 +313,11 @@ const SearchPanel = () => {
                             : "bg-gray-200 text-gray-900"
                         }`}
                       >
-                        {msg.content}
+                        {/* {msg.content} */}
+                        <div
+                          dangerouslySetInnerHTML={{ __html: msg.content }}
+                          className="[&>a]:underline [&>a]:text-blue-600 [&>a]:hover:text-blue-800"
+                        />
                       </div>
                     </div>
                   ))}

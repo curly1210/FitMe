@@ -5,6 +5,7 @@ import { Spin } from "antd";
 import { useModal } from "../../../hooks/useModal";
 import ReviewProducts from "./ReviewProducts";
 import ModalEditReview from "./ModalEditReview";
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 const ShowReview = ({
   review_id,
@@ -43,18 +44,19 @@ const ShowReview = ({
         ) : (
           <div>
             <div className="flex items-start gap-3 mb-5">
-              <img
+              <ImageWithFallback
                 src={review?.product?.image_product}
-                // alt={review.product_name}
-                className="w-16 h-16 object-cover"
+                width={64}
+                height={64}
               />
+
               <div className="flex flex-col ">
                 <p className="font-semibold">{review?.product?.product_name}</p>
                 <div className="flex text-sm text-gray-500">
                   {review?.product?.color} - {review?.product?.size}
                 </div>
               </div>
-              {!review?.is_update && (
+              {!review?.is_update && review?.product?.product_item_id && (
                 <button
                   onClick={() =>
                     openModal(
@@ -79,7 +81,11 @@ const ShowReview = ({
             </div>
             <div className="flex gap-4 px-5 my-8">
               <div>
-                <img src="" className="w-8 h-8 rounded-full" alt="" />
+                {/* <ImageWithFallback src={review?.user?.avatar} /> */}
+                <img
+                  src={review?.user?.avatar}
+                  className="w-8 h-8 rounded-full"
+                />
               </div>
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-[2px]">
@@ -92,6 +98,12 @@ const ShowReview = ({
                 <p className="text-justify">{review?.content}</p>
                 <div className="flex gap-3">
                   {review?.review_images?.map((image: any, index: any) => (
+                    // <ImageWithFallback
+                    //   key={image?.id}
+                    //   src={image?.url}
+                    //   width={80}
+                    //   height={80}
+                    // />
                     <img
                       // key={image?.id}
                       key={index}

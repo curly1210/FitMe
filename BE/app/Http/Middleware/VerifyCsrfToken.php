@@ -13,5 +13,6 @@ class VerifyCsrfToken extends Middleware
    */
   protected $except = [
     '/api/chatbot', // 👈 Thêm route cần bỏ qua ở đây
+    '/api/chatbot/reset', // 👈 Thêm route cần bỏ qua ở đây
   ];
 }

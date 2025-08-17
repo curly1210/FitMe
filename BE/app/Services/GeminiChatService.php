@@ -35,6 +35,7 @@ class GeminiChatService
             $productItems = $product->productItems ?? collect();
             return [
                 "name"         => $product->name,
+                "slug"         => $product->slug,
                 "category"     => $product->category->name ?? null,
                 "sizes"        => $productItems->pluck('size.name')->filter()->unique()->values()->toArray(),
                 "colors"       => $productItems->pluck('color.name')->filter()->unique()->values()->toArray(),
@@ -57,7 +58,9 @@ Hướng dẫn:
 4. Khi khách hỏi về sản phẩm, sử dụng dữ liệu dưới đây.
 5. Nếu khách hỏi size/màu, trả lời chính xác dựa trên dữ liệu sản phẩm dưới đây.
 6. Chỉ chào khách hàng một lần duy nhất trong cuộc hội thoại.
-7. Dữ liệu sản phẩm:
+7. Khi khách hỏi link sản phẩm thì đưa link đến trang sản phẩm tương ứng theo slug, với định dạng:
+<a href="http://localhost:5173/products/{slug}" target="_blank">{tên sản phẩm}</a>
+8. Dữ liệu sản phẩm:
 {$productsData->toJson(JSON_UNESCAPED_UNICODE)}
 EOD;
 

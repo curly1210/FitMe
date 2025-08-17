@@ -79,6 +79,7 @@ const Order = () => {
         });
       },
       onError: (error) => {
+        refetch();
         notification.error({ message: `${error?.response?.data?.message}` });
       },
     },

@@ -26,6 +26,7 @@ class OrderStatusNotification extends Notification implements ShouldBroadcast
      * Create a new notification instance.
      */
     public function __construct(int $userId, string $orderId, int $status, string $message, int $isAdmin = 0)
+
     {
         $this->userId = $userId;
         $this->orderId = $orderId;

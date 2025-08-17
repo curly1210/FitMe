@@ -9,13 +9,12 @@ import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../hooks/useAuthen";
 import { useLocation, useNavigate } from "react-router";
 import { usePopupMessage } from "../../hooks/usePopupMessage";
-import ModalChagenPass from "./ModalForgotPassword";
 import ModalForgotPass from "./ModalForgotPassword";
 
 const ModalLogin = () => {
   const { openModal, closeModal } = useModal();
   const { notify } = usePopupMessage();
-  const { setAccessToken, setUser } = useAuthen();
+  const { setAccessToken, setUser, channelAuth } = useAuthen();
   // const navigate = useNavigate();
   const navi = useNavigate();
   const location = useLocation();
@@ -25,15 +24,22 @@ const ModalLogin = () => {
     mutationOptions: {
       onSuccess: (response) => {
         // console.log(response?.data?.data?.user?.name);
+        channelAuth.postMessage({
+          type: "login",
+          payload: {
+            user: response?.data?.data?.user,
+            accessToken: response?.data?.data?.access_token,
+          },
+        });
         setUser(response?.data?.data?.user);
         setAccessToken(response?.data?.data?.access_token);
         notify("success", "Đăng nhập", "Thành công");
         localStorage.setItem("persist", JSON.stringify(true));
-        if (response?.data?.data?.user?.role === "Admin") {
-          navi("/admin");
-          closeModal();
-          return;
-        }
+        // if (response?.data?.data?.user?.role === "Admin") {
+        //   navi("/admin");
+        //   closeModal();
+        //   return;
+        // }
         // console.log(response?.data?.data?.user);
         navi(location.pathname);
         closeModal();
@@ -108,10 +114,8 @@ const ModalLogin = () => {
             </Form.Item>
 
             <p className="text-right font-semibold underline my-4">
-              <span
-               onClick={() => openModal(<ModalForgotPass />)}>
+              <span onClick={() => openModal(<ModalForgotPass />)}>
                 Quên mật khẩu
-
               </span>
             </p>
             <Button

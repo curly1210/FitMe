@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCreate } from "@refinedev/core";
@@ -11,6 +12,7 @@ interface ChatboxType {
   sendMessage: () => void;
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
+  resetChatbox: () => void; // Optional method to reset chatbox
 }
 
 export const ChatboxContext = createContext<ChatboxType>({
@@ -21,19 +23,49 @@ export const ChatboxContext = createContext<ChatboxType>({
   sendMessage: () => {},
   input: "",
   setInput: () => {},
+  resetChatbox: () => {}, // Default implementation does nothing
 });
+
+const initialMessage = [
+  {
+    role: "bot",
+    content:
+      "Xin chào 👋, đây là chatbox hỗ trợ mua hàng. Bạn cần giúp gì không ạ?",
+  },
+];
 
 export const ChatboxProvider = ({ children }: { children: ReactNode }) => {
   const [isOpenChatbox, setIsOpenChatbox] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<any>([]);
+  const [messages, setMessages] = useState<any>(initialMessage);
 
   const { mutate: createRequestForChatbox, isPending } = useCreate({
     resource: "chatbot",
   });
 
+  const { mutate: deleteChatbox } = useCreate({
+    resource: "chatbot/reset",
+  });
+
   const toggleChat = () => {
     setIsOpenChatbox(!isOpenChatbox);
+  };
+
+  const resetChatbox = () => {
+    setMessages(initialMessage);
+    setInput("");
+
+    deleteChatbox(
+      { values: {} },
+      {
+        onSuccess: (_response) => {
+          console.log("Thành công");
+        },
+        onError: (_error) => {
+          console.log("Thất bại");
+        },
+      }
+    );
   };
 
   const sendMessage = () => {
@@ -80,6 +112,7 @@ export const ChatboxProvider = ({ children }: { children: ReactNode }) => {
         sendMessage,
         input,
         setInput,
+        resetChatbox, // Expose the reset method
       }}
     >
       {/* Children components will go here */}

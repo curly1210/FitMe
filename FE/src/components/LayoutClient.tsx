@@ -6,13 +6,15 @@ import { SearchOutlined } from "@ant-design/icons";
 import SearchPanel from "./Client/SearchPanel";
 import FooterClient from "./Client/FooterClient";
 import { GiClothes } from "react-icons/gi";
-import { Tooltip } from "antd";
+import { Popconfirm, Tooltip } from "antd";
 import { useAuthen } from "../hooks/useAuthen";
 import ModalLogin from "./Modal/ModalLogin";
 import { useModal } from "../hooks/useModal";
 import { IoIosChatboxes } from "react-icons/io";
 import { useEffect, useRef } from "react";
 import { useChatbox } from "../hooks/useChatbox";
+import trashCan from "../assets/images/trash-can.png";
+import close from "../assets/images/close.png";
 
 const LayoutClient = () => {
   const { isOpenSearchPanel, setIsOpenSearchPanel } = useSearchPanel();
@@ -26,6 +28,7 @@ const LayoutClient = () => {
     input,
     sendMessage,
     setInput,
+    resetChatbox,
   } = useChatbox();
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -84,6 +87,29 @@ const LayoutClient = () => {
 
         {isOpenChatbox && (
           <div className="fixed bottom-20 right-20 w-80 h-96 bg-white rounded-l border border-gray-300 shadow-xl flex flex-col z-50 ">
+            <div className="absolute -top-7 right-8">
+              <Popconfirm
+                title="Xóa hội thoại"
+                onConfirm={() => resetChatbox()}
+                description="Bạn có chắc chắn muốn xóa không?"
+                okText="Có"
+                cancelText="Không"
+              >
+                <img
+                  src={trashCan}
+                  alt="Xóa cuộc trò chuyện"
+                  className="w-6 h-6 cursor-pointer"
+                />
+              </Popconfirm>
+            </div>
+            <div className="absolute -top-7 right-0 ">
+              <img
+                src={close}
+                alt="Đóng chat"
+                onClick={() => toggleChat()}
+                className="w-6 h-6 cursor-pointer"
+              />
+            </div>
             {/* Khung chat */}
             <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-2">
               {messages.map((msg: any, index: any) => (
@@ -100,7 +126,11 @@ const LayoutClient = () => {
                         : "bg-gray-200 text-gray-900"
                     }`}
                   >
-                    {msg.content}
+                    <div
+                      dangerouslySetInnerHTML={{ __html: msg.content }}
+                      className="[&>a]:underline [&>a]:text-blue-600 [&>a]:hover:text-blue-800"
+                    />
+                    {/* {msg.content} */}
                   </div>
                 </div>
               ))}

@@ -4,6 +4,7 @@ import { useList } from "@refinedev/core";
 import { Link } from "react-router";
 import { Spin } from "antd";
 import dayjs from "dayjs"; // ✅ Thêm thư viện xử lý ngày
+import ImageWithFallback from "../../../components/ImageFallBack";
 
 // ✅ Hàm loại bỏ thẻ HTML trong content
 const stripHtml = (html: string) => {
@@ -36,7 +37,13 @@ const ListPost = () => {
               <div className="flex flex-col gap-[9px] cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
                 {/* Ảnh thumbnail */}
                 <div className="h-[198px] bg-gray-100 rounded overflow-hidden">
-                  <img
+                  <ImageWithFallback
+                    src={item.thumbnail}
+                    alt={item.title}
+                    width={"100%"}
+                    height={"100%"}
+                  />
+                  {/* <img
                     src={
                       item.thumbnail ||
                       "https://via.placeholder.com/400x225?text=No+Image"
@@ -47,16 +54,18 @@ const ListPost = () => {
                     //   (e.target as HTMLImageElement).src =
                     //     "https://via.placeholder.com/400x225?text=Image+Error";
                     // }}
-                  />
+                  /> */}
                 </div>
 
                 {/* Ngày tạo */}
-                   {/* Created at */}
-                   <p className="text-center text-gray-500 mb-4">
-                     {dayjs(item.created_at, "DD-MM-YYYY HH:mm:ss").isValid()
-                       ? dayjs(item.created_at, "DD-MM-YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")
-                       : "Không rõ ngày"}
-                   </p>
+                {/* Created at */}
+                <p className="text-center text-gray-500 mb-4">
+                  {dayjs(item.created_at, "DD-MM-YYYY HH:mm:ss").isValid()
+                    ? dayjs(item.created_at, "DD-MM-YYYY HH:mm:ss").format(
+                        "DD/MM/YYYY HH:mm:ss"
+                      )
+                    : "Không rõ ngày"}
+                </p>
 
                 {/* Tiêu đề */}
                 <p className="line-clamp-2 font-semibold text-ellipsis text-justify leading-5">

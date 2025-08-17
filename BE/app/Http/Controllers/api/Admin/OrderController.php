@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\AdminOrderResource;
 use App\Http\Resources\Admin\AdminOrderDetailResource;
+use App\Traits\ApiResponse;
 
 class OrderController extends Controller
 {
@@ -26,6 +27,8 @@ class OrderController extends Controller
         6 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
         7 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
     ];
+
+    use ApiResponse;
 
     public function index(Request $request)
     {
@@ -96,6 +99,13 @@ class OrderController extends Controller
 
         $order = Order::with('orderDetails')->findOrFail($id);
         $newStatus = (int) $request->status_order_id;
+
+        $currentStatus = $order->status_order_id;
+
+        // Đơn hàng đã hủy
+        if ($currentStatus === 7) {
+            return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
+        }
 
         if ($newStatus === 4) {
             $order->status_payment = 1;
