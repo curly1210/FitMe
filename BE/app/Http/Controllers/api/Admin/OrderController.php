@@ -109,6 +109,7 @@ class OrderController extends Controller
 
         if ($newStatus === 4) {
             $order->status_payment = 1;
+            $order->paid_at = now();
         }
         if ($newStatus === 6) {
             $order->success_at = Carbon::now();
