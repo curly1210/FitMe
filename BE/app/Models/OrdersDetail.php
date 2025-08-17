@@ -24,6 +24,7 @@ class OrdersDetail extends Model
         'color',
         'size',
         'name_product',
+        'restocked',
     ];
 
     /**
