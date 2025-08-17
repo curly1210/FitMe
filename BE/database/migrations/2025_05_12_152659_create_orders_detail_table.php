@@ -21,6 +21,7 @@ return new class extends Migration
                 ->constrained('product_items')
                 ->onDelete('set null');
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->tinyInteger('restocked')->default(0);
             $table->timestamps();
         });
     }

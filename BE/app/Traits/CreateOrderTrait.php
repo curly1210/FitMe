@@ -106,24 +106,23 @@ trait CreateOrderTrait
 
         DB::beginTransaction();
         try {
-            if ($request->payment_method == "cod" && $request->total_amount > 10000000) {
-                return $this->error("Đơn hàng vượt quá 10 triệu vui lòng thanh toán online hoặc chia nhỏ đơn hàng", ["payment_method" => 'cod ko hỗ trợ thanh toán đơn hàng trên 10tr', 'total_amount' => "Đơn hàng vượt quá 10 triệu"], 422);
-            }
             $order = Order::create([
-                'orders_code' => $request->orders_code ?? $uniqueCode,
+                'orders_code' =>  $uniqueCode,
                 'total_price_item' => $request->total_price_cart,
                 'shipping_price' => $request->shipping_price,
                 'discount' => $request->discount ?? 0,
                 'total_amount' => $request->total_amount,
-                'status_payment' => $payment_status,
+                'status_payment' => 0,
                 'payment_method' => $request->payment_method,
                 'status_order_id' => 1,
                 'user_id' => $user->id,
                 'receiving_address' => $fullAddress,
                 'recipient_name' => $address->name_receive,
                 'recipient_phone' => $address->phone,
+                'paid_at' => $request->paid_at ?? null,
                 'transaction_at' => $request->transaction_at ?? null,
                 "bank_code" => $request->bank_code ?? null,
+                "bank_name" => $request->bank_name ?? null,
 
             ]);
 

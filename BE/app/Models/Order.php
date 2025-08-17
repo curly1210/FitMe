@@ -25,7 +25,10 @@ class Order extends Model
         'recipient_phone',
         'transaction_at',
         'bank_code',
+        'bank_name',
         "success_at",
+        "refunded_at",
+        'paid_at',
     ];
 
     // Quan hệ với User
