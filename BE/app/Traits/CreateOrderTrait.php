@@ -142,8 +142,8 @@ trait CreateOrderTrait
 
             $user->cart_items()->whereIn('id', $cartItemIds)->delete();
 
-            Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderItems));
-            Mail::to(config('mail.admin_email'))->send(new NotifyAdminOrderMail($order, $orderItems));
+            // Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderItems));
+            // Mail::to(config('mail.admin_email'))->send(new NotifyAdminOrderMail($order, $orderItems));
 
 
             DB::commit();

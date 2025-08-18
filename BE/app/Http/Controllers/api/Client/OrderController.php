@@ -260,6 +260,7 @@ class OrderController extends Controller
                         if ($productItem) {
                             // Restore stock biến thể của sản phẩm
                             $productItem->increment('stock', $orderDetail->quantity);
+                            $orderDetail->update(['restocked' => 1]);
                         };
                     };
                 });

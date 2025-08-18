@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SwapRightOutlined } from "@ant-design/icons";
-import { useCustom, useUpdate } from "@refinedev/core";
+import { useCreate, useCustom, useUpdate } from "@refinedev/core";
 
 import {
   Button,
@@ -32,6 +33,32 @@ const Order = () => {
 
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | undefined>(undefined);
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
+
+  const { mutate: createPaymentOnline } = useCreate(); // gửi thông tin về be khi ấn thanh toán
+
+  const onHandlePaymentOnline = (orders_code: any, total_amount: any) => {
+    createPaymentOnline(
+      {
+        resource: "vnpay/payment",
+        values: {
+          total_amount: total_amount,
+          orders_code: orders_code,
+        },
+      },
+      {
+        onSuccess: (response) => {
+          // console.log("url", response?.data.vnp_Url);
+          window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+        },
+        onError: (error) => {
+          notification.error({
+            message: "Có lỗi xảy ra khi thanh toán",
+          });
+          // console.log("Thanh toán thất bại");
+        },
+      }
+    );
+  };
 
   const {
     data: ordersResponse,
@@ -246,6 +273,23 @@ const Order = () => {
                     </Link>
                     <RenderReviewButton order={order} />
 
+                    {order.status_name == "Chờ xác nhận" &&
+                      order?.payment_method == "vnpay" &&
+                      !order?.status_payment && (
+                        <Button
+                          onClick={() =>
+                            onHandlePaymentOnline(
+                              order?.orders_code,
+                              order?.total_amount
+                            )
+                          }
+                          // loading={isPendingUpdateStatus}
+                          className="!text-white !bg-black !border-black !py-5 !px-3 !cursor-pointer"
+                        >
+                          THANH TOÁN LẠI
+                        </Button>
+                      )}
+
                     {(order.status_name == "Chờ xác nhận" ||
                       order.status_name == "Đang chuẩn bị hàng") && (
                       <Popconfirm
@@ -263,6 +307,7 @@ const Order = () => {
                         </Button>
                       </Popconfirm>
                     )}
+
                     {order.status_name == "Đã giao hàng" && (
                       <Popconfirm
                         title="Cập nhật trạng thái"
