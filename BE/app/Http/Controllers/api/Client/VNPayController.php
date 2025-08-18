@@ -21,7 +21,10 @@ class VNPayController extends Controller
             if (!$request->orders_code) {
                 return $this->error("Thanh toán thất bại", ["Mã đơn hàng không tồn tại", 422]);
             }
-            $vnp_TxnRef = $request->orders_code; //Mã giao dịch thanh toán tham chiếu của merchant
+            do {
+                $code = 'VNP' . strtoupper(Str::random(9)); // Ví dụ: 12 ký tự ngẫu nhiên
+            } while (Order::where('vnp_txnref', $code)->exists());
+            $vnp_TxnRef = $code; //Mã giao dịch thanh toán tham chiếu của merchant
             $vnp_Amount = $request->input('total_amount'); // Số tiền thanh toán
             $vnp_Locale = "vn"; //Ngôn ngữ chuyển hướng thanh toán
             $vnp_BankCode = "NCB"; //Mã phương thức thanh toán
@@ -40,7 +43,7 @@ class VNPayController extends Controller
                 "vnp_CurrCode" => "VND",
                 "vnp_IpAddr" => $vnp_IpAddr,
                 "vnp_Locale" => $vnp_Locale,
-                "vnp_OrderInfo" => "Thanh toan GD:" . $vnp_TxnRef . '-' . $vnp_CreateDate,
+                "vnp_OrderInfo" => "Thanh toan GD:" . $request->orders_code . '-' . $vnp_CreateDate,
                 "vnp_OrderType" => "other",
                 "vnp_ReturnUrl" => env('VNP_RETURN_URL'),
                 "vnp_TxnRef" => $vnp_TxnRef,
@@ -110,15 +113,15 @@ class VNPayController extends Controller
                 $vnp_TransactionNo =  $request->vnp_TransactionNo; // Lấy mã giao dịch của VNPay
                 $order_info = $request->query('vnp_OrderInfo');
                 $vnp_TransactionDate = explode('-', $order_info)[1];
-                // return response()->json($request->all());
-
-                $order = Order::where('orders_code', $vnp_TxnRef)->first();
+                $orders_code = explode('-', str_replace('Thanh toan GD:', '', $order_info))[0];
+                $order = Order::where('orders_code', $orders_code)->first();
                 $order->update([
                     'status_payment' => 1,
                     'bank_code' => $vnp_TransactionNo,
                     'transaction_at' => $vnp_TransactionDate,
                     "bank_name" => $request->vnp_BankCode,
                     "paid_at" => $request->vnp_PayDate,
+                    "vnp_txnref" => $vnp_TxnRef,
                 ]);
                 return response()->json(['message' => "Thanh toán thành công ", 'vnp_ResponseCode' => $request->query('vnp_ResponseCode')]);
             } else {

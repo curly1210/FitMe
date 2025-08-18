@@ -29,6 +29,7 @@ class Order extends Model
         "success_at",
         "refunded_at",
         'paid_at',
+        'vnp_txnref',
     ];
 
     // Quan hệ với User
