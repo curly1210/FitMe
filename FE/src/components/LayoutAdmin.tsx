@@ -5,6 +5,7 @@ import {
   BellOutlined,
   DownOutlined,
   InboxOutlined,
+  MailOutlined,
   PercentageOutlined,
   PictureOutlined,
   ProductOutlined,
@@ -109,6 +110,11 @@ const itemsNavigate: MenuItem[] = [
     <Link to="/admin/posts">Quản lý tin tức</Link>,
     "10",
     <ReadOutlined />
+  ),
+  getItem(
+    <Link to="/admin/contacts">Quản lý liên hệ</Link>,
+    "11",
+   <MailOutlined />
   ),
   getItem(
     <Link to="/admin/reviews">Quản lý đánh giá</Link>,
