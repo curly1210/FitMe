@@ -55,4 +55,9 @@ class Order extends Model
     {
         return $this->hasMany(OrdersDetail::class);
     }
+
+    public function proofImages()
+    {
+        return $this->hasMany(OrderProofImage::class);
+    }
 }

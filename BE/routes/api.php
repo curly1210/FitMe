@@ -98,6 +98,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
 
     Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+    Route::post('orders/proof-images/{id}', [AdminOrderController::class, 'uploadProofImages']);
+
 });
 
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
@@ -326,7 +328,6 @@ Route::get('/notifications/unread', [NotificationController::class, 'listUnread'
 Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 // đánh dấu tất cả thông báo đã đọc
 Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-
 
 
 
