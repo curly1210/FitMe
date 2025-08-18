@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Modal, Select, Spin, message, notification } from "antd";
@@ -40,7 +41,7 @@ const CheckOut = () => {
   const { mutate: createOrder, isLoading } = useCreate(); // gửi thông tin về be khi ấn thanh toán
 
   const { data: addressData } = useList({ resource: "addresses" });
-  const { mutate: redeemCoupon, isLoading: isRedeeming } = useCustomMutation();
+  const { mutate: redeemCoupon } = useCustomMutation();
   const nav = useNavigate();
 
   // const { refetch } = useCart(); // lấy đơn hàng từ cart
@@ -246,7 +247,7 @@ const CheckOut = () => {
                   // console.log("url", response?.data.vnp_Url);
                   window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
                 },
-                onError: (error) => {
+                onError: (_error) => {
                   console.log("Thanh toán thất bại");
                 },
               }

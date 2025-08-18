@@ -24,7 +24,7 @@ class VNPayController extends Controller
             do {
                 $code = 'VNP' . strtoupper(Str::random(9)); // Ví dụ: 12 ký tự ngẫu nhiên
             } while (Order::where('vnp_txnref', $code)->exists());
-            $vnp_TxnRef = $code; //Mã giao dịch thanh toán tham chiếu của merchant
+            $vnp_TxnRef = $request->orders_code . "-" .  $code; //Mã giao dịch thanh toán tham chiếu của merchant
             $vnp_Amount = $request->input('total_amount'); // Số tiền thanh toán
             $vnp_Locale = "vn"; //Ngôn ngữ chuyển hướng thanh toán
             $vnp_BankCode = "NCB"; //Mã phương thức thanh toán
@@ -221,10 +221,10 @@ class VNPayController extends Controller
 
             do {
                 $uniqueCode =  now()->format('ymd') . strtoupper(Str::random(6));
-            } while (Order::where('orders_code', $uniqueCode)->exists());
-            $vnp_TxnRef = $request->order_code; // Mã tham chiếu của giao dịch
-            $order = Order::query()->where('orders_code', $vnp_TxnRef)->first();
-            if (!$order || $vnp_TxnRef == null) {
+            } while (Order::where('vnp_txnref', $uniqueCode)->exists());
+            $orders_code = $request->order_code; // Mã tham chiếu của giao dịch
+            $order = Order::query()->where('orders_code', $orders_code)->first();
+            if (!$order) {
                 return $this->error("Không tìm thấy đơn hàng", [], 404);
             }
             if ($order->payment_method == 'cod') {
@@ -254,7 +254,7 @@ class VNPayController extends Controller
                 "vnp_Command" => $vnp_Command,
                 "vnp_TmnCode" => env('VNP_TMNCODE'),
                 "vnp_TransactionType" => $vnp_TransactionType,
-                "vnp_TxnRef" => $vnp_TxnRef,
+                "vnp_TxnRef" =>  $order->vnp_txnref,
                 "vnp_Amount" => $vnp_Amount,
                 "vnp_OrderInfo" => $vnp_OrderInfo,
                 "vnp_TransactionNo" => $vnp_TransactionNo,
