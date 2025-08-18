@@ -1,5 +1,10 @@
 import { useCustom } from "@refinedev/core";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  ZoomableGroup,
+} from "react-simple-maps";
 import { Spin, DatePicker, Select, Row, Col, Space, Typography } from "antd";
 import { useMemo, useState } from "react";
 import { feature } from "topojson-client";
@@ -25,7 +30,7 @@ const normalizeProvinceName = (str: string) =>
 
 export const OrderLocationMap = () => {
   const now = dayjs();
-  const [dateRange, setDateRange] = useState<[string, string]>([
+  const [dateRange, setDateRange] = useState<[string, string] | undefined>([
     now.subtract(30, "day").format("YYYY-MM-DD"),
     now.format("YYYY-MM-DD"),
   ]);
@@ -36,8 +41,7 @@ export const OrderLocationMap = () => {
     method: "get",
     config: {
       query: {
-        from: dateRange[0],
-        to: dateRange[1],
+        ...(dateRange && { from: dateRange[0], to: dateRange[1] }),
         ...(statusOrderId !== undefined && { status_order_id: statusOrderId }),
       },
     },
@@ -46,7 +50,10 @@ export const OrderLocationMap = () => {
   const geoJson = useMemo(() => {
     const objKey = Object.keys(topoData.objects)[0];
     const obj = (topoData.objects as any)[objKey];
-    return feature(topoData as any, obj) as unknown as FeatureCollection<Geometry, GeoJsonProperties>;
+    return feature(topoData as any, obj) as unknown as FeatureCollection<
+      Geometry,
+      GeoJsonProperties
+    >;
   }, []);
 
   const geoNameMap = useMemo(() => {
@@ -79,17 +86,24 @@ export const OrderLocationMap = () => {
     .range(["#E6F0FF", "#003366"]);
 
   const [tooltipContent, setTooltipContent] = useState<string | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
-console.log("Số đơn hàng theo tỉnh:", normalizedApiData);
-console.log("Raw API data:", data?.data?.data);
-console.log("Địa danh trên bản đồ:", geoNameMap.properties);
+  console.log("Số đơn hàng theo tỉnh:", normalizedApiData);
+  console.log("Raw API data:", data?.data?.data);
+  console.log("Địa danh trên bản đồ:", geoNameMap.properties);
 
   if (isLoading) return <Spin />;
 
   return (
     <div style={{ padding: 24 }}>
-      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}className="ml-90">
+      <Row
+        justify="space-between"
+        align="middle"
+        style={{ marginBottom: 24 }}
+        className="ml-90"
+      >
         {/* <Col>
           <Title level={4}>Bản đồ thống kê đơn hàng</Title>
         </Col> */}
@@ -97,13 +111,17 @@ console.log("Địa danh trên bản đồ:", geoNameMap.properties);
           <Space>
             <RangePicker
               allowClear={true}
-              value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
+              value={
+                dateRange ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : null
+              }
               onChange={(dates) => {
                 if (dates) {
                   setDateRange([
                     dates[0]?.format("YYYY-MM-DD") ?? "",
                     dates[1]?.format("YYYY-MM-DD") ?? "",
                   ]);
+                } else {
+                  setDateRange(undefined);
                 }
               }}
             />
@@ -111,6 +129,7 @@ console.log("Địa danh trên bản đồ:", geoNameMap.properties);
               allowClear
               style={{ width: 180 }}
               placeholder="Trạng thái đơn hàng"
+              value={statusOrderId}
               onChange={(value) => setStatusOrderId(value)}
             >
               <Select.Option value={1}>Chờ xác nhận</Select.Option>
@@ -133,38 +152,35 @@ console.log("Địa danh trên bản đồ:", geoNameMap.properties);
           projectionConfig={{ scale: 2800, center: [105.5, 16] }}
           onMouseLeave={() => setTooltipContent(null)}
         >
-            <ZoomableGroup
-    zoom={1}
-    maxZoom={20}
-    minZoom={1}
-    center={[105.5, 16]}
-  >
-          <Geographies geography={geoJson}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                const shapeName = geo.properties?.shapeName ?? "";
-                const orderCount = normalizedApiData[shapeName] || 0;
+          <ZoomableGroup zoom={1} maxZoom={20} minZoom={1} center={[105.5, 16]}>
+            <Geographies geography={geoJson}>
+              {({ geographies }) =>
+                geographies.map((geo) => {
+                  const shapeName = geo.properties?.shapeName ?? "";
+                  const orderCount = normalizedApiData[shapeName] || 0;
 
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={orderCount > 0 ? colorScale(orderCount) : "#F5F5F5"}
-                    stroke="#AAA"
-                    onMouseEnter={(e) => {
-                      setTooltipContent(`${shapeName}: ${orderCount} đơn hàng`);
-                      setTooltipPos({ x: e.clientX, y: e.clientY });
-                    }}
-                    style={{
-                      default: { outline: "none" },
-                      hover: { fill: "#FF9933", outline: "none" },
-                      pressed: { fill: "#E42", outline: "none" },
-                    }}
-                  />
-                );
-              })
-            }
-          </Geographies>
+                  return (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      fill={orderCount > 0 ? colorScale(orderCount) : "#F5F5F5"}
+                      stroke="#AAA"
+                      onMouseEnter={(e) => {
+                        setTooltipContent(
+                          `${shapeName}: ${orderCount} đơn hàng`
+                        );
+                        setTooltipPos({ x: e.clientX, y: e.clientY });
+                      }}
+                      style={{
+                        default: { outline: "none" },
+                        hover: { fill: "#FF9933", outline: "none" },
+                        pressed: { fill: "#E42", outline: "none" },
+                      }}
+                    />
+                  );
+                })
+              }
+            </Geographies>
           </ZoomableGroup>
         </ComposableMap>
 
