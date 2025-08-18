@@ -4,7 +4,6 @@ import {
   Tag,
   Button,
   Image,
-  Tooltip,
   Popconfirm,
   message,
   Spin,
@@ -44,7 +43,7 @@ const PostList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 9;
 
-  const [isDeleting, setIsDeleting] = useState(false); // ⭐️ trạng thái loading toàn màn hình
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data, isLoading, refetch } = useList<Post>({
     resource: "admin/posts",
@@ -57,7 +56,7 @@ const PostList = () => {
   const { mutate: deletePost } = useDelete();
 
   const handleDelete = (id: number) => {
-    setIsDeleting(true); // 👉 Bắt đầu loading toàn màn hình
+    setIsDeleting(true);
     deletePost(
       {
         resource: "admin/posts",
@@ -72,7 +71,7 @@ const PostList = () => {
           message.error("Lỗi khi xoá bài viết");
         },
         onSettled: () => {
-          setIsDeleting(false); // 👉 Tắt loading sau khi xoá
+          setIsDeleting(false);
         },
       }
     );
@@ -105,43 +104,6 @@ const PostList = () => {
             />
           ))}
         </div>
-      ),
-    },
-    {
-      title: "Nội dung",
-      dataIndex: "content",
-      render: (html: string) => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-
-        const text = doc.body.textContent?.trim().slice(0, 100) || "";
-        const imgEl = doc.querySelector("img");
-        const imgSrc = imgEl?.getAttribute("src");
-
-        return (
-          <div className="flex gap-2 items-center max-w-[250px]">
-            {imgSrc && (
-              <Image
-                src={imgSrc}
-                width={60}
-                height={60}
-                alt="content-img"
-                className="rounded-md border"
-                preview={false}
-              />
-            )}
-            <Tooltip title={text}>
-              <span className="truncate text-gray-700">{text}</span>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Slug",
-      dataIndex: "slug",
-      render: (text: string) => (
-        <span className="text-sm text-blue-500 italic">{text}</span>
       ),
     },
     {

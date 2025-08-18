@@ -18,6 +18,7 @@ import { InventoryPage } from "../pages/admin/Dashboard/thongKeTonKho";
 import ReviewPage from "../pages/admin/Dashboard/thongKeDanhGia/idext";
 import AdminReviewProductList from "../pages/admin/Review";
 import NotificationAdmin from "../pages/admin/Notification";
+import ContactList from "../pages/admin/Contact";
 
 export const adminRoutes = [
   {
@@ -83,6 +84,10 @@ export const adminRoutes = [
           {
             path: "posts",
             element: <PostList />,
+          },
+          {
+            path: "contacts",
+            element: <ContactList />,
           },
           {
             path: "reviews",
