@@ -98,6 +98,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
 
     Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+    Route::post('orders/proof-images/{id}', [AdminOrderController::class, 'uploadProofImages']);
+
 });
 
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
@@ -337,7 +339,6 @@ Route::prefix('admin')->middleware('auth:api')->group(function () {
     Route::get('/contact/{id}', [AdminContactController::class, 'show']);
     Route::delete('/contact/{id}', [AdminContactController::class, 'destroy']);
 });
-
 
 
 

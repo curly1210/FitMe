@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\api\Admin;
 
-use App\Events\OrderStatusUpdated;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\ProductItem;
+use App\Traits\ApiResponse;
 use App\Models\OrdersDetail;
-use App\Notifications\OrderStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\OrderProofImage;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use App\Notifications\OrderStatusNotification;
 use App\Http\Resources\Admin\AdminOrderResource;
 use App\Http\Resources\Admin\AdminOrderDetailResource;
-use App\Traits\ApiResponse;
-
+use App\Traits\CloudinaryTrait;
 class OrderController extends Controller
 {
     private $statusMap = [
@@ -28,8 +30,7 @@ class OrderController extends Controller
         7 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
     ];
 
-    use ApiResponse;
-
+    use ApiResponse, CloudinaryTrait;
     public function index(Request $request)
     {
         $query = Order::with('user')
@@ -86,6 +87,12 @@ class OrderController extends Controller
             'shipping_price' => $order->shipping_price,
             'discount' => $order->discount,
             'total_amount' => $order->total_amount,
+            'proof_images' => $order->proofImages->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'url' => $this->buildImageUrl($image->images),
+                ];
+            }),
             'order_details' => AdminOrderDetailResource::collection($order->orderDetails)
         ]);
     }
@@ -147,4 +154,56 @@ class OrderController extends Controller
 
         return response()->json(['message' => $message]);
     }
+
+    public function uploadProofImages(Request $request, $orderId)
+    {
+        $validator = Validator::make(
+            $request->only(['images']),
+            [
+                'images' => 'required|array|min:1|max:3',
+                'images.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            ],
+            [
+                'images.required' => 'Cần tải lên ít nhất 1 ảnh minh chứng.',
+                'images.array' => 'Dữ liệu ảnh không hợp lệ.',
+                'images.min' => 'Phải tải lên ít nhất 1 ảnh.',
+                'images.max' => 'Tối đa 3 ảnh minh chứng được phép tải lên.',
+                'images.*.image' => 'File tải lên phải là hình ảnh.',
+                'images.*.mimes' => 'File chỉ nhận định dạng jpeg, png, jpg, webp.',
+                'images.*.max' => 'Ảnh không được vượt quá 2MB.',
+            ]
+        );
+
+        if ($validator->fails() || !$request->hasFile('images')) {
+            return $this->error('Dữ liệu không hợp lệ', $validator->errors(), 422);
+        }
+
+        $order = Order::findOrFail($orderId);
+
+        $proofImages = [];
+        foreach ($request->file('images') as $file) {
+            $uploadedFileUrl = $this->uploadImageToCloudinary(
+                $file,
+                ['quality' => 65, 'folder' => "uploads/orders/{$order->id}/proofs"]
+            );
+
+            $proof = OrderProofImage::create([
+                'order_id' => $order->id,
+                'images' => $uploadedFileUrl['public_id'],
+            ]);
+
+            $proofImages[] = [
+                'id' => $proof->id,
+                'url' => $this->buildImageUrl($proof->images),
+                'time' => $proof->created_at->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        return $this->success([
+            'order_id' => $order->id,
+            'proof_images' => $proofImages,
+        ], 'Tải lên ảnh minh chứng thành công.', 201);
+    }
+
+
 }
