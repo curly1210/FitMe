@@ -35,8 +35,8 @@ use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-
-
+use App\Http\Controllers\api\Client\ContactController;
+use App\Http\Controllers\api\Admin\ContactController as AdminContactController;
 use App\Http\Controllers\Api\Client\ForgotPasswordController;
 
 
@@ -326,6 +326,16 @@ Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsR
 // đánh dấu tất cả thông báo đã đọc
 Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 
+
+
+//Liên hệ bên client
+Route::post("/contact", [ContactController::class, "store"]);
+//Liên hệ bên admin
+Route::prefix('admin')->middleware('auth:api')->group(function () {
+    Route::get('/contacts', [AdminContactController::class, 'index']);
+    Route::get('/contact/{id}', [AdminContactController::class, 'show']);
+    Route::delete('/contact/{id}', [AdminContactController::class, 'destroy']);
+});
 
 
 
