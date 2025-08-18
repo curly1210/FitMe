@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined } from "@ant-design/icons";
-import { useOne, useUpdate } from "@refinedev/core";
-import { notification, Popconfirm, Spin, Steps, Tag } from "antd";
+import { useCreate, useOne, useUpdate } from "@refinedev/core";
+import { Button, notification, Popconfirm, Spin, Steps, Tag } from "antd";
 import { Link, useParams } from "react-router";
 import { formatDate } from "../../../utils/dateUtils";
 import { formatCurrencyVND } from "../../../utils/currencyUtils";
@@ -31,7 +32,7 @@ const DetailOrder = () => {
     },
   });
 
-  const { mutate } = useUpdate({
+  const { mutate, isPending: isPendingUpdateStatus } = useUpdate({
     resource: "orders",
     mutationOptions: {
       onSuccess: (response) => {
@@ -54,6 +55,32 @@ const DetailOrder = () => {
     });
   };
 
+  const { mutate: createPaymentOnline } = useCreate();
+
+  const onHandlePaymentOnline = (orders_code: any, total_amount: any) => {
+    createPaymentOnline(
+      {
+        resource: "vnpay/payment",
+        values: {
+          total_amount: total_amount,
+          orders_code: orders_code,
+        },
+      },
+      {
+        onSuccess: (response) => {
+          // console.log("url", response?.data.vnp_Url);
+          window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+        },
+        onError: (_error) => {
+          notification.error({
+            message: "Có lỗi xảy ra khi thanh toán",
+          });
+          // console.log("Thanh toán thất bại");
+        },
+      }
+    );
+  };
+
   if (error) {
     if (error?.status === 404) {
       return (
@@ -63,39 +90,6 @@ const DetailOrder = () => {
   }
 
   const order: any = orderResponse?.data || [];
-
-  // console.log(order);
-
-  // console.log(order);
-
-  // const description = "This is a description.";
-
-  // const items: {
-  //   title: string;
-  //   status: "wait" | "process" | "finish" | "error" | undefined;
-  //   icon: JSX.Element;
-  // }[] = [
-  //   {
-  //     title: "Chờ xác nhận",
-  //     status: "finish",
-  //     icon: <BsBoxSeam className="!text-3xl" />,
-  //   },
-  //   {
-  //     title: "Chuẩn bị hàng",
-  //     status: order?.status_order_id > 1 ? "finish" : "wait",
-  //     icon: <BiDollar className="!text-3xl" />,
-  //   },
-  //   {
-  //     title: "Đang giao hàng",
-  //     status: order?.status_order_id > 2 ? "finish" : "wait",
-  //     icon: <LiaShippingFastSolid className="!text-3xl" />,
-  //   },
-  //   {
-  //     title: "Thành công",
-  //     status: order?.status_order_id == 6 ? "finish" : "wait",
-  //     icon: <FaCheck className="!text-3xl" />,
-  //   },
-  // ];
 
   return (
     <div>
@@ -124,8 +118,59 @@ const DetailOrder = () => {
             {formatDate(order?.created_at, 3)}
           </p>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3 mb-5">
+            {order.status_name == "Chờ xác nhận" &&
+              order?.payment_method == "vnpay" &&
+              order?.status_payment == 0 && (
+                <Button
+                  onClick={() =>
+                    onHandlePaymentOnline(
+                      order?.orders_code,
+                      order?.total_amount
+                    )
+                  }
+                  // loading={isPendingUpdateStatus}
+                  className="!text-white !bg-black !rounded-none !border-2 !border-black !py-5 !px-3  !cursor-pointer"
+                >
+                  THANH TOÁN LẠI
+                </Button>
+              )}
+
             {(order.status_name == "Chờ xác nhận" ||
+              order.status_name == "Đang chuẩn bị hàng") && (
+              <Popconfirm
+                title="Cập nhật trạng thái"
+                onConfirm={() => onHandleChangeStatus(order.id)}
+                description="Bạn có chắc chắn muốn hủy đơn hàng không?"
+                okText="Có"
+                cancelText="Không"
+              >
+                <Button
+                  loading={isPendingUpdateStatus}
+                  className="!text-white !bg-black !rounded-none !border-2 !border-black !py-5 !px-3 !cursor-pointer"
+                >
+                  HỦY ĐƠN
+                </Button>
+              </Popconfirm>
+            )}
+
+            {order.status_name == "Đã giao hàng" && (
+              <Popconfirm
+                title="Cập nhật trạng thái"
+                onConfirm={() => onHandleChangeStatus(order.id)}
+                description="Xác nhận nhận hàng thành công?"
+                okText="Có"
+                cancelText="Không"
+              >
+                <Button
+                  loading={isPendingUpdateStatus}
+                  className="!text-white !bg-black !border-2 !rounded-none !border-black !py-5 !px-3 !cursor-pointer"
+                >
+                  ĐÃ NHẬN HÀNG
+                </Button>
+              </Popconfirm>
+            )}
+            {/* {(order.status_name == "Chờ xác nhận" ||
               order.status_name == "Đang chuẩn bị hàng") && (
               <Popconfirm
                 title="Cập nhật trạng thái"
@@ -151,7 +196,7 @@ const DetailOrder = () => {
                   ĐÃ NHẬN HÀNG
                 </button>
               </Popconfirm>
-            )}
+            )} */}
           </div>
 
           <div className="grid grid-cols-3 gap-x-4 mb-5">
@@ -181,7 +226,7 @@ const DetailOrder = () => {
                 )}
                 <p>
                   <Tag
-                    className="!font-bold"
+                    className="!font-bold !text-[16px]"
                     color={
                       order?.status_payment === 0
                         ? "warning"
@@ -283,8 +328,8 @@ const DetailOrder = () => {
                   <div className="flex items-stretch gap-3">
                     <ImageWithFallback
                       src={item?.image}
-                      width={60}
-                      height={100}
+                      width={80}
+                      height={80}
                     />
 
                     <div className="flex flex-col gap-2">
@@ -330,7 +375,44 @@ const DetailOrder = () => {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div
+            className={`flex  ${
+              order?.status_payment === 3 ? "justify-between" : "justify-end"
+            }`}
+          >
+            {order?.status_payment === 3 && (
+              <div className="py-3 px-5 border border-gray-300">
+                <h2 className="text-lg font-semibold mb-4">
+                  Thông tin hoàn tiền (VNPAY)
+                </h2>
+
+                <div className="grid w-[320px] grid-cols-2 gap-x-3 gap-y-6">
+                  <div>
+                    <p className="text-sm">Ngân hàng</p>
+                    <Tag color="blue" className="!font-bold !text-[18px]">
+                      {order?.bank_name || "Chưa có thông tin"}
+                    </Tag>
+                  </div>
+                  <div className="">
+                    <p className="text-sm">Ngày hoàn tiền</p>
+                    <p className="font-semibold">{order?.refunded_at}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm">Mã giao dịch</p>
+                    <p className="font-semibold">{order?.bank_code}</p>
+                  </div>
+
+                  <div className="">
+                    <p className="text-sm ">Tổng tiền</p>
+                    <p className="font-semibold">
+                      {formatCurrencyVND(order?.total_amount)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="border border-gray-300 px-5 py-3 w-72 space-y-3">
               <div className="flex justify-between">
                 <p>Tạm tính:</p>

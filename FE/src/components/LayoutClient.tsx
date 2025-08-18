@@ -6,7 +6,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import SearchPanel from "./Client/SearchPanel";
 import FooterClient from "./Client/FooterClient";
 import { GiClothes } from "react-icons/gi";
-import { Popconfirm, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import { useAuthen } from "../hooks/useAuthen";
 import ModalLogin from "./Modal/ModalLogin";
 import { useModal } from "../hooks/useModal";
@@ -14,7 +14,6 @@ import { IoIosChatboxes } from "react-icons/io";
 import { useEffect, useRef } from "react";
 import { useChatbox } from "../hooks/useChatbox";
 import trashCan from "../assets/images/trash-can.png";
-import close from "../assets/images/close.png";
 
 const LayoutClient = () => {
   const { isOpenSearchPanel, setIsOpenSearchPanel } = useSearchPanel();
@@ -87,7 +86,7 @@ const LayoutClient = () => {
 
         {isOpenChatbox && (
           <div className="fixed bottom-20 right-20 w-80 h-96 bg-white rounded-l border border-gray-300 shadow-xl flex flex-col z-50 ">
-            <div className="absolute -top-7 right-8">
+            {/* <div className="absolute -top-7 right-8">
               <Popconfirm
                 title="Xóa hội thoại"
                 onConfirm={() => resetChatbox()}
@@ -109,7 +108,7 @@ const LayoutClient = () => {
                 onClick={() => toggleChat()}
                 className="w-6 h-6 cursor-pointer"
               />
-            </div>
+            </div> */}
             {/* Khung chat */}
             <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-2">
               {messages.map((msg: any, index: any) => (
@@ -145,7 +144,17 @@ const LayoutClient = () => {
             </div>
 
             {/* Input + Gửi */}
-            <div className="flex border-t border-gray-200">
+            <div className="flex items-stretch border-t border-gray-200">
+              <div className="px-2 border-r border-gray-200 flex items-center">
+                <Tooltip placement="top" title={"Xóa cuộc trò chuyện"}>
+                  <img
+                    onClick={() => resetChatbox()}
+                    src={trashCan}
+                    alt="Xóa cuộc trò chuyện"
+                    className="w-5 h-5 cursor-pointer"
+                  />
+                </Tooltip>
+              </div>
               <input
                 type="text"
                 value={input}
@@ -156,7 +165,7 @@ const LayoutClient = () => {
               />
               <button
                 onClick={sendMessage}
-                className="bg-blue-500 text-white px-4 text-sm"
+                className="bg-blue-500 text-white px-4 text-sm "
               >
                 Gửi
               </button>

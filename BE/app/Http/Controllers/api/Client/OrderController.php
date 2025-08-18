@@ -253,7 +253,10 @@ class OrderController extends Controller
                     // Chuyển từ "Chưa xác nhận" (1) hoặc "đang chuẩn bị" (2) sang "Đã hủy" (7)
                     $order->update(['status_order_id' => 7]);
                     if ($order->payment_method == "vnpay") {
-                        $order->update(['status_payment' => 2]); # Chờ hoàn tiền
+                        if ($order->status_payment == 1) {
+                            // Nếu đã thanh toán, chuyển sang trạng thái chờ hoàn tiền
+                            $order->update(['status_payment' => 2]); # Chờ hoàn tiền
+                        }
                     }
                     foreach ($order->orderDetails as $orderDetail) {
                         $productItem = $orderDetail->productItem;
@@ -378,7 +381,10 @@ class OrderController extends Controller
                 "created_at" => $order->created_at,
                 "order_code" => $order->orders_code,
                 "recipient_name" => $order->recipient_name,
-                "recipient_phone" => $order->recipient_phone
+                "recipient_phone" => $order->recipient_phone,
+                "bank_name" => $order->bank_name,
+                "bank_code" => $order->bank_code,
+                "refunded_at" => $order->refunded_at,
             ];
 
             return response()->json($response);

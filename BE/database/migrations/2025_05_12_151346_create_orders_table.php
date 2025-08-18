@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('bank_code', 20)->unique()->nullable();
             $table->string('bank_name', 50)->nullable();
 
-            $table->string('vnp_txnref', 20)->nullable();
+            $table->string('vnp_txnref', 100)->nullable();
 
             $table->timestamps();
             $table->timestamp('paid_at')->nullable(); # thời gian chuyển trạng thái hoàn thành

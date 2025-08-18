@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SwapRightOutlined } from "@ant-design/icons";
-import { useCreate, useCustom, useUpdate } from "@refinedev/core";
+import { useCreate, useCustom } from "@refinedev/core";
 
 import {
   Button,
@@ -10,16 +10,16 @@ import {
   Input,
   notification,
   Pagination,
-  Popconfirm,
   Spin,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
 import "dayjs/locale/vi";
 import RenderReviewButton from "./RenderReviewButton";
+import OrderActionButton from "./OrderActionButton";
 dayjs.locale("vi");
 
 const { Search } = Input;
@@ -27,6 +27,7 @@ const { Search } = Input;
 const Order = () => {
   const [idOrderStatus, setIdOrderStatus] = useState(0);
   const [searchText, setSearchText] = useState<any>(undefined);
+  const [orders, setOrders] = useState<any>([]); // danh sách đơn hàng
 
   const [currentPage, setCurrentPage] = useState(1); // trang hiện tại
   const [pageSize, setPageSize] = useState(10); // số item mỗi trang
@@ -50,7 +51,7 @@ const Order = () => {
           // console.log("url", response?.data.vnp_Url);
           window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
         },
-        onError: (error) => {
+        onError: (_error) => {
           notification.error({
             message: "Có lỗi xảy ra khi thanh toán",
           });
@@ -79,11 +80,16 @@ const Order = () => {
     },
   });
 
+  useEffect(() => {
+    if (ordersResponse?.data) {
+      // console.log("in ra order 2", orders);
+      setOrders(ordersResponse?.data?.data || []);
+    }
+  }, [ordersResponse]);
+
+  // console.log("in ra order", orders);
+
   // console.log("ngay bat dau:", fromDate);
-
-  const orders = ordersResponse?.data?.data || [];
-
-  // console.log(orders);
 
   const total = ordersResponse?.data?.total ?? 0;
 
@@ -96,28 +102,28 @@ const Order = () => {
     setSearchText(value || undefined);
   };
 
-  const { mutate, isPending: isPendingUpdateStatus } = useUpdate({
-    resource: "orders",
-    mutationOptions: {
-      onSuccess: (response) => {
-        refetch();
-        notification.success({
-          message: `${response?.data?.message}`,
-        });
-      },
-      onError: (error) => {
-        refetch();
-        notification.error({ message: `${error?.response?.data?.message}` });
-      },
-    },
-  });
+  // const { mutate, isPending: isPendingUpdateStatus } = useUpdate({
+  //   resource: "orders",
+  //   mutationOptions: {
+  //     onSuccess: (response) => {
+  //       refetch();
+  //       notification.success({
+  //         message: `${response?.data?.message}`,
+  //       });
+  //     },
+  //     onError: (error) => {
+  //       refetch();
+  //       notification.error({ message: `${error?.response?.data?.message}` });
+  //     },
+  //   },
+  // });
 
-  const onHandleChangeStatus = (orderId: number) => {
-    mutate({
-      id: orderId,
-      values: {},
-    });
-  };
+  // const onHandleChangeStatus = (orderId: number) => {
+  //   mutate({
+  //     id: orderId,
+  //     values: {},
+  //   });
+  // };
 
   return (
     <div className="list-order-client">
@@ -262,7 +268,8 @@ const Order = () => {
                 <div>Giao đến: {order?.receiving_address}</div>
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{order?.status_name}</p>
-                  <div className="flex gap-3">
+
+                  <div className="flex justify-end gap-3">
                     <Link to={`/order/${order?.orders_code}`}>
                       {/* <button className="!border-2 !py-2 !px-3 !font-semibold !cursor-pointer">
                         XEM CHI TIẾT
@@ -275,7 +282,7 @@ const Order = () => {
 
                     {order.status_name == "Chờ xác nhận" &&
                       order?.payment_method == "vnpay" &&
-                      !order?.status_payment && (
+                      order?.status_payment == 0 && (
                         <Button
                           onClick={() =>
                             onHandlePaymentOnline(
@@ -290,25 +297,9 @@ const Order = () => {
                         </Button>
                       )}
 
-                    {(order.status_name == "Chờ xác nhận" ||
-                      order.status_name == "Đang chuẩn bị hàng") && (
-                      <Popconfirm
-                        title="Cập nhật trạng thái"
-                        onConfirm={() => onHandleChangeStatus(order.id)}
-                        description="Bạn có chắc chắn muốn hủy đơn hàng không?"
-                        okText="Có"
-                        cancelText="Không"
-                      >
-                        <Button
-                          loading={isPendingUpdateStatus}
-                          className="!text-white !bg-black !border-black !py-5 !px-3 !cursor-pointer"
-                        >
-                          HỦY ĐƠN
-                        </Button>
-                      </Popconfirm>
-                    )}
+                    <OrderActionButton order={order} refetch={refetch} />
 
-                    {order.status_name == "Đã giao hàng" && (
+                    {/* {order.status_name == "Đã giao hàng" && (
                       <Popconfirm
                         title="Cập nhật trạng thái"
                         onConfirm={() => onHandleChangeStatus(order.id)}
@@ -323,7 +314,7 @@ const Order = () => {
                           ĐÃ NHẬN HÀNG
                         </Button>
                       </Popconfirm>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
