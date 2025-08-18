@@ -226,14 +226,39 @@ const CheckOut = () => {
     if (selectedMethod === "VNPAY") {
       createOrder(
         {
-          resource: "vnpay/payment",
+          // resource: "vnpay/payment",
+          resource: "orders/checkout",
           values,
         },
         {
           onSuccess: (response) => {
-            window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+            refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
+            createOrder(
+              {
+                resource: "vnpay/payment",
+                values: {
+                  total_amount: values?.total_amount,
+                  orders_code: response?.data?.order_code,
+                },
+              },
+              {
+                onSuccess: (response) => {
+                  // console.log("url", response?.data.vnp_Url);
+                  window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+                },
+                onError: (error) => {
+                  console.log("Thanh toán thất bại");
+                },
+              }
+            );
+            // console.log("VNPAY response:", response?.data?.order_code);
+            // window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
           },
-          onError: (error) => console.error("Thanh toán thất bại:", error),
+          onError: (error) => {
+            refetch(); // Lấy lại dữ liệu giỏ hàng nếu có lỗi
+            console.log(error?.response?.data?.message);
+            notification.error({ message: error?.response?.data?.message });
+          },
         }
       );
     }

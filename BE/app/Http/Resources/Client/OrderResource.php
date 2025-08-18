@@ -27,6 +27,8 @@ class OrderResource extends JsonResource
             'receiving_address' => $this->receiving_address,
             'status_order_id' => $this->status_order_id,
             'status_name' => $this->statusOrder->name ?? 'Không xác định', // Lấy name từ status_orders
+            'payment_method' => $this->payment_method,
+            'status_payment' => $this->status_payment,
 
             "is_reviewed_order" => $this->orderDetails->contains(function ($detail) {
                 return $detail->review !== null;

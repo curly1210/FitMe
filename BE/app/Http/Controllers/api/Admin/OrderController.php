@@ -123,6 +123,7 @@ class OrderController extends Controller
             foreach ($order->orderDetails as $detail) {
                 ProductItem::where('id', $detail->product_item_id)
                     ->increment('stock', $detail->quantity);
+                $detail->update(['restocked' => 1]);
             }
         }
 

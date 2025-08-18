@@ -20,7 +20,8 @@ const CheckPayment = () => {
       mutate(
         {
           resource: `vnpay/return?${searchParams}`,
-          values: localStorage.getItem("order") || "",
+          values: {},
+          // values: localStorage.getItem("order") || "",
         },
         {
           onSuccess: (response) => {
@@ -36,9 +37,9 @@ const CheckPayment = () => {
             console.error("Error processing payment:", error);
             setStatusPayment(false);
           },
-          onSettled: () => {
-            localStorage.removeItem("order");
-          },
+          // onSettled: () => {
+          //   localStorage.removeItem("order");
+          // },
         }
       );
     }
