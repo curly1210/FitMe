@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('order_proof_images', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id');
-            $table->string('image'); 
+            $table->string('images'); 
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
