@@ -106,7 +106,8 @@ class OrderStatusNotification extends Notification implements ShouldBroadcast
 
     public function broadcastAs()
     {
-        return 'order.updated';
+        // return 'order.updated';
+        return 'order';
     }
 
     // protected function isAdmin($userId)

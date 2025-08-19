@@ -19,6 +19,7 @@ use App\Http\Resources\Admin\AdminOrderResource;
 use App\Http\Resources\Admin\AdminOrderDetailResource;
 use App\Traits\CloudinaryTrait;
 use App\Models\OrderShipingFailure;
+
 class OrderController extends Controller
 {
     private $statusMap = [
@@ -115,7 +116,9 @@ class OrderController extends Controller
         $order = Order::with('orderDetails')->findOrFail($id);
         $newStatus = (int) $request->status_order_id;
 
-        $currentStatus = $order->status_order_id;
+        $currentStatus = (int) $order->status_order_id;
+
+        return response()->json($currentStatus);
 
         // Đơn hàng đã hủy
         if ($currentStatus === 7) {
@@ -157,7 +160,13 @@ class OrderController extends Controller
         };
         // Gửi Notification (lưu DB + broadcast qua Pusher) cho chủ đơn hàng
         if ($order->user) {
-            $order->user->notify(new OrderStatusNotification($order->user_id, $order->orders_code, $newStatus, $message));
+            $order->user->notify(new OrderStatusNotification($order->user_id, $order->orders_code, $newStatus, '<span>
+                            Đơn hàng 
+                            <span style="color:red;font-weight:bold;">#' .
+                $order->orders_code . '
+                            </span>
+                              ' . $message . '
+                          </span>'));
         }
 
         return response()->json(['message' => $message]);
@@ -251,7 +260,4 @@ class OrderController extends Controller
             ]
         ], 201);
     }
-
-
-
 }

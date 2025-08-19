@@ -83,19 +83,24 @@ export const NotificationUserProvider = ({
     //   });
 
     if (user?.role === "Admin") {
-      echo.private("admin.notifications").listen(".order.updated", (e: any) => {
+      echo.private("admin.notifications").listen(".order", (e: any) => {
         console.log("Thông báo admin:", e.message);
         refetchUserUnreadNotifications();
       });
+
+      // echo
+      //   .private("admin.notifications")
+      //   .listen(".order.created'", (e: any) => {
+      //     console.log("Cường đẹp trai");
+      //     refetchUserUnreadNotifications();
+      //   });
     }
 
     if (user?.role === "Customer") {
-      echo
-        .private(`App.Models.User.${userId}`)
-        .listen(".order.updated", (e: any) => {
-          refetchUserUnreadNotifications();
-          // console.log("Thông báo đơn hàng:", e.message);
-        });
+      echo.private(`App.Models.User.${userId}`).listen(".order", (e: any) => {
+        refetchUserUnreadNotifications();
+        // console.log("Thông báo đơn hàng:", e.message);
+      });
     }
 
     return () => {

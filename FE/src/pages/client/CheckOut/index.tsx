@@ -7,6 +7,7 @@ import AddressList from "./AddressList";
 import { useCreate, useList, useCustomMutation } from "@refinedev/core";
 import { useNavigate } from "react-router";
 import ImageWithFallback from "../../../components/ImageFallBack";
+import { useCart } from "../../../hooks/useCart";
 type Coupon = {
   code: string;
   name: string;
@@ -44,13 +45,13 @@ const CheckOut = () => {
   const { mutate: redeemCoupon } = useCustomMutation();
   const nav = useNavigate();
 
-  // const { refetch } = useCart(); // lấy đơn hàng từ cart
+  const { refetch: refetchAllItems } = useCart(); // lấy đơn hàng từ cart
   // const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
 
   const {
     data: cartResponse,
     isFetching: isLoadingCarts,
-    refetch,
+    refetch: refetchSelectedItems,
   } = useList({
     resource: "cart-items/selected-all",
     // queryOptions: {
@@ -211,12 +212,14 @@ const CheckOut = () => {
         {
           onSuccess: () => {
             // if (refetch) {
-            refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
+            refetchAllItems();
+            refetchSelectedItems(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
             // }
             nav("success");
           },
           onError: (error) => {
-            refetch(); // Lấy lại dữ liệu giỏ hàng nếu có lỗi
+            refetchAllItems();
+            refetchSelectedItems(); // Lấy lại dữ liệu giỏ hàng nếu có lỗi
             console.log(error?.response?.data?.message);
             notification.error({ message: error?.response?.data?.message });
           },
@@ -233,7 +236,8 @@ const CheckOut = () => {
         },
         {
           onSuccess: (response) => {
-            refetch(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
+            refetchAllItems();
+            refetchSelectedItems(); // Lấy lại dữ liệu giỏ hàng sau khi thanh toán thành công
             createOrder(
               {
                 resource: "vnpay/payment",
@@ -256,7 +260,8 @@ const CheckOut = () => {
             // window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
           },
           onError: (error) => {
-            refetch(); // Lấy lại dữ liệu giỏ hàng nếu có lỗi
+            refetchAllItems();
+            refetchSelectedItems(); // Lấy lại dữ liệu giỏ hàng nếu có lỗi
             console.log(error?.response?.data?.message);
             notification.error({ message: error?.response?.data?.message });
           },

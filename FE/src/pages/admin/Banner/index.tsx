@@ -265,7 +265,7 @@ export default function BannerList() {
   return (
     <Spin spinning={updatingBannerLoading} tip="Đang cập nhật..." size="large">
       <div className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Danh sách banner</h2>
+        <h2 className="text-2xl font-semibold mb-5">Danh sách banner</h2>
         <div className="grid grid-cols-2 gap-4">
           {banners.map((banner) => (
             <div

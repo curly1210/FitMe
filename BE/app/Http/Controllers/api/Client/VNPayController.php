@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Traits\CreateOrderTrait;
 use App\Http\Controllers\Controller;
+use App\Notifications\RefundVnpayNotification;
 use Illuminate\Support\Facades\Validator;
 
 class VNPayController extends Controller
@@ -293,6 +294,14 @@ class VNPayController extends Controller
             if ($ispTxn["vnp_ResponseCode"] == "00") {
 
                 $order->update(["status_payment" => 3, 'refunded_at' => now()]); # Đã hoàn tiền
+
+                $order->user->notify(new RefundVnpayNotification($order->user_id, $order->orders_code, '<span>
+                            Đơn hàng
+                            <span style="color:red;font-weight:bold;">#' .
+                    $order->orders_code . '
+                            </span>
+                            đã được hoàn tiền
+                          </span>'));
 
                 return response()->json(["message" => "Hoàn tiền thành công"]);
             } else {
