@@ -118,7 +118,7 @@ class OrderController extends Controller
 
         $currentStatus = (int) $order->status_order_id;
 
-        return response()->json($currentStatus);
+        // return response()->json($currentStatus);
 
         // Đơn hàng đã hủy
         if ($currentStatus === 7) {

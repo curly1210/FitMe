@@ -63,7 +63,7 @@ export default function OrderDetailDrawer({
     resource: "admin/orders",
     id: orderId || "",
     queryOptions: {
-      enabled: !!orderId,
+      enabled: open,
     },
   });
 
