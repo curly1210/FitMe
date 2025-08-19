@@ -1,6 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { CrudFilters, useCreate, useList, useUpdate } from "@refinedev/core";
+import {
+  CrudFilters,
+  useCreate,
+  useList,
+  useUpdate,
+  useCustom,
+} from "@refinedev/core";
 import {
   Button,
   Select,
@@ -10,12 +14,18 @@ import {
   notification,
   Popconfirm,
   Spin,
+  Modal,
+  Input,
+  Form,
+  message,
 } from "antd";
 import { useState } from "react";
 import OrderDetailDrawer from "./oderDetail";
 import Search from "antd/es/input/Search";
+import UploadProofForm from "./ProofImageForm";
 
 const { RangePicker } = DatePicker;
+const { TextArea } = Input;
 
 const STATUS_MAP = {
   "Chờ xác nhận": 1,
@@ -28,8 +38,8 @@ const STATUS_MAP = {
 };
 
 const Oder = () => {
+  const { mutate: create } = useCreate();
   const { mutate } = useUpdate();
-
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -39,6 +49,15 @@ const Oder = () => {
   const [statusFilter, setStatusFilter] = useState<number | undefined>();
   const [statusPay, setStatusPay] = useState<number | undefined>();
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+
+  //upload ảnh
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  // form lý do thất bại
+  const [failReasonOpen, setFailReasonOpen] = useState(false);
+  const [failReason, setFailReason] = useState("");
+  const [failOrderId, setFailOrderId] = useState<string | null>(null);
+  const [isSubmittingFail, setIsSubmittingFail] = useState(false);
 
   const _start = (current - 1) * pageSize;
   const _end = current * pageSize;
@@ -77,7 +96,6 @@ const Oder = () => {
   const { mutate: mutateRefund, isLoading: isLoadingRefund } = useCreate();
 
   const onHandleRefund = (order_code: any) => {
-    // console.log(order_code);
     mutateRefund(
       {
         resource: "vnpay/refund",
@@ -86,21 +104,82 @@ const Oder = () => {
       {
         onSuccess: (_response: any) => {
           refetch();
-          console.log("Thành công");
           notification.success({
             message: "Hoàn tiền thành công",
           });
         },
         onError: (_error: any) => {
-          console.log("Thất bại");
-          const errorMessage = "Hoàn tiền thất bại";
           notification.error({
-            message: errorMessage,
+            message: "Hoàn tiền thất bại",
           });
         },
       }
     );
-    // if (!selectedOrderId) return;
+  };
+
+  const handleUpdateStatus = (
+    newStatus: number,
+    successMessage: string,
+    type: "success" | "error" = "success"
+  ) => {
+    if (!selectedOrderId) return;
+    mutate(
+      {
+        resource: "admin/orders/update",
+        id: selectedOrderId,
+        values: { status_order_id: newStatus },
+        meta: { method: "post" },
+      },
+      {
+        onSuccess: (response: any) => {
+          refetch();
+          notification[type]({
+            message: "Cập nhật trạng thái thành công",
+          });
+        },
+        onError: (error: any) => {
+          refetch();
+          notification.error({
+            message: "Cập nhật trạng thái thất bại",
+          });
+        },
+      }
+    );
+  };
+  
+   // gửi lý do chuyển đội trạng thái tiếp theo
+  const handleShippingFailSubmit = () => {
+    if (!failOrderId || !failReason) return;
+
+    create(
+      {
+        resource: `admin/orders/shippingfail/${failOrderId}`,
+        values: { reason: failReason },
+      },
+      {
+        onSuccess: () => {
+          message.success("Cập nhật đơn hàng thất bại thành công");
+
+          // Cập nhật trạng thái tiếp theo
+          setSelectedOrderId(failOrderId);
+          handleUpdateStatus(
+            STATUS_MAP["Giao hàng thất bại"],
+            "Giao hàng thất bại"
+          );
+
+          // Reset state
+          setFailReasonOpen(false);
+          setFailReason("");
+          setFailOrderId(null);
+
+          // Refetch lại danh sách
+          refetch();
+        },
+        onError: () => {
+          message.error("Có lỗi xảy ra khi cập nhật trạng thái");
+        },
+      }
+    );
   };
 
   const renderAdminActionButtons = (record: any) => {
@@ -115,50 +194,13 @@ const Oder = () => {
         : record.status_order?.label;
 
     const orderId = record.id;
-    const handleUpdateStatus = (
-      newStatus: number,
-      successMessage: string,
-      type: "success" | "error"
-    ) => {
-      mutate(
-        {
-          resource: "admin/orders/update",
-          id: orderId,
-          values: { status_order_id: newStatus },
-          meta: { method: "post" },
-        },
-        {
-          onSuccess: (response: any) => {
-            refetch();
-            //  lấy message từ BE nếu có
-            const beMessage =
-              response?.data?.message ||
-              `Đơn hàng chuyển sang: ${successMessage}`;
-
-            // notification[type]({
-            //   message: beMessage,
-            // });
-            notification[type]({
-              message: "Cập nhật trạng thái thành công",
-            });
-          },
-          onError: (error: any) => {
-            refetch();
-            const errorMessage =
-              error?.response?.data?.message || "Cập nhật trạng thái thất bại";
-            notification.error({
-              message: "Cập nhật trạng thái thất bại",
-            });
-          },
-        }
-      );
-    };
 
     switch (status) {
       case "Chờ xác nhận":
         return (
           <Popconfirm
             onConfirm={() => {
+              setSelectedOrderId(orderId);
               handleUpdateStatus(
                 STATUS_MAP["Đang chuẩn bị hàng"],
                 "Đang chuẩn bị hàng",
@@ -178,13 +220,14 @@ const Oder = () => {
       case "Đang chuẩn bị hàng":
         return (
           <Popconfirm
-            onConfirm={() =>
+            onConfirm={() => {
+              setSelectedOrderId(orderId);
               handleUpdateStatus(
                 STATUS_MAP["Đang giao hàng"],
                 "Đang giao hàng",
                 "success"
-              )
-            }
+              );
+            }}
             title="Cập nhật trạng thái"
             description="Bạn có muốn xác nhận không?"
             okText="Có"
@@ -199,62 +242,62 @@ const Oder = () => {
         return (
           <Space>
             <Popconfirm
-              onConfirm={() =>
-                handleUpdateStatus(STATUS_MAP["Đã giao"], "Đã giao", "success")
-              }
-              title="Cập nhật trạng thái"
-              description="Bạn có muốn xác nhận không?"
+              title="Xác nhận đã giao hàng"
+              description="Bạn có chắc chắn muốn xác nhận đơn đã giao không?"
               okText="Có"
               cancelText="Không"
+              onConfirm={() => {
+                setSelectedOrderId(orderId);
+                setUploadOpen(true); // Mở form upload ảnh sau khi xác nhận
+              }}
             >
               <Button onClick={(e) => e.stopPropagation()} type="primary">
                 Đã giao
               </Button>
             </Popconfirm>
 
-            <Popconfirm
-              onConfirm={() =>
-                handleUpdateStatus(
-                  STATUS_MAP["Giao hàng thất bại"],
-                  "Giao hàng thất bại",
-                  "error"
-                )
-              }
-              title="Cập nhật trạng thái"
-              description="Bạn có muốn xác nhận không?"
-              okText="Có"
-              cancelText="Không"
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setFailOrderId(orderId);
+                setFailReasonOpen(true); // mở modal lý do thất bại
+              }}
+              danger
             >
-              <Button onClick={(e) => e.stopPropagation()} danger>
-                Giao hàng thất bại
-              </Button>
-            </Popconfirm>
+              Giao hàng thất bại
+            </Button>
           </Space>
         );
       case "Giao hàng thất bại":
         return (
           <Space>
             <Popconfirm
-              onConfirm={() =>
+              onConfirm={() => {
+                setSelectedOrderId(orderId);
                 handleUpdateStatus(
                   STATUS_MAP["Đang giao hàng"],
                   "Đang giao lại",
                   "success"
-                )
-              }
+                );
+              }}
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
               okText="Có"
               cancelText="Không"
             >
-              <Button onClick={(e) => e.stopPropagation()} type="primary">
+              <Button
+                onClick={(e) => e.stopPropagation()}
+                type="primary"
+                disabled={record.shipping_failled === 2}
+              >
                 Đang giao
               </Button>
             </Popconfirm>
             <Popconfirm
-              onConfirm={() =>
-                handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success")
-              }
+              onConfirm={() => {
+                setSelectedOrderId(orderId);
+                handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success");
+              }}
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
               okText="Có"
@@ -302,7 +345,6 @@ const Oder = () => {
       dataIndex: "customer_phone",
       key: "customer_phone",
     },
-
     { title: "Thời gian mua", dataIndex: "created_at", key: "created_at" },
     {
       title: "Tổng tiền",
@@ -326,18 +368,14 @@ const Oder = () => {
       dataIndex: "status_payment",
       key: "status_payment",
       render: (value: any) => {
-        if (value === 3 || value === "Đã hoàn tiền") {
+        if (value === 3 || value === "Đã hoàn tiền")
           return <span style={{ color: "green" }}>Đã hoàn tiền</span>;
-        }
-        if (value === 2 || value === "Chờ hoàn tiền") {
+        if (value === 2 || value === "Chờ hoàn tiền")
           return <span style={{ color: "orange" }}>Chờ hoàn tiền</span>;
-        }
-        if (value === 1 || value === "Đã thanh toán") {
+        if (value === 1 || value === "Đã thanh toán")
           return <span style={{ color: "green" }}>Đã thanh toán</span>;
-        }
-        if (value === 0 || value === "Chưa thanh toán") {
+        if (value === 0 || value === "Chưa thanh toán")
           return <span style={{ color: "red" }}>Chưa thanh toán</span>;
-        }
         return <span>{String(value)}</span>;
       },
     },
@@ -346,33 +384,12 @@ const Oder = () => {
       key: "action",
       render: (_: any, record: any) => renderAdminActionButtons(record),
     },
-    // {
-    //   title: "Hành động",
-    //   render: (_: any, record: any) => (
-    //     <Dropdown
-    //       overlay={
-    //         <Menu>
-    //           <Menu.Item
-    //             onClick={() => {
-    //               setSelectedOrderId(record.id);
-    //               setDrawerOpen(true);
-    //             }}
-    //           >
-    //             Chi tiết
-    //           </Menu.Item>
-    //         </Menu>
-    //       }
-    //       trigger={["click"]}
-    //     >
-    //       <span style={{ cursor: "pointer", fontSize: 20 }}>⋯</span>
-    //     </Dropdown>
-    //   ),
-    // },
   ];
 
   return (
     <>
       <h1 className="text-2xl font-bold mb-5">Quản lý đơn hàng</h1>
+      {/* --- filters --- */}
       <div className="flex gap-3 mb-4 flex-wrap">
         <Search
           size="middle"
@@ -383,7 +400,6 @@ const Oder = () => {
           onChange={(e) => setSearchName(e.target.value)}
           style={{ width: 270 }}
         />
-
         <RangePicker
           size="middle"
           className="!h-8 [&_.ant-picker]:!h-8 [&_.ant-picker-input>input]:!h-8"
@@ -398,7 +414,6 @@ const Oder = () => {
           }}
           style={{ width: 200 }}
         />
-
         <Select
           size="middle"
           className="!h-8 [&_.ant-select-selector]:!h-8"
@@ -416,7 +431,6 @@ const Oder = () => {
             { value: 1, label: "Đã thanh toán" },
           ]}
         />
-
         <Select
           size="middle"
           className="!h-8 [&_.ant-select-selector]:!h-8"
@@ -438,6 +452,7 @@ const Oder = () => {
         </Select>
       </div>
 
+      {/* --- table --- */}
       <Table
         className="border-gray rounded-2xl"
         dataSource={data?.data ?? []}
@@ -454,14 +469,12 @@ const Oder = () => {
             setPageSize(size);
           },
         }}
-        // chặn link chi tiết đơn hàng khi ấn nút
         onRow={(record) => ({
           onClick: (event) => {
             const isInsidePopover = (event.target as HTMLElement).closest(
               ".ant-popover"
             );
             const isButton = (event.target as HTMLElement).closest("button");
-
             if (isInsidePopover || isButton) return;
             setSelectedOrderId(record.id);
             setDrawerOpen(true);
@@ -470,6 +483,7 @@ const Oder = () => {
         })}
       />
 
+      {/* --- drawers --- */}
       <OrderDetailDrawer
         open={drawerOpen}
         onClose={() => {
@@ -479,14 +493,46 @@ const Oder = () => {
         orderId={selectedOrderId}
       />
 
-      {isLoadingRefund ? (
+      {selectedOrderId && (
+        <UploadProofForm
+          open={uploadOpen}
+          orderId={selectedOrderId}
+          onClose={() => setUploadOpen(false)}
+          onSuccess={() => {
+            if (selectedOrderId)
+              handleUpdateStatus(STATUS_MAP["Đã giao"], "Đã giao", "success");
+            setUploadOpen(false);
+            refetch();
+          }}
+        />
+      )}
+
+      {/* --- form lý do thất bại --- */}
+      <Modal
+        title="Nhập lý do giao hàng thất bại"
+        open={failReasonOpen}
+        onCancel={() => setFailReasonOpen(false)}
+        onOk={handleShippingFailSubmit}
+        confirmLoading={isSubmittingFail}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Lý do" required>
+            <TextArea
+              value={failReason}
+              onChange={(e) => setFailReason(e.target.value)}
+              rows={4}
+              placeholder="Nhập lý do thất bại..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {isLoadingRefund && (
         <Spin
           className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
           style={{ textAlign: "center" }}
           size="large"
         />
-      ) : (
-        ""
       )}
     </>
   );

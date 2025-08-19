@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Drawer, Spin, Table } from "antd";
+import { Drawer, Spin, Table, Image } from "antd";
 import { useOne } from "@refinedev/core";
 
 interface OrderDetail {
@@ -12,6 +11,15 @@ interface OrderDetail {
   sale_price: number;
   sale_percent: number;
   subtotal: number;
+}
+interface ProofImages {
+  id: string;
+  url: string;
+}
+interface PhippingFailures {
+  id: string;
+  attempt: string;
+  reason: string;
 }
 
 interface Status {
@@ -36,6 +44,8 @@ interface OrderData {
   total_amount: number;
   order_details: OrderDetail[];
   note?: string;
+  proof_images: ProofImages[];
+  shipping_failures: PhippingFailures[];
 }
 
 interface OrderDetailDrawerProps {
@@ -104,7 +114,7 @@ export default function OrderDetailDrawer({
     },
     {
       title: "Giá tiền",
-      dataIndex: "price", 
+      dataIndex: "price",
       key: "price",
       width: 120,
       render: (_: any, record: { price: number; sale_price?: number }) => {
@@ -182,6 +192,49 @@ export default function OrderDetailDrawer({
               <div className={`font-medium ${statusColor}`}>
                 {statusText[paymentStatus]}
               </div>
+            </div>
+            {/* Ảnh minh chứng */}
+
+            <div className="col-span-4">
+              <div className="text-gray-500 mb-1">Ảnh minh chứng</div>
+              {order.proof_images && order.proof_images.length > 0 ? (
+                <Image.PreviewGroup>
+                  <div className="flex gap-2 flex-wrap">
+                    {order.proof_images.map((img) => (
+                      <Image
+                        key={img.id}
+                        src={img.url}
+                        alt="Proof"
+                        width={80}
+                        height={80}
+                        className="object-cover rounded border"
+                      />
+                    ))}
+                  </div>
+                </Image.PreviewGroup>
+              ) : (
+                <div className="text-gray-400 italic">
+                  Chưa có ảnh minh chứng
+                </div>
+              )}
+            </div>
+
+            {/* Lịch sử giao hàng thất bại */}
+            <div className="col-span-4">
+              <div className="text-gray-500 mb-1">
+                Lịch sử giao hàng thất bại
+              </div>
+              {order.shipping_failures && order.shipping_failures.length > 0 ? (
+                <ul className="list-disc list-inside text-sm">
+                  {order.shipping_failures.map((fail) => (
+                    <li key={fail.id}>{fail.reason}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-gray-400 italic">
+                  Chưa có lần giao thất bại
+                </div>
+              )}
             </div>
           </div>
 
