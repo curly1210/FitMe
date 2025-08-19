@@ -17,17 +17,5 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")!).render(
-  // <RouterProvider router={router}>
-  // <Refine dataProvider={dataProvider("http://localhost:3000")}>
   <RouterProvider router={router} />
-  // <RouterProvider router={router}>
-  //   <Refine dataProvider={dataProvider("http://127.0.0.1:8000/api")}>
-  //     <PopupProvider>
-  //       <ModalProvider>
-  //         <App />
-  //       </ModalProvider>
-  //     </PopupProvider>
-  //   </Refine>
-  // </RouterProvider>
-  // </RouterProvider>
 );

@@ -79,7 +79,7 @@ const ModalLogin = () => {
           </p>
         </div>
         <div className="relative">
-          <Form onFinish={onFinish} layout="vertical">
+          <Form className="!mb-4" onFinish={onFinish} layout="vertical">
             <Form.Item
               label={
                 <span>
@@ -113,7 +113,7 @@ const ModalLogin = () => {
               />
             </Form.Item>
 
-            <p className="text-right font-semibold underline my-4">
+            <p className="text-right font-semibold underline my-4 cursor-pointer">
               <span onClick={() => openModal(<ModalForgotPass />)}>
                 Quên mật khẩu
               </span>
@@ -127,7 +127,7 @@ const ModalLogin = () => {
               Đăng nhập
             </Button>
           </Form>
-          <div className="flex items-center justify-center w-full my-3">
+          {/* <div className="flex items-center justify-center w-full my-3">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm">Hoặc</span>
             <div className="flex-grow border-t border-gray-300"></div>
@@ -141,7 +141,7 @@ const ModalLogin = () => {
             <span className="text-sm text-gray-700 font-medium">
               Đăng nhập với Google
             </span>
-          </div>
+          </div> */}
           <p className="text-sm text-gray-700 text-center">
             Bạn chưa có tài khoản?{" "}
             <span

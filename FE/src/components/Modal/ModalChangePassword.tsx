@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Button, Form, Input, Spin, Result } from "antd";
 import login from "../../assets/images/login.png";
@@ -65,7 +66,7 @@ const ModalChangePass = () => {
           response?.data?.message || "Thành công"
         );
         // Quay về trang trước hoặc trang bạn muốn
-        navigate(-1);
+        navigate("/");
         // Mở modal đăng nhập
         openModal(<ModalLogin />);
       },
