@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   CrudFilters,
   useCreate,
@@ -59,6 +61,8 @@ const Oder = () => {
   const [failOrderId, setFailOrderId] = useState<string | null>(null);
   const [isSubmittingFail, setIsSubmittingFail] = useState(false);
 
+  const [loadingOrderId, setLoadingOrderId] = useState<any>(null);
+
   const _start = (current - 1) * pageSize;
   const _end = current * pageSize;
 
@@ -96,6 +100,7 @@ const Oder = () => {
   const { mutate: mutateRefund, isLoading: isLoadingRefund } = useCreate();
 
   const onHandleRefund = (order_code: any) => {
+    setLoadingOrderId(selectedOrderId);
     mutateRefund(
       {
         resource: "vnpay/refund",
@@ -113,6 +118,9 @@ const Oder = () => {
             message: "Hoàn tiền thất bại",
           });
         },
+        onSettled: () => {
+          setLoadingOrderId(null); // tắt loading
+        },
       }
     );
   };
@@ -123,6 +131,7 @@ const Oder = () => {
     type: "success" | "error" = "success"
   ) => {
     if (!selectedOrderId) return;
+    setLoadingOrderId(selectedOrderId);
     mutate(
       {
         resource: "admin/orders/update",
@@ -143,11 +152,14 @@ const Oder = () => {
             message: "Cập nhật trạng thái thất bại",
           });
         },
+        onSettled: () => {
+          setLoadingOrderId(null); // tắt loading
+        },
       }
     );
   };
-  
-   // gửi lý do chuyển đội trạng thái tiếp theo
+
+  // gửi lý do chuyển đội trạng thái tiếp theo
   const handleShippingFailSubmit = () => {
     if (!failOrderId || !failReason) return;
 
@@ -200,7 +212,7 @@ const Oder = () => {
         return (
           <Popconfirm
             onConfirm={() => {
-              setSelectedOrderId(orderId);
+              // setSelectedOrderId(orderId);
               handleUpdateStatus(
                 STATUS_MAP["Đang chuẩn bị hàng"],
                 "Đang chuẩn bị hàng",
@@ -212,7 +224,14 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button onClick={(e) => e.stopPropagation()} type="primary">
+            <Button
+              loading={loadingOrderId === orderId}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedOrderId(orderId);
+              }}
+              type="primary"
+            >
               Xác nhận
             </Button>
           </Popconfirm>
@@ -221,7 +240,7 @@ const Oder = () => {
         return (
           <Popconfirm
             onConfirm={() => {
-              setSelectedOrderId(orderId);
+              // setSelectedOrderId(orderId);
               handleUpdateStatus(
                 STATUS_MAP["Đang giao hàng"],
                 "Đang giao hàng",
@@ -233,7 +252,14 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button onClick={(e) => e.stopPropagation()} type="primary">
+            <Button
+              loading={loadingOrderId === orderId}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedOrderId(orderId);
+              }}
+              type="primary"
+            >
               Đang giao hàng
             </Button>
           </Popconfirm>
@@ -247,18 +273,29 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
               onConfirm={() => {
-                setSelectedOrderId(orderId);
+                // setSelectedOrderId(orderId);
                 setUploadOpen(true); // Mở form upload ảnh sau khi xác nhận
               }}
             >
-              <Button onClick={(e) => e.stopPropagation()} type="primary">
+              <Button
+                loading={loadingOrderId === orderId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrderId(orderId);
+                }}
+                type="primary"
+              >
                 Đã giao
               </Button>
             </Popconfirm>
 
             <Button
+              loading={loadingOrderId === orderId}
               onClick={(e) => {
-                e.stopPropagation();
+                {
+                  e.stopPropagation();
+                  setSelectedOrderId(orderId);
+                }
                 setFailOrderId(orderId);
                 setFailReasonOpen(true); // mở modal lý do thất bại
               }}
@@ -273,7 +310,7 @@ const Oder = () => {
           <Space>
             <Popconfirm
               onConfirm={() => {
-                setSelectedOrderId(orderId);
+                // setSelectedOrderId(orderId);
                 handleUpdateStatus(
                   STATUS_MAP["Đang giao hàng"],
                   "Đang giao lại",
@@ -286,7 +323,11 @@ const Oder = () => {
               cancelText="Không"
             >
               <Button
-                onClick={(e) => e.stopPropagation()}
+                loading={loadingOrderId === orderId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrderId(orderId);
+                }}
                 type="primary"
                 disabled={record.shipping_failled === 2}
               >
@@ -295,7 +336,7 @@ const Oder = () => {
             </Popconfirm>
             <Popconfirm
               onConfirm={() => {
-                setSelectedOrderId(orderId);
+                // setSelectedOrderId(orderId);
                 handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success");
               }}
               title="Cập nhật trạng thái"
@@ -303,7 +344,14 @@ const Oder = () => {
               okText="Có"
               cancelText="Không"
             >
-              <Button onClick={(e) => e.stopPropagation()} danger>
+              <Button
+                loading={loadingOrderId === orderId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrderId(orderId);
+                }}
+                danger
+              >
                 Hủy đơn hàng
               </Button>
             </Popconfirm>
@@ -318,7 +366,14 @@ const Oder = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button onClick={(e) => e.stopPropagation()} type="primary">
+            <Button
+              loading={loadingOrderId === orderId}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedOrderId(orderId);
+              }}
+              type="primary"
+            >
               Hoàn tiền
             </Button>
           </Popconfirm>
@@ -527,13 +582,13 @@ const Oder = () => {
         </Form>
       </Modal>
 
-      {isLoadingRefund && (
+      {/* {isLoadingRefund && (
         <Spin
           className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
           style={{ textAlign: "center" }}
           size="large"
         />
-      )}
+      )} */}
     </>
   );
 };
