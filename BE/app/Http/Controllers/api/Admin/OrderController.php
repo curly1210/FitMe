@@ -18,6 +18,7 @@ use App\Notifications\OrderStatusNotification;
 use App\Http\Resources\Admin\AdminOrderResource;
 use App\Http\Resources\Admin\AdminOrderDetailResource;
 use App\Traits\CloudinaryTrait;
+use App\Models\OrderShipingFailure;
 class OrderController extends Controller
 {
     private $statusMap = [
@@ -91,6 +92,13 @@ class OrderController extends Controller
                 return [
                     'id' => $image->id,
                     'url' => $this->buildImageUrl($image->images),
+                ];
+            }),
+            'shipping_failures' => $order->shippingFailures->map(function ($failure) {
+                return [
+                    'id' => $failure->id,
+                    'attempt' => $failure->attempt,
+                    'reason' => $failure->reason,
                 ];
             }),
             'order_details' => AdminOrderDetailResource::collection($order->orderDetails)
@@ -204,6 +212,46 @@ class OrderController extends Controller
             'proof_images' => $proofImages,
         ], 'Tải lên ảnh minh chứng thành công.', 201);
     }
+
+    public function failureReason(Request $request, $orderId)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:1000'
+        ], [
+            'reason.required' => 'Lý do giao hàng thất bại là bắt buộc.',
+            'reason.string' => 'Lý do giao hàng thất bại phải là một chuỗi văn bản.',
+            'reason.max' => 'Lý do giao hàng thất bại không được vượt quá 1000 ký tự.'
+
+        ]);
+
+        $order = Order::findOrFail($orderId);
+
+        $failureCount = OrderShipingFailure::where('order_id', $order->id)->count();
+        if ($failureCount >= 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đơn hàng đã thất bại 2 lần, không thể thêm nữa.'
+            ], 400);
+        }
+
+        $failure = OrderShipingFailure::create([
+            'order_id' => $order->id,
+            'attempt' => $failureCount + 1,
+            'reason' => $request->reason,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thêm lý do giao hàng thất bại thành công',
+            'data' => [
+                'id' => $failure->id,
+                'order_id' => $failure->order_id,
+                'attempt' => $failure->attempt,
+                'reason' => $failure->reason,
+            ]
+        ], 201);
+    }
+
 
 
 }

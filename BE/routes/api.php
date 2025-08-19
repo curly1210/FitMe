@@ -98,7 +98,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
 
     Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
-    Route::post('orders/proof-images/{id}', [AdminOrderController::class, 'uploadProofImages']);
+    Route::post('/orders/proof-images/{id}', [AdminOrderController::class, 'uploadProofImages']);
+    Route::post('/orders/shippingfail/{id}', [AdminOrderController::class, 'failureReason'])->name('admin.orders.shippingFailure');
 
 });
 
