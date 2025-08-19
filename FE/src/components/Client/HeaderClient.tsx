@@ -402,13 +402,12 @@ const HeaderClient = () => {
                           className="px-4 py-[6px] hover:bg-gray-100 flex items-center gap-2"
                         >
                           <span className="text-xl">{noti.data?.icon} - </span>
-                          <span>
-                            Đơn hàng{" "}
-                            <span className="text-red-500 font-semibold">
-                              #{noti.data?.order_id}
-                            </span>{" "}
-                            {noti.data?.message}
-                          </span>
+                          <span
+                            // className="text-base"
+                            dangerouslySetInnerHTML={{
+                              __html: noti.data?.message,
+                            }}
+                          />
                         </div>
                       ))
                     )}

@@ -86,29 +86,6 @@ const LayoutClient = () => {
 
         {isOpenChatbox && (
           <div className="fixed bottom-20 right-20 w-80 h-96 bg-white rounded-l border border-gray-300 shadow-xl flex flex-col z-50 ">
-            {/* <div className="absolute -top-7 right-8">
-              <Popconfirm
-                title="Xóa hội thoại"
-                onConfirm={() => resetChatbox()}
-                description="Bạn có chắc chắn muốn xóa không?"
-                okText="Có"
-                cancelText="Không"
-              >
-                <img
-                  src={trashCan}
-                  alt="Xóa cuộc trò chuyện"
-                  className="w-6 h-6 cursor-pointer"
-                />
-              </Popconfirm>
-            </div>
-            <div className="absolute -top-7 right-0 ">
-              <img
-                src={close}
-                alt="Đóng chat"
-                onClick={() => toggleChat()}
-                className="w-6 h-6 cursor-pointer"
-              />
-            </div> */}
             {/* Khung chat */}
             <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-2">
               {messages.map((msg: any, index: any) => (

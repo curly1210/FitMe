@@ -11,7 +11,10 @@ use App\Mail\NotifyAdminOrderMail;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\OrderConfirmationMail;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\CreateOrderNotification;
+use Illuminate\Support\Facades\Notification;
 
 trait CreateOrderTrait
 {
@@ -141,6 +144,19 @@ trait CreateOrderTrait
             }
 
             $user->cart_items()->whereIn('id', $cartItemIds)->delete();
+
+            $admins = User::where('role', 'Admin')->get();
+
+            Notification::send($admins, new CreateOrderNotification($user->id, $order->orders_code, '<span>
+                            Khách hàng
+                            <span style="color:red;font-weight:bold;">' .
+                $user->name . '
+                            </span>
+                            tạo thành công đơn hàng 
+                            <span style="color:red;font-weight:bold;">
+                              #' . $order->orders_code . '
+                            </span>
+                          </span>'));
 
             // Mail::to($user->email)->send(new OrderConfirmationMail($order, $orderItems));
             // Mail::to(config('mail.admin_email'))->send(new NotifyAdminOrderMail($order, $orderItems));

@@ -51,6 +51,37 @@ function getItem(
   } as MenuItem;
 }
 
+const getBreadcrumbItems = (path: string) => {
+  switch (path) {
+    case "/admin":
+      return [{ title: "Tổng quan" }];
+    case "/admin/banner":
+      return [{ title: "Banner" }];
+    case "/admin/category":
+      return [{ title: "Danh mục" }];
+    case "/admin/products":
+      return [{ title: "Sản phẩm" }];
+    case "/admin/products/trash":
+      return [{ title: "Sản phẩm" }, { title: "Thùng rác" }];
+    case "/admin/oders":
+      return [{ title: "Đơn hàng" }];
+    case "/admin/coupons":
+      return [{ title: "Khuyến mãi" }];
+    case "/admin/users":
+      return [{ title: "Khách hàng" }];
+    case "/admin/posts":
+      return [{ title: "Tin tức" }];
+    case "/admin/contacts":
+      return [{ title: "Liên hệ" }];
+    case "/admin/reviews":
+      return [{ title: "Đánh giá" }];
+    case "/admin/notifications":
+      return [{ title: "Thông báo" }];
+    default:
+      return [{ title: "Trang" }];
+  }
+};
+
 const itemsNavigate: MenuItem[] = [
   getItem(<Link to="/admin">Tổng quan</Link>, "1", <AreaChartOutlined />),
   // getItem("Thống kê", "sub1", <PieChartOutlined />, [
@@ -114,7 +145,7 @@ const itemsNavigate: MenuItem[] = [
   getItem(
     <Link to="/admin/contacts">Quản lý liên hệ</Link>,
     "11",
-   <MailOutlined />
+    <MailOutlined />
   ),
   getItem(
     <Link to="/admin/reviews">Quản lý đánh giá</Link>,
@@ -201,14 +232,14 @@ const LayoutAdmin = () => {
         return "9";
       case "/admin/posts":
         return "10";
-      case "/admin/dashboard/user":
+      case "/admin/contacts":
         return "11";
-      case "/admin/dashboard/product":
-        return "12";
-      case "/admin/dashboard/tonkho":
-        return "13";
-      case "/admin/dashboard/danhgia":
-        return "14";
+      // case "/admin/dashboard/product":
+      //   return "12";
+      // case "/admin/dashboard/tonkho":
+      //   return "13";
+      // case "/admin/dashboard/danhgia":
+      //   return "14";
       case "/admin/reviews":
         return "15";
       case "/admin/notifications":
@@ -378,16 +409,6 @@ const LayoutAdmin = () => {
                               __html: noti.data?.message,
                             }}
                           />
-                          {/* <span dangerouslySetInnerHTML={{ _ }}>
-                            Khách hàng{" "}
-                            <span className="text-red-500 font-semibold">
-                              Cuong Pham
-                            </span>{" "}
-                            đã hủy đơn{" "}
-                            <span className="text-red-500 font-semibold">
-                              #OD250814RA7CDF
-                            </span>
-                          </span> */}
                         </div>
                       ))
                     )}
@@ -430,7 +451,7 @@ const LayoutAdmin = () => {
         <Content style={{ margin: "0 16px" }}>
           <Breadcrumb
             style={{ margin: "16px 0" }}
-            items={[{ title: "User" }, { title: "Bill" }]}
+            items={getBreadcrumbItems(location.pathname)}
           />
           <div
             style={{

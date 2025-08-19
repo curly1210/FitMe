@@ -269,7 +269,13 @@ class OrderController extends Controller
                 });
                 $message = 'Đơn hàng đã được hủy thành công.';
                 // Notify owner (user) — optional (he is the one who canceled)
-                $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 7, $message));
+                $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 7, '<span>
+                            Đơn hàng
+                            <span style="color:red;font-weight:bold;">#' .
+                    $order->orders_code . '
+                            </span>
+                            đã được hủy thành công
+                          </span>'));
 
                 // Notify admins (tùy project: chọn admin bằng cột is_admin hoặc role)
                 $admins = User::where('role', 'Admin')->get();
@@ -289,11 +295,26 @@ class OrderController extends Controller
                 $order->update(['status_order_id' => 6]);
 
                 $message = 'Đơn hàng đã được hoàn thành.';
-                $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 6, $message));
+                $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 6, '<span>
+                            Đơn hàng
+                            <span style="color:red;font-weight:bold;">#' .
+                    $order->orders_code . '
+                            </span>
+                            đã được hoàn thành
+                          </span>'));
 
                 // Notify admins
                 $admins = User::where('role', 'Admin')->get();
-                Notification::send($admins, new OrderStatusNotification($user->id, $order->orders_code, 6, "Khách hàng {$user->name} đã hoàn thành đơn #{$order->orders_code}", 1));
+                Notification::send($admins, new OrderStatusNotification($user->id, $order->orders_code, 6, '<span>
+                            Khách hàng
+                            <span style="color:red;font-weight:bold;">' .
+                    $user->name . '
+                            </span>
+                            đã hoàn thành đơn
+                            <span style="color:red;font-weight:bold;">
+                              #' . $order->orders_code . '
+                            </span>
+                          </span>', 1));
             } else {
                 return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
             }
