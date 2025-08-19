@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Auth\UserResource;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use App\Models\PasswordReset;
+use App\Mail\ResetPasswordMail;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTFactory;
+use App\Http\Resources\Auth\UserResource;
+use App\Mail\ActivateAccountMail;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -20,7 +25,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return $this->error('Thông tin đăng nhập không chính xác', [], 402,);
+            return $this->error('Thông tin đăng nhập không chính xác', [], 402, );
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT
@@ -38,17 +43,17 @@ class AuthController extends Controller
             'expires_in' => JWTAuth::factory()->getTTL() * 60, // Tính bằng giây
             'user' => new UserResource($user),
         ], 'Đăng nhập thành công', 200)->cookie(
-            'refresh_token',
-            $refreshToken,
-            // $refreshTtl,
-            (int) config('jwt.refresh_ttl'), // Thời gian sống của cookie (phút)
-            '/',
-            null,
-            false, // Secure
-            true, // HttpOnly
-            false, // Raw
-            'Lax' // SameSite
-        );
+                'refresh_token',
+                $refreshToken,
+                // $refreshTtl,
+                (int) config('jwt.refresh_ttl'), // Thời gian sống của cookie (phút)
+                '/',
+                null,
+                false, // Secure
+                true, // HttpOnly
+                false, // Raw
+                'Lax' // SameSite
+            );
     }
 
     public function register(Request $request)
@@ -81,6 +86,22 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);
+
+        PasswordReset::where('user_id', $user->id)->delete();
+
+        $rawToken = Str::random(60) . $user->id;
+        $hashedToken = hash('sha256', $rawToken);
+
+        PasswordReset::create([
+            'user_id' => $user->id,
+            'token' => $hashedToken,
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        $resetUrl = 'http://localhost:5173/verify-email?token=' . $rawToken;
+
+        Mail::to($user->email)->send(new ActivateAccountMail($resetUrl));
+
 
         return $this->success(new UserResource($user), 'Đăng ký thành công', 201);
     }
@@ -147,4 +168,37 @@ class AuthController extends Controller
                 ->cookie('refresh_token', '', -1, '/', null, false, true, false, 'Lax');
         }
     }
+
+    public function activeAccount(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string'
+        ]);
+
+        $hashedToken = hash('sha256', $request->token);
+
+        $reset = PasswordReset::where('token', $hashedToken)
+            ->where('used', false)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$reset) {
+            return response()->json(['message' => 'Link không hợp lệ hoặc đã hết hạn.'], 400);
+        }
+
+        $user = User::where('id', $reset->user_id)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Không tìm thấy người dùng.'], 404);
+        }
+
+        $user->is_ban = 0;
+        $user->save();
+
+        $reset->used = true;
+        $reset->save();
+
+        return response()->json(['message' => 'Tài khoản đã được kích hoạt thành công!'], 200);
+    }
+
 }
