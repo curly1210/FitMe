@@ -9,6 +9,7 @@ import AttachAxios from "./components/AttachAxios";
 import { PopupProvider } from "./context/PopupMessageProvider";
 import { API_URL } from "./utils/constant";
 import { NotificationUserProvider } from "./context/NotificationUserProvider";
+import ScrollToTop from "./components/ScrollToTop";
 
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -28,6 +29,7 @@ function App() {
             <NotificationUserProvider>
               <AttachAxios />
               <ModalProvider>
+                <ScrollToTop />
                 <Outlet />
               </ModalProvider>
             </NotificationUserProvider>

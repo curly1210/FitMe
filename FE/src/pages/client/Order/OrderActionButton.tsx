@@ -26,7 +26,7 @@ const OrderActionButton = ({ order, refetch }: any) => {
     },
   });
   return (
-    <div>
+    <>
       {(order.status_name == "Chờ xác nhận" ||
         order.status_name == "Đang chuẩn bị hàng") && (
         <Popconfirm
@@ -61,7 +61,7 @@ const OrderActionButton = ({ order, refetch }: any) => {
           </Button>
         </Popconfirm>
       )}
-    </div>
+    </>
   );
 };
 export default OrderActionButton;

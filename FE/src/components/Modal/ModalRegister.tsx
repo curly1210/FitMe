@@ -181,8 +181,11 @@ const ModalRegister = () => {
               />
             </Form.Item>
 
-            <p className="text-right font-semibold underline my-4">
-              Quên mật khẩu
+            <p
+              onClick={() => openModal(<ModalLogin />)}
+              className="text-right font-semibold underline my-4 cursor-pointer"
+            >
+              Đăng nhập
             </p>
             <Button
               loading={isLoading}
@@ -193,12 +196,12 @@ const ModalRegister = () => {
               Đăng ký
             </Button>
           </Form>
-          <div className="flex items-center justify-center w-full my-3">
+          {/* <div className="flex items-center justify-center w-full my-3">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm">Hoặc</span>
             <div className="flex-grow border-t border-gray-300"></div>
-          </div>
-          <div className="flex items-center mb-3 justify-center gap-2 border border-gray-300 rounded px-4 py-2 cursor-pointer hover:bg-gray-100 transition">
+          </div> */}
+          {/* <div className="flex items-center mb-3 justify-center gap-2 border border-gray-300 rounded px-4 py-2 cursor-pointer hover:bg-gray-100 transition">
             <img
               src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
               alt="Google Logo"
@@ -207,7 +210,7 @@ const ModalRegister = () => {
             <span className="text-sm text-gray-700 font-medium">
               Đăng nhập với Google
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

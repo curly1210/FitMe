@@ -5,9 +5,10 @@ import { MailOutlined } from "@ant-design/icons";
 import { useModal } from "../../hooks/useModal";
 import { useCreate } from "@refinedev/core";
 import { usePopupMessage } from "../../hooks/usePopupMessage";
+import ModalLogin from "./ModalLogin";
 
 const ModalForgotPass = () => {
-  const { closeModal } = useModal();
+  const { closeModal, openModal } = useModal();
   const { notify } = usePopupMessage();
 
   // Gọi API /password/forgot
@@ -85,6 +86,10 @@ const ModalForgotPass = () => {
                 prefix={<MailOutlined className="text-gray-400 mr-2" />}
               />
             </Form.Item>
+
+            <p className="text-right font-semibold underline my-3 cursor-pointer">
+              <span onClick={() => openModal(<ModalLogin />)}>Đăng nhập</span>
+            </p>
 
             <Button
               loading={isLoading}
