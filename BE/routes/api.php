@@ -46,6 +46,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/activate-account', [AuthController::class, 'activeAccount']);
+Route::post('/resend-verification-email', [AuthController::class, 'resendVerificationEmail']);
+
 
 // Route::middleware('jwt.auth')->group(function () {
 //     Route::middleware('role.admin')->group(function () {
@@ -101,7 +103,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/orders/update/{id}', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
     Route::post('/orders/proof-images/{id}', [AdminOrderController::class, 'uploadProofImages']);
     Route::post('/orders/shippingfail/{id}', [AdminOrderController::class, 'failureReason'])->name('admin.orders.shippingFailure');
-
 });
 
 Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);

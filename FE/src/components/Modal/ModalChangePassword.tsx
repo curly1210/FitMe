@@ -66,7 +66,7 @@ const ModalChangePass = () => {
           response?.data?.message || "Thành công"
         );
         // Quay về trang trước hoặc trang bạn muốn
-        navigate("/");
+        navigate("/", { replace: true });
         // Mở modal đăng nhập
         openModal(<ModalLogin />);
       },
