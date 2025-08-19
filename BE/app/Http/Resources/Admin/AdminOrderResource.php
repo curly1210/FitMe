@@ -29,6 +29,8 @@ class AdminOrderResource extends JsonResource
             'total_amount' => $this->total_amount,
             'payment_method' => $this->payment_method,
             'status_payment' => $this->status_payment,
+            'shipping_failled' => $this->shippingFailures->count(function ($failure) {
+            }),
         ];
     }
 }

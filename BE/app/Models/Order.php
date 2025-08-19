@@ -60,4 +60,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderProofImage::class);
     }
+
+    public function shippingFailures()
+    {
+        return $this->hasMany(OrderShipingFailure::class, 'order_id');
+    }
 }
