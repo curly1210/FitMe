@@ -23,8 +23,13 @@ const ModalRegister = () => {
     resource: "register",
     mutationOptions: {
       onSuccess: (response) => {
-        notify("success", "Đăng ký", response?.data?.message);
-        openModal(<ModalLogin />);
+        notify(
+          "success",
+          "Đăng ký",
+          "Đã gửi email xác thực. Kiểm tra hộp thư của bạn."
+        );
+        closeModal();
+        // openModal(<ModalLogin />);
       },
       onError: (error) => {
         console.log(error);

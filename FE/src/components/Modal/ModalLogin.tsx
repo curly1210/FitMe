@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, notification } from "antd";
 import login from "../../assets/images/login.png";
 
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
@@ -10,8 +11,11 @@ import { useAuthen } from "../../hooks/useAuthen";
 import { useLocation, useNavigate } from "react-router";
 import { usePopupMessage } from "../../hooks/usePopupMessage";
 import ModalForgotPass from "./ModalForgotPassword";
+import { useState } from "react";
 
 const ModalLogin = () => {
+  const [showResend, setShowResend] = useState(false);
+  const [emailForResend, setEmailForResend] = useState<string | null>(null);
   const { openModal, closeModal } = useModal();
   const { notify } = usePopupMessage();
   const { setAccessToken, setUser, channelAuth } = useAuthen();
@@ -19,7 +23,27 @@ const ModalLogin = () => {
   const navi = useNavigate();
   const location = useLocation();
 
-  const { mutate, isLoading } = useCreate({
+  const { mutate: mutateResendEmail, isPending: isLoadingResendEmail } =
+    useCreate({
+      resource: "resend-verification-email",
+      values: { email: emailForResend },
+      mutationOptions: {
+        onSuccess: (response) => {
+          setShowResend(false);
+          notification.success({
+            message:
+              "Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư.",
+          });
+        },
+        onError: (error) => {
+          notification.success({
+            message: "Có lỗi xảy ra",
+          });
+        },
+      },
+    });
+
+  const { mutate: mutateLogin, isPending: isLoadingLogin } = useCreate({
     resource: "login",
     mutationOptions: {
       onSuccess: (response) => {
@@ -46,7 +70,10 @@ const ModalLogin = () => {
         // openPopup(<ModalLogin />);
       },
       onError: (error) => {
-        console.log(error);
+        if (error?.status === 400) {
+          setShowResend(true);
+          setEmailForResend(error?.response?.data?.errors["email"] || null);
+        }
         notify("error", "Đăng nhập", error?.response?.data?.message);
       },
     },
@@ -54,7 +81,7 @@ const ModalLogin = () => {
 
   const onFinish = (values: any) => {
     // const { confirmPassword, ...userData } = values;
-    mutate({ values: values });
+    mutateLogin({ values: values });
     // console.log(userData);
     // console.log(confirmPassword);
   };
@@ -112,14 +139,29 @@ const ModalLogin = () => {
                 prefix={<LockOutlined className="text-gray-400 mr-2" />}
               />
             </Form.Item>
-
-            <p className="text-right font-semibold underline my-4 cursor-pointer">
-              <span onClick={() => openModal(<ModalForgotPass />)}>
-                Quên mật khẩu
-              </span>
-            </p>
+            <div className="flex justify-between items-center">
+              <div>
+                {showResend && (
+                  <div className=" ">
+                    <Button
+                      loading={isLoadingResendEmail}
+                      type="link"
+                      className="text-blue-600 underline !p-0"
+                      onClick={() => mutateResendEmail()}
+                    >
+                      Gửi lại email xác thực
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <p className=" font-semibold underline my-4 cursor-pointer">
+                <span onClick={() => openModal(<ModalForgotPass />)}>
+                  Quên mật khẩu
+                </span>
+              </p>
+            </div>
             <Button
-              loading={isLoading}
+              loading={isLoadingLogin}
               className="w-full !bg-[#22689B] !text-base !py-5 !rounded-3xl"
               type="primary"
               htmlType="submit"
@@ -127,21 +169,7 @@ const ModalLogin = () => {
               Đăng nhập
             </Button>
           </Form>
-          {/* <div className="flex items-center justify-center w-full my-3">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="mx-4 text-gray-500 text-sm">Hoặc</span>
-            <div className="flex-grow border-t border-gray-300"></div>
-          </div>
-          <div className="flex items-center mb-3 justify-center gap-2 border border-gray-300 rounded px-4 py-2 cursor-pointer hover:bg-gray-100 transition">
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              alt="Google Logo"
-              className="w-5 h-5"
-            />
-            <span className="text-sm text-gray-700 font-medium">
-              Đăng nhập với Google
-            </span>
-          </div> */}
+
           <p className="text-sm text-gray-700 text-center">
             Bạn chưa có tài khoản?{" "}
             <span

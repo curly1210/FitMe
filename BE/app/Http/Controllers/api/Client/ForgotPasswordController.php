@@ -145,8 +145,7 @@ class ForgotPasswordController extends Controller
         $request->validate(
             [
                 'code' => 'required|digits:6',
-            ]
-            ,
+            ],
             [
                 'code.required' => 'Mã xác thực là bắt buộc.',
                 'code.digits' => 'Mã xác thực phải có 6 chữ số.',
@@ -178,8 +177,4 @@ class ForgotPasswordController extends Controller
             'message' => 'Mã xác thực hợp lệ',
         ], 200);
     }
-
-
-
-
 }

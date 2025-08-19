@@ -26,6 +26,7 @@ import ProtectRole from "../components/ProtectRole";
 
 import ModalChangePass from "../components/Modal/ModalChangePassword";
 import Notification from "../pages/client/Notification";
+import ActiveEmail from "../pages/client/ActiveEmail";
 
 export const clientRoutes = [
   {
@@ -48,6 +49,10 @@ export const clientRoutes = [
         path: "/",
         element: <HomePage />,
         index: true,
+      },
+      {
+        path: "verify-email",
+        element: <ActiveEmail />,
       },
       {
         path: "/",

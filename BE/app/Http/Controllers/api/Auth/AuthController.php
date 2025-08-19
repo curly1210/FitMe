@@ -25,11 +25,25 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return $this->error('Thông tin đăng nhập không chính xác', [], 402, );
+            return $this->error('Thông tin đăng nhập không chính xác', [], 402,);
         }
 
         $user = JWTAuth::user(); // Lấy thông tin user từ JWT
         // $refreshToken = JWTAuth::claims(['type' => 'refresh'])->fromUser($user); // Sử dụng TTL từ config/jwt.php
+
+        if (!$user->is_active) {
+            // Huỷ token đã cấp (nếu có) để đảm bảo không dùng được
+            JWTAuth::setToken($accessToken)->invalidate();
+
+            return $this->error('Tài khoản của bạn chưa được kích hoạt', ['email'   => $user->email,], 400);
+        }
+
+        if ($user->is_ban) {
+            // Huỷ token đã cấp (nếu có) để đảm bảo không dùng được
+            JWTAuth::setToken($accessToken)->invalidate();
+
+            return $this->error('Tài khoản của bạn đã bị ban', [], 500);
+        }
 
         $payload = JWTFactory::customClaims(['type' => 'refresh'])
             ->setTTL(config('jwt.refresh_ttl'))
@@ -43,17 +57,17 @@ class AuthController extends Controller
             'expires_in' => JWTAuth::factory()->getTTL() * 60, // Tính bằng giây
             'user' => new UserResource($user),
         ], 'Đăng nhập thành công', 200)->cookie(
-                'refresh_token',
-                $refreshToken,
-                // $refreshTtl,
-                (int) config('jwt.refresh_ttl'), // Thời gian sống của cookie (phút)
-                '/',
-                null,
-                false, // Secure
-                true, // HttpOnly
-                false, // Raw
-                'Lax' // SameSite
-            );
+            'refresh_token',
+            $refreshToken,
+            // $refreshTtl,
+            (int) config('jwt.refresh_ttl'), // Thời gian sống của cookie (phút)
+            '/',
+            null,
+            false, // Secure
+            true, // HttpOnly
+            false, // Raw
+            'Lax' // SameSite
+        );
     }
 
     public function register(Request $request)
@@ -192,7 +206,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Không tìm thấy người dùng.'], 404);
         }
 
-        $user->is_ban = 0;
+        $user->is_active = 1;
         $user->save();
 
         $reset->used = true;
@@ -201,4 +215,34 @@ class AuthController extends Controller
         return response()->json(['message' => 'Tài khoản đã được kích hoạt thành công!'], 200);
     }
 
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.required' => 'Email là bắt buộc.',
+            'email.email' => 'Email không hợp lệ.',
+            'email.exists' => 'Email không tồn tại trong hệ thống.',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return $this->error('Không tìm thấy người dùng với email này.', [], 404);
+        }
+
+        $rawToken = Str::random(60) . $user->id;
+        $hashedToken = hash('sha256', $rawToken);
+
+        PasswordReset::updateOrCreate(
+            ['user_id' => $user->id, 'used' => false],
+            ['token' => $hashedToken, 'expires_at' => now()->addMinutes(15)]
+        );
+
+        $resetUrl = 'http://localhost:5173/verify-email?token=' . $rawToken;
+
+        Mail::to($user->email)->send(new ActivateAccountMail($resetUrl));
+
+        return $this->success([], 'Đã gửi liên kết kích hoạt tài khoản đến email của bạn.', 200);
+    }
 }

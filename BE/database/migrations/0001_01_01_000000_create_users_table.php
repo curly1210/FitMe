@@ -22,7 +22,8 @@ return new class() extends Migration {
 
             $table->enum('role', ['Customer', 'Admin'])->default('Customer');
 
-            $table->tinyInteger('is_ban')->default(1);
+            $table->tinyInteger('is_ban')->default(0);
+            $table->tinyInteger('is_active')->default(0);
             $table->timestamps();
         });
     }
