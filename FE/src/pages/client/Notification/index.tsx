@@ -104,13 +104,19 @@ const Notification = () => {
                     noti?.read_at ? "opacity-80" : ""
                   }`}
                 >
-                  <span className={`${noti?.read_at ? "" : "font-semibold"}`}>
+                  <span
+                    // className="text-base"
+                    dangerouslySetInnerHTML={{
+                      __html: noti.data?.message,
+                    }}
+                  />
+                  {/* <span className={`${noti?.read_at ? "" : "font-semibold"}`}>
                     Đơn hàng{" "}
                     <span className="text-red-500 font-semibold">
                       #{noti.data?.order_id}
                     </span>{" "}
                     {noti.data?.message}
-                  </span>
+                  </span> */}
                   <div className="text-sm text-gray-500">
                     {formatDateTime(noti?.created_at)}
                   </div>
