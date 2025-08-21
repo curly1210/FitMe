@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
@@ -32,6 +33,7 @@ interface ProductContextType {
   };
   setFieldFilter: (value: any) => void;
   isLoadingProduct: boolean;
+  handlePageChange: (page: number, pageSize?: number) => void;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(
@@ -53,6 +55,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   const [filterData, setFilterData] = useState([]);
   const [metaLink, setMetaLink] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [callapiList, setCallapiList] = useState(true);
   const [sortData, setSortData] = useState("");
   const [fieldFilter, setFieldFilter] = useState({
@@ -62,11 +65,17 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   });
   const navigate = useNavigate();
 
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+
+    if (pageSize) setPageSize(pageSize);
+  };
+
   const urlListProduct = categorySlug
     ? `${useApiUrl()}/category/${categorySlug}`
     : `${useApiUrl()}/search`;
 
-  const { data: response, isLoading } = useCustom({
+  const { data: response, isFetching } = useCustom({
     url: urlListProduct,
     method: "get",
     queryOptions: {
@@ -79,6 +88,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
     config: {
       query: {
         page: currentPage,
+        per_page: pageSize,
         color: fieldFilter.color.length
           ? `[${fieldFilter.color.join(",")}]`
           : "",
@@ -110,7 +120,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
       setListProduct([]);
       setMetaLink(null);
     }
-  }, [isLoading, response]);
+  }, [isFetching, response]);
 
   useEffect(() => {
     setCallapiList(true);
@@ -195,7 +205,8 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
         searchValue,
         fieldFilter,
         setFieldFilter,
-        isLoadingProduct: isLoading,
+        isLoadingProduct: isFetching,
+        handlePageChange,
       }}
     >
       {children}

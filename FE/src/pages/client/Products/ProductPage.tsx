@@ -27,6 +27,7 @@ function ProductPage() {
     handleSearch,
     searchValue,
     isLoadingProduct,
+    handlePageChange,
   } = useProduct();
 
   const { accessToken, user } = useAuthen();
@@ -262,16 +263,17 @@ function ProductPage() {
           )}
 
           {/* Pagination */}
-          <div className="flex justify-center items-center gap-1 mt-6">
+          <div className="flex justify-center items-center gap-1 mt-10">
             {metaLink !== null && listProduct.length > 0 && (
               <Pagination
                 className="flex justify-end col-span-full"
-                size="small"
+                // size="small"
                 current={metaLink.current_page}
                 pageSize={metaLink.per_page}
-                total={metaLink.last_page}
-                onChange={(e) => {
-                  setCurrentPage(e);
+                total={metaLink.total}
+                onChange={(page, pageSize) => {
+                  // setCurrentPage(e);
+                  handlePageChange(page, pageSize);
                   handleSearch();
                 }}
               />
