@@ -340,6 +340,7 @@ Route::post("/contact", [ContactController::class, "store"]);
 Route::prefix('admin')->middleware('auth:api')->group(function () {
     Route::get('/contacts', [AdminContactController::class, 'index']);
     Route::get('/contact/{id}', [AdminContactController::class, 'show']);
+    Route::patch('/contact/{id}', [AdminContactController::class, 'update']);
     Route::delete('/contact/{id}', [AdminContactController::class, 'destroy']);
 });
 

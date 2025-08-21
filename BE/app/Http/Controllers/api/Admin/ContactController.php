@@ -16,32 +16,45 @@ class ContactController extends Controller
     {
         $contacts = Contact::all();
         return $contacts;
-        
     }
 
     public function show($id)
     {
         $contact = Contact::find($id);
 
-        if(!$contact){
-            return $this->error('Không tìm thấy liên hệ',[],404);
+        if (!$contact) {
+            return $this->error('Không tìm thấy liên hệ', [], 404);
         }
 
-        $contact->update(['is_read' => true ]);
-
         return $contact;
+    }
+
+    public function update($id)
+    {
+        $contact = Contact::find($id);
+
+        if (!$contact) {
+            return $this->error('Không tìm thấy liên hệ', [], 404);
+        }
+
+        $contact->update(['is_read' => 1]);
+
+        return response()->json([
+            'message' => 'Đã xử lí liên hệ',
+            'data' => $contact
+        ], 200);
     }
 
     public function destroy($id)
     {
         $contact = Contact::find($id);
 
-         if(!$contact){
-            return $this->error('Không tìm thấy liên hệ',[],404);
+        if (!$contact) {
+            return $this->error('Không tìm thấy liên hệ', [], 404);
         }
 
-         if(!$contact->is_read){
-            return $this->error('Chỉ xóa khi đã xem liên hệ',[],403);
+        if (!$contact->is_read) {
+            return $this->error('Chỉ xóa khi đã xem liên hệ', [], 403);
         }
         $contact->delete();
 
