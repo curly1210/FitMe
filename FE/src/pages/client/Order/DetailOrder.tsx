@@ -14,9 +14,16 @@ import { MdClose } from "react-icons/md";
 // import NotFound from "../../../assets/images/404.png";
 import NotFound_404 from "../NotFound_404";
 import ImageWithFallback from "../../../components/ImageFallBack";
+import { useEffect } from "react";
+import { useNotificationUser } from "../../../hooks/userNotificationUser";
+import { useAuthen } from "../../../hooks/useAuthen";
 
 const DetailOrder = () => {
   const { id } = useParams();
+
+  const { echo } = useNotificationUser();
+
+  const { user } = useAuthen();
 
   const {
     data: orderResponse,
@@ -80,6 +87,24 @@ const DetailOrder = () => {
       }
     );
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `App.Models.User.${user?.id}`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo, user?.id]);
 
   if (error) {
     if (error?.status === 404) {

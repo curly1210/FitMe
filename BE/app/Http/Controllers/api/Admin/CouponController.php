@@ -93,7 +93,8 @@ class CouponController extends Controller
                     }
                     break;
                 case 'fixed':
-                    if ($request->value >= $request->max_price_discount) {
+                    // if ($request->value >= $request->max_price_discount) {
+                    if ($request->value >= $request->min_price_order) {
                         return $this->error('Nhập dữ liệu không hợp lệ', ["value" => "Giá trị giảm không được vượt quá giá trị tối thiểu áp mã"], 422);
                     }
                     break;
