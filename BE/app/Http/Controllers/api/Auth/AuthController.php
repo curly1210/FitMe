@@ -3,18 +3,19 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Models\User;
+use App\Models\MemberPoint;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\PasswordReset;
 use App\Mail\ResetPasswordMail;
+use App\Mail\ActivateAccountMail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTFactory;
 use App\Http\Resources\Auth\UserResource;
-use App\Mail\ActivateAccountMail;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -51,7 +52,31 @@ class AuthController extends Controller
 
         $refreshToken = JWTAuth::encode($payload)->get();
 
+        $lastestOrder = $user->orders()->where('status_order_id', '=', 6)->latest()->first() ?? null;
+        if ($lastestOrder && now()->diffInDays($lastestOrder->created_at, true) > 180) {
+            $memberPoint = MemberPoint::where('user_id', '=', $user->id)->first();
+            if (!$memberPoint->last_rank_deduction_at || $memberPoint->last_rank_deduction_at < $lastestOrder->created_at) {
+                switch ($memberPoint->rank) {
+                    case "diamond":
+                        $memberPoint->update(['point' => 500, 'rank' => 'gold', 'value' => 5]);
+                        break;
+                    case "gold":
+                        $memberPoint->update(['point' => 200, 'rank' => 'silver', 'value' => 3]);
+                        break;
+                    case "silver":
+                        $memberPoint->update(['point' => 0, 'rank' => 'bronze', 'value' => 0]);
+                        break;
+                    case "bronze":
+                        break;
+                }
+                $memberPoint->last_rank_deduction_at = now();
+                $memberPoint->save();
+            }
+        }
+
+
         return $this->success([
+
             'access_token' => $accessToken,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60, // Tính bằng giây
@@ -100,6 +125,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);
+        MemberPoint::create(['user_id' => $user->id]);
 
         PasswordReset::where('user_id', $user->id)->delete();
 
