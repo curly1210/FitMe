@@ -79,69 +79,6 @@ const TryClothes = () => {
 
   const wishlist = wishListResponse?.data?.data || [];
 
-  // useEffect(() => {
-  //   // console.log(imageUpload);
-  //   if (imageUpload) {
-  //     const fetchData = async () => {
-  //       try {
-  //         // Step 1: Gửi yêu cầu tạo prediction
-  //         const formData = new FormData();
-
-  //         formData.append(
-  //           "version",
-  //           "0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985"
-  //         );
-  //         formData.append("human_img", imageUpload);
-  //         formData.append("garment_des", "hi");
-  //         formData.append("category", selectedCategory);
-  //         formData.append("crop", "false");
-  //         formData.append("force_dc", "false");
-  //         formData.append("mask_only", "false");
-  //         formData.append("seed", "42");
-  //         formData.append("steps", "30");
-  //         formData.append("garm_img", imageClothes);
-
-  //         const response = await axios.post(
-  //           "http://localhost:8000/api/replicate/run",
-  //           formData,
-  //           {
-  //             headers: {
-  //               "Content-Type": "multipart/form-data",
-  //             },
-  //           }
-  //         );
-
-  //         const predictionId = response.data.id;
-
-  //         // Step 2: Kiểm tra trạng thái lặp lại cho đến khi có output
-  //         const pollStatus = async () => {
-  //           const res = await axios.get(
-  //             `http://localhost:8000/api/replicate/status/${predictionId}`
-  //           );
-
-  //           const status = res.data.status;
-
-  //           console.log("Status:", status);
-
-  //           if (status === "succeeded") {
-  //             console.log("🎉 Output ready:", res.data.output);
-  //           } else if (status === "failed") {
-  //             console.error("❌ Prediction failed:", res.data.error);
-  //           } else {
-  //             setTimeout(pollStatus, 3000); // kiểm tra lại sau 3 giây
-  //           }
-  //         };
-
-  //         pollStatus();
-  //       } catch (error) {
-  //         console.error("❌ Lỗi gọi API Replicate:", error);
-  //       }
-  //     };
-
-  //     // fetchData();
-  //   }
-  // }, [imageUpload]);
-
   const contentStyle = {
     padding: 50,
     background: "transparent",

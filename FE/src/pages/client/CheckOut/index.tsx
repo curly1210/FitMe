@@ -156,7 +156,8 @@ const CheckOut = () => {
       );
       // mã giảm cố định
     } else if (coupon.type === "fixed") {
-      calculatedDiscount = Math.min(coupon.value, coupon.max_price_discount);
+      calculatedDiscount = Math.min(coupon.value, coupon.min_price_order);
+      console.log();
       // mã freeship
     } else if (coupon.type === "free_shipping") {
       calculatedDiscount = 0; // Không giảm giá tiền
