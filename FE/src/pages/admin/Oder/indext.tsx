@@ -21,10 +21,11 @@ import {
   Form,
   message,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OrderDetailDrawer from "./oderDetail";
 import Search from "antd/es/input/Search";
 import UploadProofForm from "./ProofImageForm";
+import { useNotificationUser } from "../../../hooks/userNotificationUser";
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -62,6 +63,7 @@ const Oder = () => {
   const [isSubmittingFail, setIsSubmittingFail] = useState(false);
 
   const [loadingOrderId, setLoadingOrderId] = useState<any>(null);
+  const { echo } = useNotificationUser();
 
   const _start = (current - 1) * pageSize;
   const _end = current * pageSize;
@@ -96,6 +98,24 @@ const Oder = () => {
     pagination: { current, pageSize },
     meta: { _start, _end },
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `admin.notifications`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo]);
 
   const { mutate: mutateRefund, isLoading: isLoadingRefund } = useCreate();
 

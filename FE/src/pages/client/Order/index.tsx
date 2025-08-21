@@ -20,6 +20,8 @@ import viVN from "antd/locale/vi_VN";
 import "dayjs/locale/vi";
 import RenderReviewButton from "./RenderReviewButton";
 import OrderActionButton from "./OrderActionButton";
+import { useNotificationUser } from "../../../hooks/userNotificationUser";
+import { useAuthen } from "../../../hooks/useAuthen";
 dayjs.locale("vi");
 
 const { Search } = Input;
@@ -36,6 +38,10 @@ const Order = () => {
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
 
   const { mutate: createPaymentOnline } = useCreate(); // gửi thông tin về be khi ấn thanh toán
+
+  const { echo } = useNotificationUser();
+
+  const { user } = useAuthen();
 
   const onHandlePaymentOnline = (orders_code: any, total_amount: any) => {
     createPaymentOnline(
@@ -79,6 +85,24 @@ const Order = () => {
       },
     },
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `App.Models.User.${user?.id}`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo, user?.id]);
 
   useEffect(() => {
     if (ordersResponse?.data) {

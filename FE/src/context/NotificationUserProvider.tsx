@@ -11,6 +11,7 @@ interface NotificationUserType {
   unread: number;
   refetchUserUnreadNotifications: () => void; // Optional refetch function
   isLoadingUserNotications: boolean; // Optional loading state
+  echo: any;
 }
 
 export const NotificationUserContext = createContext<NotificationUserType>({
@@ -18,6 +19,7 @@ export const NotificationUserContext = createContext<NotificationUserType>({
   unread: 0,
   refetchUserUnreadNotifications: () => {}, // Default no-op function
   isLoadingUserNotications: false, // Default loading state
+  echo: null,
 });
 
 export const NotificationUserProvider = ({
@@ -30,6 +32,7 @@ export const NotificationUserProvider = ({
     []
   );
   const [unread, setUnread] = useState<any>(0);
+  const [echo, setEcho] = useState<any>(null);
 
   const {
     data: responseUserNotifications,
@@ -49,23 +52,6 @@ export const NotificationUserProvider = ({
     },
   });
 
-  // const {
-  //   data: responseUserNotifications,
-  //   refetch: refetchUserUnreadNotifications,
-  //   isFetching: isLoadingUserNotications,
-  // } = useList({
-  //   resource: "notifications/unread",
-  //   queryOptions: {
-  //     enabled: !!accessToken, // Chỉ chạy khi accessToken tồn tại
-  //     onSuccess: (data) => {
-  //       setUserUnreadNotifications(data.data?.notifications ?? []);
-  //       setUnread(data.data?.unread_count ?? 0);
-  //     },
-  //   },
-  // });
-
-  // console.log(userNotifications);
-
   useEffect(() => {
     if (!accessToken) return; // chưa login thì bỏ qua
 
@@ -74,7 +60,8 @@ export const NotificationUserProvider = ({
     // console.log("userId:", userId);
     if (!userId) return;
 
-    const echo = initEcho(accessToken);
+    const echoInstance = initEcho(accessToken);
+    setEcho(echoInstance);
     // echo
     //   .private(`App.Models.User.${userId}`)
     //   .listen(".order.updated", (e: any) => {
@@ -83,7 +70,7 @@ export const NotificationUserProvider = ({
     //   });
 
     if (user?.role === "Admin") {
-      echo.private("admin.notifications").listen(".order", (e: any) => {
+      echoInstance.private("admin.notifications").listen(".order", (e: any) => {
         console.log("Thông báo admin:", e.message);
         refetchUserUnreadNotifications();
       });
@@ -97,10 +84,12 @@ export const NotificationUserProvider = ({
     }
 
     if (user?.role === "Customer") {
-      echo.private(`App.Models.User.${userId}`).listen(".order", (e: any) => {
-        refetchUserUnreadNotifications();
-        // console.log("Thông báo đơn hàng:", e.message);
-      });
+      echoInstance
+        .private(`App.Models.User.${userId}`)
+        .listen(".order", (e: any) => {
+          refetchUserUnreadNotifications();
+          // console.log("Thông báo đơn hàng:", e.message);
+        });
     }
 
     return () => {
@@ -115,6 +104,7 @@ export const NotificationUserProvider = ({
         unread,
         refetchUserUnreadNotifications,
         isLoadingUserNotications,
+        echo,
       }}
     >
       {/* Children components will go here */}
