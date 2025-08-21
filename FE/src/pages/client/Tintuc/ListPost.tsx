@@ -14,7 +14,7 @@ const stripHtml = (html: string) => {
 
 const ListPost = () => {
   const [current, setCurrent] = useState(1);
-  const pageSize = 10; // ✅ 10 bài mỗi trang
+  const pageSize = 10; 
 
   const { data, isLoading } = useList({
     resource: "client/posts",
