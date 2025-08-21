@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import {
   Table,
-  Tag,
   Button,
   Tooltip,
   Popconfirm,
   message,
   Spin,
+  Tag,
 } from "antd";
-import { useList, useDelete } from "@refinedev/core";
+import { useList, useDelete, useUpdate } from "@refinedev/core";
 import type { ColumnsType } from "antd/es/table";
 import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import ContactDetailDrawer from "./DrawercontactDetail";
@@ -32,7 +32,7 @@ const ContactList: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const { data, isLoading, refetch } = useList<Contact>({
-    resource: "admin/contacts",
+    resource: "admin/contacts", // lấy danh sách
     pagination: {
       current: currentPage,
       pageSize,
@@ -40,6 +40,7 @@ const ContactList: React.FC = () => {
   });
 
   const { mutate: deleteContact } = useDelete();
+  const { mutate: updateContact } = useUpdate();
 
   const handleDelete = (id: number) => {
     setIsDeleting(true);
@@ -58,6 +59,26 @@ const ContactList: React.FC = () => {
         },
         onSettled: () => {
           setIsDeleting(false);
+        },
+      }
+    );
+  };
+
+  const handleToggleRead = (record: Contact) => {
+    updateContact(
+      {
+        resource: "admin/contact", 
+        id: record.id,
+        values: { is_read: record.is_read ? 0 : 1 },
+        meta: { method: "patch" }, 
+      },
+      {
+        onSuccess: () => {
+          message.success("Cập nhật trạng thái thành công!");
+          refetch();
+        },
+        onError: () => {
+          message.error("Cập nhật trạng thái thất bại!");
         },
       }
     );
@@ -94,7 +115,19 @@ const ContactList: React.FC = () => {
         </Tooltip>
       ),
     },
-
+    {
+      title: "Trạng thái",
+      dataIndex: "is_read",
+      render: (_, record) => (
+        <Tag
+          color={record.is_read ? "green" : "red"}
+          className="cursor-pointer"
+          onClick={() => handleToggleRead(record)}
+        >
+          {record.is_read ? "Đã đọc" : "Chưa đọc"}
+        </Tag>
+      ),
+    },
     {
       title: "Thao tác",
       key: "action",
