@@ -172,6 +172,8 @@ const DrawerEdit = ({
     return true;
   };
 
+  // console.log(uploadImagesMap);
+
   const onFinish = (values: any) => {
     // console.log(values);
     if (formData.variants.length === 0) {
@@ -185,6 +187,12 @@ const DrawerEdit = ({
       if (variant?.sale_price > variant?.price) {
         notification.error({
           message: "Giá khuyến mãi không được lớn hơn giá bán",
+        });
+        return; // dừng hàm cha luôn
+      }
+      if (variant?.sale_price <= 0 || variant?.price <= 0) {
+        notification.error({
+          message: "Giá phải lớn hơn 0",
         });
         return; // dừng hàm cha luôn
       }
@@ -210,7 +218,7 @@ const DrawerEdit = ({
     // console.log("anh moi upload:", syncImagesToFormData(uploadImagesMap));
 
     const totalImages = [
-      ...(formData?.images || []),
+      // ...(formData?.images || []),
       ...syncImagesToFormData(uploadImagesMap),
     ];
 
@@ -252,7 +260,7 @@ const DrawerEdit = ({
     //   console.log(key, value);
     // }
 
-    console.log("formDataRequest", formData);
+    // console.log("formDataRequest", formData);
 
     updateProduct(
       {
@@ -269,8 +277,14 @@ const DrawerEdit = ({
           notification.success({ message: response?.data?.message });
         },
         onError: (err) => {
-          notification.error({ message: "Thêm sản phẩm thất bại" });
-          console.log(err);
+          const errors = err.response?.data?.errors;
+          const firstKey = Object.keys(errors)[0];
+          notification.error({ message: errors[firstKey][0] });
+          // if (err?.status === 422) {
+          // } else {
+          //   notification.error({ message: "Sửa sản phẩm thất bại" });
+          // }
+          // console.log(err);
         },
       }
     );

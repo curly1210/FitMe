@@ -123,33 +123,6 @@ const SearchPanel = () => {
                 </div>
               </div>
 
-              {/* Bộ sưu tập */}
-              <div className="mt-6 pb-8 border-b border-gray-200">
-                <h2 className="text-xl font-bold mb-5">
-                  Các bộ sưu tập của Fitme
-                </h2>
-                <div className="flex items-start gap-[22px]">
-                  {[
-                    "https://media.routine.vn/400x400/prod/media/thumb-copy-png-5o81.webp",
-                    "https://media.routine.vn/400x400/prod/media/1-png-zjme-1-png-mwmb.webp",
-                    "https://media.routine.vn/400x400/prod/media/476229736-1074507978046092-3929017900147860215-n-jpg-orfd.webp",
-                  ].map((src, index) => (
-                    <div key={index} className="overflow-hidden">
-                      <div className="cursor-pointer transform transition-transform duration-400 hover:-translate-y-2">
-                        <div className="w-[248px] h-[248px] mb-2">
-                          <img
-                            src={src}
-                            alt=""
-                            className="object-cover block h-full w-full"
-                          />
-                        </div>
-                        <p className="font-semibold">Bộ sưu tập {index + 1}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Tin tức */}
               <div className="mt-6 pb-8 border-b border-gray-200">
                 <h2 className="text-xl font-bold mb-5">Tin tức</h2>

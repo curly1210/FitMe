@@ -3,5 +3,5 @@ export function formatCurrencyVND(amount: any) {
   if (typeof amount !== "number") return "";
 
   // Dùng toLocaleString và thay dấu phẩy bằng dấu chấm
-  return amount.toLocaleString().replace(/,/g, ".") + "đ";
+  return amount.toLocaleString().replace(/,/g, ".") + " đ";
 }

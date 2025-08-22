@@ -374,12 +374,12 @@ const DetailOrder = () => {
                         <p className="font-bold">
                           {item?.sale_percent > 0 ? (
                             <span className="line-through font-normal text-sm mr-2">
-                              {item?.price.toLocaleString()}đ
+                              {formatCurrencyVND(item?.price)}
                             </span>
                           ) : (
                             ""
                           )}
-                          {item?.sale_price.toLocaleString()}đ
+                          {formatCurrencyVND(item?.sale_price)}
                         </p>
                         <p className="font-semibold">x{item?.quantity}</p>
                       </div>
@@ -393,7 +393,7 @@ const DetailOrder = () => {
                     </div>
                   </div>
                   <div className="font-bold">
-                    {item?.subtotal.toLocaleString()}đ
+                    {formatCurrencyVND(item?.subtotal)}
                   </div>
                 </div>
               ))}
@@ -446,18 +446,19 @@ const DetailOrder = () => {
                 </p>
               </div>
               <div className="flex justify-between">
+                <p>Phí vận chuyển:</p>
+                <p className="font-bold">
+                  {formatCurrencyVND(order?.shipping_price)}
+                </p>
+              </div>
+              <div className="flex justify-between">
                 <p>Giảm giá:</p>
                 <p className="font-bold">
                   {order?.discount ? "-" : ""}
                   {formatCurrencyVND(order?.discount)}
                 </p>
               </div>
-              <div className="flex justify-between">
-                <p>Phí vận chuyển:</p>
-                <p className="font-bold">
-                  {formatCurrencyVND(order?.shipping_price)}
-                </p>
-              </div>
+
               <hr className="text-gray-300" />
               <div className="flex justify-between">
                 <p>Tổng tiền:</p>

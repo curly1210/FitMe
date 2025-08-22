@@ -60,6 +60,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         notification.success({ message: "Thêm vào giỏ hàng thành công" });
       },
       onError: (error) => {
+        refetch();
         notification.error({ message: `${error?.response?.data?.message}` });
       },
     },
@@ -106,13 +107,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       { resource: "cart-items", id: idCartItem },
       {
         onSuccess: (response) => {
-          refetch();
           notification.success({ message: response?.data?.message });
         },
         onError: (error) => {
           notification.error({ message: `${error?.response?.data?.message}` });
         },
         onSettled: () => {
+          refetch();
           setLoadingItemId(null); // Reset loading state
         },
       }
@@ -129,7 +130,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         },
         {
           onSuccess: (response) => {
-            refetch();
             notification.success({ message: response?.data?.message });
             resolve(response); // return response
           },
@@ -140,6 +140,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             reject(error); // return error
           },
           onSettled: () => {
+            refetch();
+
             setLoadingItemId(null); // Reset loading state
           },
         }
