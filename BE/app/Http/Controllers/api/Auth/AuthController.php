@@ -124,7 +124,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'is_active' => 1
+            'is_active' => 1 //test, thực tế comment lại
         ]);
         MemberPoint::create(['user_id' => $user->id]);
 
