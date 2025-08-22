@@ -204,7 +204,9 @@ class ReviewController extends Controller
             } else if (!$request->user()) {
                 return $this->error('Bạn chưa đăng nhập', [], 403);
             } else {
-
+                if (count($request->review_images) > 5) {
+                    return $this->error("Số lượng ảnh tải lên tối đa là 5 ảnh", [], 422);
+                }
                 $review = Review::create([
                     'user_id' => $request->user()->id,
                     'product_item_id' => $request->input('product_item_id'),
