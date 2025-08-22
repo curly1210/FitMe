@@ -30,18 +30,13 @@ class ContactController extends Controller
         }
 
         // Lọc theo tên
-        if ($request->has('name') && $request->input('name')) {
-            $query->where('name', 'like', '%' . $request->input('name') . '%');
-        }
-
-        // Lọc theo email
-        if ($request->has('email') && $request->input('email')) {
-            $query->where('email', 'like', '%' . $request->input('email') . '%');
-        }
-
-        // Lọc theo số điện thoại
-        if ($request->has('phone') && $request->input('phone')) {
-            $query->where('phone', 'like', '%' . $request->input('phone') . '%');
+if ($request->has('search') && $request->input('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('phone', 'like', '%' . $search . '%');
+            });
         }
 
         $contacts = $query->get();
