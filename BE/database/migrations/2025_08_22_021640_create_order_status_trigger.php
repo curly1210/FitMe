@@ -17,27 +17,26 @@ return new class extends Migration
             AFTER UPDATE ON orders
             FOR EACH ROW
             BEGIN
-                -- chỉ chạy khi status_order_id đổi sang 6
-                IF NEW.status_order_id = 6 AND OLD.status_order_id <> 6 THEN
-                    UPDATE member_points mp
-                    SET 
-                        mp.point = mp.point + FLOOR(NEW.total_amount / 10000),
-                        mp.last_order_date = NEW.created_at,
-                        mp.rank = CASE
-                            WHEN mp.point + FLOOR(NEW.total_amount / 10000) >= 1000 THEN "diamond"
-                            WHEN mp.point + FLOOR(NEW.total_amount / 10000) >= 500 THEN "gold"
-                            WHEN mp.point + FLOOR(NEW.total_amount / 10000) >= 200 THEN "silver"
-                            ELSE "bronze"
-                        END,
-                        mp.value = CASE
-                            WHEN mp.point + FLOOR(NEW.total_amount / 10000) >= 1000 THEN 10
-                            WHEN mp.point + FLOOR(NEW.total_amount / 10000) >= 500 THEN 5
-                            WHEN mp.point + FLOOR(NEW.total_amount / 10000) >= 200 THEN 3
-                            ELSE 0
-                        END
-                    WHERE mp.user_id = NEW.user_id;
-                END IF;
-            END
+            IF NEW.status_order_id = 6 AND OLD.status_order_id <> 6 THEN
+            UPDATE member_points mp
+            SET 
+                mp.point = @new_point := mp.point + FLOOR(NEW.total_amount / 10000),
+                mp.last_order_date = NEW.created_at,
+                mp.rank = CASE
+                    WHEN @new_point >= 1000 THEN "diamond"
+                    WHEN @new_point >= 500 THEN "gold"
+                    WHEN @new_point >= 200 THEN "silver"
+                    ELSE "bronze"
+                END,
+                mp.value = CASE
+                    WHEN @new_point >= 1000 THEN 10
+                    WHEN @new_point >= 500 THEN 5
+                    WHEN @new_point >= 200 THEN 3
+                    ELSE 0
+                END
+            WHERE mp.user_id = NEW.user_id;
+        END IF;
+    END
         ');
     }
 
