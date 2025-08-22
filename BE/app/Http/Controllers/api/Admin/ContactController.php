@@ -12,9 +12,39 @@ class ContactController extends Controller
 {
     //
     use ApiResponse;
-    public function index()
+    // public function index()
+    // {
+    //     $contacts = Contact::all();
+    //     return $contacts;
+    // }
+    public function index(Request $request)
     {
-        $contacts = Contact::all();
+        $query = Contact::query();
+
+        // Lọc theo trạng thái is_read
+        if ($request->has('is_read')) {
+            $isRead = filter_var($request->input('is_read'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if (!is_null($isRead)) {
+                $query->where('is_read', $isRead);
+            }
+        }
+
+        // Lọc theo tên
+        if ($request->has('name') && $request->input('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        // Lọc theo email
+        if ($request->has('email') && $request->input('email')) {
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        // Lọc theo số điện thoại
+        if ($request->has('phone') && $request->input('phone')) {
+            $query->where('phone', 'like', '%' . $request->input('phone') . '%');
+        }
+
+        $contacts = $query->get();
         return $contacts;
     }
 
