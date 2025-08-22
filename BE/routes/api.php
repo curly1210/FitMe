@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\NotificationController;
+use App\Models\MemberPoint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\api\Admin\GhnController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\PostController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\api\Client\AddressController;
 use App\Http\Controllers\api\Client\ChatbotController;
 use App\Http\Controllers\Api\Client\CommentController;
+use App\Http\Controllers\api\Client\ContactController;
 use App\Http\Controllers\Api\Client\ProductController;
 use App\Http\Controllers\Api\Admin\VariationController;
 use App\Http\Controllers\api\Client\CartItemController;
@@ -23,22 +25,21 @@ use App\Http\Controllers\Api\Client\WishlistController;
 use App\Http\Controllers\Api\Admin\StatisticsController;
 use App\Http\Controllers\api\Client\ReplicateController;
 use App\Http\Controllers\api\Admin\ReviewReplyController;
-use App\Http\Controllers\api\Client\WithdrawRequestController as ClientWithdrawRequestController;
-use App\Http\Controllers\api\Admin\WithdrawRequestController as AdminWithdrawRequestController;
 
+use App\Http\Controllers\api\Client\MemberPointController;
+use App\Http\Controllers\Api\Client\ForgotPasswordController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Client\PostController as ClientPostController;
 use App\Http\Controllers\api\Client\UserController as ClientUserController;
 use App\Http\Controllers\api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\CommentController as AdminCommentController;
+use App\Http\Controllers\api\Admin\ContactController as AdminContactController;
 use App\Http\Controllers\api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Client\BannerController as ClientBannerController;
 use App\Http\Controllers\api\Client\ReviewController as ClientReviewController;
 use App\Http\Controllers\Api\Client\CategoryController as ClientCategoryController;
-use App\Http\Controllers\api\Client\ContactController;
-use App\Http\Controllers\api\Admin\ContactController as AdminContactController;
-use App\Http\Controllers\Api\Client\ForgotPasswordController;
-
+use App\Http\Controllers\api\Admin\WithdrawRequestController as AdminWithdrawRequestController;
+use App\Http\Controllers\api\Client\WithdrawRequestController as ClientWithdrawRequestController;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -93,7 +94,7 @@ Route::get('/orders', [OrderController::class, 'index']);
 // Route::post('/orders/{id}', [OrderController::class, 'update']);
 Route::patch('/orders/{id}', [OrderController::class, 'update']);
 Route::get('/orders/{orderCode}', [OrderController::class, 'show']);
-
+Route::get('/get-rank', [MemberPointController::class, "getRank"]);
 
 Route::prefix('admin')->group(function () {
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');

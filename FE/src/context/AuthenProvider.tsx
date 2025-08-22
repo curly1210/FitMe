@@ -15,6 +15,8 @@ interface User {
   name: string;
   email: string;
   role: string; // có thể có hoặc không
+  avatar: string;
+  phone: string;
 }
 
 type AuthContextType = {

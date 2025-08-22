@@ -293,6 +293,25 @@ class OrderController extends Controller
             } elseif ($currentStatus == 4) {
                 // Chuyển từ "Đã giao hàng" (4) sang "Hoàn thành" (6)
                 $order->update(['status_order_id' => 6]);
+                // $memberPoint = $user->memberPoint; // point ,//rank  // lastest //value
+                // $pointTransfer = floor((int) $order->total_amount / 10000);
+
+                // $memberPoint->update(['point' => $memberPoint->point += $pointTransfer, "last_order_date" => $order->created_at]);
+                // $memberPoint->refresh();
+                // switch (true) {
+                //     case $memberPoint->point >= 200 && $memberPoint->point < 500:
+                //         $memberPoint->update(['rank' => 'silver', 'value' => 3]);
+                //         break;
+                //     case $memberPoint->point >= 500 && $memberPoint->point < 1000:
+                //         $memberPoint->update(['rank' => 'gold', 'value' => 5]);
+                //         break;
+                //     case $memberPoint->point >= 1000:
+                //         $memberPoint->update(['rank' => 'diamond', 'value' => 10]);
+                //         break;
+                //     case $memberPoint->point >= 0 && $memberPoint->point < 200:
+                //         $memberPoint->update(['rank' => 'bronze', 'value' => 0]);
+                //         break;
+                // }
 
                 $message = 'Đơn hàng đã được hoàn thành.';
                 $user->notify(new OrderStatusNotification($user->id, $order->orders_code, 6, '<span>

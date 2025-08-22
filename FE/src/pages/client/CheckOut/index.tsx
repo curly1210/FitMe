@@ -4,7 +4,7 @@
 import { Button, Modal, Select, Spin, message, notification } from "antd";
 import { useEffect, useState } from "react";
 import AddressList from "./AddressList";
-import { useCreate, useList, useCustomMutation } from "@refinedev/core";
+import { useCreate, useList, useCustomMutation, useOne } from "@refinedev/core";
 import { useNavigate } from "react-router";
 import ImageWithFallback from "../../../components/ImageFallBack";
 import { useCart } from "../../../hooks/useCart";
@@ -15,6 +15,13 @@ type Coupon = {
   max_price_discount: number;
   type: "percentage" | "fixed" | "free_shipping";
 };
+
+const rankLabels: Record<string, string> = {
+  silver: "Bạc",
+  gold: "Vàng",
+  diamond: "Kim cương",
+};
+
 const CheckOut = () => {
   const [selectedMethod, setSelectedMethod] = useState("COD");
   const [cart, setCart] = useState<any>({});
@@ -36,6 +43,7 @@ const CheckOut = () => {
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discount, setDiscount] = useState<number>(0);
+  const [rank, setRank] = useState<any>(null);
 
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
 
@@ -59,6 +67,10 @@ const CheckOut = () => {
     // },
   });
 
+  const { data: memberResponse } = useOne({ resource: "get-rank", id: "" });
+
+  console.log(memberResponse?.data);
+
   useEffect(() => {
     if (cartResponse?.data) {
       // console.log("cartResponse:", cartResponse);
@@ -66,7 +78,19 @@ const CheckOut = () => {
     }
   }, [cartResponse]);
 
-  console.log("cart:", cart);
+  // console.log("cart:", cart);
+
+  useEffect(() => {
+    if (cart?.totalPriceCart && memberResponse?.data) {
+      // console.log((memberResponse?.data?.value / 100) * cart?.totalPriceCart);
+      setDiscount(
+        Math.floor((memberResponse?.data?.value / 100) * cart?.totalPriceCart)
+      );
+      setRank(memberResponse?.data?.rank);
+      // console.log(memberResponse?.data?.value / 100);
+    }
+    // console.log("hi");
+  }, [memberResponse, cart]);
 
   // console.log(orderItems, "cart");
 
@@ -157,7 +181,6 @@ const CheckOut = () => {
       // mã giảm cố định
     } else if (coupon.type === "fixed") {
       calculatedDiscount = Math.min(coupon.value, coupon.min_price_order);
-      console.log();
       // mã freeship
     } else if (coupon.type === "free_shipping") {
       calculatedDiscount = 0; // Không giảm giá tiền
@@ -202,7 +225,7 @@ const CheckOut = () => {
       coupon_code: appliedCoupon?.code || "",
     };
 
-    localStorage.setItem("order", JSON.stringify(values));
+    // localStorage.setItem("order", JSON.stringify(values));
 
     if (selectedMethod === "COD") {
       createOrder(
@@ -406,6 +429,11 @@ const CheckOut = () => {
                   if (appliedCoupon?.type === "free_shipping") {
                     setShippingPrice(20000); // hoặc 40000 tùy theo mặc định bạn muốn
                   }
+                  setDiscount(
+                    Math.floor(
+                      (memberResponse?.data?.value / 100) * cart?.totalPriceCart
+                    )
+                  );
                   return;
                 }
                 const selected = availableCoupons.find((c) => c.code === value);
@@ -467,7 +495,7 @@ const CheckOut = () => {
             />
           ) : (
             (cart?.cartItems || []).map((item: any, index: number) => (
-              <div key={index} className="flex space-x-4 items-center">
+              <div key={index} className="flex space-x-4 items-center ">
                 <ImageWithFallback src={item.image} width={64} height={64} />
                 {/* <img
                   src={item.image}
@@ -509,7 +537,7 @@ const CheckOut = () => {
             </div>
           ))} */}
 
-          {appliedCoupon && (
+          {appliedCoupon ? (
             <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
               🎁 Áp dụng mã: <strong>{appliedCoupon.code}</strong> –{" "}
               {appliedCoupon.type === "free_shipping"
@@ -520,9 +548,14 @@ const CheckOut = () => {
                       : `${appliedCoupon.value.toLocaleString()} VNĐ`
                   }`}
             </div>
-          )}
+          ) : rank === "silver" || rank === "gold" || rank === "diamond" ? (
+            <div className="bg-green-100 text-green-800 p-3 rounded text-sm">
+              🎁 Thành viên: <strong>{rankLabels[rank].toUpperCase()}</strong> –
+              Giảm {memberResponse?.data?.value}%
+            </div>
+          ) : null}
 
-          <div className="text-sm text-gray-800 space-y-1">
+          <div className="text-sm text-gray-800 space-y-3">
             <div className="flex justify-between">
               <span>Tổng giá trị đơn hàng</span>
               <span className="font-semibold">
@@ -539,14 +572,20 @@ const CheckOut = () => {
             </div>
             <div className="flex justify-between">
               <span>Giảm giá</span>
-              <span>{discount?.toLocaleString()} VNĐ</span>
+              <span>
+                {discount ? "-" : ""} {discount?.toLocaleString()} VNĐ
+              </span>
             </div>
           </div>
 
-          <div className="border-t pt-2 text-sm text-gray-900 space-y-1  ">
+          <div className="border-t pt-2 text-sm text-gray-900 space-y-3  ">
             <div className="flex justify-between font-semibold  ">
-              <span>Thành tiền</span>
+              <span className="font-normal">Thành tiền</span>
               <span>{totalAmount?.toLocaleString()} VNĐ</span>
+            </div>
+            <div className="flex justify-between font-semibold  ">
+              <span className="font-normal">Số điểm tích lũy</span>
+              <span>{Math.floor(totalPrice / 10000)}đ</span>
             </div>
           </div>
 

@@ -30,6 +30,7 @@ class User extends Authenticatable implements JWTSubject
         'role',
         'new_email',
         'email_verification_token',
+        'is_active'
     ];
 
     /**
@@ -101,5 +102,9 @@ class User extends Authenticatable implements JWTSubject
     public function wallet()
     {
         return $this->hasOne(Wallet::class);
+    }
+    public function memberPoint()
+    {
+        return $this->hasOne(MemberPoint::class);
     }
 }
