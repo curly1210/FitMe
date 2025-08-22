@@ -7,6 +7,9 @@ import {
   message,
   Spin,
   Tag,
+  Input,
+  Space,
+  Select,
 } from "antd";
 import { useList, useDelete, useUpdate } from "@refinedev/core";
 import type { ColumnsType } from "antd/es/table";
@@ -31,11 +34,29 @@ const ContactList: React.FC = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // search & filter
+  const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [cacheBuster, setCacheBuster] = useState<number>(Date.now());
+
+  // build URL đúng theo backend (dùng param search)
+  const resourceURL = `admin/contacts?page=${currentPage}&page_size=${pageSize}${
+    keyword ? `&search=${encodeURIComponent(keyword)}` : ""
+  }${statusFilter !== "" ? `&is_read=${statusFilter}` : ""}&t=${cacheBuster}`;
+
   const { data, isLoading, refetch } = useList<Contact>({
-    resource: "admin/contacts", // lấy danh sách
-    pagination: {
-      current: currentPage,
-      pageSize,
+    resource: resourceURL,
+    config: { hasPagination: false },
+    queryOptions: {
+      keepPreviousData: true,
+      select: (response) => {
+        const items = Array.isArray(response?.data)
+          ? response.data
+          : response?.data?.data ?? [];
+        const metaL = response?.meta || response?.data?.meta || {};
+        const total = metaL.total || 0;
+        return { data: items, total, metaL };
+      },
     },
   });
 
@@ -45,10 +66,7 @@ const ContactList: React.FC = () => {
   const handleDelete = (id: number) => {
     setIsDeleting(true);
     deleteContact(
-      {
-        resource: "admin/contact",
-        id,
-      },
+      { resource: "admin/contact", id },
       {
         onSuccess: () => {
           message.success("Đã xoá liên hệ");
@@ -57,9 +75,7 @@ const ContactList: React.FC = () => {
         onError: () => {
           message.error("Lỗi khi xoá liên hệ");
         },
-        onSettled: () => {
-          setIsDeleting(false);
-        },
+        onSettled: () => setIsDeleting(false),
       }
     );
   };
@@ -67,10 +83,10 @@ const ContactList: React.FC = () => {
   const handleToggleRead = (record: Contact) => {
     updateContact(
       {
-        resource: "admin/contact", 
+        resource: "admin/contact",
         id: record.id,
         values: { is_read: record.is_read ? 0 : 1 },
-        meta: { method: "patch" }, 
+        meta: { method: "patch" },
       },
       {
         onSuccess: () => {
@@ -84,6 +100,11 @@ const ContactList: React.FC = () => {
     );
   };
 
+  const handleSearch = () => {
+    setCurrentPage(1);
+    setCacheBuster(Date.now()); // trigger reload
+  };
+
   const columns: ColumnsType<Contact> = [
     {
       title: "STT",
@@ -94,18 +115,9 @@ const ContactList: React.FC = () => {
       dataIndex: "name",
       render: (text) => <span className="font-semibold">{text}</span>,
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-    },
-    {
-      title: "SĐT",
-      dataIndex: "phone",
-    },
-    {
-      title: "Tiêu đề",
-      dataIndex: "title",
-    },
+    { title: "Email", dataIndex: "email" },
+    { title: "SĐT", dataIndex: "phone" },
+    { title: "Tiêu đề", dataIndex: "title" },
     {
       title: "Nội dung",
       dataIndex: "content",
@@ -163,22 +175,49 @@ const ContactList: React.FC = () => {
       <div className="p-6 bg-white rounded-xl shadow">
         <h2 className="text-xl font-bold mb-4">Danh sách liên hệ</h2>
 
+        <Space className="mb-4">
+          {/* nhập keyword */}
+          <Input
+            placeholder="Tìm kiếm theo tên, email hoặc SĐT"
+            allowClear
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onPressEnter={handleSearch}
+          />
+
+          {/* lọc trạng thái */}
+          <Select
+            placeholder="Lọc trạng thái"
+            allowClear
+            style={{ width: 180 }}
+            value={statusFilter || undefined}
+            onChange={(value) => {
+              setStatusFilter(value ?? "");
+              handleSearch();
+            }}
+          >
+            <Select.Option value="1">Đã đọc</Select.Option>
+            <Select.Option value="0">Chưa đọc</Select.Option>
+          </Select>
+
+    
+        </Space>
+
         <Table
           columns={columns}
-          dataSource={data?.data?.data || data?.data || []}
+          dataSource={data?.data || []}
           rowKey="id"
           loading={isLoading}
           scroll={{ x: true }}
           pagination={{
             current: currentPage,
             pageSize,
-            total: data?.data?.total ?? 0,
+            total: data?.total ?? 0,
             onChange: (page) => setCurrentPage(page),
             showSizeChanger: false,
           }}
         />
 
-        {/* Drawer chi tiết liên hệ */}
         <ContactDetailDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
