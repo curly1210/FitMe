@@ -124,6 +124,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'is_active' => 1
         ]);
         MemberPoint::create(['user_id' => $user->id]);
 
@@ -140,7 +141,8 @@ class AuthController extends Controller
 
         $resetUrl = 'http://localhost:5173/verify-email?token=' . $rawToken;
 
-        Mail::to($user->email)->send(new ActivateAccountMail($resetUrl));
+        // Khoong gui mail (test)
+        // Mail::to($user->email)->send(new ActivateAccountMail($resetUrl));
 
 
         return $this->success(new UserResource($user), 'Đăng ký thành công', 201);
@@ -164,6 +166,28 @@ class AuthController extends Controller
 
             $user = JWTAuth::toUser($refreshToken);
             $newAccessToken = JWTAuth::fromUser($user);
+
+            $lastestOrder = $user->orders()->where('status_order_id', '=', 6)->latest()->first() ?? null;
+            if ($lastestOrder && now()->diffInDays($lastestOrder->created_at, true) > 180) {
+                $memberPoint = MemberPoint::where('user_id', '=', $user->id)->first();
+                if (!$memberPoint->last_rank_deduction_at || $memberPoint->last_rank_deduction_at < $lastestOrder->created_at) {
+                    switch ($memberPoint->rank) {
+                        case "diamond":
+                            $memberPoint->update(['point' => 500, 'rank' => 'gold', 'value' => 5]);
+                            break;
+                        case "gold":
+                            $memberPoint->update(['point' => 200, 'rank' => 'silver', 'value' => 3]);
+                            break;
+                        case "silver":
+                            $memberPoint->update(['point' => 0, 'rank' => 'bronze', 'value' => 0]);
+                            break;
+                        case "bronze":
+                            break;
+                    }
+                    $memberPoint->last_rank_deduction_at = now();
+                    $memberPoint->save();
+                }
+            }
 
             return $this->success([
                 'access_token' => $newAccessToken,
