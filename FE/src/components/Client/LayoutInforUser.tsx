@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-sparse-arrays */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined } from "@ant-design/icons";
@@ -6,6 +7,8 @@ import { useAuthen } from "../../hooks/useAuthen";
 import { useOne } from "@refinedev/core";
 import { Progress, Spin } from "antd";
 import { formatCurrencyVND } from "../../utils/currencyUtils";
+import { useNotificationUser } from "../../hooks/userNotificationUser";
+import { useEffect } from "react";
 
 const rankLabels = {
   bronze: {
@@ -41,12 +44,36 @@ const LayoutInforUser = () => {
   const path = location.pathname;
   const { user } = useAuthen();
 
-  const { data: memberResponse, isLoading } = useOne({
+  const { echo } = useNotificationUser();
+
+  const {
+    data: memberResponse,
+    isLoading,
+    refetch,
+  } = useOne({
     resource: "get-rank",
     id: "",
   });
 
-  console.log(user);
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `App.Models.User.${user?.id}`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo, user?.id]);
+
+  // console.log(user);
 
   let pageTitle = "";
   if (path.includes("address")) {
@@ -90,7 +117,7 @@ const LayoutInforUser = () => {
                     alt=""
                   />
                   <div className="flex flex-col items-start gap-1">
-                    <p className="font-bold">Phạm Xuân Cường</p>
+                    <p className="font-bold">{user?.name}</p>
                     <p
                       className={`text-xs bg-gradient-to-r py-1 px-3 rounded-[5px]  ${
                         rankLabels[
@@ -112,7 +139,7 @@ const LayoutInforUser = () => {
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <p className="text-sm">SĐT tích điểm</p>
-                    <p className="font-bold">0898645513</p>
+                    <p className="font-bold">{user?.phone}</p>
                   </div>
                   <div className="flex justify-between text-sm mb-2">
                     <p className="text-sm">Số điểm đang có</p>

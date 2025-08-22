@@ -140,6 +140,12 @@ const DrawerAdd = ({
         });
         return; // dừng hàm cha luôn
       }
+      if (variant?.salePrice <= 0 || variant?.price <= 0) {
+        notification.error({
+          message: "Giá phải lớn hơn 0",
+        });
+        return; // dừng hàm cha luôn
+      }
     }
 
     const formDataRequest = new FormData();
@@ -179,9 +185,9 @@ const DrawerAdd = ({
       // }
     });
 
-    for (const [key, value] of formDataRequest.entries()) {
-      console.log(key, value);
-    }
+    // for (const [key, value] of formDataRequest.entries()) {
+    //   console.log(key, value);
+    // }
 
     createProduct(
       {
@@ -197,8 +203,15 @@ const DrawerAdd = ({
           notification.success({ message: response?.data?.message });
         },
         onError: (err) => {
-          notification.error({ message: "Thêm sản phẩm thất bại" });
-          console.log(err);
+          const errors = err.response?.data?.errors;
+          if (err?.status === 500) {
+            notification.error({ message: "Lỗi khi thêm sản phẩm" });
+          } else {
+            const firstKey = Object.keys(errors)[0];
+            notification.error({ message: errors[firstKey][0] });
+          }
+          // notification.error({ message: "Thêm sản phẩm thất bại" });
+          // console.log(err);
         },
       }
     );

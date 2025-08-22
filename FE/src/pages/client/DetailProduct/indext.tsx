@@ -5,7 +5,6 @@ import {
   Radio,
   Button,
   Tooltip,
-  Space,
   notification,
   Pagination,
   Spin,
@@ -613,31 +612,31 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <Space.Compact style={{ width: "100%" }}>
-              <TextArea
-                rows={4}
-                placeholder="Bình luận ..."
-                value={comment}
-                onChange={(e) => {
-                  if (!accessToken || !user) return;
-                  setComment(e.target.value);
-                }}
-                onFocus={() => {
-                  if (!accessToken || !user) {
-                    openModal(<ModalLogin />);
-                  }
-                }}
-                className="rounded-l-md cursor-pointer"
-              />
-              <Button
-                type="primary"
-                className="rounded-r-md"
-                onClick={handleSubmitComment}
-                loading={loadingCreateComment}
-              >
-                Bình luận
-              </Button>
-            </Space.Compact>
+            {/* <Space.Compact style={{ width: "100%" }}> */}
+            <TextArea
+              rows={4}
+              placeholder="Bình luận ..."
+              value={comment}
+              onChange={(e) => {
+                if (!accessToken || !user) return;
+                setComment(e.target.value);
+              }}
+              onFocus={() => {
+                if (!accessToken || !user) {
+                  openModal(<ModalLogin />);
+                }
+              }}
+              className="rounded-l-md cursor-pointer !mb-3  "
+            />
+            <Button
+              type="primary"
+              className="rounded-r-md"
+              onClick={handleSubmitComment}
+              loading={loadingCreateComment}
+            >
+              Bình luận
+            </Button>
+            {/* </Space.Compact> */}
           </TabPane>
 
           <TabPane
@@ -716,7 +715,9 @@ const ProductDetail = () => {
                               {/* <StarRating rating={review.rate} /> */}
                             </div>
                             <p className="text-gray-500">
-                              {review?.updated_at}
+                              {review?.updated_at} | Phân loại hàng:{" "}
+                              {review?.productItem?.color} -{" "}
+                              {review?.productItem?.size}
                             </p>
                           </div>
                           <p className="text-justify">{review?.content}</p>

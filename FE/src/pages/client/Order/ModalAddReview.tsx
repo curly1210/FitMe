@@ -37,7 +37,7 @@ const ModalAddReview = ({ review }: ReviewEachProductProps) => {
   const { openModal } = useModal();
 
   const onHandleChangeImage = ({ fileList }: any) => {
-    setFileList(fileList); // cập nhật state
+    setFileList(fileList.slice(0, 5)); // cập nhật state
   };
 
   // Hàm xử lý khi người dùng nhấn nút "Đánh giá"
@@ -160,14 +160,24 @@ const ModalAddReview = ({ review }: ReviewEachProductProps) => {
             beforeUpload={() => false}
             listType="picture-card"
             onChange={onHandleChangeImage}
+            maxCount={5}
           >
-            <Button
+            {fileList.length >= 5 ? null : (
+              <Button
+                type="primary"
+                className="!text-xs"
+                icon={<UploadOutlined />}
+              >
+                Thêm ảnh
+              </Button>
+            )}
+            {/* <Button
               type="primary"
               className="!text-xs"
               icon={<UploadOutlined />}
             >
               Thêm ảnh
-            </Button>
+            </Button> */}
           </Upload>
           <p className="text-sm text-red-500">{errImage}</p>
         </div>

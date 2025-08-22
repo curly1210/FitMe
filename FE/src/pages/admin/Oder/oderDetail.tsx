@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Drawer, Spin, Table, Image } from "antd";
 import { useOne } from "@refinedev/core";
 
@@ -269,7 +270,10 @@ export default function OrderDetailDrawer({
               </div>
               <div className="flex justify-between mb-2 text-sm">
                 <span>Khuyến mãi</span>
-                <span>- {order.discount.toLocaleString("vi-VN")} VND</span>
+                <span>
+                  {order.discount ? "-" : ""}{" "}
+                  {order.discount.toLocaleString("vi-VN")} VND
+                </span>
               </div>
 
               <div className="flex justify-between mt-4 font-semibold text-base">

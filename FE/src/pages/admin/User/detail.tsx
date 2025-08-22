@@ -1,18 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useOne } from "@refinedev/core";
 import {
   Button,
   Drawer,
   Input,
   DatePicker,
-  Select,
   Table,
   Form,
   Spin,
+  Tag,
 } from "antd";
 import { useEffect } from "react";
 import dayjs from "dayjs";
-
-const { Option } = Select;
+import { formatCurrencyVND } from "../../../utils/currencyUtils";
 
 interface Order {
   orders_code: string;
@@ -32,6 +32,7 @@ interface User {
   is_ban: number;
   gender?: string;
   orders?: Order[];
+  member_points: any;
 }
 
 interface DetailProps {
@@ -40,9 +41,30 @@ interface DetailProps {
   record: User | null;
 }
 
+const rankLabels = {
+  bronze: {
+    name: "ĐỒNG",
+    color: "from-[#cd7f32] to-[#a97142]",
+  },
+  silver: {
+    name: "BẠC",
+    color: "from-gray-300 to-gray-500",
+  },
+  gold: {
+    name: "VÀNG",
+    color: "from-[#FFD700] to-[#FFC107]",
+  },
+  diamond: {
+    name: "KIM CƯƠNG",
+    color: "from-cyan-300 to-blue-600",
+  },
+
+  // diamond: "Kim cương",
+};
+
 export default function Detail({ open, onClose, record }: DetailProps) {
   const [form] = Form.useForm();
-// lấy thông tin và đơn hàng
+  // lấy thông tin và đơn hàng
   const { data, isLoading } = useOne<User>({
     resource: "admin/users",
     id: record?.id || "",
@@ -69,7 +91,7 @@ export default function Detail({ open, onClose, record }: DetailProps) {
       dataIndex: "orders_code",
       key: "orders_code",
     },
-        {
+    {
       title: "Người nhận",
       dataIndex: "recipient_name",
       key: "recipient_name",
@@ -97,7 +119,7 @@ export default function Detail({ open, onClose, record }: DetailProps) {
         ),
     },
 
-        {
+    {
       title: "Tổng tiền",
       dataIndex: "total_amount",
       key: "total_amount",
@@ -113,7 +135,7 @@ export default function Detail({ open, onClose, record }: DetailProps) {
     <Drawer
       title="Chi tiết người dùng"
       placement="right"
-      width={720}
+      width={1000}
       onClose={onClose}
       open={open}
       destroyOnClose
@@ -125,10 +147,28 @@ export default function Detail({ open, onClose, record }: DetailProps) {
           <>
             {/* Thông tin chung */}
             <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-4">Thông tin chung</h2>
+              <div className="mb-4 flex items-center gap-3">
+                <h2 className="text-lg font-semibold ">Thông tin chung</h2>
+                <p
+                  className={`text-xs bg-gradient-to-r py-1 px-3 rounded-[5px]  ${
+                    rankLabels[
+                      (user?.member_points?.rank as keyof typeof rankLabels) ??
+                        "bronze"
+                    ].color
+                  } text-white`}
+                >
+                  Hạng tài khoản:{" "}
+                  {
+                    rankLabels[
+                      (user?.member_points?.rank as keyof typeof rankLabels) ??
+                        "bronze"
+                    ].name
+                  }
+                </p>
+              </div>
               <Form layout="vertical" form={form}>
                 <div className="grid grid-cols-2 gap-4">
-                  <Form.Item label="Tên người dùng" name="name" >
+                  <Form.Item label="Tên người dùng" name="name">
                     <Input disabled />
                   </Form.Item>
                   <Form.Item label="Email" name="email">
@@ -141,9 +181,22 @@ export default function Detail({ open, onClose, record }: DetailProps) {
                     <DatePicker className="w-full" disabled />
                   </Form.Item>
                   <Form.Item label="Trạng thái hoạt động" name="is_ban">
-                     <span style={{ color: user.is_ban === 0 ? "green" : "red" }}>
+                    <span
+                      className="font-semibold"
+                      style={{ color: user.is_ban === 0 ? "green" : "red" }}
+                    >
                       {user.is_ban === 0 ? "Hoạt động" : "Khóa"}
-                      </span>
+                    </span>
+                  </Form.Item>
+                  <Form.Item label="Chi tiêu" name="is_ban">
+                    <Tag color="red" className="!text-xl font-bold">
+                      {formatCurrencyVND(user?.member_points?.point * 10000)}
+                    </Tag>
+                    {/* <span
+                      style={{ color: user.is_ban === 0 ? "green" : "red" }}
+                    >
+                      {user.is_ban === 0 ? "Hoạt động" : "Khóa"}
+                    </span> */}
                   </Form.Item>
                 </div>
               </Form>

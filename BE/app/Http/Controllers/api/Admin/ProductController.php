@@ -89,7 +89,7 @@ class ProductController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:products,name',
                 'category_id' => 'required|exists:categories,id',
                 'short_description' => 'required|string',
                 'description' => 'required|string',
@@ -103,7 +103,7 @@ class ProductController extends Controller
                 'images.*.url' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
                 'images.*.color_id' => 'required|exists:colors,id',
                 'is_active' => 'nullable|boolean',
-            ]);
+            ], ['name.unique' => 'Tên sản phẩm đã tồn tại.',]);
 
             DB::beginTransaction();
 
@@ -192,10 +192,14 @@ class ProductController extends Controller
     {
 
         try {
+
+            // return response()->json(232);
             $product = Product::findOrFail($id);
 
+
+
             $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:products,name,' . $product->id,
                 'category_id' => 'required|exists:categories,id',
                 'short_description' => 'required|string',
                 'description' => 'required|string',
@@ -218,7 +222,7 @@ class ProductController extends Controller
 
                 'images.*.color_id' => 'required|exists:colors,id',
                 'is_active' => 'nullable|boolean',
-            ]);
+            ], ['name.unique' => 'Tên sản phẩm đã tồn tại.',]);
 
             DB::beginTransaction();
 
@@ -312,6 +316,7 @@ class ProductController extends Controller
                     $this->deleteImageFromCloudinary($dbImage->url);
                     $productDelete = ProductImage::find($dbImage->id);
                     $productDelete->delete();
+                    // return response()->json($productDelete);
                 }
             }
 

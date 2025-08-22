@@ -126,29 +126,6 @@ const Order = () => {
     setSearchText(value || undefined);
   };
 
-  // const { mutate, isPending: isPendingUpdateStatus } = useUpdate({
-  //   resource: "orders",
-  //   mutationOptions: {
-  //     onSuccess: (response) => {
-  //       refetch();
-  //       notification.success({
-  //         message: `${response?.data?.message}`,
-  //       });
-  //     },
-  //     onError: (error) => {
-  //       refetch();
-  //       notification.error({ message: `${error?.response?.data?.message}` });
-  //     },
-  //   },
-  // });
-
-  // const onHandleChangeStatus = (orderId: number) => {
-  //   mutate({
-  //     id: orderId,
-  //     values: {},
-  //   });
-  // };
-
   return (
     <div className="list-order-client">
       <div className="">
