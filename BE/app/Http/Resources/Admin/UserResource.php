@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Resources\Admin;
 
 
@@ -24,6 +25,7 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'gender' => $this->gender,
             // 'role'     => $this->role,
+            "member_points" => $this->memberPoint,
             'is_ban' => $this->is_ban,
             'orders' => OrderResource::collection($this->whenLoaded('orders')),
 
