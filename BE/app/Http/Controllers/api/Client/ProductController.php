@@ -224,7 +224,7 @@ class ProductController extends Controller
             'reviews.reviewImages',
             'comments.user',
             'productImages',
-        ])->where('slug', $slug)->firstOrFail();
+        ])->where('slug', $slug)->where('is_active', 1)->firstOrFail();
 
         return new ProductDetailResource($product);
     }

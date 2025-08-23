@@ -191,7 +191,7 @@ class CartItemController extends Controller
             try {
                 // Lấy thông tin product item
                 $productItem = ProductItem::find($productItemId);
-                if (!$productItem) {
+                if (!$productItem || $productItem->is_active != 1) {
                     return $this->error('Không tìm thấy sản phẩm', [], 404);
                 }
 
@@ -283,7 +283,7 @@ class CartItemController extends Controller
 
             $productItem = $cartItem->productItem;
             $requestedQuantity = $validated['quantity'];
-            if (!$productItem) {
+            if (!$productItem || $productItem->is_active != 1) {
                 return $this->error('Không tìm thấy sản phẩm', [], 404);
             }
 

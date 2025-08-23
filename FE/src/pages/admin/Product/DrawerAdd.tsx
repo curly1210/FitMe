@@ -740,6 +740,7 @@ const DrawerAdd = ({
                 {selectedColorForImages && (
                   <Upload
                     // key={uploadKey}
+                    // maxCount={5}
                     multiple
                     beforeUpload={() => false}
                     onChange={handleUploadChange2}

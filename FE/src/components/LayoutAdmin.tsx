@@ -155,7 +155,7 @@ const itemsNavigate: MenuItem[] = [
   getItem(
     <Link to="/admin/notifications">Thông báo</Link>,
     "16",
-    <StarOutlined />
+    <BellOutlined />
   ),
 ];
 
@@ -176,6 +176,7 @@ const LayoutAdmin = () => {
   const location = useLocation();
 
   const navigate = useNavigate();
+  const { user } = useAuthen();
 
   const {
     unread,
@@ -321,15 +322,15 @@ const LayoutAdmin = () => {
           <div className="flex gap-2 items-center ">
             <div>
               <img
-                src="https://pbs.twimg.com/media/FoUoGo3XsAMEPFr?format=jpg&name=4096x4096"
+                src="https://working.vn/vnt_upload/news/hinh_ky_nang/H10-min.gif"
                 alt=""
                 width={40}
                 height={40}
-                className="rounded-full"
+                className="rounded-full h-[40px] w-[40px] object-cover"
               />
             </div>
             <div className="flex flex-col ">
-              <p className="text-sm">Pham Cuong</p>
+              <p className="text-sm">{user?.name}</p>
               <p className="text-sm text-gray-400">Admin</p>
             </div>
             <Dropdown

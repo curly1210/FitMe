@@ -81,7 +81,7 @@ const CheckOut = () => {
   // console.log("cart:", cart);
 
   useEffect(() => {
-    if (cart?.totalPriceCart && memberResponse?.data) {
+    if (cart?.totalPriceCart >= 0 && memberResponse?.data) {
       // console.log((memberResponse?.data?.value / 100) * cart?.totalPriceCart);
       setDiscount(
         Math.floor((memberResponse?.data?.value / 100) * cart?.totalPriceCart)
