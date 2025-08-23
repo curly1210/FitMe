@@ -19,7 +19,7 @@ class ContactController extends Controller
     // }
     public function index(Request $request)
     {
-        $query = Contact::query();
+        $query = Contact::query()->latest();
 
         // Lọc theo trạng thái is_read
         if ($request->has('is_read')) {
@@ -30,12 +30,12 @@ class ContactController extends Controller
         }
 
         // Lọc theo tên
-if ($request->has('search') && $request->input('search')) {
+        if ($request->has('search') && $request->input('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%')
-                  ->orWhere('phone', 'like', '%' . $search . '%');
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
             });
         }
 
