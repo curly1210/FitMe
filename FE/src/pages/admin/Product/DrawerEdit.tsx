@@ -94,6 +94,10 @@ const DrawerEdit = ({
     return null; // Không tìm thấy
   }
 
+  // useEffect(() => {
+  //   console.log("FormData thay đổi:", formData);
+  // }, [formData]);
+
   useEffect(() => {
     if (!openDrawerEdit) return;
 
@@ -218,9 +222,11 @@ const DrawerEdit = ({
     // console.log("anh moi upload:", syncImagesToFormData(uploadImagesMap));
 
     const totalImages = [
-      // ...(formData?.images || []),
+      ...(formData?.images || []),
       ...syncImagesToFormData(uploadImagesMap),
     ];
+
+    // console.log(totalImages);
 
     // const testImage = syncImagesToFormData(uploadImagesMap);
 
@@ -339,11 +345,16 @@ const DrawerEdit = ({
 
   const generateVariants = (colorsList: any, sizesList: any) => {
     if (colorsList.length === 0 || sizesList.length === 0) {
-      setFormData({
-        ...formData,
+      setFormData((prev: any) => ({
+        ...prev,
         variants: [],
-      });
+      }));
       return;
+      // setFormData({
+      //   ...formData,
+      //   variants: [],
+      // });
+      // return;
     }
 
     const newVariants: any = [];
@@ -379,11 +390,18 @@ const DrawerEdit = ({
       });
     });
 
-    setFormData({
-      ...formData,
+    setFormData((prev: any) => ({
+      ...prev,
       variants: newVariants,
-    });
+    }));
+
+    // setFormData({
+    //   ...formData,
+    //   variants: newVariants,
+    // });
   };
+
+  // console.log(formData);
 
   const handleUploadChange2 = (info: { fileList: UploadFile[] }) => {
     const colorId = selectedColorForImages?.id;
@@ -478,6 +496,25 @@ const DrawerEdit = ({
         // syncImagesToFormData(newMap);
 
         return newMap;
+      });
+
+      const filteredImages = formData.images.filter(
+        (img: any) => img.colorId !== color.id // ảnh mới
+      );
+
+      // console.log(filteredImages);
+
+      // setFormData({
+      //   ...formData,
+      //   images: filteredImages,
+      // });
+
+      setFormData((prev: any) => {
+        // console.log("prev trước khi set:", prev);
+        return {
+          ...prev,
+          images: filteredImages,
+        };
       });
 
       if (selectedColorForImages?.id === color?.id) {

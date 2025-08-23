@@ -35,7 +35,8 @@ class OrderController extends Controller
     use ApiResponse, CloudinaryTrait;
     public function index(Request $request)
     {
-        $query = Order::with('user')
+        $perPage = $request->input('per_page', 10);
+        $orders = Order::with('user')
             ->when($request->has('search'), function ($q) use ($request) {
                 $q->where(function ($query) use ($request) {
                     $query->whereHas('user', function ($uq) use ($request) {
@@ -58,9 +59,9 @@ class OrderController extends Controller
             ->when($request->filled('date'), function ($q) use ($request) {
                 $q->whereDate('created_at', $request->date);
             })
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')->paginate($perPage);
 
-        $orders = $query->get();
+        // $orders = $query->get();
 
         return AdminOrderResource::collection($orders);
     }

@@ -91,13 +91,34 @@ const Oder = () => {
     filters.push({ field: "to", operator: "eq", value: dateRange[1] });
   }
 
-  const { data, isLoading, refetch } = useList({
-    resource: "admin/orders",
-    filters,
-    hasPagination: true,
-    pagination: { current, pageSize },
-    meta: { _start, _end },
+  const { data, isLoading, refetch } = useCustom({
+    method: "get",
+    url: "admin/orders",
+    config: {
+      query: {
+        page: current,
+        per_page: pageSize,
+        search: searchName,
+        status_order_id: statusFilter,
+        status_payment: statusPay,
+        from: dateRange ? dateRange[0] : undefined,
+        to: dateRange ? dateRange[1] : undefined,
+      },
+    },
   });
+
+  // const handlePageChange = (page: number, pageSize?: number) => {
+  //   setCurrentPage(page);
+  //   if (pageSize) setPageSize(pageSize);
+  // };
+
+  // const { data, isLoading, refetch } = useList({
+  //   resource: "admin/orders",
+  //   filters,
+  //   hasPagination: true,
+  //   pagination: { current, pageSize },
+  //   meta: { _start, _end },
+  // });
 
   useEffect(() => {
     let isMounted = true;
@@ -530,15 +551,15 @@ const Oder = () => {
       {/* --- table --- */}
       <Table
         className="border-gray rounded-2xl"
-        dataSource={data?.data ?? []}
+        dataSource={data?.data?.data ?? []}
         columns={columns}
         loading={isLoading}
-        rowKey={(record) => `${record.id}-${record.status_order?.id}`}
+        rowKey={(record: any) => `${record.id}-${record.status_order?.id}`}
         pagination={{
           current,
           pageSize,
-          total: data?.meta?.total ?? 0,
-          showSizeChanger: true,
+          total: data?.data?.meta?.total ?? 0,
+          // showSizeChanger: true,
           onChange: (page, size) => {
             setCurrent(page);
             setPageSize(size);

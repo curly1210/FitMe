@@ -25,7 +25,7 @@ class ProductController extends Controller
     {
         try {
             $query = Product::query();
-
+            $perPage = $request->input('per_page', 10);
             // Tìm kiếm theo name
             if ($request->has('search')) {
                 $search = $request->input('search');
@@ -44,7 +44,7 @@ class ProductController extends Controller
                 $query->where('is_active', $isActive);
             }
             // Lấy tất cả dữ liệu
-            $products = $query->with(['category', 'productImages'])->orderBy('id', 'desc')->get();
+            $products = $query->with(['category', 'productImages'])->orderBy('id', 'desc')->paginate($perPage);
 
             // Định dạng dữ liệu sản phẩm
             $productArray = $products->map(function ($product) {
@@ -62,7 +62,15 @@ class ProductController extends Controller
                 ];
             });
 
-            return response()->json($productArray);
+            return response()->json([
+                'data' => $productArray,
+                'meta' => [
+                    'current_page' => $products->currentPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                    'last_page' => $products->lastPage(),
+                ],
+            ]);
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy danh sách sản phẩm', $th->getMessage(), 500);
         }
@@ -269,6 +277,7 @@ class ProductController extends Controller
                         'price' => $variant['price'],
                         'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
+                        'is_active' => $validatedData['is_active'] ?? 1
                     ]);
                 } else {
                     // Tạo mới variant
@@ -285,6 +294,7 @@ class ProductController extends Controller
                         'price' => $variant['price'],
                         'sale_price' => $variant['sale_price'],
                         'sale_percent' => $salePercent,
+                        'is_active' => $validatedData['is_active'] ?? 1
                     ]);
                 }
             }

@@ -23,9 +23,9 @@ import { IoAdd } from "react-icons/io5";
 import { useCart } from "../../../hooks/useCart";
 import TextArea from "antd/es/input/TextArea";
 
-import { GoStarFill } from "react-icons/go";
 import StarRating from "../../../utils/StarRating";
 import ImageWithFallback from "../../../components/ImageFallBack";
+import NotFound_404 from "../NotFound_404";
 
 const { TabPane } = Tabs;
 
@@ -145,7 +145,7 @@ const ProductDetail = () => {
   const { data, isLoading, error, refetch } = useOne<Product>({
     resource: "products",
     id: slug,
-    queryOptions: { enabled: !!slug },
+    queryOptions: { enabled: !!slug, retry: 0 },
   });
 
   const nav = useNavigate();
@@ -366,7 +366,15 @@ const ProductDetail = () => {
         <Spin tip="Đang tải sản phẩm..." size="large" />
       </div>
     );
-  if (error) return <p>Error: {error.message}</p>;
+
+  if (error) {
+    if (error?.status === 404) {
+      return (
+        <NotFound_404 message="Không tìm thấy sản phẩm" fullscreen={false} />
+      );
+    }
+  }
+
   if (!product) return <p>Không tìm thấy sản phẩm</p>;
 
   return (
@@ -651,16 +659,20 @@ const ProductDetail = () => {
                 <div className="flex w-[70%] flex-col justify-center items-center">
                   <p className="text-red-500 text-xl mb-1">
                     <span className="text-3xl">
-                      {responseReviews?.data?.review_rate}
+                      {responseReviews?.data?.total_review === 0
+                        ? 5
+                        : responseReviews?.data?.review_rate}
                     </span>{" "}
                     trên 5
                   </p>
-                  <div className="flex  ">
-                    <GoStarFill className="text-red-500 text-xl" />
-                    <GoStarFill className="text-red-500 text-xl" />
-                    <GoStarFill className="text-red-500 text-xl" />
-                    <GoStarFill className="text-red-500 text-xl" />
-                    <GoStarFill className="text-red-500 text-xl" />
+                  <div className="flex">
+                    <StarRating
+                      rating={
+                        responseReviews?.data?.total_review === 0
+                          ? 5
+                          : responseReviews?.data?.review_rate
+                      }
+                    />
                   </div>
                 </div>
               </div>

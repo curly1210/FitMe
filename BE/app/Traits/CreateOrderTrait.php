@@ -40,7 +40,7 @@ trait CreateOrderTrait
         foreach ($items as $item) {
             $productItem = ProductItem::with('product', 'color', 'size')->find($item['idProduct_item']);
 
-            if (!$productItem || !$productItem->product) {
+            if (!$productItem || !$productItem->product || $productItem->is_active != 1) {
                 return response()->json(['message' => "Không tìm thấy sản phẩm {$item['name_product']}."], 400);
             }
 

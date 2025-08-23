@@ -14,7 +14,7 @@ import {
 
 import { useMemo, useState } from "react";
 import DrawerAdd from "./DrawerAdd";
-import { useDelete, useList } from "@refinedev/core";
+import { useCustom, useDelete, useList } from "@refinedev/core";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import DrawerEdit from "./DrawerEdit";
 import DrawerDetail from "./DrawerDetail";
@@ -32,6 +32,9 @@ const ListProducts = () => {
     null
   );
 
+  const [currentPage, setCurrentPage] = useState(1); // trang hiện tại
+  const [pageSize, setPageSize] = useState(10); // số item mỗi trang
+
   const [searchText, setSearchText] = useState<any>(undefined);
   const [selectCategory, setSelectCategory] = useState<any>(undefined);
   const [selectStatus, setSelectStatus] = useState<any>(undefined);
@@ -44,20 +47,45 @@ const ListProducts = () => {
     data: productResponse,
     isLoading,
     refetch,
-  } = useList({
-    resource: "admin/products",
-    filters: [
-      { field: "search", operator: "eq", value: searchText },
-      { field: "category_id", operator: "eq", value: selectCategory },
-      { field: "is_active", operator: "eq", value: selectStatus },
-    ],
+  } = useCustom({
+    method: "get",
+    url: "admin/products",
+    config: {
+      query: {
+        page: currentPage,
+        per_page: pageSize,
+        search: searchText,
+        category_id: selectCategory,
+        is_active: selectStatus,
+      },
+    },
   });
+
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+    if (pageSize) setPageSize(pageSize);
+  };
+
+  // const {
+  //   data: productResponse,
+  //   isLoading,
+  //   refetch,
+  // } = useList({
+  //   resource: "admin/products",
+  //   filters: [
+  //     { field: "search", operator: "eq", value: searchText },
+  //     { field: "category_id", operator: "eq", value: selectCategory },
+  //     { field: "is_active", operator: "eq", value: selectStatus },
+  //   ],
+  // });
 
   const { mutate: deleteProduct } = useDelete();
 
   const products =
-    productResponse?.data.map((product) => ({ ...product, key: product.id })) ||
-    [];
+    productResponse?.data?.data.map((product: any) => ({
+      ...product,
+      key: product.id,
+    })) || [];
 
   const handleDeleteProduct = (id: number) => {
     deleteProduct(
@@ -219,7 +247,18 @@ const ListProducts = () => {
         {isLoading ? (
           <Skeleton active />
         ) : (
-          <Table dataSource={products} columns={columns} />
+          <Table
+            dataSource={products}
+            columns={columns}
+            pagination={{
+              current: productResponse?.data?.meta.current_page, // trang hiện tại
+              pageSize: pageSize, // số bản ghi mỗi trang
+              total: productResponse?.data?.meta.total, // tổng số bản ghi
+              onChange: (page, pageSize) => {
+                handlePageChange(page, pageSize);
+              },
+            }}
+          />
         )}
       </div>
 
