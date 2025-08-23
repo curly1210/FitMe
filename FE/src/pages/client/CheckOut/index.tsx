@@ -494,28 +494,30 @@ const CheckOut = () => {
               size="large"
             />
           ) : (
-            (cart?.cartItems || []).map((item: any, index: number) => (
-              <div key={index} className="flex space-x-4 items-center ">
-                <ImageWithFallback src={item.image} width={64} height={64} />
-                {/* <img
+            <div className="max-h-52 overflow-y-auto space-y-2 no-scrollbar">
+              {(cart?.cartItems || []).map((item: any, index: number) => (
+                <div key={index} className="flex space-x-4 items-center ">
+                  <ImageWithFallback src={item.image} width={64} height={64} />
+                  {/* <img
                   src={item.image}
                   alt={item.name}
                   className="w-16 h-16 object-cover"
                 /> */}
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">
-                    {item.name} -{" "}
-                    <span className="text-xs text-gray-500">{item?.sku}</span>
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {item.color}, {item.size} – SL: {item.quantity}
-                  </p>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">
+                      {item.name} -{" "}
+                      <span className="text-xs text-gray-500">{item?.sku}</span>
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {item.color}, {item.size} – SL: {item.quantity}
+                    </p>
+                  </div>
+                  <div className="text-sm font-semibold">
+                    {(item.subtotal || 0).toLocaleString()} VNĐ
+                  </div>
                 </div>
-                <div className="text-sm font-semibold">
-                  {(item.subtotal || 0).toLocaleString()} VNĐ
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
 
           {/* {(cart?.cartItems || []).map((item: any, index: number) => (

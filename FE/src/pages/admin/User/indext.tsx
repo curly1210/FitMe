@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CrudFilters, useList, useUpdate } from "@refinedev/core";
-import { Button, Col, Dropdown, Input, Menu, Row, Select, Space, Table } from "antd";
+import { Col, Dropdown, Input, Menu, Row, Select, Table } from "antd";
 import { useState } from "react";
 import Detail from "./detail";
 import DashboardUser from "../Dashboard/thongKeKhachHang";
-import { Title } from "chart.js";
 
 const User = () => {
   const { mutate } = useUpdate();
@@ -15,49 +15,48 @@ const User = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
 
   const [searchName, setSearchName] = useState("");
-  const [statusFilter, setStatusFilter] = useState<number | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<number | undefined>(
+    undefined
+  );
 
   // Tính toán _start và _end theo page & pageSize backend dùng
   const _start = (current - 1) * pageSize;
   const _end = current * pageSize;
 
+  const filters: CrudFilters = [];
 
-const filters: CrudFilters = [];
+  if (searchName) {
+    filters.push({
+      field: "search",
+      operator: "eq",
+      value: searchName,
+    });
+  }
 
-if (searchName) {
-  filters.push({
-    field: "search",
-    operator: "eq",
-    value: searchName,
-  });
-}
+  if (statusFilter !== undefined) {
+    filters.push({
+      field: "is_ban",
+      operator: "eq",
+      value: statusFilter,
+    });
+  }
 
-if (statusFilter !== undefined) {
-  filters.push({
-    field: "is_ban",
-    operator: "eq",
-    value: statusFilter,
-  });
-}
-
-const { data, isLoading } = useList({
-  resource: "admin/users",
-  filters,
-  hasPagination: true,
-  pagination: {
-    current,
-    pageSize,
-  },
-  meta: {
-    _start,
-    _end,
-  },
-
-
+  const { data, isLoading } = useList({
+    resource: "admin/users",
+    filters,
+    hasPagination: true,
+    pagination: {
+      current,
+      pageSize,
+    },
+    meta: {
+      _start,
+      _end,
+    },
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name",ellipsis: true  },
+    { title: "Name", dataIndex: "name", key: "name", ellipsis: true },
     { title: "Email", dataIndex: "email", key: "email" },
     { title: "Ngày sinh", dataIndex: "birthday", key: "birthday" },
     { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
@@ -67,8 +66,8 @@ const { data, isLoading } = useList({
       dataIndex: "is_ban",
       key: "is_ban",
       render: (value: number) => {
-
-        if (value === 0) return <span style={{ color: "green" }}>Hoạt động</span>;
+        if (value === 0)
+          return <span style={{ color: "green" }}>Hoạt động</span>;
         if (value === 1) return <span style={{ color: "red" }}>Khóa</span>;
         return <span>Không xác định</span>;
       },
@@ -95,16 +94,19 @@ const { data, isLoading } = useList({
               onSuccess: () => {
                 window.location.reload();
               },
-            },
+            }
           );
         };
 
         const menu = (
           <Menu>
-            <Menu.Item key="detail" onClick={() => {
-              setSelectedRecord(record);
-              setDrawerOpen(true);
-            }}>
+            <Menu.Item
+              key="detail"
+              onClick={() => {
+                setSelectedRecord(record);
+                setDrawerOpen(true);
+              }}
+            >
               Chi tiết
             </Menu.Item>
             <Menu.Item key="toggle_ban" onClick={hanlToggleBan}>
@@ -124,66 +126,62 @@ const { data, isLoading } = useList({
 
   return (
     <>
-    <div className="w-full" >
-    <Row className="w-full" >
-      <DashboardUser/>
-    </Row>
-      {/* Thanh tìm kiếm & lọc */}
-   <div style={{ width: 1310 }} className="ml-4.75">
-    <Row className="flex gap-3 mb-4 flex-wrap">
-     
-        
-          <Input
-            size="middle"
-            placeholder="Tìm theo tên"
-            allowClear
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            className="!h-10" // ép height 40px
-            style={{ width: 250 }}
+      <div className="w-full">
+        <Row className="w-full">
+          <DashboardUser />
+        </Row>
+        {/* Thanh tìm kiếm & lọc */}
+        <div style={{ width: 1310 }} className="ml-4.75">
+          <Row className="flex gap-3 mb-4 flex-wrap">
+            <Input
+              size="middle"
+              placeholder="Tìm theo tên"
+              allowClear
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              className="!h-10" // ép height 40px
+              style={{ width: 250 }}
+            />
+
+            <Col span={8}>
+              <Select
+                placeholder="Lọc theo trạng thái"
+                allowClear
+                value={statusFilter}
+                onChange={(value) => {
+                  setStatusFilter(value);
+                  setCurrent(1);
+                }}
+                size="middle"
+                className="!h-10 [&_.ant-select-selector]:!h-10"
+                style={{ width: 200 }}
+              >
+                <Select.Option value={undefined}>Tất cả</Select.Option>
+                <Select.Option value={0}>Hoạt động</Select.Option>
+                <Select.Option value={1}>Khóa</Select.Option>
+              </Select>
+            </Col>
+          </Row>
+
+          <Table
+            className="border-gray rounded-2xl"
+            dataSource={data?.data ?? []}
+            columns={columns}
+            loading={isLoading}
+            rowKey="id"
+            pagination={{
+              current,
+              pageSize,
+              total: data?.meta?.total ?? 0,
+              showSizeChanger: true,
+              onChange: (page, size) => {
+                setCurrent(page);
+                setPageSize(size);
+              },
+            }}
           />
-        
-      
-
-      <Col span={8}>
-        <Select
-          placeholder="Lọc theo trạng thái"
-          allowClear
-          value={statusFilter}
-          onChange={(value) => {
-            setStatusFilter(value);
-            setCurrent(1);
-          }}
-          size="middle"
-          className="!h-10 [&_.ant-select-selector]:!h-10"
-          style={{ width: 200 }}
-        >
-          <Select.Option value={undefined}>Tất cả</Select.Option>
-          <Select.Option value={0}>Hoạt động</Select.Option>
-          <Select.Option value={1}>Khóa</Select.Option>
-        </Select>
-      </Col>
-    </Row>
-
-     <Table
-        className="border-gray rounded-2xl"
-        dataSource={data?.data ?? []}
-        columns={columns}
-        loading={isLoading}
-        rowKey="id"
-        pagination={{
-          current,
-          pageSize,
-          total: data?.meta?.total ?? 0,
-          showSizeChanger: true,
-          onChange: (page, size) => {
-            setCurrent(page);
-            setPageSize(size);
-          },
-        }}
-      />
+        </div>
       </div>
-</div>
       <Detail
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

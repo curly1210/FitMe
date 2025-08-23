@@ -26,6 +26,7 @@ class UserResource extends JsonResource
             'gender' => $this->gender,
             // 'role'     => $this->role,
             "member_points" => $this->memberPoint,
+            'total_spent' => $this->orders->where('status_order_id', '=', 6)->sum('total_amount'),
             'is_ban' => $this->is_ban,
             'orders' => OrderResource::collection($this->whenLoaded('orders')),
 

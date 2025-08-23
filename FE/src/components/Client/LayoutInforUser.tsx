@@ -155,8 +155,8 @@ const LayoutInforUser = () => {
                 <Progress
                   className="!mb-3"
                   size={[, 20]}
-                  percent={Math.round(
-                    ((memberResponse?.data?.point * 10000) /
+                  percent={Math.floor(
+                    (memberResponse?.data?.total_spent /
                       rankLabels[
                         (memberResponse?.data
                           ?.rank as keyof typeof rankLabels) ?? "bronze"
@@ -169,9 +169,7 @@ const LayoutInforUser = () => {
                   trailColor="#e5e5e5" // màu nền phía sau
                 />
                 <div className="flex justify-between text-sm">
-                  <p>
-                    {formatCurrencyVND(memberResponse?.data?.point * 10000)}
-                  </p>
+                  <p>{formatCurrencyVND(memberResponse?.data?.total_spent)}</p>
                   <p className="font-bold">
                     {memberResponse?.data?.rank === "diamond"
                       ? ""
