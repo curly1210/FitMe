@@ -94,7 +94,7 @@ const SearchPanel = () => {
           <>
             <HeaderClient />
 
-            <div className="w-7xl flex-1 mx-auto px-3 overflow-y-auto pt-4 pb-10 no-scrollbar">
+            <div className="w-7xl flex-1 mx-auto px-3 overflow-y-auto pt-4 pb-10 no-scrollbar ">
               {/* Danh mục */}
               <div className="pb-10 border-b border-gray-200">
                 <div className="grid grid-cols-4 gap-y-8 px-5">

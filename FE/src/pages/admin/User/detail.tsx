@@ -33,6 +33,7 @@ interface User {
   gender?: string;
   orders?: Order[];
   member_points: any;
+  total_spent: any;
 }
 
 interface DetailProps {
@@ -190,7 +191,7 @@ export default function Detail({ open, onClose, record }: DetailProps) {
                   </Form.Item>
                   <Form.Item label="Chi tiêu" name="is_ban">
                     <Tag color="red" className="!text-xl font-bold">
-                      {formatCurrencyVND(user?.member_points?.point * 10000)}
+                      {formatCurrencyVND(user?.total_spent)}
                     </Tag>
                     {/* <span
                       style={{ color: user.is_ban === 0 ? "green" : "red" }}
