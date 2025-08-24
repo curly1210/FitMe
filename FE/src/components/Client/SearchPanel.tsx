@@ -153,10 +153,10 @@ const SearchPanel = () => {
                           <p className="font-semibold text-sm text-[#8C8C8C]">
                             {item.created_at}
                           </p>
-                          <p className="line-clamp-2 font-semibold text-ellipsis text-justify leading-5">
+                          <p className="line-clamp-2 font-semibold text-ellipsis text-justify leading-5 min-h-[40px]">
                             {item.title}
                           </p>
-                          <p className="line-clamp-2 text-[#8C8C8C] text-sm text-ellipsis text-justify leading-5">
+                          <p className="line-clamp-2 text-[#8C8C8C] text-sm text-ellipsis text-justify leading-5 min-h-[40px]">
                             {stripHtml(item.content)}
                           </p>
                         </div>
