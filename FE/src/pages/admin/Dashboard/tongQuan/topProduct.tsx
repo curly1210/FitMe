@@ -7,22 +7,22 @@ import dayjs, { Dayjs } from "dayjs";
 const { RangePicker } = DatePicker;
 
 const TopProducts = () => {
-  const [range, setRange] = useState<[Dayjs, Dayjs]>([
-    dayjs().startOf("month"),
-    dayjs().endOf("month"),
-  ]);
+  // const [range, setRange] = useState<[Dayjs, Dayjs]>([
+  //   dayjs().startOf("month"),
+  //   dayjs().endOf("month"),
+  // ]);
   const [filterBy, setFilterBy] = useState<"revenue" | "quantity">("revenue");
 
-  const from = range[0].format("YYYY-MM-DD");
-  const to = range[1].format("YYYY-MM-DD");
+  // const from = range[0].format("YYYY-MM-DD");
+  // const to = range[1].format("YYYY-MM-DD");
 
   const { data, isLoading, error } = useCustom({
     url: "/admin/statistics/top-products",
     method: "get",
     config: {
       query: {
-        from,
-        to,
+        // from,
+        // to,
         filter_by: filterBy,
       },
     },
@@ -98,16 +98,17 @@ const TopProducts = () => {
             <Radio.Button value="revenue">Doanh thu</Radio.Button>
             <Radio.Button value="quantity">Số lượng</Radio.Button>
           </Radio.Group>
-
-          <RangePicker
+              
+              {/* <RangePicker
             value={range}
             onChange={(val: any) => val && setRange(val)}
             allowClear={true}
-          />
+          />*/}
+         
         </Space>
 
         <Table
-          dataSource={products}
+          dataSource={products.slice(0,10)}
           columns={columns}
           rowKey="product_item_id"
           loading={isLoading}

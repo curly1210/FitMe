@@ -454,7 +454,17 @@ const Oder = () => {
       dataIndex: ["status_order", "label"],
       key: "status_order",
       render: (_: any, record: any) => (
-        <span style={{ color: record.status_order?.color }}>
+        <span
+          style={{
+            color: record.status_order?.color,
+            border: `1px solid ${record.status_order?.color}`,
+            borderRadius: 6,
+            padding: "2px 8px",
+            fontWeight: 500,
+            display: "inline-block",
+            background: `${record.status_order?.color}15`,
+          }}
+        >
           {record.status_order?.label}
         </span>
       ),

@@ -23,7 +23,7 @@ const RevenueByMonth = ({
 
   return (
     <Card
-      title={`Biểu đồ doanh thu trong tháng ${month}/${year}`}
+      title={`Biểu đồ khách hàng trong tháng ${month}/${year}`}
       style={{ borderRadius: 10 }}
     >
       <Bar data={chartData} options={{ responsive: true }} />
