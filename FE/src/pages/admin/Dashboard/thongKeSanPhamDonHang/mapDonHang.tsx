@@ -30,10 +30,7 @@ const normalizeProvinceName = (str: string) =>
 
 export const OrderLocationMap = () => {
   const now = dayjs();
-  const [dateRange, setDateRange] = useState<[string, string] | undefined>([
-    now.subtract(30, "day").format("YYYY-MM-DD"),
-    now.format("YYYY-MM-DD"),
-  ]);
+  const [dateRange, setDateRange] = useState<[string, string] | undefined>(undefined);
   const [statusOrderId, setStatusOrderId] = useState<number | undefined>();
 
   const { data, isLoading } = useCustom({

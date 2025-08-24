@@ -126,13 +126,13 @@ class StatisticsController extends Controller
     {
         $request->validate([
             'filter_by' => 'nullable|in:quantity,revenue',
-            'from' => 'nullable|date',
-            'to' => 'nullable|date|after_or_equal:from',
+            // 'from' => 'nullable|date',
+            // 'to' => 'nullable|date|after_or_equal:from',
         ]);
 
         $filterBy = $request->input('filter_by', 'quantity');
-        $from = $request->input('from', '2000-01-01');
-        $to = $request->input('to', now()->toDateString());
+        // $from = $request->input('from', '2000-01-01');
+        // $to = $request->input('to', now()->toDateString());
 
         $query = OrdersDetail::select([
             'product_item_id',
@@ -141,13 +141,13 @@ class StatisticsController extends Controller
             DB::raw('SUM(quantity) as total_quantity'),
             DB::raw('SUM(sale_price * quantity) as total_revenue')
         ])
-            ->whereHas('order', function ($q) use ($from, $to) {
-                $q->where('status_order_id', 6) // Chỉ lấy đơn đã hoàn thành
-                    ->whereBetween('created_at', [$from, $to]);
+            ->whereHas('order', function ($q)  {
+                $q->where('status_order_id', 6); // Chỉ lấy đơn đã hoàn thành
+                    // ->whereBetween('created_at');
             })
             ->groupBy('product_item_id', 'name_product', 'image_product')
             ->orderBy($filterBy === 'revenue' ? 'total_revenue' : 'total_quantity', 'desc')
-            ->limit(20)
+            ->limit(10)
             ->get();
 
         return response()->json([

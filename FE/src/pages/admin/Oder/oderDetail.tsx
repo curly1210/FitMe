@@ -162,7 +162,15 @@ export default function OrderDetailDrawer({
 
               <div
                 className=" font-medium"
-                style={{ color: order.status.color }}
+                style={{
+                  color: order.status.color,
+                  border: `1px solid ${order.status.color}`,
+                  borderRadius: 6,
+                  padding: "2px 8px",
+                  fontWeight: 500,
+                  display: "inline-block",
+                  background: `${order.status.color}15`,
+                }}
               >
                 {order.status.label}
               </div>
