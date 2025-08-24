@@ -398,20 +398,26 @@ const LayoutAdmin = () => {
                         </div>
                       </div>
                     ) : (
-                      userUnreadNotifications.map((noti: any, index: any) => (
-                        <div
-                          key={index}
-                          className="px-4 py-[6px] hover:bg-gray-100 flex items-center gap-2"
-                        >
-                          <span className="text-xl">{noti.data?.icon} - </span>
-                          <span
-                            // className="text-base"
-                            dangerouslySetInnerHTML={{
-                              __html: noti.data?.message,
-                            }}
-                          />
-                        </div>
-                      ))
+                      <div className="max-h-[500px] overflow-y-auto ">
+                        {userUnreadNotifications.map(
+                          (noti: any, index: any) => (
+                            <div
+                              key={index}
+                              className="px-4 py-[6px] hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <span className="text-xl">
+                                {noti.data?.icon} -{" "}
+                              </span>
+                              <span
+                                // className="text-base"
+                                dangerouslySetInnerHTML={{
+                                  __html: noti.data?.message,
+                                }}
+                              />
+                            </div>
+                          )
+                        )}
+                      </div>
                     )}
                     <div className="flex justify-between text-sm  px-4 py-[6px] text-blue-500">
                       <span
