@@ -115,7 +115,7 @@ const CardReview = ({
         <div>
           <img
             src={review?.user?.avatar}
-            className="w-8 h-8 rounded-full"
+            className="w-8 h-8 rounded-full object-cover object-center"
             alt=""
           />
         </div>

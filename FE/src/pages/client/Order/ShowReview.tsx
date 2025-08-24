@@ -84,7 +84,7 @@ const ShowReview = ({
                 {/* <ImageWithFallback src={review?.user?.avatar} /> */}
                 <img
                   src={review?.user?.avatar}
-                  className="w-8 h-8 rounded-full"
+                  className="w-8 h-8 rounded-full object-cover object-center"
                 />
               </div>
               <div className="flex flex-col gap-5">
