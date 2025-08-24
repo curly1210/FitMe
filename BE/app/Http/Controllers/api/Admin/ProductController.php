@@ -300,7 +300,8 @@ class ProductController extends Controller
             }
             // Xóa các product_item không còn trong danh sách gửi lên
             $idsToDelete = array_diff($existingIds, $inputIds);
-            ProductItem::whereIn('id', $idsToDelete)->delete();
+            // ProductItem::whereIn('id', $idsToDelete)->delete();
+            ProductItem::whereIn('id', $idsToDelete)->forceDelete();
 
             // Cập nhật lại tổng số lượng tồn kho của sản phẩm
             $product->update(['total_inventory' => $totalInventory]);

@@ -20,6 +20,9 @@ use App\Http\Resources\Client\ReviewResource;
 use App\Http\Resources\Client\OrderReviewResource;
 use App\Models\ProductItem;
 
+use Illuminate\Support\Str;
+
+
 class ReviewController extends Controller
 {
     use ApiResponse, CloudinaryTrait;
@@ -97,15 +100,18 @@ class ReviewController extends Controller
 
             $data = $order->orderDetails->map(function ($orderDetail) use ($successAt) {
                 if (!$orderDetail) return null;
+
                 // dd($orderDetail->review);
                 $productItem = ProductItem::withTrashed()->find($orderDetail->product_item_id);
                 // return response()->json($productItem);
                 $product_name = Product::where('id', $productItem->product_id)->first()->name ?? null;
+
                 return [
                     'id' => $orderDetail->id,
                     "order_id" => $orderDetail->order_id,
                     "order_detail_id" => $orderDetail->id,
                     'product_item_id' => $orderDetail->product_item_id,
+                    // 'slug'=> $orderDetail->pro
                     'product_name' => $orderDetail->name_product,
                     'slug' => Str::slug($product_name),
                     'product_image' => $this->buildImageUrl($orderDetail->image_product),

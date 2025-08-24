@@ -717,7 +717,11 @@ const ProductDetail = () => {
                     >
                       <div className="flex gap-4 px-5 mb-8 mt-8">
                         <div>
-                          <img src="" className="w-8 h-8 rounded-full" alt="" />
+                          <img
+                            src={review?.user?.avatar}
+                            className="w-8 h-8 rounded-full object-cover object-center"
+                            alt=""
+                          />
                         </div>
                         <div className="flex flex-col gap-5 grow">
                           <div className="flex flex-col gap-[2px]">
