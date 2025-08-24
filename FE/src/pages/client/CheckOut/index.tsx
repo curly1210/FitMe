@@ -8,6 +8,7 @@ import { useCreate, useList, useCustomMutation, useOne } from "@refinedev/core";
 import { useNavigate } from "react-router";
 import ImageWithFallback from "../../../components/ImageFallBack";
 import { useCart } from "../../../hooks/useCart";
+import { useAuthen } from "../../../hooks/useAuthen";
 type Coupon = {
   code: string;
   name: string;
@@ -44,17 +45,22 @@ const CheckOut = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discount, setDiscount] = useState<number>(0);
   const [rank, setRank] = useState<any>(null);
+  const { user } = useAuthen();
 
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
 
   const { mutate: createOrder, isLoading } = useCreate(); // gửi thông tin về be khi ấn thanh toán
 
-  const { data: addressData } = useList({ resource: "addresses" });
+  const { data: addressData } = useList({
+    resource: "addresses",
+    queryOptions: {
+      queryKey: ["addresses", user?.id], // cache riêng cho từng user
+    },
+  });
   const { mutate: redeemCoupon } = useCustomMutation();
   const nav = useNavigate();
 
   const { refetch: refetchAllItems } = useCart(); // lấy đơn hàng từ cart
-  // const { cart, refetch } = useCart(); // lấy đơn hàng từ cart
 
   const {
     data: cartResponse,
@@ -69,11 +75,11 @@ const CheckOut = () => {
 
   const { data: memberResponse } = useOne({ resource: "get-rank", id: "" });
 
-  console.log(memberResponse?.data);
+  // console.log(memberResponse?.data);
 
   useEffect(() => {
     if (cartResponse?.data) {
-      // console.log("cartResponse:", cartResponse);
+      console.log("cartResponse:", cartResponse);
       setCart(cartResponse.data);
     }
   }, [cartResponse]);
@@ -94,11 +100,11 @@ const CheckOut = () => {
 
   // console.log(orderItems, "cart");
 
-  // useEffect(() => {
-  //   if (cart?.cartItems && cart.cartItems.length === 0) {
-  //     nav("/", { replace: true }); // Chuyển hướng về trang chủ nếu giỏ hàng trống
-  //   }
-  // }, [cart, nav]);
+  useEffect(() => {
+    if (cart?.cartItems && cart.cartItems.length === 0) {
+      nav("/carts", { replace: true }); // Chuyển hướng về trang chủ nếu giỏ hàng trống
+    }
+  }, [cart, nav]);
 
   const totalPrice = (cart?.cartItems || []).reduce(
     (sum: number, item: any) => sum + item.subtotal,
