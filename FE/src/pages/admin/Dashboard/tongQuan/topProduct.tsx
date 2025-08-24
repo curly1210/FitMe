@@ -108,7 +108,7 @@ const TopProducts = () => {
         </Space>
 
         <Table
-          dataSource={products.slice(0,10)}
+          dataSource={products}
           columns={columns}
           rowKey="product_item_id"
           loading={isLoading}
