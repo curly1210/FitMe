@@ -301,233 +301,237 @@ const Category: React.FC = () => {
   const categoryList = data?.data;
 
   return (
-     <Spin spinning={actionLoading} tip="Đang xử lý..." size="large">
-    <div className="p-2 bg-white min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Quản lý danh mục sản phẩm</h1>
-      <div className="flex gap-4 items-start overflow-x-auto">
-        {Array.isArray(categoryList) && categoryList.length > 0 ? (
-          categoryList.map((category: any) => (
-            <Card
-              key={category.id}
-              title={
-                <span className="font-semibold text-base">{category.name}</span>
-              }
-              bodyStyle={{ padding: 12 }}
-              className="w-90  rounded-2xl border border-gray-100 !bg-gray-100 shadow-sm flex-shrink-0"
-              extra={
-                <Dropdown
-                  overlay={
-                    <Menu>
-                      <Menu.Item onClick={() => showDrawer(category)}>
-                        Sửa
-                      </Menu.Item>
-                      <Menu.Item
-                        onClick={() =>
-                          handleDelete(category.id, category.items)
-                        }
-                      >
-                        Xóa
-                      </Menu.Item>
-                    </Menu>
-                  }
-                >
-                  <MoreOutlined className="text-gray-500 cursor-pointer" />
-                </Dropdown>
-              }
-            >
-              <div className=" flex flex-col gap-3">
-                {Array.isArray(category.items) && category.items.length > 0 ? (
-                  category.items.map((item: any) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between px-5 py-3 rounded-xl border border-gray-200 bg-white shadow-sm w-full"
-                      style={{ minWidth: 200 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        {item.image && (
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={30}
-                            height={30}
-                            style={{ objectFit: "cover", borderRadius: 6 }}
-                            preview={false}
-                          />
-                        )}
-                        <span className="font-medium">{item.name}</span>
-                      </div>
-                      <Dropdown
-                        overlay={
-                          <Menu>
-                            <Menu.Item
-                              onClick={() =>
-                                showDrawer(undefined, item, category)
-                              }
-                            >
-                              Sửa
-                            </Menu.Item>
-                            <Menu.Item
-                              onClick={() => {
-                                Modal.confirm({
-                                  title:
-                                    "Bạn có chắc muốn xóa danh mục con này?",
-                                  onOk: () => {
-                                    deleteCategory(
-                                      {
-                                        resource: "admin/categories/delete",
-                                        id: item.id,
-                                      },
-                                      {
-                                        onSuccess: () => {
-                                          notification.success({
-                                            message:
-                                              "Xoá danh mục con thành công!",
-                                          });
-                                          refetch();
-                                        },
-                                        onError: () => {
-                                          notification.error({
-                                            message:
-                                              "Xoá danh mục con thất bại!",
-                                          });
-                                        },
-                                      }
-                                    );
-                                  },
-                                });
-                              }}
-                            >
-                              Xóa
-                            </Menu.Item>
-                          </Menu>
-                        }
-                      >
-                        <MoreOutlined className="text-gray-500 cursor-pointer" />
-                      </Dropdown>
-                    </div>
-                  ))
-                ) : (
-                  <div className="ml-3 text-gray-500">
-                    Không có danh mục con
-                  </div>
-                )}
-                <Button
-                  icon={<PlusOutlined />}
-                  onClick={() => showDrawer(undefined, undefined, category)}
-                  className="rounded-lg border border-blue-500"
-                  style={{
-                    backgroundColor: "#f5f6f8",
-                    color: "#22689B",
-                    fontWeight: 500,
-                  }}
-                >
-                  <p className="text-left"> Thêm danh mục con</p>
-                </Button>
-              </div>
-            </Card>
-          ))
-        ) : (
-          <div className="text-gray-500">Không có danh mục</div>
-        )}
-        <Card
-          className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
-          bodyStyle={{ padding: 10 }}
-        >
-          <Button
-            icon={<PlusOutlined />}
-            onClick={() => showDrawer()}
-            className="rounded-lg border border-blue-500"
-            style={{
-              backgroundColor: "#f5f6f8",
-              color: "#22689B",
-              fontWeight: 500,
-              width: "100%",
-            }}
-          >
-            Thêm danh mục
-          </Button>
-        </Card>
-      </div>
-
-      <Drawer
-        title={
-          mode === "edit-category"
-            ? `Sửa ${editingCategory?.name}`
-            : mode === "edit-item"
-            ? `Sửa ${editingItem?.name}`
-            : mode === "add-item"
-            ? `Thêm danh mục con cho ${parentCategory?.name}`
-            : "Thêm danh mục"
-        }
-        placement="right"
-        onClose={onClose}
-        open={openDrawer}
-        footer={
-          <div className="text-right">
-            <Space>
-              <Button onClick={onClose}>Hủy</Button>
-              <Button
-                icon={<PlusOutlined />}
-                className="text-white"
-                style={{ backgroundColor: "#22689B", color: "white" }}
-                onClick={handleSave}
+    <Spin spinning={actionLoading} tip="Đang xử lý..." size="large">
+      <div className="p-2 bg-white min-h-screen">
+        <h1 className="text-2xl font-bold mb-6">Quản lý danh mục sản phẩm</h1>
+        <div className="flex gap-4 items-start overflow-x-auto">
+          {Array.isArray(categoryList) && categoryList.length > 0 ? (
+            categoryList.map((category: any) => (
+              <Card
+                key={category.id}
+                title={
+                  <span className="font-semibold text-base">
+                    {category.name}
+                  </span>
+                }
+                bodyStyle={{ padding: 12 }}
+                className="w-90  rounded-2xl border border-gray-100 !bg-gray-100 shadow-sm flex-shrink-0"
+                extra={
+                  <Dropdown
+                    overlay={
+                      <Menu>
+                        <Menu.Item onClick={() => showDrawer(category)}>
+                          Sửa
+                        </Menu.Item>
+                        <Menu.Item
+                          onClick={() =>
+                            handleDelete(category.id, category.items)
+                          }
+                        >
+                          Xóa
+                        </Menu.Item>
+                      </Menu>
+                    }
+                  >
+                    <MoreOutlined className="text-gray-500 cursor-pointer" />
+                  </Dropdown>
+                }
               >
-                {mode === "add-category" || mode === "add-item"
-                  ? "Thêm mới"
-                  : "Lưu thay đổi"}
-              </Button>
-            </Space>
-          </div>
-        }
-      >
-        {(mode === "add-category" || mode === "edit-category") && (
-          <>
-            <Input
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="Nhập tên danh mục"
-              style={{ marginBottom: 12 }}
-            />
-            <Upload
-              beforeUpload={handleBeforeUpload}
-              listType="picture"
-              maxCount={1}
-              showUploadList={false}
+                <div className=" flex flex-col gap-3">
+                  {Array.isArray(category.items) &&
+                  category.items.length > 0 ? (
+                    category.items.map((item: any) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between px-5 py-3 rounded-xl border border-gray-200 bg-white shadow-sm w-full"
+                        style={{ minWidth: 200 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          {item.image && (
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              width={30}
+                              height={30}
+                              style={{ objectFit: "cover", borderRadius: 6 }}
+                              preview={false}
+                            />
+                          )}
+                          <span className="font-medium">{item.name}</span>
+                        </div>
+                        <Dropdown
+                          overlay={
+                            <Menu>
+                              <Menu.Item
+                                onClick={() =>
+                                  showDrawer(undefined, item, category)
+                                }
+                              >
+                                Sửa
+                              </Menu.Item>
+                              <Menu.Item
+                                onClick={() => {
+                                  Modal.confirm({
+                                    title:
+                                      "Bạn có chắc muốn xóa danh mục con này?",
+                                    onOk: () => {
+                                      deleteCategory(
+                                        {
+                                          resource: "admin/categories/delete",
+                                          id: item.id,
+                                        },
+                                        {
+                                          onSuccess: () => {
+                                            notification.success({
+                                              message:
+                                                "Xoá danh mục con thành công!",
+                                            });
+                                            refetch();
+                                          },
+                                          onError: () => {
+                                            notification.error({
+                                              message:
+                                                "Xoá danh mục con thất bại!",
+                                            });
+                                          },
+                                        }
+                                      );
+                                    },
+                                  });
+                                }}
+                              >
+                                Xóa
+                              </Menu.Item>
+                            </Menu>
+                          }
+                        >
+                          <MoreOutlined className="text-gray-500 cursor-pointer" />
+                        </Dropdown>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="ml-3 text-gray-500">
+                      Không có danh mục con
+                    </div>
+                  )}
+                  <Button
+                    icon={<PlusOutlined />}
+                    onClick={() => showDrawer(undefined, undefined, category)}
+                    className="rounded-lg border border-blue-500"
+                    style={{
+                      backgroundColor: "#f5f6f8",
+                      color: "#22689B",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <p className="text-left"> Thêm danh mục con</p>
+                  </Button>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <div className="text-gray-500">Không có danh mục</div>
+          )}
+          <Card
+            className="w-64 rounded-xl border border-gray-200 bg-[#f5f6f8] shadow-sm flex-shrink-0"
+            bodyStyle={{ padding: 10 }}
+          >
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => showDrawer()}
+              className="rounded-lg border border-blue-500"
+              style={{
+                backgroundColor: "#f5f6f8",
+                color: "#22689B",
+                fontWeight: 500,
+                width: "100%",
+              }}
             >
-              <Button icon={<UploadOutlined />}>Chọn ảnh danh mục</Button>
-            </Upload>
-          </>
-        )}
-        {(mode === "add-item" || mode === "edit-item") && (
-          <>
-            <Input
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              placeholder="Nhập tên danh mục con"
-              style={{ marginBottom: 12 }}
-            />
-            <Upload
-              beforeUpload={handleBeforeUpload}
-              listType="picture"
-              maxCount={1}
-              showUploadList={false}
-            >
-              <Button icon={<UploadOutlined />}>Chọn ảnh danh mục con</Button>
-            </Upload>
-          </>
-        )}
-        {previewImage && (
-          <div className="mt-4 mb-2 ">
-            <Image
-              src={previewImage}
-              alt="Ảnh preview"
-              style={{ maxHeight: 150, borderRadius: 6 }}
-              preview
-            />
-          </div>
-        )}
-      </Drawer>
-    </div>
+              Thêm danh mục
+            </Button>
+          </Card>
+        </div>
+
+        <Drawer
+          title={
+            mode === "edit-category"
+              ? `Sửa ${editingCategory?.name}`
+              : mode === "edit-item"
+              ? `Sửa ${editingItem?.name}`
+              : mode === "add-item"
+              ? `Thêm danh mục con cho ${parentCategory?.name}`
+              : "Thêm danh mục"
+          }
+          placement="right"
+          onClose={onClose}
+          open={openDrawer}
+          footer={
+            <div className="text-right">
+              <Space>
+                <Button onClick={onClose}>Hủy</Button>
+                <Button
+                  loading={actionLoading}
+                  icon={<PlusOutlined />}
+                  className="text-white"
+                  style={{ backgroundColor: "#22689B", color: "white" }}
+                  onClick={handleSave}
+                >
+                  {mode === "add-category" || mode === "add-item"
+                    ? "Thêm mới"
+                    : "Lưu thay đổi"}
+                </Button>
+              </Space>
+            </div>
+          }
+        >
+          {(mode === "add-category" || mode === "edit-category") && (
+            <>
+              <Input
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                placeholder="Nhập tên danh mục"
+                style={{ marginBottom: 12 }}
+              />
+              <Upload
+                beforeUpload={handleBeforeUpload}
+                listType="picture"
+                maxCount={1}
+                showUploadList={false}
+              >
+                <Button icon={<UploadOutlined />}>Chọn ảnh danh mục</Button>
+              </Upload>
+            </>
+          )}
+          {(mode === "add-item" || mode === "edit-item") && (
+            <>
+              <Input
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="Nhập tên danh mục con"
+                style={{ marginBottom: 12 }}
+              />
+              <Upload
+                beforeUpload={handleBeforeUpload}
+                listType="picture"
+                maxCount={1}
+                showUploadList={false}
+              >
+                <Button icon={<UploadOutlined />}>Chọn ảnh danh mục con</Button>
+              </Upload>
+            </>
+          )}
+          {previewImage && (
+            <div className="mt-4 mb-2 ">
+              <Image
+                src={previewImage}
+                alt="Ảnh preview"
+                style={{ maxHeight: 150, borderRadius: 6 }}
+                preview
+              />
+            </div>
+          )}
+        </Drawer>
+      </div>
     </Spin>
   );
 };

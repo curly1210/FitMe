@@ -92,7 +92,7 @@ const DrawerAdd = ({
   const [selectedSizes, setSelectedSizes] = useState<any>([]);
   const [selectedSizesId, setSelectedSizesId] = useState<any>([]);
 
-  const [defaultStock, setDefaultStock] = useState<any>(10);
+  const [defaultStock, setDefaultStock] = useState<any>(50);
   const [selectedColorForImages, setSelectedColorForImages] =
     useState<any>(null);
 
@@ -451,6 +451,8 @@ const DrawerAdd = ({
             gia_thuong: 0,
             percent: 0,
             status: 1,
+            description: "Mô tả",
+            long_description: "Mô tả dài",
           }}
           form={form}
           onFinish={onFinish}

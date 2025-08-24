@@ -251,6 +251,7 @@ const ListProducts = () => {
             dataSource={products}
             columns={columns}
             pagination={{
+              showSizeChanger: false,
               current: productResponse?.data?.meta.current_page, // trang hiện tại
               pageSize: pageSize, // số bản ghi mỗi trang
               total: productResponse?.data?.meta.total, // tổng số bản ghi
