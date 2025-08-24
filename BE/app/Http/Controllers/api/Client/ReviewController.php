@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Client\OrderResource;
 use App\Http\Resources\Client\ReviewResource;
 use App\Http\Resources\Client\OrderReviewResource;
+use App\Models\ProductItem;
+use Illuminate\Support\Str;
 
 class ReviewController extends Controller
 {
@@ -95,12 +97,14 @@ class ReviewController extends Controller
 
             $data = $order->orderDetails->map(function ($orderDetail) use ($successAt) {
                 if (!$orderDetail) return null;
-                // dd($orderDetail->review);
+
+
                 return [
                     'id' => $orderDetail->id,
                     "order_id" => $orderDetail->order_id,
                     "order_detail_id" => $orderDetail->id,
                     'product_item_id' => $orderDetail->product_item_id,
+                    // 'slug'=> $orderDetail->pro
                     'product_name' => $orderDetail->name_product,
                     'product_image' => $this->buildImageUrl($orderDetail->image_product),
                     "is_review" => $orderDetail->review ? $orderDetail->review->id  : 0,

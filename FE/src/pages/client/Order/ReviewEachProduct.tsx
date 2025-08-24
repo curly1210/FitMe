@@ -15,6 +15,7 @@ type Review = {
   is_review?: any; // Thêm trường này để xác định đã đánh giá hay chưa
   order_id?: any; // Thêm order_id nếu cần
   product_item_id: string | number;
+  slug: any;
 };
 
 interface ReviewEachProductProps {
