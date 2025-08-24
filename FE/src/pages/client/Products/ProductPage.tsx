@@ -163,12 +163,18 @@ function ProductPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {listProduct.map((product) => {
                 const productItems =
-                  product.colors.flatMap((itemV) => itemV.product_items) || [];
+                  product.colors.flatMap(
+                    (itemV: { product_items: any }) => itemV.product_items
+                  ) || [];
                 const imgFirst = product.colors[0]?.images[0]?.url;
                 const thumbnails =
-                  product.colors.flatMap((itemV) => itemV.images[0]) || [];
+                  product.colors.flatMap(
+                    (itemV: { images: any[] }) => itemV.images[0]
+                  ) || [];
                 const minPrice = Math.min(
-                  ...product.colors.map((item) => item.min_sale_price)
+                  ...product.colors.map(
+                    (item: { min_sale_price: any }) => item.min_sale_price
+                  )
                 );
                 const percent = product.colors[0]?.product_items[0]
                   ?.sale_percent as number;
@@ -187,7 +193,8 @@ function ProductPage() {
                         handleLikeProduct(
                           product.id,
                           dataLike.some(
-                            (item) => item?.product?.id === product.id
+                            (item: { product: { id: any } }) =>
+                              item?.product?.id === product.id
                           )
                         )
                       }
@@ -195,7 +202,8 @@ function ProductPage() {
                       <HeartOutlined
                         className={`text-2xl group-hover/group-like:!text-red-400 ${
                           dataLike.some(
-                            (item) => item?.product?.id === product.id
+                            (item: { product: { id: any } }) =>
+                              item?.product?.id === product.id
                           )
                             ? "!text-red-400"
                             : ""
@@ -230,9 +238,9 @@ function ProductPage() {
                     </div>
 
                     <div className="px-2 pt-2 pb-3 space-y-1">
-                      <p className="text-sm font-semibold text-black">
+                      <div className="text-sm font-semibold text-black line-clamp-2 min-h-[40px]">
                         {product.name}
-                      </p>
+                      </div>
                       <div className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                         <p>{minPrice?.toLocaleString("vi-VN")}₫ </p>
                         {percent != 0 ? (

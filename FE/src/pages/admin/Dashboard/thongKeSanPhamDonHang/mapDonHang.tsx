@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCustom } from "@refinedev/core";
 import {
   ComposableMap,
@@ -5,7 +6,7 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
-import { Spin, DatePicker, Select, Row, Col, Space, Typography } from "antd";
+import { Spin, DatePicker, Select, Row, Col, Space } from "antd";
 import { useMemo, useState } from "react";
 import { feature } from "topojson-client";
 import { scaleLinear } from "d3-scale";
@@ -14,7 +15,7 @@ import topoData from "../../../../assets/map/geoBoundaries-VNM-ADM1.topo.json";
 import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
-const { Title } = Typography;
+// const { Title } = Typography;
 
 const normalizeProvinceName = (str: string) =>
   str
@@ -29,8 +30,10 @@ const normalizeProvinceName = (str: string) =>
     .toLowerCase();
 
 export const OrderLocationMap = () => {
-  const now = dayjs();
-  const [dateRange, setDateRange] = useState<[string, string] | undefined>(undefined);
+  // const now = dayjs();
+  const [dateRange, setDateRange] = useState<[string, string] | undefined>(
+    undefined
+  );
   const [statusOrderId, setStatusOrderId] = useState<number | undefined>();
 
   const { data, isLoading } = useCustom({
