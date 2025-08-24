@@ -559,7 +559,7 @@ const Oder = () => {
           current,
           pageSize,
           total: data?.data?.meta?.total ?? 0,
-          // showSizeChanger: true,
+          showSizeChanger: false,
           onChange: (page, size) => {
             setCurrent(page);
             setPageSize(size);

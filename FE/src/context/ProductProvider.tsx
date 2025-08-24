@@ -55,7 +55,7 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
   const [filterData, setFilterData] = useState([]);
   const [metaLink, setMetaLink] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(8);
   const [callapiList, setCallapiList] = useState(true);
   const [sortData, setSortData] = useState("");
   const [fieldFilter, setFieldFilter] = useState({
@@ -70,6 +70,11 @@ export default function ProductProvider({ children }: { children: ReactNode }) {
 
     if (pageSize) setPageSize(pageSize);
   };
+
+  useEffect(() => {
+    // reset về page 1 khi đổi category hoặc đổi search text
+    setCurrentPage(1);
+  }, [categorySlug, searchValue]);
 
   const urlListProduct = categorySlug
     ? `${useApiUrl()}/category/${categorySlug}`

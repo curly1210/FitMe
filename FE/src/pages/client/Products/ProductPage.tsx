@@ -173,6 +173,8 @@ function ProductPage() {
                 const percent = product.colors[0]?.product_items[0]
                   ?.sale_percent as number;
 
+                const price = product.colors[0]?.product_items[0]?.price;
+
                 return (
                   <div
                     key={product.id}
@@ -207,7 +209,7 @@ function ProductPage() {
                           src={imgFirst}
                           height={400}
                           width={"100%"}
-                          attribute="bg-white hover:opacity-90 transition duration-200"
+                          attribute="bg-white hover:opacity-90 transition duration-200 object-cover"
                         />
                         {/* <img className=" h-[400px] object-contain object-center bg-white hover:opacity-90 transition duration-200" /> */}
                       </Link>
@@ -231,10 +233,19 @@ function ProductPage() {
                       <p className="text-sm font-semibold text-black">
                         {product.name}
                       </p>
-                      <p className="text-lg font-semibold text-gray-800">
-                        {minPrice?.toLocaleString("vi-VN")}₫ -{" "}
-                        <span className="text-green-600">{percent}%</span>
-                      </p>
+                      <div className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <p>{minPrice?.toLocaleString("vi-VN")}₫ </p>
+                        {percent != 0 ? (
+                          <div>
+                            <span className="text-sm text-gray-400 font-normal line-through mr-2">
+                              {price.toLocaleString("vi-VN")}đ
+                            </span>
+                            <span className="text-green-600">{percent}%</span>
+                          </div>
+                        ) : (
+                          ""
+                        )}
+                      </div>
                       <div className="flex gap-1 mt-2">
                         {thumbnails.map((modelImg: any, key: any) => (
                           <ImageWithFallback

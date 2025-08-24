@@ -30,7 +30,7 @@ class BannerController extends Controller
                     $directLink = $banner->direct_link;
                     $directElements = array_values(array_filter(explode('/', $directLink)));
                     $directType = $directElements[0];
-                    $directValue = $directElements[1];
+                    $directValue = $directElements[1] ?? null;
                     # Trường hợp có danh mục con
                     if ($directType == "danh-muc") {
                         $subDirectValue = $directElements[1]; # trường hợp có danh mục con
