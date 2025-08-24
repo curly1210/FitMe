@@ -7,6 +7,7 @@ use App\Models\Review;
 use App\Models\Product;
 use App\Models\ReviewImage;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Traits\CloudinaryTrait;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Client\OrderResource;
 use App\Http\Resources\Client\ReviewResource;
 use App\Http\Resources\Client\OrderReviewResource;
+use App\Models\ProductItem;
 
 class ReviewController extends Controller
 {
@@ -96,12 +98,16 @@ class ReviewController extends Controller
             $data = $order->orderDetails->map(function ($orderDetail) use ($successAt) {
                 if (!$orderDetail) return null;
                 // dd($orderDetail->review);
+                $productItem = ProductItem::withTrashed()->find($orderDetail->product_item_id);
+                // return response()->json($productItem);
+                $product_name = Product::where('id', $productItem->product_id)->first()->name ?? null;
                 return [
                     'id' => $orderDetail->id,
                     "order_id" => $orderDetail->order_id,
                     "order_detail_id" => $orderDetail->id,
                     'product_item_id' => $orderDetail->product_item_id,
                     'product_name' => $orderDetail->name_product,
+                    'slug' => Str::slug($product_name),
                     'product_image' => $this->buildImageUrl($orderDetail->image_product),
                     "is_review" => $orderDetail->review ? $orderDetail->review->id  : 0,
                     "is_updated_review" => $orderDetail->review ? $orderDetail->review->is_update : 0,
