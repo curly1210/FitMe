@@ -69,6 +69,11 @@ const CheckOut = () => {
   } = useList({
     resource: "cart-items/selected-all",
     // queryOptions: {
+    //   refetchOnMount: "always",
+    //   // refetchOnWindowFocus: "always",
+    //   staleTime: 0,
+    // },
+    // queryOptions: {
     //   enabled: hasAuth, // ✅ chỉ gọi API khi đã có accessToken & user
     // },
   });
@@ -101,10 +106,10 @@ const CheckOut = () => {
   // console.log(orderItems, "cart");
 
   useEffect(() => {
-    if (cart?.cartItems && cart.cartItems.length === 0) {
+    if (cartResponse?.cartItems && cartResponse.cartItems.length === 0) {
       nav("/carts", { replace: true }); // Chuyển hướng về trang chủ nếu giỏ hàng trống
     }
-  }, [cart, nav]);
+  }, [cartResponse, nav]);
 
   const totalPrice = (cart?.cartItems || []).reduce(
     (sum: number, item: any) => sum + item.subtotal,
