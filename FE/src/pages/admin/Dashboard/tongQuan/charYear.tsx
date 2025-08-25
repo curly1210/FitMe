@@ -3,7 +3,7 @@ import { Bar } from "react-chartjs-2";
 import { Select, Spin } from "antd";
 import { useState } from "react";
 
-const years = [2025, 2024, 2023];
+const years = [2025, 2024];
 
 const ChartByYear = () => {
   const [year, setYear] = useState<number>(2024);
