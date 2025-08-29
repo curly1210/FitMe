@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('bank_name', 50);
-            $table->string('account_number', 255);
-            $table->string('account_holder', 100);
+            $table->string('bank_name', 50)->nullable();
+            $table->string('account_number', 255)->nullable();
+            $table->string('account_holder', 100)->nullable();
             $table->unsignedBigInteger('balance')->default(0);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

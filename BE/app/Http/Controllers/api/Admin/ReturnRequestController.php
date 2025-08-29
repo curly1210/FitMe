@@ -49,6 +49,9 @@ class ReturnRequestController extends Controller
                     }
                     $user = $returnRequest->order->user;
                     $wallet = $user->wallet;
+                    if (!$wallet) {
+                        return $this->error("Ví người dùng không tồn tại", [], 404);
+                    }
                     // dd($user);
                     $total_return = collect($returnRequest->returnItems)->sum(function ($item) {
                         return $item->quantity * $item->price;
@@ -63,6 +66,9 @@ class ReturnRequestController extends Controller
                     ]);
                     $returnRequest->update([
                         'status' => $request->status
+                    ]);
+                    $returnRequest->order->update([
+                        'status_order_id' => 6
                     ]);
                     return response()->json(["message" => "Chuyển trạng thái thành công"]);
                 } catch (\Throwable $th) {
@@ -135,10 +141,16 @@ class ReturnRequestController extends Controller
                             'upload_by' => 'Admin',
                         ]);
                     }
+                    $returnRequest->order->update([
+                        'status_order_id' => 6
+                    ]);
                     DB::commit();
                 } catch (\Throwable $th) {
                     return $this->error("Chuyển trạng thái thất bại", $th->getMessage(), 400);
                 }
+                break;
+            default:
+                return $this->error("Trạng thái không hợp lệ", [], 422);
                 break;
         }
         return response()->json(['message' => "Chuyển trạng thái thành công"]);

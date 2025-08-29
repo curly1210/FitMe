@@ -284,10 +284,10 @@ class ReturnRequestController extends Controller
         $validator = Validator::make(
             $request->only('shipping_label_image'),
             [
-                'shipping_label_image' => 'file|mimes:jpg,jpeg,pn,webp|max:2048'
+                'shipping_label_image' => 'required|file|mimes:jpg,jpeg,pn,webp|max:2048'
             ],
             [
-                'shipping_label_image.required' => 'Vui lòng tải lên hình ảnh nhãn vận chuyển.',
+                'shipping_label_image.required' => 'Vui lòng tải lên hình ảnh phiếu vận đơn.',
                 'shipping_label_image.file' => 'Hình ảnh nhãn vận chuyển không hợp lệ.',
                 'shipping_label_image.mimes' => 'Hình ảnh nhãn vận chuyển phải có định dạng jpg, jpeg, png, webp.',
                 'shipping_label_image.max' => 'Hình ảnh nhãn vận chuyển không được vượt quá 2MB.',

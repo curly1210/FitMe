@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Review;
 use App\Models\Product;
 use Carbon\CarbonPeriod;
+use App\Models\ReturnItem;
 use App\Models\ProductItem;
 use App\Models\OrdersDetail;
 use Illuminate\Http\Request;
@@ -39,14 +40,19 @@ class StatisticsController extends Controller
         $allStatuses = collect(range(0, 6))->mapWithKeys(function ($status) use ($ordersByStatus) {
             return [$status => $ordersByStatus[$status] ?? 0];
         });
+        $totalRevenue = Order::where('status_order_id', 6)->sum(DB::raw('total_amount - shipping_price'));
+        $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) {
+            $query->where('status_order_id', 6);
+        })
+            ->selectRaw('SUM(price * quantity) as total')
+            ->value('total');
 
-        $totalRevenue = Order::where('status_order_id', 6)->sum('total_amount');
-
+        $netRevenue = $totalRevenue - ($totalRefund ?? 0);
         $data = [
             'total_orders' => $totalOrders,
             'total_selling_products' => $totalSellingProducts,
             'total_customers' => $totalCustomers,
-            'total_sold' => $totalRevenue,
+            'total_sold' => $netRevenue,
             'orders_by_status' => $allStatuses,
         ];
 
@@ -67,7 +73,14 @@ class StatisticsController extends Controller
 
             $total = Order::where('status_order_id', 6)
                 ->whereBetween('created_at', [$start, $end])
-                ->sum('total_amount');
+                ->sum(DB::raw('total_amount - shipping_price'));
+            $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) use ($start, $end) {
+                $query->where('status_order_id', 6)->whereBetween('created_at', [$start, $end]);
+            })
+                ->selectRaw('SUM(price * quantity) as total')
+                ->value('total');
+
+            $total = $total - ($totalRefund ?? 0);
 
             return [$m => $total];
         });
@@ -81,8 +94,14 @@ class StatisticsController extends Controller
 
             $total = Order::where('status_order_id', 6)
                 ->whereBetween('created_at', [$start, $end])
-                ->sum('total_amount');
+                ->sum(DB::raw('total_amount - shipping_price'));
+            $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) use ($start, $end) {
+                $query->where('status_order_id', 6)->whereBetween('created_at', [$start, $end]);
+            })
+                ->selectRaw('SUM(price * quantity) as total')
+                ->value('total');
 
+            $total = $total - ($totalRefund ?? 0);
             return [$d => $total];
         });
 
@@ -97,8 +116,14 @@ class StatisticsController extends Controller
                 $date = $from->copy()->addDays($offset);
                 $total = Order::where('status_order_id', 6)
                     ->whereDate('created_at', $date)
-                    ->sum('total_amount');
+                    ->sum(DB::raw('total_amount - shipping_price'));
+                $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) use ($date) {
+                    $query->where('status_order_id', 6)->whereDate('created_at', $date);
+                })
+                    ->selectRaw('SUM(price * quantity) as total')
+                    ->value('total');
 
+                $total = $total - ($totalRefund ?? 0);
                 return [$date->format('Y-m-d') => $total];
             });
         }
@@ -141,14 +166,39 @@ class StatisticsController extends Controller
             DB::raw('SUM(quantity) as total_quantity'),
             DB::raw('SUM(sale_price * quantity) as total_revenue')
         ])
-            ->whereHas('order', function ($q)  {
+            ->whereHas('order', function ($q) {
                 $q->where('status_order_id', 6); // Chỉ lấy đơn đã hoàn thành
-                    // ->whereBetween('created_at');
+                // ->whereBetween('created_at');
             })
             ->groupBy('product_item_id', 'name_product', 'image_product')
             ->orderBy($filterBy === 'revenue' ? 'total_revenue' : 'total_quantity', 'desc')
             ->limit(10)
-            ->get();
+            ->get()->map(function ($item) {
+                // Lấy danh sách order_detail_id của product_item_id này
+                $orderDetailIds = OrdersDetail::where('product_item_id', $item->product_item_id)->pluck('id');
+                // Tính tổng số lượng hoàn trả cho từng sản phẩm
+                $refundQuantity = ReturnItem::whereIn('order_detail_id', $orderDetailIds)
+                    ->whereHas('returnRequest.order', function ($q) {
+                        $q->where('status_order_id', 6);
+                    })
+                    ->selectRaw('SUM(quantity) as total')
+                    ->value('total') ?? 0;
+
+                // Trừ số lượng hoàn trả khỏi tổng số lượng đã bán
+                $item->total_quantity = $item->total_quantity - $refundQuantity;
+
+                // Tính tổng tiền hoàn trả cho từng sản phẩm
+                $refund = ReturnItem::whereIn('order_detail_id', $orderDetailIds)
+                    ->whereHas('returnRequest.order', function ($q) {
+                        $q->where('status_order_id', 6);
+                    })
+                    ->selectRaw('SUM(price * quantity) as total')
+                    ->value('total') ?? 0;
+
+                // Trừ hoàn trả khỏi doanh thu
+                $item->total_revenue = $item->total_revenue - $refund;
+                return $item;
+            });
 
         return response()->json([
             'data' => $query
@@ -324,7 +374,7 @@ class StatisticsController extends Controller
             // ],
         ]);
     }
-public function orderByLocation(Request $request)
+    public function orderByLocation(Request $request)
     {
         $from = $request->input('from');
         $to = $request->input('to');
@@ -545,18 +595,4 @@ public function orderByLocation(Request $request)
             'filter_products' => $products,
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
