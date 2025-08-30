@@ -10,6 +10,8 @@ class WalletTransaction extends Model
         'wallet_id',
         'amount',
         'type',
+        'status',
+        'reject_reason',
         'bill_url',
     ];
     public function wallet()

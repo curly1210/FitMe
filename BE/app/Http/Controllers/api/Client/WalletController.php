@@ -44,6 +44,7 @@ class WalletController extends Controller
                 $lastDigits = substr($decrypted, -4); // 4 ký tự cuối
                 $account_number = str_repeat('*', $length - 4) . $lastDigits; #chuỗi hoàn chỉnh
                 $data = [
+
                     'balance' => $wallet->balance,
                     'bank_account' => [
                         'bank_name'      => $wallet->bank_name,
@@ -62,6 +63,7 @@ class WalletController extends Controller
                     // 'account_holder' => null,
                 ];
             }
+
             return response()->json($data);
         } catch (\Throwable $th) {
             return $this->error('Lỗi hệ thống', $th->getMessage(), 400);
@@ -138,21 +140,5 @@ class WalletController extends Controller
         } catch (\Throwable $th) {
             return $this->error("Lỗi validate", $th->getMessage(), 422);
         }
-    }
-    public function getWalletTransaction(Request $request)
-    {
-        $user = $request->user() ?? null;
-        if (!$user) {
-            return $this->error('Người dùng chưa đăng nhập', [], 403);
-        }
-        if (!$user->wallet) {
-            return $this->error('Tài khoản chưa thiết lập ví', [], 404);
-        }
-        $walletId = $user->wallet->id;
-        $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
-        if ($transactions->isEmpty()) {
-            return response()->json(['data' => [], 'message' => 'Lịch sử ví trống'], 200);
-        }
-        return response()->json($transactions);
     }
 }
