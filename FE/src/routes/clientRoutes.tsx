@@ -27,6 +27,7 @@ import ProtectRole from "../components/ProtectRole";
 import ModalChangePass from "../components/Modal/ModalChangePassword";
 import Notification from "../pages/client/Notification";
 import ActiveEmail from "../pages/client/ActiveEmail";
+import Wallet from "../pages/client/Wallet";
 
 export const clientRoutes = [
   {
@@ -53,6 +54,15 @@ export const clientRoutes = [
       {
         path: "verify-email",
         element: <ActiveEmail />,
+      },
+      {
+        element: <ProtectClient role="Customer" />,
+        children: [
+          {
+            path: "wallet",
+            element: <Wallet />,
+          },
+        ],
       },
       {
         path: "/",
@@ -150,6 +160,10 @@ export const clientRoutes = [
                 path: "payment-result",
                 element: <CheckPayment />,
               },
+              // {
+              //   path: "wallet",
+              //   element: <Wallet />,
+              // },
             ],
           },
         ],

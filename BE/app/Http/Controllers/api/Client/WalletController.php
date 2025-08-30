@@ -38,16 +38,30 @@ class WalletController extends Controller
             }
             $wallet = $user->wallet;
             //  Giải mã số tài khoản
-            $decrypted = Crypt::decryptString($wallet->account_number);
-            $length = strlen($decrypted); // độ dài STK
-            $lastDigits = substr($decrypted, -4); // 4 ký tự cuối
-            $account_number = str_repeat('*', $length - 4) . $lastDigits; #chuỗi hoàn chỉnh
-            $data = [
-                'bank_name' => $wallet->bank_name,
-                'account_number' => $account_number,
-                'account_holder' => $wallet->account_holder,
-                'balance' => $wallet->balance,
-            ];
+            if ($wallet->account_number) {
+                $decrypted = Crypt::decryptString($wallet->account_number);
+                $length = strlen($decrypted); // độ dài STK
+                $lastDigits = substr($decrypted, -4); // 4 ký tự cuối
+                $account_number = str_repeat('*', $length - 4) . $lastDigits; #chuỗi hoàn chỉnh
+                $data = [
+                    'balance' => $wallet->balance,
+                    'bank_account' => [
+                        'bank_name'      => $wallet->bank_name,
+                        'account_number' => $decrypted,
+                        'account_holder' => $wallet->account_holder,
+                    ],
+                    // 'bank_name' => $wallet->bank_name,
+                    // 'account_number' => $account_number,
+                    // 'account_holder' => $wallet->account_holder,
+                ];
+            } else {
+                $data = [
+                    'balance' => 0,
+                    'bank_account' => null,
+                    // 'account_number' => null,
+                    // 'account_holder' => null,
+                ];
+            }
             return response()->json($data);
         } catch (\Throwable $th) {
             return $this->error('Lỗi hệ thống', $th->getMessage(), 400);
