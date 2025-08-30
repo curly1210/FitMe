@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 
 
-class WithdrawRequestController extends Controller
+class WalletTransactionController extends Controller
 {
     use ApiResponse, CloudinaryTrait;
     public function index(Request $request)
     {
         try {
             $search = $request->search ?? '';
-            $query = WithdrawRequest::with(['wallet.user', 'wallet'])->whereHas('wallet.user', function (Builder $q) use ($search) {
+            $query = WalletTransaction::with(['wallet.user', 'wallet'])->whereHas('wallet.user', function (Builder $q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%');
             })->orderBy('id', 'desc');
             switch ($request->fill) {

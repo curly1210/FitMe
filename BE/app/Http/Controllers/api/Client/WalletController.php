@@ -38,16 +38,26 @@ class WalletController extends Controller
             }
             $wallet = $user->wallet;
             //  Giải mã số tài khoản
-            $decrypted = Crypt::decryptString($wallet->account_number);
-            $length = strlen($decrypted); // độ dài STK
-            $lastDigits = substr($decrypted, -4); // 4 ký tự cuối
-            $account_number = str_repeat('*', $length - 4) . $lastDigits; #chuỗi hoàn chỉnh
-            $data = [
-                'bank_name' => $wallet->bank_name,
-                'account_number' => $account_number,
-                'account_holder' => $wallet->account_holder,
-                'balance' => $wallet->balance,
-            ];
+            if ($wallet->account_number) {
+                $decrypted = Crypt::decryptString($wallet->account_number);
+                $length = strlen($decrypted); // độ dài STK
+                $lastDigits = substr($decrypted, -4); // 4 ký tự cuối
+                $account_number = str_repeat('*', $length - 4) . $lastDigits; #chuỗi hoàn chỉnh
+                $data = [
+                    'bank_name' => $wallet->bank_name,
+                    'account_number' => $account_number,
+                    'account_holder' => $wallet->account_holder,
+                    'balance' => $wallet->balance,
+                ];
+            } else {
+                $data = [
+                    'bank_name' => null,
+                    'account_number' => null,
+                    'account_holder' => null,
+                    'balance' => 0,
+                ];
+            }
+
             return response()->json($data);
         } catch (\Throwable $th) {
             return $this->error('Lỗi hệ thống', $th->getMessage(), 400);
@@ -124,21 +134,5 @@ class WalletController extends Controller
         } catch (\Throwable $th) {
             return $this->error("Lỗi validate", $th->getMessage(), 422);
         }
-    }
-    public function getWalletTransaction(Request $request)
-    {
-        $user = $request->user() ?? null;
-        if (!$user) {
-            return $this->error('Người dùng chưa đăng nhập', [], 403);
-        }
-        if (!$user->wallet) {
-            return $this->error('Tài khoản chưa thiết lập ví', [], 404);
-        }
-        $walletId = $user->wallet->id;
-        $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
-        if ($transactions->isEmpty()) {
-            return response()->json(['data' => [], 'message' => 'Lịch sử ví trống'], 200);
-        }
-        return response()->json($transactions);
     }
 }
