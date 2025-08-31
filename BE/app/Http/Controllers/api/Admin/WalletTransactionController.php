@@ -20,11 +20,22 @@ use Illuminate\Support\Facades\Validator;
 class WalletTransactionController extends Controller
 {
     use ApiResponse, CloudinaryTrait;
-    public function getWallets()
+    public function getWallets(Request $request)
     {
-        $wallets = Wallet::with('user')->get();
+        $search = $request->search ?? '';
+        $query = Wallet::with('user')->orderBy(
+            'id',
+            'desc'
+        );
+        if ($search) {
+            $query->whereHas('user', function (Builder $q) use ($search) {
+                $q->where('email', 'like', '%' . $search . '%')
+                    ->orWhere('name', 'like', '%' . $search . '%');
+            });
+        }
+        $data = $query->paginate(10);
         // return response()->json($wallets);
-        return WalletResource::collection($wallets);
+        return WalletResource::collection($data);
     }
     public function index(Request $request)
     {
