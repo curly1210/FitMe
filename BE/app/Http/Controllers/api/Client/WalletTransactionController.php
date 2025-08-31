@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\api\Client;
 
+use App\Http\Resources\Client\WalletTransactionResource;
+use FFI\CType;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
 
@@ -21,11 +24,32 @@ class WalletTransactionController extends Controller
             return $this->error('Tài khoản chưa thiết lập ví', [], 404);
         }
         $walletId = $user->wallet->id;
-        $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
+        $query = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc');
+        $dateFrom = $request->date_from;
+        $dateTo = $request->date_to;
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+        switch ($request->fill) {
+            case 'pending':
+                $query->where('status', 'like', 'pending');
+                break;
+            case 'reject':
+                $query->where('status', 'like', 'reject');
+                break;
+            case 'accept':
+                $query->where('status', 'like', 'accept');
+                break;
+        }
+        $transactions = $query->paginate(8);
         if ($transactions->isEmpty()) {
             return response()->json(['data' => [], 'message' => 'Lịch sử ví trống'], 200);
         }
-        return response()->json($transactions);
+
+        return WalletTransactionResource::collection($transactions);
     }
 
     public function store(Request $request)
@@ -39,6 +63,9 @@ class WalletTransactionController extends Controller
         }
         $walletId = $user->wallet->id;
         $balance = $user->wallet->balance;
+        if (!$request->amount) {
+            return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút không hợp lệ"], 422);
+        }
         $amount = $request->amount ?? null;
         if (!$amount || $amount < 10000) {
             return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút tối thiểu là 10.000"], 422);
