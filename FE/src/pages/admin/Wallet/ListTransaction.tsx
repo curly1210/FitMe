@@ -35,9 +35,7 @@ const ListTransaction = () => {
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedTransactionId, setSelectedTransactionId] = useState<
-    string | null
-  >(null);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<any>(null);
 
   const { echo } = useNotificationUser();
 

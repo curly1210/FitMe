@@ -126,8 +126,8 @@ const DetailTransaction = ({
       onClose={onClose}
       open={open}
     >
-      <div className="flex justify-between">
-        <div className="text-base font-semibold mb-7">Thông tin giao dịch</div>
+      <div className="flex justify-between mb-7">
+        <div className="text-base font-semibold ">Thông tin giao dịch</div>
         {isFetchingTransaction
           ? ""
           : data?.data?.type === "withdraw" &&
@@ -273,8 +273,8 @@ const DetailTransaction = ({
               <div className="text-center py-6 px-4 border border-gray-300  rounded-lg flex flex-col  items-center justify-center gap-4">
                 {/* <BanknotesIcon className="w-12 h-12 text-gray-400" /> */}
                 <div>
-                  <p className="text-gray-500 mb-2">
-                    Chưa có thông tin tài khoản ngân hàng.
+                  <p className="text-gray-500">
+                    Không có thông tin tài khoản ngân hàng.
                   </p>
                 </div>
               </div>
