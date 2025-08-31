@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Client\WalletTransactionResource;
+use Illuminate\Support\Carbon;
 
 class WalletTransactionController extends Controller
 {
@@ -14,6 +16,7 @@ class WalletTransactionController extends Controller
     public function index(Request $request)
     {
         $user = $request->user() ?? null;
+        $perPage = $request->input('per_page', 10);
         if (!$user) {
             return $this->error('Người dùng chưa đăng nhập', [], 403);
         }
@@ -21,11 +24,39 @@ class WalletTransactionController extends Controller
             return $this->error('Tài khoản chưa thiết lập ví', [], 404);
         }
         $walletId = $user->wallet->id;
-        $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
+
+        // $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
+
+        $query = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc');
+        $dateFrom = $request->date_from;
+        $dateTo = $request->date_to;
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        switch ($request->status) {
+            case 'pending':
+                $query->where('status', 'like', 'pending');
+                break;
+            case 'reject':
+                $query->where('status', 'like', 'reject');
+                break;
+            case 'accept':
+                $query->where('status', 'like', 'accept');
+                break;
+        }
+
+        $transactions = $query->paginate($perPage);
+
         if ($transactions->isEmpty()) {
             return response()->json(['data' => [], 'message' => 'Lịch sử ví trống'], 200);
         }
-        return response()->json($transactions);
+
+
+        return WalletTransactionResource::collection($transactions);
     }
 
     public function store(Request $request)

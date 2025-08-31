@@ -87,7 +87,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
               type="text"
               // value={formData.bankName}
               // onChange={handleChange}
-              className="w-full !p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
+              className="w-full !p-2 bg-white border  border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
               placeholder="VD: Vietcombank"
             />
           </div>

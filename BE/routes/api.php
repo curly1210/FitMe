@@ -298,12 +298,12 @@ Route::get("/wallet/transaction", [WalletTransactionController::class, "index"])
 Route::get("/wallet/widraw-request/check-exist", [WalletTransactionController::class, "checkRequest"]); // Kiểm tra tồn tại yêu cầu
 Route::post("/wallet/widraw-request/create", [WalletTransactionController::class, "store"]); //lấy danh sách yêu cầu rút tiền
 
-Route::prefix('admin')->group(function () {
-    Route::get('/wallet/widraw-request', [AdminWithdrawRequestController::class, 'index']);
-    Route::post('/wallet/widraw-request/accept', [AdminWithdrawRequestController::class, 'acceptRequest']);
-    Route::post('/wallet/widraw-request/reject', [AdminWithdrawRequestController::class, 'rejectRequest']);
-    Route::get('/wallet/widraw-request/{id}', [AdminWithdrawRequestController::class, 'show'])->whereNumber('id');
-});
+// Route::prefix('admin')->group(function () {
+//     Route::get('/wallet/widraw-request', [AdminWithdrawRequestController::class, 'index']);
+//     Route::post('/wallet/widraw-request/accept', [AdminWithdrawRequestController::class, 'acceptRequest']);
+//     Route::post('/wallet/widraw-request/reject', [AdminWithdrawRequestController::class, 'rejectRequest']);
+//     Route::get('/wallet/widraw-request/{id}', [AdminWithdrawRequestController::class, 'show'])->whereNumber('id');
+// });
 
 // Hoàn hàng
 

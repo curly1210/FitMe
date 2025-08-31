@@ -40,7 +40,7 @@ const BankAccountInfor = ({ bankAccount, refetchGetWallet }: any) => {
         {bankAccount && (
           <button
             // onClick={onManageAccount}
-            className="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
+            className="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 cursor-pointer"
             aria-label="Chỉnh sửa thông tin ngân hàng"
           >
             {/* <PencilIcon className="w-4 h-4" /> */}
