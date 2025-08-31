@@ -29,11 +29,11 @@ class WithdrawRequestResource extends JsonResource
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'walet_id' => $user->wallet->id,
-                'bank_account' => $user->wallet->account_number ? [
-                    'bank_name'      => $user->wallet->bank_name,
-                    'account_number' =>  Crypt::decryptString($user->wallet->account_number),
-                    'account_holder' => $user->wallet->account_holder,
-                ] : null,
+                'bank_account' => [
+                    'bank_name'      => $this->receive_bank_name ?? null,
+                    'account_number' =>  $this->receive_account_number == null ? null : Crypt::decryptString($this->receive_account_number),
+                    'account_holder' => $this->receive_account_holder ?? null,
+                ],
             ],
             'id' => $this->id,
             'amount' => $this->amount,

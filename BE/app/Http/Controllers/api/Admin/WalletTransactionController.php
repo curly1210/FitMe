@@ -9,6 +9,7 @@ use App\Models\WithdrawRequest;
 use App\Traits\CloudinaryTrait;
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\WalletResource;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Notifications\CreateRequestWithdraw;
@@ -19,6 +20,12 @@ use Illuminate\Support\Facades\Validator;
 class WalletTransactionController extends Controller
 {
     use ApiResponse, CloudinaryTrait;
+    public function getWallets()
+    {
+        $wallets = Wallet::with('user')->get();
+        // return response()->json($wallets);
+        return WalletResource::collection($wallets);
+    }
     public function index(Request $request)
     {
         try {
@@ -62,7 +69,7 @@ class WalletTransactionController extends Controller
     }
     public function show($id)
     {
-        $walletTransaction = WalletTransaction::with(['wallet.user', 'wallet'])->find($id);
+        $walletTransaction = WalletTransaction::with(['wallet.user', 'wallet'])->where('id', $id)->first();
         // dd(1);
         if (!$walletTransaction) {
             return $this->error("Yêu cầu không tồn tại", [], 404);

@@ -297,12 +297,17 @@ Route::post('/wallet/checkCode', [ForgotPasswordController::class, 'checkCode'])
 
 // withdraw
 Route::get("/wallet/transaction", [ClientWalletTransactionController::class, "index"]); //lấy danh sách yêu cầu rút tiền
+# new
+Route::get("/wallet/transaction/{id}", [ClientWalletTransactionController::class, "show"]); //lấy thông tin yêu cầu rút tiền
+#
 Route::get("/wallet/widraw-request/check-exist", [ClientWalletTransactionController::class, "checkRequest"]); // Kiểm tra tồn tại yêu cầu
 Route::post("/wallet/widraw-request/create", [ClientWalletTransactionController::class, "store"]); //lấy danh sách yêu cầu rút tiền
 
 
 Route::prefix('admin')->group(function () {
     Route::get('/wallet/widraw-request', [AdminWalletTransactionController::class, 'index']);
+    Route::get('/wallet', [AdminWalletTransactionController::class, 'getWallets']);
+
     Route::post('/wallet/widraw-request/accept', [AdminWalletTransactionController::class, 'acceptRequest']);
     Route::post('/wallet/widraw-request/reject', [AdminWalletTransactionController::class, 'rejectRequest']);
     Route::get('/wallet/widraw-request/{id}', [AdminWalletTransactionController::class, 'show'])->whereNumber('id');

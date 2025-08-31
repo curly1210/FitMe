@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\api\Client;
 
 use FFI\CType;
-use App\Traits\ApiResponse;
+use App\Models\User;
 
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Client\WalletTransactionResource;
-use App\Models\User;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Validator;
 use App\Notifications\CreateRequestWithdraw;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Carbon;
+use App\Http\Resources\Client\WalletTransactionResource;
 
 class WalletTransactionController extends Controller
 {
@@ -67,6 +69,19 @@ class WalletTransactionController extends Controller
 
     public function store(Request $request)
     {
+        $validator = Validator::make($request->only(['amount', 'receive_account_number', 'receive_account_holder', 'receive_bank_name']), [
+            'amount' => 'required|integer|min:10000|max:5000000',
+
+        ], [
+            'amount.required' => 'Số tiền rút là bắt buộc',
+            'amount.integer' => 'Số tiền rút phải là số nguyên',
+            'amount.min' => 'Số tiền rút tối thiểu là 10.000',
+            'amount.max' => 'Số tiền rút tối đa là 5.000.000',
+
+        ]);
+        if ($validator->fails()) {
+            return $this->error('Lỗi nhập dữ liệu', $validator->errors(), 422);
+        }
         $user = $request->user() ?? null;
         if (!$user) {
             return $this->error('Người dùng chưa đăng nhập', [], 403);
@@ -80,21 +95,24 @@ class WalletTransactionController extends Controller
             return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút không hợp lệ"], 422);
         }
         $amount = $request->amount ?? null;
-        if (!$amount || $amount < 10000) {
-            return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút tối thiểu là 10.000"], 422);
-        } else if ($amount > $balance) {
+        if ($amount && $amount > $balance) {
             return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút vượt quá số dư"], 422);
-        } else if ($amount > 5000000) {
-            return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút tối đa là 5.000.000"], 422);
         }
         $checkRequest = $this->checkRequest($request)->original;
         if ($checkRequest['can_withdraw'] == 0) {
             return $this->error('Lỗi nhập dữ liệu', ['can_withdraw' => $checkRequest['message']], 422);
         } else if ($checkRequest['can_withdraw'] == 1) {
             try {
+                $wallet = $user->wallet;
                 $walletTransaction = WalletTransaction::create([
                     'wallet_id' => $walletId,
                     'amount' => $request->amount,
+                    'receive_account_number' => $wallet->account_number,
+
+                    'receive_account_holder' => $wallet->account_holder,
+
+                    'receive_bank_name' => $wallet->bank_name,
+
                     'type' => 'withdraw',
                 ]);
 
@@ -123,6 +141,18 @@ class WalletTransactionController extends Controller
         } else {
             return $this->checkRequest($request);
         }
+    }
+    public function show($id, Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return $this->error('Người dùng chưa đăng nhập', [], 403);
+        }
+        $transaction = $user->wallet->walletTransactions()->where('id', $id)->first();
+        if (!$transaction) {
+            return $this->error('Không tìm thấy giao dịch', [], 404);
+        }
+        return new WalletTransactionResource($transaction);
     }
     public function checkRequest(Request $request)
     {

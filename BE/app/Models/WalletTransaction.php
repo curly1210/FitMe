@@ -11,6 +11,9 @@ class WalletTransaction extends Model
         'amount',
         'type',
         'status',
+        'receive_bank_name',
+        'receive_account_number',
+        'receive_account_holder',
         'reject_reason',
         'bill_url',
     ];
