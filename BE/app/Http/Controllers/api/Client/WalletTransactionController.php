@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\api\Client;
 
+use FFI\CType;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 
+use Illuminate\Http\Request;
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Client\WalletTransactionResource;
@@ -27,6 +28,7 @@ class WalletTransactionController extends Controller
 
         // $transactions = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc')->paginate(8);
 
+
         $query = WalletTransaction::where('wallet_id', $walletId)->orderBy('id', 'desc');
         $dateFrom = $request->date_from;
         $dateTo = $request->date_to;
@@ -38,6 +40,7 @@ class WalletTransactionController extends Controller
         }
 
         switch ($request->status) {
+
             case 'pending':
                 $query->where('status', 'like', 'pending');
                 break;
@@ -51,10 +54,10 @@ class WalletTransactionController extends Controller
 
         $transactions = $query->paginate($perPage);
 
+
         if ($transactions->isEmpty()) {
             return response()->json(['data' => [], 'message' => 'Lịch sử ví trống'], 200);
         }
-
 
         return WalletTransactionResource::collection($transactions);
     }
@@ -70,6 +73,9 @@ class WalletTransactionController extends Controller
         }
         $walletId = $user->wallet->id;
         $balance = $user->wallet->balance;
+        if (!$request->amount) {
+            return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút không hợp lệ"], 422);
+        }
         $amount = $request->amount ?? null;
         if (!$amount || $amount < 10000) {
             return $this->error('Lỗi nhập dữ liệu', ['amount' => "Số tiền rút tối thiểu là 10.000"], 422);
