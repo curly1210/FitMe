@@ -37,6 +37,14 @@ class WalletTransactionController extends Controller
         // return response()->json($wallets);
         return WalletResource::collection($data);
     }
+    public function showWallet($id)
+    {
+        $wallet = Wallet::with('user')->where('id', $id)->first();
+        if (!$wallet) {
+            return $this->error("Ví không tồn tại", [], 404);
+        }
+        return new WalletResource($wallet);
+    }
     public function index(Request $request)
     {
         try {
