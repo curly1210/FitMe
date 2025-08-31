@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RightOutlined, SwapRightOutlined } from "@ant-design/icons";
 import { useCustom } from "@refinedev/core";
@@ -5,16 +6,19 @@ import {
   Collapse,
   ConfigProvider,
   DatePicker,
+  Image,
   Pagination,
   Select,
   Skeleton,
   Tag,
 } from "antd";
 import { CollapseProps } from "antd/lib";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
 import "dayjs/locale/vi";
+import { useNotificationUser } from "../../../hooks/userNotificationUser";
+import { useAuthen } from "../../../hooks/useAuthen";
 
 const { Option } = Select;
 
@@ -22,6 +26,9 @@ const WithDrawHistory = () => {
   // const { data: responseTransaction, isLoading } = useList({
   //   resource: "wallet/transaction",
   // });
+  const { echo } = useNotificationUser();
+
+  const { user } = useAuthen();
 
   const [currentPage, setCurrentPage] = useState(1); // trang hiện tại
   const [pageSize, setPageSize] = useState(10); // số item mỗi trang
@@ -30,7 +37,11 @@ const WithDrawHistory = () => {
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
   const [status, setStatus] = useState(undefined);
 
-  const { data: responseTransaction, isFetching } = useCustom({
+  const {
+    data: responseTransaction,
+    isFetching,
+    refetch,
+  } = useCustom({
     method: "get",
     url: "wallet/transaction",
     config: {
@@ -43,6 +54,24 @@ const WithDrawHistory = () => {
       },
     },
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `App.Models.User.${user?.id}`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo, user?.id]);
 
   const handlePageChange = (page: number, pageSize?: number) => {
     setCurrentPage(page);
@@ -95,7 +124,7 @@ const WithDrawHistory = () => {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Trạng thái:</span>
-              <span className="font-medium text-gray-700">
+              <span className="font-semibold text-gray-700">
                 {item?.status === "accept"
                   ? "Đã duyệt"
                   : item?.status === "pending"
@@ -112,28 +141,28 @@ const WithDrawHistory = () => {
                 </span>
               </div>
             )}
-            {/* 
-            {request.rejectionReason && (
-              <div className="pt-2">
-                <p className="text-gray-500 font-medium">Lý do từ chối:</p>
-                <p className="text-red-700 bg-red-50 p-3 rounded-md mt-1">
-                  {request.rejectionReason}
-                </p>
+            {item?.reject_reason && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">Lý do từ chối:</span>
+                <span className=" text-gray-700 font-semibold">
+                  {item?.reject_reason}
+                </span>
               </div>
             )}
 
-            {request.proofImageUrl && (
-              <div className="pt-2">
-                <p className="text-gray-500 font-medium mb-2">
-                  Minh chứng chuyển khoản:
-                </p>
-                <img
-                  src={request.proofImageUrl}
-                  alt="Minh chứng chuyển khoản"
-                  className="rounded-lg border border-gray-300 w-full max-w-sm mx-auto"
-                />
+            {item?.bill_url && (
+              <div>
+                <div className="text-gray-500">Minh chứng chuyển khoản:</div>
+                <div className="flex items-center justify-center">
+                  <Image
+                    className="!border-none  !h-[120px] !rounded-none !w-[120px]  !object-cover !object-center"
+                    src={item?.bill_url}
+                    alt="Ảnh preview"
+                    preview
+                  />
+                </div>
               </div>
-            )} */}
+            )}
           </div>
         </div>
       ),

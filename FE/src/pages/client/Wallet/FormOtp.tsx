@@ -7,8 +7,9 @@ import { useAuthen } from "../../../hooks/useAuthen";
 // import FormAddInforAccount from "./FormAddInforAccount";
 import { useModal } from "../../../hooks/useModal";
 import FormAddInforAccount from "./FormAddInforAccount";
+import FormEditInforAccount from "./FormEditInforAccount";
 
-const FormOtp = ({ refetchGetWallet }: any) => {
+const FormOtp = ({ refetchGetWallet, action, bankAccount }: any) => {
   // const [error, setError] = useState("");
   const { user } = useAuthen();
   const { openModal, closeModal } = useModal();
@@ -23,9 +24,19 @@ const FormOtp = ({ refetchGetWallet }: any) => {
       {
         onSuccess: (_response) => {
           notification.success({ message: "Xác thực thành công." });
-          openModal(
-            <FormAddInforAccount refetchGetWallet={refetchGetWallet} />
-          );
+
+          if (action === "add") {
+            openModal(
+              <FormAddInforAccount refetchGetWallet={refetchGetWallet} />
+            );
+          } else {
+            openModal(
+              <FormEditInforAccount
+                bankAccount={bankAccount}
+                refetchGetWallet={refetchGetWallet}
+              />
+            );
+          }
         },
         onError: (_error) => {
           notification.error({
@@ -92,41 +103,6 @@ const FormOtp = ({ refetchGetWallet }: any) => {
             }}
           />
         </Form.Item>
-
-        {/* <div>
-          <label htmlFor="otp" className="sr-only">
-            Mã OTP
-          </label>
-          <input
-            type="text"
-            name="otp"
-            id="otp"
-            // value={otp}
-            // onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
-            className="w-full text-center text-2xl tracking-[0.5em] font-mono p-3 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
-            maxLength={6}
-            placeholder="------"
-            // required
-            autoComplete="one-time-code"
-            inputMode="numeric"
-          />
-        </div> */}
-
-        {/* <div className="mt-4 text-sm">
-          {countdown > 0 ? (
-            <p className="text-gray-500">
-              Bạn có thể yêu cầu gửi lại mã sau {countdown} giây.
-            </p>
-          ) : (
-            <button
-              type="button"
-              onClick={handleResend}
-              className="font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
-            >
-              Gửi lại mã
-            </button>
-          )}
-        </div> */}
 
         <div className="pt-3">
           <Button

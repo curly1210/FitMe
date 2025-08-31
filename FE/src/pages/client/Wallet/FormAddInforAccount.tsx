@@ -40,7 +40,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
     <div className="bg-white rounded-xl shadow-2xl  w-[400px]  transform transition-all duration-300 scale-100 animate-fade-in-up">
       <div className="flex justify-between items-center p-5 border-b border-gray-200">
         <h2 className="text-xl font-bold text-gray-900">
-          Thông tin Tài khoản Ngân hàng
+          Thêm thông tin tài khoản ngân hàng
         </h2>
         <button
           onClick={() => closeModal()}
@@ -109,7 +109,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
             </label>
             <Input
               className="w-full !p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
-              onKeyDown={(e) => {
+              onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key) && e.key !== "Backspace") {
                   e.preventDefault();
                 }

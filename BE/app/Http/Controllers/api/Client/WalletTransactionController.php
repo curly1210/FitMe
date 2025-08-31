@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Client\WalletTransactionResource;
+use App\Models\User;
+use App\Notifications\CreateRequestWithdraw;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Carbon;
 
 class WalletTransactionController extends Controller
@@ -86,7 +89,7 @@ class WalletTransactionController extends Controller
         }
         $checkRequest = $this->checkRequest($request)->original;
         if ($checkRequest['can_withdraw'] == 0) {
-            return response()->json($checkRequest, 422);
+            return $this->error('Lỗi nhập dữ liệu', ['can_withdraw' => $checkRequest['message']], 422);
         } else if ($checkRequest['can_withdraw'] == 1) {
             try {
                 $walletTransaction = WalletTransaction::create([
@@ -94,6 +97,25 @@ class WalletTransactionController extends Controller
                     'amount' => $request->amount,
                     'type' => 'withdraw',
                 ]);
+
+                $user->notify(new CreateRequestWithdraw($user->id, $walletTransaction->id, '<span>
+                            Gửi yêu cầu 
+                            <span style="color:red;font-weight:bold;">' .
+                    'hoàn tiền' . '
+                            </span>
+                            trong ví thành công 
+                          </span>'));
+
+                $admins = User::where('role', 'Admin')->get();
+
+                Notification::send($admins, new CreateRequestWithdraw($user->id, $walletTransaction->id, '<span>
+                            Khách hàng
+                            <span style="color:red;font-weight:bold;">' .
+                    $user->name . '
+                            </span>
+                            gửi yêu cầu hoàn tiền trong ví 
+                          </span>', 1));
+
                 return $this->success($walletTransaction, "Tạo yêu cầu thành công", 201);
             } catch (\Throwable $th) {
                 return $this->error("Lỗi validate", $th->getMessage(), 422);

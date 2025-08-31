@@ -4,6 +4,7 @@ import { useModal } from "../../../hooks/useModal";
 import FormOtp from "./FormOtp";
 import { useCreate } from "@refinedev/core";
 import { useAuthen } from "../../../hooks/useAuthen";
+import FormEditInforAccount from "./FormEditInforAccount";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const BankAccountInfor = ({ bankAccount, refetchGetWallet }: any) => {
@@ -14,13 +15,19 @@ const BankAccountInfor = ({ bankAccount, refetchGetWallet }: any) => {
     resource: "wallet/sendCode",
   });
 
-  const onHandleSendcode = () => {
+  const onHandleSendcode = (action: "add" | "edit") => {
     mutateSendCode(
       { values: { email: user?.email } },
       {
         onSuccess: (_response) => {
           notification.success({ message: "Đã gửi mã OTP đến email." });
-          openModal(<FormOtp refetchGetWallet={refetchGetWallet} />);
+          openModal(
+            <FormOtp
+              action={action}
+              bankAccount={bankAccount}
+              refetchGetWallet={refetchGetWallet}
+            />
+          );
         },
         onError: (_error) => {
           notification.error({
@@ -38,14 +45,23 @@ const BankAccountInfor = ({ bankAccount, refetchGetWallet }: any) => {
           Thông tin thanh toán
         </h3>
         {bankAccount && (
-          <button
-            // onClick={onManageAccount}
-            className="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 cursor-pointer"
+          <Button
+            loading={isLoadingSendcode}
+            onClick={() => onHandleSendcode("edit")}
+            // onClick={() =>
+            //   openModal(
+            //     <FormEditInforAccount
+            //       bankAccount={bankAccount}
+            //       refetchGetWallet={refetchGetWallet}
+            //     />
+            //   )
+            // }
+            className="text-sm !text-blue-600 !hover:text-blue-800 !border-none !font-semibold flex items-center gap-1 cursor-pointer"
             aria-label="Chỉnh sửa thông tin ngân hàng"
           >
             {/* <PencilIcon className="w-4 h-4" /> */}
             Sửa
-          </button>
+          </Button>
         )}
       </div>
 
@@ -79,7 +95,7 @@ const BankAccountInfor = ({ bankAccount, refetchGetWallet }: any) => {
             </p>
             <Button
               loading={isLoadingSendcode}
-              onClick={() => onHandleSendcode()}
+              onClick={() => onHandleSendcode("add")}
               // onClick={() => openModal(<FormAddInforAccount />)}
               className="!bg-gray-200 !text-gray-800 !font-semibold !py-2 !px-4 !rounded-lg !hover:bg-gray-300 !focus:outline-none !focus:ring-2 !focus:ring-offset-2 !focus:ring-gray-400 !transition-all !duration-200"
             >

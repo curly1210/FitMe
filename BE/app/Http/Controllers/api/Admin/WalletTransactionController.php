@@ -9,7 +9,9 @@ use App\Models\WithdrawRequest;
 use App\Traits\CloudinaryTrait;
 use App\Models\WalletTransaction;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\CreateRequestWithdraw;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 
@@ -21,10 +23,11 @@ class WalletTransactionController extends Controller
     {
         try {
             $search = $request->search ?? '';
+            $perPage = $request->input('per_page', 10);
             $query = WalletTransaction::with(['wallet.user', 'wallet'])->whereHas('wallet.user', function (Builder $q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%');
-            })->where('type', 'withdraw')->orderBy('id', 'desc');
-            switch ($request->fill) {
+            })->orderBy('id', 'desc');
+            switch ($request->status) {
                 case 'pending':
                     $query->where('status', 'like', 'pending');
                     break;
@@ -35,6 +38,14 @@ class WalletTransactionController extends Controller
                     $query->where('status', 'like', 'accept');
                     break;
             }
+            switch ($request->type) {
+                case 'refund':
+                    $query->where('type', 'like', 'refund');
+                    break;
+                case 'withdraw':
+                    $query->where('type', 'like', 'withdraw');
+                    break;
+            }
             $dateFrom = $request->date_from;
             $dateTo = $request->date_to;
             if ($dateFrom) {
@@ -43,7 +54,7 @@ class WalletTransactionController extends Controller
             if ($dateTo) {
                 $query->whereDate('created_at', '<=', $dateTo);
             }
-            $data = $query->paginate(10);
+            $data = $query->paginate($perPage);
             return WithdrawRequestResource::collection($data);
         } catch (\Throwable $th) {
             return $this->error("Lỗi hệ thống", $th->getMessage(), 400);
@@ -51,7 +62,7 @@ class WalletTransactionController extends Controller
     }
     public function show($id)
     {
-        $walletTransaction = WalletTransaction::with(['wallet.user', 'wallet'])->where('type', 'withdraw')->find($id);
+        $walletTransaction = WalletTransaction::with(['wallet.user', 'wallet'])->find($id);
         // dd(1);
         if (!$walletTransaction) {
             return $this->error("Yêu cầu không tồn tại", [], 404);
@@ -100,6 +111,18 @@ class WalletTransactionController extends Controller
             $wallet->update([
                 'balance' => $balanceUpdate,
             ]);
+
+            $user = User::find($wallet->user_id);
+            $user->notify(new CreateRequestWithdraw($user->id, $walletTransaction->id, '<span>
+                            Bạn đã được hoàn
+                            <span style="color:red;font-weight:bold;">' .
+                number_format($walletTransaction->amount, 0, ',', '.') . ' đ' . '
+                            </span>
+                           thành công
+                          </span>'));
+
+
+
             return response()->json(['mesage' => "Yêu cầu đã được chấp nhận"]);
         } catch (\Throwable $th) {
             return $this->error("Chuyển trạng thái không thành công", $th->getMessage(), 400);
