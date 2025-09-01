@@ -320,7 +320,7 @@ Route::prefix('admin')->group(function () {
 
 Route::get("order/return-request", [ClientReturnRequestController::class, "index"]);
 # get order_detail
-Route::get("order/{id}/order-details", [OrderController::class, 'getOrderDetails'])->whereNumber('id');
+Route::get("order/order-details/{id}", [OrderController::class, 'getOrderDetails'])->whereNumber('id');
 #
 Route::get("order/return-request/check-exist/{id}", [ClientReturnRequestController::class, "checkRequest"])->whereNumber('id');
 Route::post("order/{id}/return-request/create", [ClientReturnRequestController::class, "store"])->whereNumber('id');

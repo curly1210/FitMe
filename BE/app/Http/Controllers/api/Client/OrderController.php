@@ -440,10 +440,10 @@ class OrderController extends Controller
         if (!$order) {
             return $this->error('Không tìm thấy đơn hàng', [], 404);
         }
-        $orderDetails = $order->orderDetails()->paginate(10);
+        $orderDetails = $order->orderDetails;
 
         // Format dữ liệu từng item
-        $orderDetails->getCollection()->transform(function ($orderDetail) {
+        $orderDetails = $orderDetails->map(function ($orderDetail) {
             return [
                 'id' => $orderDetail->id,
                 'quantity' => $orderDetail->quantity,
