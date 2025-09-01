@@ -20,7 +20,7 @@ class ReturnRequestController extends Controller
     {
         //lọc theo trạng thái (status) và lọc theo mã đơn - orders_code  (search)
         $search = $request->search ?? '';
-        $allowedStatus = ['pending', 'accept', 'reject', 'returning', 'return_complete', 'cancel'];
+        $allowedStatus = ['pending', 'accepted', 'rejected', 'returning', 'return_completed', 'canceled'];
 
         $query = ReturnRequest::with(['order'])->whereHas('order', function ($q) use ($search) {
             $q->where('orders_code', 'like', "%" . $search . "%");
@@ -42,7 +42,7 @@ class ReturnRequestController extends Controller
         }
         switch ($request->status) {
             //Trường hợp hoàn hàng thành công và chuyển tiền về ví
-            case 'return_complete':
+            case 'return_completed':
                 try {
                     if ($returnRequest->status != 'returning') {
                         return $this->error("Trạng thái hiện tại không hợp lệ", [], 422);
@@ -67,16 +67,23 @@ class ReturnRequestController extends Controller
                     $returnRequest->update([
                         'status' => $request->status
                     ]);
-                    $returnRequest->order->update([
-                        'status_order_id' => 6
-                    ]);
+                    if ($returnRequest->type == 'partial') {
+                        $returnRequest->order->update([
+                            'status_order_id' => 10
+                        ]);
+                    } else {
+                        $returnRequest->order->update([
+                            'status_order_id' => 11
+                        ]);
+                    }
+
                     return response()->json(["message" => "Chuyển trạng thái thành công"]);
                 } catch (\Throwable $th) {
                     return $this->error("Chuyển trạng thái thất bại", $th->getMessage(), 400);
                 }
                 break;
             //Trường hợp hoàn hàng thất bại
-            case 'return_fail':
+            case 'return_failed':
                 $validator = Validator::make(
                     $request->only(['admin_note', "media_files", "video_file"]),
                     [
@@ -142,7 +149,7 @@ class ReturnRequestController extends Controller
                         ]);
                     }
                     $returnRequest->order->update([
-                        'status_order_id' => 6
+                        'status_order_id' => 12
                     ]);
                     DB::commit();
                 } catch (\Throwable $th) {
@@ -182,7 +189,10 @@ class ReturnRequestController extends Controller
         }
         $returnRequest->update([
             'admin_note' => $request->admin_note,
-            "status" => "reject",
+            "status" => "rejected",
+        ]);
+        $returnRequest->order->update([
+            'status_order_id' => 6
         ]);
         return response()->json(['message' => "Yêu cầu đã bị từ chối"]);
     }
@@ -198,7 +208,7 @@ class ReturnRequestController extends Controller
             return $this->error("Trạng thái yêu cầu không thể thực hiện từ chối", [], 422);
         }
         $returnRequest->update([
-            'status' => 'accept',
+            'status' => 'accepted',
             'accepted_at' => now(),
         ]);
         return response()->json(['message' => "Yêu cầu đã được chấp nhận"]);

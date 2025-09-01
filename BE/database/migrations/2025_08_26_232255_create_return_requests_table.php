@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('reason');
             $table->string('shipping_label_image')->nullable();
             $table->enum('type', ['full', 'partial']);
-            $table->enum('status', ['pending', 'reject', 'accept', 'cancel', 'returning', 'return_fail', 'return_complete'])->default('pending');
+            $table->enum('status', ['pending', 'rejected', 'accepted', 'canceled', 'returning', 'return_failed', 'return_completed'])->default('pending');
             $table->string('admin_note')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
