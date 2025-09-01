@@ -25,7 +25,12 @@ class StatusOrderFactory extends Factory
             'Đã giao hàng' => '#ffc107',
             'Giao hàng thất bại' => '#198754',
             'Hoàn thành' => '#0dcaf0',
-            'Đã hủy' => '#dc3545'
+            'Đã hủy' => '#dc3545',
+            'Đang xử lý yêu cầu' => '#ffc107',
+            'Đang hoàn hàng' => '#17a2b8',
+            'Đã hoàn hàng một phần' => '#0dcaf0',
+            'Đã hoàn hàng toàn phần' => '#28a745',
+            'Hoàn hàng thất bại' => '#dc3545',
         ];
         // Chuyển associative array thành indexed array
         $statusOrders = array_keys($data);

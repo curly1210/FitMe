@@ -45,6 +45,7 @@ use App\Http\Controllers\api\Admin\ReturnRequestController as AdminReturnRequest
 use App\Http\Controllers\api\Client\ReturnRequestController as ClientReturnRequestController;
 use App\Http\Controllers\api\Admin\WithdrawRequestController as AdminWithdrawRequestController;
 use App\Http\Controllers\api\Client\WithdrawRequestController as ClientWithdrawRequestController;
+use App\Models\OrdersDetail;
 
 // Route Authen
 Route::post('/register', [AuthController::class, 'register']);
@@ -318,6 +319,9 @@ Route::prefix('admin')->group(function () {
 // Hoàn hàng
 
 Route::get("order/return-request", [ClientReturnRequestController::class, "index"]);
+# get order_detail
+Route::get("order/{id}/order-details", [OrderController::class, 'getOrderDetails'])->whereNumber('id');
+#
 Route::get("order/return-request/check-exist/{id}", [ClientReturnRequestController::class, "checkRequest"])->whereNumber('id');
 Route::post("order/{id}/return-request/create", [ClientReturnRequestController::class, "store"])->whereNumber('id');
 Route::post("order/return-request/cancel/{id}", [ClientReturnRequestController::class, "cancelRequest"])->whereNumber('id');

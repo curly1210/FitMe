@@ -30,6 +30,11 @@ class OrderController extends Controller
         5 => ['label' => 'Giao hàng thất bại', 'color' => '#d47190ff'],
         6 => ['label' => 'Hoàn thành', 'color' => '#0dcaf0'],
         7 => ['label' => 'Đã hủy', 'color' => '#dc3545'],
+        8  => ['label' => 'Đang xử lý yêu cầu',      'color' => '#ffc107'],
+        9  => ['label' => 'Đang hoàn hàng',          'color' => '#17a2b8'],
+        10 => ['label' => 'Đã hoàn hàng một phần',   'color' => '#0dcaf0'],
+        11 => ['label' => 'Đã hoàn hàng toàn phần',  'color' => '#28a745'],
+        12 => ['label' => 'Hoàn hàng thất bại',      'color' => '#dc3545'],
     ];
 
     use ApiResponse, CloudinaryTrait;

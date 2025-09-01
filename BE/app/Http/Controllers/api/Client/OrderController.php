@@ -434,4 +434,29 @@ class OrderController extends Controller
             return $this->error('Lỗi khi lấy chi tiết đơn hàng', [$th->getMessage()], 403);
         }
     }
+    public function getOrderDetails($id)
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return $this->error('Không tìm thấy đơn hàng', [], 404);
+        }
+        $orderDetails = $order->orderDetails()->paginate(10);
+
+        // Format dữ liệu từng item
+        $orderDetails->getCollection()->transform(function ($orderDetail) {
+            return [
+                'id' => $orderDetail->id,
+                'quantity' => $orderDetail->quantity,
+                'price' => $orderDetail->price,
+                'sale_price' => $orderDetail->sale_price,
+                'sale_percent' => $orderDetail->sale_percent,
+                'product_item_id' => $orderDetail->product_item_id,
+                'name_product' => $orderDetail->name_product,
+                'color' => $orderDetail->color,
+                'size' => $orderDetail->size,
+                'image_product' => $this->buildImageUrl($orderDetail->image_product),
+            ];
+        });
+        return response()->json($orderDetails);
+    }
 }
