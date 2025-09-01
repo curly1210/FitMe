@@ -24,7 +24,7 @@ class ReturnRequestController extends Controller
     {
         $user = $request->user();
         $search = $request->search ?? '';
-        $allowedStatus = ['pending', 'accept', 'reject', 'returning', 'return_complete', 'cancel'];
+        $allowedStatus = ['pending', 'accepted', 'rejected', 'returning', 'return_completed', 'canceled'];
         if (!$user) {
             return $this->error("Người dùng chưa đăng nhập", [], 403);
         }
@@ -273,6 +273,7 @@ class ReturnRequestController extends Controller
                     'upload_by' => $user->role,
                 ]);
             }
+            $order->update(['status_order_id' => 8]);
             DB::commit();
             return response()->json(['message' => "Tạo yêu cầu thành công"]);
         } catch (\Throwable $th) {
@@ -308,17 +309,23 @@ class ReturnRequestController extends Controller
             if (!$returnRequest->order->user_id === $user->id) {
                 return $this->error("Yêu cầu không tồn tại", [], 404);
             }
-            if ($returnRequest->status != "accept") {
+            if ($returnRequest->status != "accepted") {
                 return $this->error('Trạng thái yêu cầu không hợp lệ để thực hiện hành động', [], 422);
+            }
+            $order = $returnRequest->order;
+            if (!$order) {
+                return $this->error('Đơn hàng không tồn tại', [], 404);
             }
             $image = $this->uploadImageToCloudinary($request->shipping_label_image);
             if (!$image) {
                 return $this->error('Tải ảnh minh chứng thất bại', [], 422);
             }
+
             $returnRequest->update([
                 "shipping_label_image" => $image['public_id'],
                 'status' => 'returning',
             ]);
+            $order->update(['status_order_id' => 9]);
             return response()->json("Gửi minh chứng thành công");
         } catch (\Throwable $th) {
             return $this->error("Tải ảnh minh chứng thất bại", $th->getMessage(), 400);
@@ -335,11 +342,15 @@ class ReturnRequestController extends Controller
         if (!$returnRequest) {
             return $this->error("Yêu cầu hoàn hàng không tồn tại", [], 404);
         }
-
-        if ($returnRequest->status == "pending" || $returnRequest->status == "approve") {
+        $order = $returnRequest->order;
+        if (!$order) {
+            return $this->error('Đơn hàng không tồn tại', [], 404);
+        }
+        if ($returnRequest->status == "pending" || $returnRequest->status == "accepted") {
             $returnRequest->update([
-                "status" => "cancel",
+                "status" => "canceled",
             ]);
+
             return response()->json(['message' => "Hủy yêu cầu thành công"]);
         } else {
             return $this->error('Hủy yêu cầu thất bại', [], 422);
