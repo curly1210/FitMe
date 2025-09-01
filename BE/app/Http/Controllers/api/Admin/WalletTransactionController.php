@@ -22,7 +22,9 @@ class WalletTransactionController extends Controller
     use ApiResponse, CloudinaryTrait;
     public function getWallets(Request $request)
     {
+
         $search = $request->search ?? '';
+        $perPage = $request->input('per_page', 10);
         $query = Wallet::with('user')->orderBy(
             'id',
             'desc'
@@ -33,7 +35,7 @@ class WalletTransactionController extends Controller
                     ->orWhere('name', 'like', '%' . $search . '%');
             });
         }
-        $data = $query->paginate(10);
+        $data = $query->paginate($perPage);
         // return response()->json($wallets);
         return WalletResource::collection($data);
     }
@@ -172,17 +174,27 @@ class WalletTransactionController extends Controller
             return $this->error("Lỗi truyền dữ liệu", $validator->errors(), 422);
         }
         try {
-            $WalletTransaction = WalletTransaction::where('id', '=', $request->walletTransaction_id)->where('type', 'withdraw')->first();
-            if (!$WalletTransaction) {
+            $walletTransaction = WalletTransaction::where('id', '=', $request->walletTransaction_id)->where('type', 'withdraw')->first();
+            if (!$walletTransaction) {
                 return $this->error("Yêu cầu không tồn tại", [], 404);
             }
 
-            $WalletTransaction->update(
+            $walletTransaction->update(
                 [
                     'status' => 'reject',
                     'reject_reason' => $request->reject_reason
                 ]
             );
+
+            $wallet = Wallet::find($walletTransaction->wallet_id);
+            $user = User::find($wallet->user_id);
+            $user->notify(new CreateRequestWithdraw($user->id, $walletTransaction->id, '<span>
+                            Yêu cầu hoàn tiền
+                            <span style="color:red;font-weight:bold;">' .
+                number_format($walletTransaction->amount, 0, ',', '.') . ' đ' . '
+                            </span>
+                           đã bị từ chối.
+                          </span>'));
             return response()->json(['mesage' => "Yêu cầu đã được từ chối"]);
         } catch (\Throwable $th) {
             return $this->error("Chuyển trạng thái không thành công", $th->getMessage(), 400);

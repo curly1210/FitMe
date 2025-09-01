@@ -117,11 +117,11 @@ class WalletTransactionController extends Controller
                 ]);
 
                 $user->notify(new CreateRequestWithdraw($user->id, $walletTransaction->id, '<span>
-                            Gửi yêu cầu 
+                           Gửi yêu cầu hoàn
                             <span style="color:red;font-weight:bold;">' .
-                    'hoàn tiền' . '
+                    number_format($walletTransaction->amount, 0, ',', '.') . ' đ' . '
                             </span>
-                            trong ví thành công 
+                           thành công.
                           </span>'));
 
                 $admins = User::where('role', 'Admin')->get();

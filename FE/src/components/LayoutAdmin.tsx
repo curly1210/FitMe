@@ -307,11 +307,11 @@ const LayoutAdmin = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
-        width={250}
+        width={230}
         style={siderStyle}
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
+        // collapsible
+        // collapsed={collapsed}
+        // onCollapse={(value) => setCollapsed(value)}
       >
         <div className="flex justify-center p-4">
           <Link to={"/"}>
