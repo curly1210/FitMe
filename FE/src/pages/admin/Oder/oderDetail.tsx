@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Drawer, Spin, Table, Image } from "antd";
+import { Drawer, Spin, Table, Image, Button } from "antd";
 import { useOne } from "@refinedev/core";
+import { useModal } from "../../../hooks/useModal";
+import ModalRequestRefund from "./ModalRequestRefund";
 
 interface OrderDetail {
   image_product: string;
@@ -47,6 +49,7 @@ interface OrderData {
   note?: string;
   proof_images: ProofImages[];
   shipping_failures: PhippingFailures[];
+  return_request_id: any;
 }
 
 interface OrderDetailDrawerProps {
@@ -67,6 +70,8 @@ export default function OrderDetailDrawer({
       enabled: open,
     },
   });
+
+  const { openModal } = useModal();
 
   const order = data?.data;
   const paymentStatus = Number(order?.payment_status ?? 0);
@@ -135,6 +140,7 @@ export default function OrderDetailDrawer({
       width={800}
       onClose={onClose}
       open={open}
+      zIndex={50}
       destroyOnClose
     >
       {isLoading || !order ? (
@@ -144,8 +150,26 @@ export default function OrderDetailDrawer({
           {/* Thông tin */}
 
           {/* Thông tin đơn hàng */}
-          <div className="text-base font-semibold mb-2">
-            Thông tin người nhận
+          <div className="flex items-center justify-between">
+            <div className="text-base font-semibold mb-2">
+              Thông tin người nhận
+            </div>
+
+            {order?.return_request_id && (
+              <Button
+                onClick={() =>
+                  openModal(
+                    <ModalRequestRefund
+                      return_request_id={order?.return_request_id}
+                    />
+                  )
+                }
+                // loading={isPendingUpdateStatus}
+                className="!text-white !bg-black !border-2 !rounded-none !border-black !py-5 !px-3 !cursor-pointer"
+              >
+                CHI TIẾT YÊU CẦU HOÀN HÀNG
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-sm  pb-4 mb-6">

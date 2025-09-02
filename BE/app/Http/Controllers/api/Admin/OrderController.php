@@ -108,7 +108,8 @@ class OrderController extends Controller
                     'reason' => $failure->reason,
                 ];
             }),
-            'order_details' => AdminOrderDetailResource::collection($order->orderDetails)
+            'order_details' => AdminOrderDetailResource::collection($order->orderDetails),
+            'return_request_id' => $order->returnRequest ? $order->returnRequest->id : null
         ]);
     }
 

@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\Client\CouponResource;
+use App\Models\ReturnRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Notification;
 
@@ -405,6 +406,8 @@ class OrderController extends Controller
                 ];
             })->values();
 
+            $return_request = ReturnRequest::where('order_id', $order->id)->first();
+
             // Định dạng response
             $response = [
                 'id' => $order->id,
@@ -425,6 +428,7 @@ class OrderController extends Controller
                 "bank_name" => $order->bank_name,
                 "bank_code" => $order->bank_code,
                 "refunded_at" => $order->refunded_at,
+                "return_request_id" => $return_request ? $return_request->id : null
             ];
 
             return response()->json($response);

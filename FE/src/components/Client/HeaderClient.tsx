@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  BankOutlined,
   BellOutlined,
   EllipsisOutlined,
   SearchOutlined,
@@ -439,6 +440,12 @@ const HeaderClient = () => {
                 <BellOutlined className="text-[28px] cursor-pointer " />
               </Badge>
             </Dropdown>
+          )}
+
+          {accessToken && (
+            <Link to={"/wallet"}>
+              <BankOutlined className="text-[28px] !text-black" />
+            </Link>
           )}
 
           <Dropdown

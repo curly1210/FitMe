@@ -43,6 +43,11 @@ class Order extends Model
     // {
     //     return $this->belongsTo(ShippingAddress::class);
     // }
+    public function returnRequest()
+    {
+        return $this->hasOne(ReturnRequest::class);
+    }
+
 
     // Quan hệ với StatusOrder
     public function statusOrder()

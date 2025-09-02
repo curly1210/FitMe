@@ -82,6 +82,10 @@ class ReturnRequestController extends Controller
                     "order_detail_id" => $item->order_detail_id,
                     "image" => $this->buildImageUrl($item->orderDetail->image_product),
                     "price" => $item->price,
+                    "quantity" => $item->quantity,
+                    "name_product" => $item->orderDetail->name_product,
+                    "color" => $item->orderDetail->color,
+                    "size" => $item->orderDetail->size,
                 ];
             }),
             "reason" => $returnRequest->reason,
@@ -128,7 +132,7 @@ class ReturnRequestController extends Controller
 
         $validator = Validator::make($request->only(['media_files', 'reason', 'type', 'items', 'video_file']), [
             'media_files' => 'required|array',
-            'media_files.*' => 'required|file|mimes:jpg,jpeg,pn,webp|max:2048',
+            'media_files.*' => 'required|file|mimes:jpg,jpeg,png,webp|max:2048',
             'reason' => 'required|string|max:255',
             'type' => 'required|string|in:full,partial',
             'video_file' => 'nullable|file|mimes:mp4,avi,mpeg,mov|max:51200'
@@ -251,7 +255,7 @@ class ReturnRequestController extends Controller
                     'return_request_id' => $returnRequest->id,
                     'order_detail_id' => $item['id'],
                     'quantity' => $item['quantity'],
-                    'price' => $item['sale_price'],
+                    'price' => $item['price'],
                 ]);
             }
 

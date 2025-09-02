@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { RightOutlined } from "@ant-design/icons";
+import {
+  InboxOutlined,
+  InteractionOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import { useCreate, useOne, useUpdate } from "@refinedev/core";
 import { Button, notification, Popconfirm, Spin, Steps, Tag } from "antd";
 import { Link, useParams } from "react-router";
@@ -19,6 +23,7 @@ import { useNotificationUser } from "../../../hooks/userNotificationUser";
 import { useAuthen } from "../../../hooks/useAuthen";
 import { useModal } from "../../../hooks/useModal";
 import ModalRequestRefundItems from "./ModalRequestRefundItems";
+import ModalDetailRefund from "./ModalDetailRefund";
 
 const DetailOrder = () => {
   const { id } = useParams();
@@ -32,7 +37,7 @@ const DetailOrder = () => {
     data: orderResponse,
     isLoading,
     error,
-    refetch,
+    refetch: refetchDetailOrder,
   } = useOne({
     resource: "orders",
     id: id,
@@ -46,13 +51,13 @@ const DetailOrder = () => {
     resource: "orders",
     mutationOptions: {
       onSuccess: (response) => {
-        refetch();
+        refetchDetailOrder();
         notification.success({
           message: `${response?.data?.message}`,
         });
       },
       onError: (error) => {
-        refetch();
+        refetchDetailOrder();
         notification.error({ message: `${error?.response?.data?.message}` });
       },
     },
@@ -100,7 +105,7 @@ const DetailOrder = () => {
 
     channel.listen(".order", (e: any) => {
       if (isMounted) {
-        refetch();
+        refetchDetailOrder();
       }
     });
 
@@ -200,13 +205,36 @@ const DetailOrder = () => {
                 </Popconfirm>
                 <Button
                   onClick={() =>
-                    openModal(<ModalRequestRefundItems idOrder={order?.id} />)
+                    openModal(
+                      <ModalRequestRefundItems
+                        refetch={refetchDetailOrder}
+                        idOrder={order?.id}
+                      />
+                    )
                   }
                   className="!border-2 !py-5 !px-3 !font-semibold !text-black !rounded-none !border-black !cursor-pointer"
                 >
                   YÊU CẦU HOÀN HÀNG
                 </Button>
               </div>
+            )}
+
+            {/* {order.status_name == "Đang xử lý yêu cầu" && ( */}
+            {order.return_request_id && (
+              <Button
+                onClick={() =>
+                  openModal(
+                    <ModalDetailRefund
+                      refetchDetailOrder={refetchDetailOrder}
+                      return_request_id={order?.return_request_id}
+                    />
+                  )
+                }
+                // loading={isPendingUpdateStatus}
+                className="!text-white !bg-black !border-2 !rounded-none !border-black !py-5 !px-3 !cursor-pointer"
+              >
+                CHI TIẾT YÊU CẦU HOÀN HÀNG
+              </Button>
             )}
             {/* {(order.status_name == "Chờ xác nhận" ||
               order.status_name == "Đang chuẩn bị hàng") && (
@@ -320,6 +348,40 @@ const DetailOrder = () => {
                     title: "Đã hủy",
                     status: "finish",
                     icon: <MdClose className="!text-3xl" />,
+                  },
+                ]}
+              />
+            ) : order?.status_order_id === 8 ||
+              order?.status_order_id === 9 ||
+              order?.status_order_id === 10 ||
+              order?.status_order_id === 11 ? (
+              <Steps
+                labelPlacement="vertical"
+                current={1}
+                items={[
+                  {
+                    title: "Thành công",
+                    status: "finish",
+                    icon: <FaCheck className="!text-3xl" />,
+                  },
+                  {
+                    title: "Xử lý hoàn hàng",
+                    status: order?.status_order_id > 7 ? "finish" : "wait",
+                    icon: <InboxOutlined className="!text-3xl" />,
+                  },
+                  {
+                    title: "Đang hoàn hàng",
+                    status: order?.status_order_id > 8 ? "finish" : "wait",
+                    icon: <LiaShippingFastSolid className="!text-3xl" />,
+                  },
+                  {
+                    title: "Hoàn thành công",
+                    status:
+                      order?.status_order_id == 10 ||
+                      order?.status_order_id == 11
+                        ? "finish"
+                        : "wait",
+                    icon: <InteractionOutlined className="!text-3xl" />,
                   },
                 ]}
               />
