@@ -39,6 +39,17 @@ const Order = () => {
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  useEffect(() => {
+    if (isRedirecting) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto"; // cleanup
+    };
+  }, [isRedirecting]);
+
   const {
     mutate: createPaymentOnline,
     isPending: isLoadingRedirectSanboxVnpay,
@@ -60,9 +71,10 @@ const Order = () => {
       {
         onSuccess: (response) => {
           setIsRedirecting(true);
-          console.log("redirect");
           // console.log("url", response?.data.vnp_Url);
-          window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+          setTimeout(() => {
+            window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+          }, 500);
         },
         onError: (_error) => {
           notification.error({
@@ -134,7 +146,7 @@ const Order = () => {
   };
 
   return (
-    <div className="list-order-client">
+    <div className="list-order-client ">
       <div className="">
         <h1 className="font-semibold mb-8 text-3xl">Đơn hàng</h1>
         <div className="flex items-center gap-3 mb-5 border-b-1 border-gray-300 pb-3">
@@ -342,9 +354,9 @@ const Order = () => {
         )}
       </div>
 
-      {isRedirecting ?? (
+      {isRedirecting && (
         <Spin
-          className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+          className="!absolute z-[100] backdrop-blur-[2px] !inset-0 !flex !items-center !justify-center"
           style={{ textAlign: "center" }}
           size="large"
         />

@@ -48,6 +48,18 @@ const CheckOut = () => {
   const { user } = useAuthen();
 
   const [shippingPrice, setShippingPrice] = useState<number>(20000); // Phí ship
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    if (isRedirecting) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto"; // cleanup
+    };
+  }, [isRedirecting]);
 
   const { mutate: createOrder, isLoading } = useCreate(); // gửi thông tin về be khi ấn thanh toán
 
@@ -284,7 +296,10 @@ const CheckOut = () => {
               {
                 onSuccess: (response) => {
                   // console.log("url", response?.data.vnp_Url);
-                  window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+                  setIsRedirecting(true);
+                  setTimeout(() => {
+                    window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
+                  }, 500);
                 },
                 onError: (_error) => {
                   console.log("Thanh toán thất bại");
@@ -625,7 +640,7 @@ const CheckOut = () => {
           </p>
         </div>
       </div>
-      {isLoading ? (
+      {isLoading || isRedirecting ? (
         <Spin
           className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
           style={{ textAlign: "center" }}
