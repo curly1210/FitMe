@@ -16,6 +16,7 @@ class WalletTransaction extends Model
         'receive_account_holder',
         'reject_reason',
         'bill_url',
+        "from_order_code"
     ];
     public function wallet()
     {

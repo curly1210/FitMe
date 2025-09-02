@@ -91,6 +91,9 @@ class ReturnRequestController extends Controller
                     "size" => $item->orderDetail->size,
                 ];
             }),
+            "total_price" => $returnRequest->returnItems->sum(function ($item) {
+                return $item->price * $item->quantity;
+            }),
             "reason" => $returnRequest->reason,
             "shipping_label_image" => $returnRequest->shipping_label_image != null ? $this->buildImageUrl($returnRequest->shipping_label_image) : null,
             "admin_note" => $returnRequest->admin_note,
@@ -258,7 +261,7 @@ class ReturnRequestController extends Controller
                     'return_request_id' => $returnRequest->id,
                     'order_detail_id' => $item['id'],
                     'quantity' => $item['quantity'],
-                    'price' => $item['price'],
+                    'price' => $request->type == 'full' ? $item['sale_price'] : $item['price'],
                 ]);
             }
 

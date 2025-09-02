@@ -21,9 +21,7 @@ return new class extends Migration {
 
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
         });
-
     }
 
     /**
@@ -31,7 +29,10 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropForeign(['user_id']);
+        Schema::table('password_resets', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
+
         Schema::dropIfExists('password_resets');
     }
 };

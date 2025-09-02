@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('return_requests', function (Blueprint $table) {
+        Schema::table('return_files', function (Blueprint $table) {
             $table->dropForeign(['return_request_id']);
         });
         Schema::dropIfExists('return_files');

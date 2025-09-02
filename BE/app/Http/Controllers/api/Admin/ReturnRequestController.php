@@ -65,7 +65,8 @@ class ReturnRequestController extends Controller
                         "wallet_id" => $wallet->id,
                         "amount" => $total_return,
                         'type' => "refund",
-                        "status" => "accept"
+                        "status" => "accept",
+                        "from_order_code" => $returnRequest->order->orders_code ?? null,
                     ]);
                     $returnRequest->update([
                         'status' => $request->status
@@ -299,7 +300,11 @@ class ReturnRequestController extends Controller
                     "order_detail_id" => $item->order_detail_id,
                     "image" => $this->buildImageUrl($item->orderDetail->image_product),
                     "price" => $item->price,
+                    "quantity" => $item->quantity,
                 ];
+            }),
+            "total_price" => $returnRequest->returnItems->sum(function ($item) {
+                return $item->price * $item->quantity;
             }),
             "reason" => $returnRequest->reason,
             "shipping_label_image" => $returnRequest->shipping_label_image != null ? $this->buildImageUrl($returnRequest->shipping_label_image) : null,

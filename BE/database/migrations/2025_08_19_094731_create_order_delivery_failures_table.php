@@ -13,8 +13,8 @@ return new class extends Migration {
         Schema::create('order_delivery_failures', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('attempt')->default(1); 
-            $table->text('reason'); 
+            $table->unsignedBigInteger('attempt')->default(1);
+            $table->text('reason');
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
@@ -26,7 +26,9 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropForeign(['order_id']);
+        Schema::table('order_delivery_failures', function (Blueprint $table) {
+            $table->dropForeign(['order_id']);
+        });
         Schema::dropIfExists('order_delivery_failures');
     }
 };
