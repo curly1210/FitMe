@@ -63,6 +63,7 @@ class ReturnRequestController extends Controller
                         "wallet_id" => $wallet->id,
                         "amount" => $total_return,
                         'type' => "refund",
+                        "status" => "accept"
                     ]);
                     $returnRequest->update([
                         'status' => $request->status

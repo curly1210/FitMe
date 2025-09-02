@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('wallet_id');
             $table->unsignedBigInteger('amount');
             $table->enum('type', ['refund', 'withdraw']);
-            $table->enum('status', ['pending', 'reject', 'accept'])->default('pending');
+            $table->enum('status', ['pending', 'reject', 'accept', 'refunded'])->default('pending');
             $table->string('receive_bank_name')->nullable();
             $table->string('receive_account_number')->nullable();
             $table->string('receive_account_holder')->nullable();

@@ -37,17 +37,18 @@ class StatisticsController extends Controller
             ->groupBy('status_order_id')
             ->pluck('count', 'status_order_id');
 
-        $allStatuses = collect(range(0, 6))->mapWithKeys(function ($status) use ($ordersByStatus) {
+        $allStatuses = collect(range(0, 12))->mapWithKeys(function ($status) use ($ordersByStatus) {
             return [$status => $ordersByStatus[$status] ?? 0];
         });
-        $totalRevenue = Order::where('status_order_id', 6)->sum(DB::raw('total_amount - shipping_price'));
-        $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) {
-            $query->where('status_order_id', 6);
+        $totalRevenue = Order::whereIn('status_order_id', [6, 10, 11])
+            ->sum(DB::raw('total_amount - shipping_price'));
+        $totalRefund = ReturnItem::whereHas('returnRequest', function ($q) {
+            $q->where('status', 'like', 'return_completed');
         })
             ->selectRaw('SUM(price * quantity) as total')
             ->value('total');
-
-        $netRevenue = $totalRevenue - ($totalRefund ?? 0);
+        // return response()->json($totalRefund);
+        $netRevenue = ($totalRevenue ?? 0) - ($totalRefund ?? 0);
         $data = [
             'total_orders' => $totalOrders,
             'total_selling_products' => $totalSellingProducts,
@@ -71,16 +72,16 @@ class StatisticsController extends Controller
             $start = now()->setDate($year, $m, 1)->startOfMonth();
             $end = now()->setDate($year, $m, 1)->endOfMonth();
 
-            $total = Order::where('status_order_id', 6)
+            $total = Order::whereIn('status_order_id', [6, 10, 11])
                 ->whereBetween('created_at', [$start, $end])
                 ->sum(DB::raw('total_amount - shipping_price'));
-            $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) use ($start, $end) {
-                $query->where('status_order_id', 6)->whereBetween('created_at', [$start, $end]);
+            $totalRefund = ReturnItem::whereHas('returnRequest', function ($q) use ($start, $end) {
+                $q->where('status', 'like', 'return_completed')->whereBetween('created_at', [$start, $end]);
             })
                 ->selectRaw('SUM(price * quantity) as total')
                 ->value('total');
 
-            $total = $total - ($totalRefund ?? 0);
+            $total = ($total ?? 0) - ($totalRefund ?? 0);
 
             return [$m => $total];
         });
@@ -92,16 +93,16 @@ class StatisticsController extends Controller
             $start = now()->setDate($year, $month, $d)->startOfDay();
             $end = now()->setDate($year, $month, $d)->endOfDay();
 
-            $total = Order::where('status_order_id', 6)
+            $total = Order::whereIn('status_order_id', [6, 10, 11])
                 ->whereBetween('created_at', [$start, $end])
                 ->sum(DB::raw('total_amount - shipping_price'));
-            $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) use ($start, $end) {
-                $query->where('status_order_id', 6)->whereBetween('created_at', [$start, $end]);
+            $totalRefund = ReturnItem::whereHas('returnRequest', function ($query) use ($start, $end) {
+                $query->where('status', 'like', 'return_completed')->whereBetween('created_at', [$start, $end]);
             })
                 ->selectRaw('SUM(price * quantity) as total')
                 ->value('total');
 
-            $total = $total - ($totalRefund ?? 0);
+            $total = ($total ?? 0) - ($totalRefund ?? 0);
             return [$d => $total];
         });
 
@@ -114,16 +115,16 @@ class StatisticsController extends Controller
 
             $recent[$dayCount] = collect(range(0, $dayCount - 1))->mapWithKeys(function ($offset) use ($from) {
                 $date = $from->copy()->addDays($offset);
-                $total = Order::where('status_order_id', 6)
+                $total = Order::whereIn('status_order_id', [6, 10, 11])
                     ->whereDate('created_at', $date)
                     ->sum(DB::raw('total_amount - shipping_price'));
-                $totalRefund = ReturnItem::whereHas('returnRequest.order', function ($query) use ($date) {
-                    $query->where('status_order_id', 6)->whereDate('created_at', $date);
+                $totalRefund = ReturnItem::whereHas('returnRequest', function ($query) use ($date) {
+                    $query->where('status', 'like', 'return_completed')->whereDate('created_at', $date);
                 })
                     ->selectRaw('SUM(price * quantity) as total')
                     ->value('total');
 
-                $total = $total - ($totalRefund ?? 0);
+                $total = ($total ?? 0) - ($totalRefund ?? 0);
                 return [$date->format('Y-m-d') => $total];
             });
         }
