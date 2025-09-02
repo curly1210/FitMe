@@ -16,6 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('wallet_id');
             $table->unsignedBigInteger('amount');
             $table->enum('type', ['refund', 'withdraw']);
+            $table->enum('status', ['pending', 'reject', 'accept', 'refunded'])->default('pending');
+            $table->string('receive_bank_name')->nullable();
+            $table->string('receive_account_number')->nullable();
+            $table->string('receive_account_holder')->nullable();
+            $table->string('reject_reason')->nullable();
             $table->string('bill_url')->nullable();
             $table->foreign('wallet_id')->references('id')->on('wallets')->onDelete('cascade');
 

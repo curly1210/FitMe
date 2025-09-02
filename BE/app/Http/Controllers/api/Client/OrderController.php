@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\Client\CouponResource;
+use App\Models\ReturnRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Notification;
 
@@ -405,6 +406,8 @@ class OrderController extends Controller
                 ];
             })->values();
 
+            $return_request = ReturnRequest::where('order_id', $order->id)->first();
+
             // Định dạng response
             $response = [
                 'id' => $order->id,
@@ -425,6 +428,7 @@ class OrderController extends Controller
                 "bank_name" => $order->bank_name,
                 "bank_code" => $order->bank_code,
                 "refunded_at" => $order->refunded_at,
+                "return_request_id" => $return_request ? $return_request->id : null
             ];
 
             return response()->json($response);
@@ -433,5 +437,30 @@ class OrderController extends Controller
         } catch (\Throwable $th) {
             return $this->error('Lỗi khi lấy chi tiết đơn hàng', [$th->getMessage()], 403);
         }
+    }
+    public function getOrderDetails($id)
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return $this->error('Không tìm thấy đơn hàng', [], 404);
+        }
+        $orderDetails = $order->orderDetails;
+
+        // Format dữ liệu từng item
+        $orderDetails = $orderDetails->map(function ($orderDetail) {
+            return [
+                'id' => $orderDetail->id,
+                'quantity' => $orderDetail->quantity,
+                'price' => $orderDetail->price,
+                'sale_price' => $orderDetail->sale_price,
+                'sale_percent' => $orderDetail->sale_percent,
+                'product_item_id' => $orderDetail->product_item_id,
+                'name_product' => $orderDetail->name_product,
+                'color' => $orderDetail->color,
+                'size' => $orderDetail->size,
+                'image_product' => $this->buildImageUrl($orderDetail->image_product),
+            ];
+        });
+        return response()->json($orderDetails);
     }
 }

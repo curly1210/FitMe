@@ -26,10 +26,21 @@ import OrderDetailDrawer from "./oderDetail";
 import Search from "antd/es/input/Search";
 import UploadProofForm from "./ProofImageForm";
 import { useNotificationUser } from "../../../hooks/userNotificationUser";
+import { useModal } from "../../../hooks/useModal";
+import ModalRequestRefund from "./ModalRequestRefund";
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
+// const STATUS_MAP = {
+//   "Chờ xác nhận": 1,
+//   "Đang chuẩn bị hàng": 2,
+//   "Đang giao hàng": 3,
+//   "Đã giao": 4,
+//   "Giao hàng thất bại": 5,
+//   "Hoàn thành": 6,
+//   "Đã hủy": 7,
+// };
 const STATUS_MAP = {
   "Chờ xác nhận": 1,
   "Đang chuẩn bị hàng": 2,
@@ -38,6 +49,11 @@ const STATUS_MAP = {
   "Giao hàng thất bại": 5,
   "Hoàn thành": 6,
   "Đã hủy": 7,
+  "Đang xử lý yêu cầu": 8,
+  "Đang hoàn hàng": 9,
+  "Đã hoàn hàng một phần": 10,
+  "Đã hoàn hàng toàn phần": 11,
+  "Hoàn hàng thất bại": 12,
 };
 
 const Oder = () => {
@@ -55,6 +71,8 @@ const Oder = () => {
 
   //upload ảnh
   const [uploadOpen, setUploadOpen] = useState(false);
+
+  const { openModal } = useModal();
 
   // form lý do thất bại
   const [failReasonOpen, setFailReasonOpen] = useState(false);
@@ -91,7 +109,11 @@ const Oder = () => {
     filters.push({ field: "to", operator: "eq", value: dateRange[1] });
   }
 
-  const { data, isLoading, refetch } = useCustom({
+  const {
+    data,
+    isLoading,
+    refetch: refetchListOrder,
+  } = useCustom({
     method: "get",
     url: "admin/orders",
     config: {
@@ -129,7 +151,7 @@ const Oder = () => {
 
     channel.listen(".order", (e: any) => {
       if (isMounted) {
-        refetch();
+        refetchListOrder();
       }
     });
 
@@ -149,7 +171,7 @@ const Oder = () => {
       },
       {
         onSuccess: (_response: any) => {
-          refetch();
+          refetchListOrder();
           notification.success({
             message: "Hoàn tiền thành công",
           });
@@ -182,13 +204,13 @@ const Oder = () => {
       },
       {
         onSuccess: (response: any) => {
-          refetch();
+          refetchListOrder();
           notification[type]({
             message: "Cập nhật trạng thái thành công",
           });
         },
         onError: (error: any) => {
-          refetch();
+          refetchListOrder();
           notification.error({
             message: "Cập nhật trạng thái thất bại",
           });
@@ -226,7 +248,7 @@ const Oder = () => {
           setFailOrderId(null);
 
           // Refetch lại danh sách
-          refetch();
+          refetchListOrder();
         },
         onError: () => {
           message.error("Có lỗi xảy ra khi cập nhật trạng thái");
@@ -419,6 +441,26 @@ const Oder = () => {
             </Button>
           </Popconfirm>
         );
+      case "Đang xử lý yêu cầu":
+      case "Đang hoàn hàng":
+        return (
+          <Button
+            loading={loadingOrderId === orderId}
+            onClick={(e) => {
+              openModal(
+                <ModalRequestRefund
+                  refetchListOrder={refetchListOrder}
+                  return_request_id={record?.return_request_id}
+                />
+              );
+              e.stopPropagation();
+              setSelectedOrderId(orderId);
+            }}
+            type="primary"
+          >
+            Xem yêu cầu hoàn tiền
+          </Button>
+        );
       default:
         return null;
     }
@@ -608,7 +650,7 @@ const Oder = () => {
             if (selectedOrderId)
               handleUpdateStatus(STATUS_MAP["Đã giao"], "Đã giao", "success");
             setUploadOpen(false);
-            refetch();
+            refetchListOrder();
           }}
         />
       )}

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTFactory;
 use App\Http\Resources\Auth\UserResource;
+use App\Models\Wallet;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -127,7 +128,7 @@ class AuthController extends Controller
             'is_active' => 1 //test, thực tế comment lại
         ]);
         MemberPoint::create(['user_id' => $user->id]);
-
+        Wallet::create(['user_id' => $user->id]);
         PasswordReset::where('user_id', $user->id)->delete();
 
         $rawToken = Str::random(60) . $user->id;

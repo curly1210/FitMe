@@ -7,6 +7,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import {
+  BankOutlined,
   BellOutlined,
   EllipsisOutlined,
   SearchOutlined,
@@ -579,6 +580,12 @@ const HomePage = () => {
                     <BellOutlined className="text-[28px] cursor-pointer !text-white" />
                   </Badge>
                 </Dropdown>
+              )}
+
+              {accessToken && (
+                <Link to={"/wallet"}>
+                  <BankOutlined className="text-[28px] " />
+                </Link>
               )}
 
               <Dropdown

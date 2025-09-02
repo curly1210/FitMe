@@ -26,11 +26,11 @@ class AdminOrderResource extends JsonResource
                 'label' => $this->statusOrder->name ?? 'Không rõ',
                 'color' => $this->statusOrder->color ?? '#000000',
             ],
+            'return_request_id' => $this->returnRequest ? $this->returnRequest->id : null,
             'total_amount' => $this->total_amount,
             'payment_method' => $this->payment_method,
             'status_payment' => $this->status_payment,
-            'shipping_failled' => $this->shippingFailures->count(function ($failure) {
-            }),
+            'shipping_failled' => $this->shippingFailures->count(function ($failure) {}),
         ];
     }
 }

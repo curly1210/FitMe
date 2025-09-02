@@ -20,12 +20,12 @@ class DatabaseSeeder extends Seeder
     {
         // Lưu ý rằng ngoài những seeder được thêm vào sẵn để tiện thao tác các bảng khác, CHƯA CẦN đưa các seeder mới vào file này để tránh xung đột code
         $this->call([
-            UserSeeder::class,
-            ShippingAddressSeeder::class,
-            CategorySeeder::class,
+            // UserSeeder::class,
+            // ShippingAddressSeeder::class,
+            // CategorySeeder::class,
             StatusOrderSeeder::class,
-            SizeSeeder::class,
-            ColorSeeder::class,
+            // SizeSeeder::class,
+            // ColorSeeder::class,
             // ProductSeeder::class,
             // ProductItemSeeder::class,
             // OrderSeeder::class,
@@ -33,15 +33,15 @@ class DatabaseSeeder extends Seeder
             // OrderSeeder::class, //bao gồm order_detail
             // CommentSeeder::class,
             // ReviewSeeder::class,
+            // ProductImageSeeder::class,
+            // PostSeeder::class,
+            // WishlistSeeder::class,
+            // CouponSeeder::class,
+            // BannerSeeder::class,
+            // ContactSeeder::class,
             // VariationSeeder::class,
             // VariationOptionSeeder::class,
-            // ProductImageSeeder::class,
             // ProductConfigurationSeeder::class,
-            PostSeeder::class,
-            // WishlistSeeder::class,
-            CouponSeeder::class,
-            BannerSeeder::class,
-            ContactSeeder::class,
 
         ]);
     }

@@ -77,6 +77,10 @@ const getBreadcrumbItems = (path: string) => {
       return [{ title: "Đánh giá" }];
     case "/admin/notifications":
       return [{ title: "Thông báo" }];
+    case "/admin/wallet-list":
+      return [{ title: "Danh sách ví" }];
+    case "/admin/transaction-list":
+      return [{ title: "Quản lý giao dịch" }];
     default:
       return [{ title: "Trang" }];
   }
@@ -106,7 +110,7 @@ const itemsNavigate: MenuItem[] = [
   ),
   getItem(
     "Quản lý sản phẩm",
-    "sub2",
+    "sub2-products",
     <InboxOutlined />,
     [
       getItem(<Link to="/admin/products">Danh sách sản phẩm</Link>, "4"),
@@ -156,6 +160,20 @@ const itemsNavigate: MenuItem[] = [
     <Link to="/admin/notifications">Thông báo</Link>,
     "16",
     <BellOutlined />
+  ),
+  getItem(
+    "Quản lý ví",
+    "sub2-wallet",
+    <InboxOutlined />,
+    [
+      getItem(<Link to="/admin/wallet-list">Danh sách ví</Link>, "17"),
+      getItem(
+        <Link to="/admin/transaction-list">Quản lý giao dịch</Link>,
+        "18"
+      ),
+    ]
+
+    // <InboxOutlined />
   ),
 ];
 
@@ -245,6 +263,10 @@ const LayoutAdmin = () => {
         return "15";
       case "/admin/notifications":
         return "16";
+      case "/admin/wallet-list":
+        return "17";
+      case "/admin/transaction-list":
+        return "18";
       default:
         return "";
     }
@@ -285,11 +307,11 @@ const LayoutAdmin = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
-        width={250}
+        width={230}
         style={siderStyle}
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
+        // collapsible
+        // collapsed={collapsed}
+        // onCollapse={(value) => setCollapsed(value)}
       >
         <div className="flex justify-center p-4">
           <Link to={"/"}>

@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useUpdate } from "@refinedev/core";
 import { Button, notification, Popconfirm } from "antd";
+import ModalRequestRefundItems from "./ModalRequestRefundItems";
+import { useModal } from "../../../hooks/useModal";
 
 const OrderActionButton = ({ order, refetch }: any) => {
   const onHandleChangeStatus = (orderId: number) => {
@@ -9,6 +11,8 @@ const OrderActionButton = ({ order, refetch }: any) => {
       values: {},
     });
   };
+
+  const { openModal } = useModal();
 
   const { mutate, isPending: isPendingUpdateStatus } = useUpdate({
     resource: "orders",
@@ -46,20 +50,35 @@ const OrderActionButton = ({ order, refetch }: any) => {
       )}
 
       {order.status_name == "Đã giao hàng" && (
-        <Popconfirm
-          title="Cập nhật trạng thái"
-          onConfirm={() => onHandleChangeStatus(order.id)}
-          description="Xác nhận nhận hàng thành công?"
-          okText="Có"
-          cancelText="Không"
-        >
+        <div className="flex items-center gap-3">
           <Button
-            loading={isPendingUpdateStatus}
+            onClick={() =>
+              openModal(
+                <ModalRequestRefundItems
+                  refetch={refetch}
+                  idOrder={order?.id}
+                />
+              )
+            }
             className="!text-white !bg-black !border-2 !border-black !py-5 !px-3 !cursor-pointer"
           >
-            ĐÃ NHẬN HÀNG
+            YÊU CẦU HOÀN HÀNG
           </Button>
-        </Popconfirm>
+          <Popconfirm
+            title="Cập nhật trạng thái"
+            onConfirm={() => onHandleChangeStatus(order.id)}
+            description="Xác nhận nhận hàng thành công?"
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button
+              loading={isPendingUpdateStatus}
+              className="!text-white !bg-black !border-2 !border-black !py-5 !px-3 !cursor-pointer"
+            >
+              ĐÃ NHẬN HÀNG
+            </Button>
+          </Popconfirm>
+        </div>
       )}
     </>
   );

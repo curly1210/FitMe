@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Review;
 use App\Models\Product;
 use Carbon\CarbonPeriod;
+use App\Models\ReturnItem;
 use App\Models\ProductItem;
 use App\Models\OrdersDetail;
 use Illuminate\Http\Request;
@@ -36,17 +37,23 @@ class StatisticsController extends Controller
             ->groupBy('status_order_id')
             ->pluck('count', 'status_order_id');
 
-        $allStatuses = collect(range(0, 6))->mapWithKeys(function ($status) use ($ordersByStatus) {
+        $allStatuses = collect(range(0, 12))->mapWithKeys(function ($status) use ($ordersByStatus) {
             return [$status => $ordersByStatus[$status] ?? 0];
         });
-
-        $totalRevenue = Order::where('status_order_id', 6)->sum('total_amount');
-
+        $totalRevenue = Order::whereIn('status_order_id', [6, 10, 11])
+            ->sum(DB::raw('total_amount - shipping_price'));
+        $totalRefund = ReturnItem::whereHas('returnRequest', function ($q) {
+            $q->where('status', 'like', 'return_completed');
+        })
+            ->selectRaw('SUM(price * quantity) as total')
+            ->value('total');
+        // return response()->json($totalRefund);
+        $netRevenue = ($totalRevenue ?? 0) - ($totalRefund ?? 0);
         $data = [
             'total_orders' => $totalOrders,
             'total_selling_products' => $totalSellingProducts,
             'total_customers' => $totalCustomers,
-            'total_sold' => $totalRevenue,
+            'total_sold' => $netRevenue,
             'orders_by_status' => $allStatuses,
         ];
 
@@ -65,9 +72,16 @@ class StatisticsController extends Controller
             $start = now()->setDate($year, $m, 1)->startOfMonth();
             $end = now()->setDate($year, $m, 1)->endOfMonth();
 
-            $total = Order::where('status_order_id', 6)
+            $total = Order::whereIn('status_order_id', [6, 10, 11])
                 ->whereBetween('created_at', [$start, $end])
-                ->sum('total_amount');
+                ->sum(DB::raw('total_amount - shipping_price'));
+            $totalRefund = ReturnItem::whereHas('returnRequest', function ($q) use ($start, $end) {
+                $q->where('status', 'like', 'return_completed')->whereBetween('created_at', [$start, $end]);
+            })
+                ->selectRaw('SUM(price * quantity) as total')
+                ->value('total');
+
+            $total = ($total ?? 0) - ($totalRefund ?? 0);
 
             return [$m => $total];
         });
@@ -79,10 +93,16 @@ class StatisticsController extends Controller
             $start = now()->setDate($year, $month, $d)->startOfDay();
             $end = now()->setDate($year, $month, $d)->endOfDay();
 
-            $total = Order::where('status_order_id', 6)
+            $total = Order::whereIn('status_order_id', [6, 10, 11])
                 ->whereBetween('created_at', [$start, $end])
-                ->sum('total_amount');
+                ->sum(DB::raw('total_amount - shipping_price'));
+            $totalRefund = ReturnItem::whereHas('returnRequest', function ($query) use ($start, $end) {
+                $query->where('status', 'like', 'return_completed')->whereBetween('created_at', [$start, $end]);
+            })
+                ->selectRaw('SUM(price * quantity) as total')
+                ->value('total');
 
+            $total = ($total ?? 0) - ($totalRefund ?? 0);
             return [$d => $total];
         });
 
@@ -95,10 +115,16 @@ class StatisticsController extends Controller
 
             $recent[$dayCount] = collect(range(0, $dayCount - 1))->mapWithKeys(function ($offset) use ($from) {
                 $date = $from->copy()->addDays($offset);
-                $total = Order::where('status_order_id', 6)
+                $total = Order::whereIn('status_order_id', [6, 10, 11])
                     ->whereDate('created_at', $date)
-                    ->sum('total_amount');
+                    ->sum(DB::raw('total_amount - shipping_price'));
+                $totalRefund = ReturnItem::whereHas('returnRequest', function ($query) use ($date) {
+                    $query->where('status', 'like', 'return_completed')->whereDate('created_at', $date);
+                })
+                    ->selectRaw('SUM(price * quantity) as total')
+                    ->value('total');
 
+                $total = ($total ?? 0) - ($totalRefund ?? 0);
                 return [$date->format('Y-m-d') => $total];
             });
         }
@@ -141,14 +167,39 @@ class StatisticsController extends Controller
             DB::raw('SUM(quantity) as total_quantity'),
             DB::raw('SUM(sale_price * quantity) as total_revenue')
         ])
-            ->whereHas('order', function ($q)  {
+            ->whereHas('order', function ($q) {
                 $q->where('status_order_id', 6); // Chỉ lấy đơn đã hoàn thành
-                    // ->whereBetween('created_at');
+                // ->whereBetween('created_at');
             })
             ->groupBy('product_item_id', 'name_product', 'image_product')
             ->orderBy($filterBy === 'revenue' ? 'total_revenue' : 'total_quantity', 'desc')
             ->limit(10)
-            ->get();
+            ->get()->map(function ($item) {
+                // Lấy danh sách order_detail_id của product_item_id này
+                $orderDetailIds = OrdersDetail::where('product_item_id', $item->product_item_id)->pluck('id');
+                // Tính tổng số lượng hoàn trả cho từng sản phẩm
+                $refundQuantity = ReturnItem::whereIn('order_detail_id', $orderDetailIds)
+                    ->whereHas('returnRequest.order', function ($q) {
+                        $q->where('status_order_id', 6);
+                    })
+                    ->selectRaw('SUM(quantity) as total')
+                    ->value('total') ?? 0;
+
+                // Trừ số lượng hoàn trả khỏi tổng số lượng đã bán
+                $item->total_quantity = $item->total_quantity - $refundQuantity;
+
+                // Tính tổng tiền hoàn trả cho từng sản phẩm
+                $refund = ReturnItem::whereIn('order_detail_id', $orderDetailIds)
+                    ->whereHas('returnRequest.order', function ($q) {
+                        $q->where('status_order_id', 6);
+                    })
+                    ->selectRaw('SUM(price * quantity) as total')
+                    ->value('total') ?? 0;
+
+                // Trừ hoàn trả khỏi doanh thu
+                $item->total_revenue = $item->total_revenue - $refund;
+                return $item;
+            });
 
         return response()->json([
             'data' => $query
@@ -324,7 +375,7 @@ class StatisticsController extends Controller
             // ],
         ]);
     }
-public function orderByLocation(Request $request)
+    public function orderByLocation(Request $request)
     {
         $from = $request->input('from');
         $to = $request->input('to');
@@ -545,18 +596,4 @@ public function orderByLocation(Request $request)
             'filter_products' => $products,
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

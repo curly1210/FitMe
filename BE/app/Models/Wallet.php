@@ -17,10 +17,6 @@ class Wallet extends Model
     {
         return $this->hasMany(WalletTransaction::class);
     }
-    public function withdrawRequests()
-    {
-        return $this->hasMany(WithdrawRequest::class);
-    }
     public function user()
     {
         return $this->belongsTo(User::class);
