@@ -13,6 +13,11 @@ import {
   DeliveredProcedureOutlined,
   ExceptionOutlined,
   StopOutlined,
+  InboxOutlined,
+  TruckOutlined,
+  BackwardOutlined,
+  RedoOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import ChartLastDays from "./charDay";
 import ChartByMonth from "./charMonth";
@@ -156,6 +161,26 @@ const Dashboard = () => {
     "7": {
       label: "Đã huỷ",
       icon: <StopOutlined style={{ marginRight: 6, color: "#8c8c8c" }} />, // Xám
+    },
+    "8": {
+      label: "Xử lý hoàn hàng",
+      icon: <InboxOutlined style={{ marginRight: 6, color: "#ffc107" }} />, // Xám
+    },
+    "9": {
+      label: "Đang hoàn hàng",
+      icon: <TruckOutlined style={{ marginRight: 6, color: "#17a2b8" }} />, // Xám
+    },
+    "10": {
+      label: "Hoàn hàng một phần",
+      icon: <BackwardOutlined style={{ marginRight: 6, color: "#0dcaf0" }} />, // Xám
+    },
+    "11": {
+      label: "Hoàn hàng toàn phần",
+      icon: <RedoOutlined style={{ marginRight: 6, color: "#28a745" }} />, // Xám
+    },
+    "12": {
+      label: "Hoàn hàng thất bại",
+      icon: <CloseOutlined style={{ marginRight: 6, color: "#dc3545" }} />, // Xám
     },
   };
 

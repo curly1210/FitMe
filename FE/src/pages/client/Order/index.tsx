@@ -37,7 +37,12 @@ const Order = () => {
   const [fromDate, setFromDate] = useState<dayjs.Dayjs | undefined>(undefined);
   const [toDate, setToDate] = useState<dayjs.Dayjs | undefined>(undefined);
 
-  const { mutate: createPaymentOnline } = useCreate(); // gửi thông tin về be khi ấn thanh toán
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const {
+    mutate: createPaymentOnline,
+    isPending: isLoadingRedirectSanboxVnpay,
+  } = useCreate(); // gửi thông tin về be khi ấn thanh toán
 
   const { echo } = useNotificationUser();
 
@@ -54,6 +59,8 @@ const Order = () => {
       },
       {
         onSuccess: (response) => {
+          setIsRedirecting(true);
+          console.log("redirect");
           // console.log("url", response?.data.vnp_Url);
           window.location.href = response.data.vnp_Url; // Chuyển hướng đến trang thanh toán VNPAY
         },
@@ -285,6 +292,7 @@ const Order = () => {
                       order?.payment_method == "vnpay" &&
                       order?.status_payment == 0 && (
                         <Button
+                          loading={isLoadingRedirectSanboxVnpay}
                           onClick={() =>
                             onHandlePaymentOnline(
                               order?.orders_code,
@@ -333,6 +341,14 @@ const Order = () => {
           </div>
         )}
       </div>
+
+      {isRedirecting ?? (
+        <Spin
+          className="!absolute z-[100] backdrop-blur-[1px] !inset-0 !flex !items-center !justify-center"
+          style={{ textAlign: "center" }}
+          size="large"
+        />
+      )}
     </div>
   );
 };

@@ -139,6 +139,11 @@ export const OrderLocationMap = () => {
               <Select.Option value={5}>Giao hàng thất bại</Select.Option>
               <Select.Option value={6}>Hoàn thành</Select.Option>
               <Select.Option value={7}>Đã huỷ</Select.Option>
+              <Select.Option value={8}>Đang xử lý yêu cầu</Select.Option>
+              <Select.Option value={9}>Đang hoàn hàng</Select.Option>
+              <Select.Option value={10}>Đã hoàn hàng một phần</Select.Option>
+              <Select.Option value={11}>Đã hoàn hàng toàn phần</Select.Option>
+              <Select.Option value={12}>Hoàn hàng thất bại</Select.Option>
             </Select>
           </Space>
         </Col>
