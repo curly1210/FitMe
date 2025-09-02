@@ -16,6 +16,9 @@ use App\Http\Controllers\Controller;
 use function PHPUnit\Framework\isEmpty;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Client\ReturnRequestResource;
+use App\Models\User;
+use App\Notifications\ReturnOrderNotification;
+use Illuminate\Support\Facades\Notification;
 
 class ReturnRequestController extends Controller
 {
@@ -278,6 +281,17 @@ class ReturnRequestController extends Controller
                 ]);
             }
             $order->update(['status_order_id' => 8]);
+
+            $admins = User::where('role', 'Admin')->get();
+
+            Notification::send($admins, new ReturnOrderNotification($user->id, $returnRequest->id, '<span>
+                            Đơn hàng
+                            <span style="color:red;font-weight:bold;">' .
+                $order->orders_code . '
+                            </span>
+                           gửi yêu cầu hoàn hàng
+                          </span>', 1));
+
             DB::commit();
             return response()->json(['message' => "Tạo yêu cầu thành công"]);
         } catch (\Throwable $th) {
@@ -330,6 +344,17 @@ class ReturnRequestController extends Controller
                 'status' => 'returning',
             ]);
             $order->update(['status_order_id' => 9]);
+
+            $admins = User::where('role', 'Admin')->get();
+
+            Notification::send($admins, new ReturnOrderNotification($user->id, $returnRequest->id, '<span>
+                            Đơn hàng
+                            <span style="color:red;font-weight:bold;">' .
+                '#' . $order->orders_code . '
+                            </span>
+                         đã gửi thông tin giao vận hoàn hàng
+                          </span>', 1));
+
             return response()->json("Gửi minh chứng thành công");
         } catch (\Throwable $th) {
             return $this->error("Tải ảnh minh chứng thất bại", $th->getMessage(), 400);

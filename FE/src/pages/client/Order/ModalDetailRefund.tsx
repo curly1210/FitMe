@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCreate, useOne } from "@refinedev/core";
 import {
   Button,
@@ -10,9 +11,11 @@ import {
   Upload,
 } from "antd";
 import ImageWithFallback from "../../../components/ImageFallBack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
+import { useNotificationUser } from "../../../hooks/userNotificationUser";
+import { useAuthen } from "../../../hooks/useAuthen";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
@@ -25,6 +28,27 @@ const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
     id: return_request_id,
     queryOptions: { enabled: !!return_request_id },
   });
+
+  const { echo } = useNotificationUser();
+  const { user } = useAuthen();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `App.Models.User.${user?.id}`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo, user?.id]);
 
   const [openModalShippingImage, setOpenModalShippingImage] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);

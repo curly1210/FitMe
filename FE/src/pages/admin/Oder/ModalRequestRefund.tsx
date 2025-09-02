@@ -12,9 +12,10 @@ import {
 } from "antd";
 import ImageWithFallback from "../../../components/ImageFallBack";
 import TextArea from "antd/es/input/TextArea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UploadFile } from "antd/lib";
 import { PlusOutlined } from "@ant-design/icons";
+import { useNotificationUser } from "../../../hooks/userNotificationUser";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const ModalRequestRefund = ({ return_request_id, refetchListOrder }: any) => {
@@ -26,6 +27,26 @@ const ModalRequestRefund = ({ return_request_id, refetchListOrder }: any) => {
   const onHandleChangeImage = ({ fileList }: any) => {
     setFileList(fileList); // cập nhật state
   };
+
+  const { echo } = useNotificationUser();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!echo) return;
+    const channelName = `admin.notifications`;
+    const channel = echo.private(channelName);
+
+    channel.listen(".order", (e: any) => {
+      if (isMounted) {
+        refetch();
+      }
+    });
+
+    return () => {
+      isMounted = false; // chỉ tắt logic, không hủy listener
+    };
+  }, [echo]);
 
   const {
     data: responseDetailRequestRefund,
