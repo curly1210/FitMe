@@ -32,6 +32,15 @@ import ModalRequestRefund from "./ModalRequestRefund";
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
+// const STATUS_MAP = {
+//   "Chờ xác nhận": 1,
+//   "Đang chuẩn bị hàng": 2,
+//   "Đang giao hàng": 3,
+//   "Đã giao": 4,
+//   "Giao hàng thất bại": 5,
+//   "Hoàn thành": 6,
+//   "Đã hủy": 7,
+// };
 const STATUS_MAP = {
   "Chờ xác nhận": 1,
   "Đang chuẩn bị hàng": 2,
@@ -40,6 +49,11 @@ const STATUS_MAP = {
   "Giao hàng thất bại": 5,
   "Hoàn thành": 6,
   "Đã hủy": 7,
+  "Đang xử lý yêu cầu": 8,
+  "Đang hoàn hàng": 9,
+  "Đã hoàn hàng một phần": 10,
+  "Đã hoàn hàng toàn phần": 11,
+  "Hoàn hàng thất bại": 12,
 };
 
 const Oder = () => {

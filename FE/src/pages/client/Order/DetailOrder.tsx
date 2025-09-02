@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  CloseOutlined,
   InboxOutlined,
   InteractionOutlined,
   RightOutlined,
@@ -382,6 +383,33 @@ const DetailOrder = () => {
                         ? "finish"
                         : "wait",
                     icon: <InteractionOutlined className="!text-3xl" />,
+                  },
+                ]}
+              />
+            ) : order?.status_order_id === 12 ? (
+              <Steps
+                labelPlacement="vertical"
+                current={1}
+                items={[
+                  {
+                    title: "Thành công",
+                    status: "finish",
+                    icon: <FaCheck className="!text-3xl" />,
+                  },
+                  {
+                    title: "Xử lý hoàn hàng",
+                    status: order?.status_order_id > 7 ? "finish" : "wait",
+                    icon: <InboxOutlined className="!text-3xl" />,
+                  },
+                  {
+                    title: "Đang hoàn hàng",
+                    status: order?.status_order_id > 8 ? "finish" : "wait",
+                    icon: <LiaShippingFastSolid className="!text-3xl" />,
+                  },
+                  {
+                    title: "Hoàn thất bại",
+                    status: "finish",
+                    icon: <CloseOutlined className="!text-3xl" />,
                   },
                 ]}
               />

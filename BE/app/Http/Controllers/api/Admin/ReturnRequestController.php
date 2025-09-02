@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Client\ReturnRequestResource;
+use App\Models\User;
+use App\Notifications\ReturnOrderNotification;
 
 class ReturnRequestController extends Controller
 {
@@ -77,6 +79,16 @@ class ReturnRequestController extends Controller
                             'status_order_id' => 11
                         ]);
                     }
+
+                    $user = User::find($returnRequest->order->user->id);
+
+                    $user->notify(new ReturnOrderNotification($user->id, $returnRequest->id, '<span>
+                            Đơn hàng 
+                            <span style="color:red;font-weight:bold;">' .
+                        '#' .  $returnRequest->order->orders_code  . '
+                            </span>
+                           hoàn hàng thành công.
+                          </span>'));
 
                     return response()->json(["message" => "Chuyển trạng thái thành công"]);
                 } catch (\Throwable $th) {
@@ -152,6 +164,16 @@ class ReturnRequestController extends Controller
                     $returnRequest->order->update([
                         'status_order_id' => 12
                     ]);
+
+                    $user = User::find($returnRequest->order->user->id);
+
+                    $user->notify(new ReturnOrderNotification($user->id, $returnRequest->id, '<span>
+                            Đơn hàng 
+                            <span style="color:red;font-weight:bold;">' .
+                        '#' .  $returnRequest->order->orders_code  . '
+                            </span>
+                           hoàn hàng thất bại.
+                          </span>'));
                     DB::commit();
                 } catch (\Throwable $th) {
                     return $this->error("Chuyển trạng thái thất bại", $th->getMessage(), 400);
@@ -195,6 +217,16 @@ class ReturnRequestController extends Controller
         $returnRequest->order->update([
             'status_order_id' => 6
         ]);
+
+        $user = User::find($returnRequest->order->user->id);
+
+        $user->notify(new ReturnOrderNotification($user->id, $returnRequest->id, '<span>
+                            Yêu cầu hoàn hàng đơn 
+                            <span style="color:red;font-weight:bold;">' .
+            '#' .  $returnRequest->order->orders_code  . '
+                            </span>
+                           đã bị từ chối.
+                          </span>'));
         return response()->json(['message' => "Yêu cầu đã bị từ chối"]);
     }
 
@@ -212,6 +244,16 @@ class ReturnRequestController extends Controller
             'status' => 'accepted',
             'accepted_at' => now(),
         ]);
+
+        $user = User::find($returnRequest->order->user->id);
+
+        $user->notify(new ReturnOrderNotification($user->id, $returnRequest->id, '<span>
+                            Yêu cầu hoàn hàng đơn 
+                            <span style="color:red;font-weight:bold;">' .
+            '#' .  $returnRequest->order->orders_code  . '
+                            </span>
+                           được chấp thuận
+                          </span>'));
         return response()->json(['message' => "Yêu cầu đã được chấp nhận"]);
     }
     public function show($id, Request $request)
