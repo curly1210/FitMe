@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\api\Client;
 
-use App\Http\Controllers\Controller;
+use App\Models\ReturnItem;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
 class MemberPointController extends Controller
 {
@@ -16,10 +18,20 @@ class MemberPointController extends Controller
             if (!$user) {
                 return $this->error("Người dùng chưa đăng nhập", [], 403);
             }
+            $gross = $user->orders()
+                ->whereIn('status_order_id', [6, 10, 12]) // các trạng thái thành công
+                ->sum(DB::raw('total_amount - shipping_price'));
+
+            // tổng tiền đã hoàn lại cho user này
+            $refunded = ReturnItem::whereHas('returnRequest', function ($q) use ($user) {
+                $q->where('status', 'return_completed')->where('type', 'like', 'partial')
+                    ->whereHas('order', fn($oq) => $oq->where('user_id', $user->id));
+            })
+                ->sum(DB::raw('price * quantity'));
             $memberPoint = $user->memberPoint;
             $data = [
                 'id' => $memberPoint->id,
-                'total_spent' => $user->orders->where('status_order_id', '=', 6)->sum('total_amount'),
+                'total_spent' => $gross - ($refunded ?? 0),
                 'point' => $memberPoint->point,
                 'rank' => $memberPoint->rank,
                 'value' => $memberPoint->value,

@@ -28,8 +28,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('return_requests', function (Blueprint $table) {
-            $table->dropForeign(['return_request_id', 'order_detail_id']);
+        Schema::table('return_items', function (Blueprint $table) {
+            $table->dropForeign(['return_request_id']);
+            $table->dropForeign(['order_detail_id']);
         });
         Schema::dropIfExists('return_items');
     }
