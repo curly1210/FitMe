@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\api\Admin;
 
+use App\Models\User;
 use App\Models\ReturnFile;
+use App\Models\ProductItem;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Models\ReturnRequest;
@@ -11,9 +13,8 @@ use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\Client\ReturnRequestResource;
-use App\Models\User;
 use App\Notifications\ReturnOrderNotification;
+use App\Http\Resources\Client\ReturnRequestResource;
 
 class ReturnRequestController extends Controller
 {
@@ -71,6 +72,13 @@ class ReturnRequestController extends Controller
                     $returnRequest->update([
                         'status' => $request->status
                     ]);
+                    foreach ($returnRequest->returnItems as $item) {
+                        $productItemId = $item->orderDetail->product_item_id;
+                        $productItem = ProductItem::withTrashed()->find($productItemId);
+                        if ($productItem) {
+                            $productItem->increment('stock', $item->quantity);
+                        }
+                    }
                     if ($returnRequest->type == 'partial') {
                         $returnRequest->order->update([
                             'status_order_id' => 10
