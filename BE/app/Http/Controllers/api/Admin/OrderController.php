@@ -122,13 +122,14 @@ class OrderController extends Controller
 
         $order = Order::with('orderDetails')->findOrFail($id);
         $newStatus = (int) $request->status_order_id;
+        $current_status_request = (int) $request->current_status;
 
-        $currentStatus = (int) $order->status_order_id;
+        $currentStatus_DB = (int) $order->status_order_id;
 
         // return response()->json($currentStatus);
 
         // Đơn hàng đã hủy
-        if ($currentStatus === 7) {
+        if ($currentStatus_DB === 7 || $current_status_request !== $currentStatus_DB) {
             return $this->error('Thao tác không hợp lệ hoặc trạng thái không cho phép thay đổi.', [], 400);
         }
 

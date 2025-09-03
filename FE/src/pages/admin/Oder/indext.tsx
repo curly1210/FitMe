@@ -189,6 +189,7 @@ const Oder = () => {
   };
 
   const handleUpdateStatus = (
+    currentStatus: number,
     newStatus: number,
     successMessage: string,
     type: "success" | "error" = "success"
@@ -199,7 +200,7 @@ const Oder = () => {
       {
         resource: "admin/orders/update",
         id: selectedOrderId,
-        values: { status_order_id: newStatus },
+        values: { status_order_id: newStatus, current_status: currentStatus },
         meta: { method: "post" },
       },
       {
@@ -233,11 +234,12 @@ const Oder = () => {
       },
       {
         onSuccess: () => {
-          message.success("Cập nhật đơn hàng thất bại thành công");
+          // message.success("Cập nhật đơn hàng thất bại thành công");
 
           // Cập nhật trạng thái tiếp theo
           setSelectedOrderId(failOrderId);
           handleUpdateStatus(
+            STATUS_MAP["Đang giao hàng"],
             STATUS_MAP["Giao hàng thất bại"],
             "Giao hàng thất bại"
           );
@@ -277,6 +279,7 @@ const Oder = () => {
             onConfirm={() => {
               // setSelectedOrderId(orderId);
               handleUpdateStatus(
+                STATUS_MAP["Chờ xác nhận"],
                 STATUS_MAP["Đang chuẩn bị hàng"],
                 "Đang chuẩn bị hàng",
                 "success"
@@ -305,6 +308,7 @@ const Oder = () => {
             onConfirm={() => {
               // setSelectedOrderId(orderId);
               handleUpdateStatus(
+                STATUS_MAP["Đang chuẩn bị hàng"],
                 STATUS_MAP["Đang giao hàng"],
                 "Đang giao hàng",
                 "success"
@@ -375,6 +379,7 @@ const Oder = () => {
               onConfirm={() => {
                 // setSelectedOrderId(orderId);
                 handleUpdateStatus(
+                  STATUS_MAP["Giao hàng thất bại"],
                   STATUS_MAP["Đang giao hàng"],
                   "Đang giao lại",
                   "success"
@@ -400,7 +405,12 @@ const Oder = () => {
             <Popconfirm
               onConfirm={() => {
                 // setSelectedOrderId(orderId);
-                handleUpdateStatus(STATUS_MAP["Đã hủy"], "Đã hủy", "success");
+                handleUpdateStatus(
+                  STATUS_MAP["Giao hàng thất bại"],
+                  STATUS_MAP["Đã hủy"],
+                  "Đã hủy",
+                  "success"
+                );
               }}
               title="Cập nhật trạng thái"
               description="Bạn có muốn xác nhận không?"
@@ -648,7 +658,12 @@ const Oder = () => {
           onClose={() => setUploadOpen(false)}
           onSuccess={() => {
             if (selectedOrderId)
-              handleUpdateStatus(STATUS_MAP["Đã giao"], "Đã giao", "success");
+              handleUpdateStatus(
+                STATUS_MAP["Đang giao hàng"],
+                STATUS_MAP["Đã giao"],
+                "Đã giao",
+                "success"
+              );
             setUploadOpen(false);
             refetchListOrder();
           }}
