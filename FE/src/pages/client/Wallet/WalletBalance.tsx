@@ -17,7 +17,9 @@ const WalletBalance = ({ balance, walletResponse }: any) => {
           </p>
         </div>
         <Button
-          onClick={() => openModal(<FormRequestWithDraw />)}
+          onClick={() =>
+            openModal(<FormRequestWithDraw walletResponse={walletResponse} />)
+          }
           disabled={
             walletResponse?.data?.balance == 0 ||
             !walletResponse?.data?.bank_account

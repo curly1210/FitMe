@@ -6,7 +6,7 @@ import { useModal } from "../../../hooks/useModal";
 import { useState } from "react";
 import { useCreate } from "@refinedev/core";
 
-const FormRequestWithDraw = () => {
+const FormRequestWithDraw = ({ walletResponse }: any) => {
   const { closeModal } = useModal();
   const [amount, setAmount] = useState<any>(undefined);
 
@@ -99,7 +99,9 @@ const FormRequestWithDraw = () => {
               disabled
               type="text"
               className="w-full !p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
-              placeholder="NGUYEN VAN A"
+              placeholder={
+                walletResponse?.data?.bank_account?.account_holder || ""
+              }
             />
           </div>
         </Form.Item>
@@ -116,7 +118,7 @@ const FormRequestWithDraw = () => {
               disabled
               type="text"
               className="w-full !p-2 bg-white border  border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
-              placeholder="Vietcombank"
+              placeholder={walletResponse?.data?.bank_account?.bank_name || ""}
             />
           </div>
         </Form.Item>
@@ -132,7 +134,9 @@ const FormRequestWithDraw = () => {
             <Input
               disabled
               className="w-full !p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
-              placeholder="23123"
+              placeholder={
+                walletResponse?.data?.bank_account?.account_number || ""
+              }
             />
           </div>
         </Form.Item>

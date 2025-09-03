@@ -52,6 +52,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
       </div>
       <Form onFinish={onFinish} className="!p-6 !space-y-4">
         <Form.Item
+          normalize={(value) => value?.toUpperCase()}
           name="account_holder"
           rules={[
             { required: true, message: "Vui lòng nhập tên chủ tài khoản" },
@@ -65,6 +66,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
               Tên chủ tài khoản
             </label>
             <Input
+              style={{ textTransform: "uppercase" }}
               type="text"
               className="w-full !p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-gray-900 focus:border-gray-900"
               placeholder="NGUYEN VAN A"
@@ -73,6 +75,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
         </Form.Item>
 
         <Form.Item
+          normalize={(value) => value?.toUpperCase()}
           name="bank_name"
           rules={[{ required: true, message: "Vui lòng nhập tên tài khoản" }]}
         >
@@ -84,6 +87,7 @@ const FormAddInforAccount = ({ refetchGetWallet }: any) => {
               Tên ngân hàng
             </label>
             <Input
+              style={{ textTransform: "uppercase" }}
               type="text"
               // value={formData.bankName}
               // onChange={handleChange}
