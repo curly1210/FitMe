@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Traits\CloudinaryTrait;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\Client\CouponResource;
+use App\Models\ReturnItem;
 use App\Models\ReturnRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Notification;
@@ -401,6 +402,10 @@ class OrderController extends Controller
                     'subtotal' => $detail->quantity * $detail->sale_price,
                     'color' => $detail->color ?? null,
                     'size' => $detail->size ?? null,
+                    'is_return' => ReturnItem::where('order_detail_id', '=', $detail->id)->first()  ? 1 : null,
+                    // 'is_return' => $detail->returnItem  ? 1 : 0,
+                    // 'is_return' => $detail->productItem == null ? 0 : $detail->productItem->id,
+
 
 
                 ];

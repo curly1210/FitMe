@@ -486,13 +486,22 @@ const DetailOrder = () => {
                         </p>
                         <p className="font-semibold">x{item?.quantity}</p>
                       </div>
-                      {item?.idProduct_item ? (
-                        ""
-                      ) : (
-                        <Tag className="!font-bold !w-fit" color={"red"}>
-                          Ngừng bán
-                        </Tag>
-                      )}
+
+                      <div className="flex items-center gap-2">
+                        {item?.idProduct_item ? (
+                          ""
+                        ) : (
+                          <Tag className="!font-bold !w-fit" color={"red"}>
+                            Ngừng bán
+                          </Tag>
+                        )}
+
+                        {item?.is_return && (
+                          <Tag className="!font-bold !w-fit" color={"orange"}>
+                            Hoàn hàng
+                          </Tag>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="font-bold">

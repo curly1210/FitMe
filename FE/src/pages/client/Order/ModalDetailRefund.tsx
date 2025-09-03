@@ -16,6 +16,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { useNotificationUser } from "../../../hooks/userNotificationUser";
 import { useAuthen } from "../../../hooks/useAuthen";
+import { formatCurrencyVND } from "../../../utils/currencyUtils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
@@ -271,7 +272,7 @@ const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
             )}
           </div>
 
-          <div className="grid grid-cols-3 mb-5">
+          <div className="grid grid-cols-3 mb-5 ">
             {detailRequestRefund?.admin_note && (
               <div>
                 <div className="text-gray-500">Lý do</div>
@@ -280,7 +281,7 @@ const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
             )}
 
             {detailRequestRefund?.admin_media_files?.image.length > 0 && (
-              <div className="col-span-2">
+              <div className="">
                 <div className="text-gray-500">
                   Ảnh minh chứng từ chối hoàn hàng
                 </div>
@@ -299,6 +300,13 @@ const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
                 </div>
               </div>
             )}
+
+            <div>
+              <div className="text-gray-500">Tổng tiền hoàn</div>
+              <Tag color="red" className="!font-bold !text-xl">
+                {formatCurrencyVND(detailRequestRefund?.total_price)}
+              </Tag>
+            </div>
           </div>
 
           <div className="border border-gray-300 px-5 py-3 mb-5">
@@ -307,16 +315,25 @@ const ModalDetailRefund = ({ return_request_id, refetchDetailOrder }: any) => {
               {detailRequestRefund?.items.map((item: any) => (
                 <div key={item?.id} className="flex items-stretch">
                   <ImageWithFallback src={item?.image} width={60} height={60} />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col flex-1  gap-2">
                     <p className="font-medium">
                       {item.name_product}{" "}
                       <span className="font-normal  text-xs">
                         - {item?.color}/{item?.size}
                       </span>
                     </p>
-                    <p className="text-sm text-gray-500">
-                      Số lượng hoàn: {item.quantity}
-                    </p>
+                    <div className="flex justify-between ">
+                      <p className="text-sm text-gray-500">
+                        Số lượng hoàn: {item.quantity} - {""}
+                        <span className="font-semibold text-black">
+                          {formatCurrencyVND(item?.price)}
+                        </span>
+                      </p>
+                      <p className="text-black font-bold">
+                        {" "}
+                        {formatCurrencyVND(item?.price * item?.quantity)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -24,6 +24,7 @@ class WalletTransactionResource extends JsonResource
             'wallet_id' => $this->wallet_id,
             'type' => $this->type,
             'reject_reason' => $this->reject_reason ?? null,
+            'from_order_code' => $this->from_order_code ?? null,
             // 'bill_url' => $this->bill_url ?? null,
             'bill_url' => $this->bill_url ? $this->buildImageUrl($this->bill_url) : null,
             'status' => $this->status,

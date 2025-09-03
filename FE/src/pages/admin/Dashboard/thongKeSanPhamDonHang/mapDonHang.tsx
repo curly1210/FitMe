@@ -17,8 +17,8 @@ import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
 // const { Title } = Typography;
 
-const normalizeProvinceName = (str: string) =>
-  str
+const normalizeProvinceName = (str: string) => {
+  let normalized = str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
@@ -26,8 +26,25 @@ const normalizeProvinceName = (str: string) =>
     .replace(/\s+/g, " ")
     .replace("Tỉnh ", "") // Bỏ tiền tố "Tỉnh"
     .replace("Thành phố ", "") // Bỏ tiền tố "Thành phố"
-    .trim()
-    .toLowerCase();
+    .trim();
+
+  // Nếu có "Huế" trong tên gốc => ép thành "Thừa Thiên Huế"
+  if (normalized.toLowerCase().includes("hue")) {
+    normalized = "Thua Thien Hue";
+  }
+
+  return normalized.toLowerCase();
+  // return str
+  //   .normalize("NFD")
+  //   .replace(/[\u0300-\u036f]/g, "")
+  //   .replace(/đ/g, "d")
+  //   .replace(/Đ/g, "D")
+  //   .replace(/\s+/g, " ")
+  //   .replace("Tỉnh ", "") // Bỏ tiền tố "Tỉnh"
+  //   .replace("Thành phố ", "") // Bỏ tiền tố "Thành phố"
+  //   .trim()
+  //   .toLowerCase();
+};
 
 export const OrderLocationMap = () => {
   // const now = dayjs();

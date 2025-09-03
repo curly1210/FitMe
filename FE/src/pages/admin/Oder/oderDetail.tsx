@@ -119,6 +119,12 @@ export default function OrderDetailDrawer({
       ),
     },
     {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      width: 80,
+    },
+    {
       title: "Giá tiền",
       dataIndex: "price",
       key: "price",

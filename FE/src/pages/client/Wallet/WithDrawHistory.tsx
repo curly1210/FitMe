@@ -137,7 +137,8 @@ const WithDrawHistory = () => {
               <div className="flex justify-between">
                 <span className="text-gray-500">Nội dung:</span>
                 <span className=" text-gray-700">
-                  Hoàn tiền từ đơn <span className="font-bold">#F3F4F6</span>
+                  Hoàn tiền từ đơn hàng{" "}
+                  <span className="font-bold">#{item?.from_order_code}</span>
                 </span>
               </div>
             )}

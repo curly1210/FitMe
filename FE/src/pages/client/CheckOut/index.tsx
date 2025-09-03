@@ -613,7 +613,7 @@ const CheckOut = () => {
             </div>
             <div className="flex justify-between font-semibold  ">
               <span className="font-normal">Số điểm tích lũy</span>
-              <span>{Math.floor(totalPrice / 10000)}đ</span>
+              <span>{Math.floor((totalAmount - shippingPrice) / 10000)}đ</span>
             </div>
           </div>
 
