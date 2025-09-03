@@ -32,7 +32,7 @@ const FormRequestWithDraw = () => {
         onError: (err) => {
           const errors = err.response?.data?.errors;
           if (err?.status !== 422) {
-            notification.error({ message: "Lỗi khi thêm sản phẩm" });
+            notification.error({ message: "Có lỗi xảy ra" });
           } else {
             const firstKey = Object.keys(errors)[0];
             notification.error({ message: errors[firstKey] });
